@@ -1,7 +1,7 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry.json",
-  "name": "acme",
-  "homepage": "https://acme.com",
+  "name": "joyco",
+  "homepage": "https://registry.joyco.studio",
   "items": [
     {
       "name": "hello-world",
@@ -11,7 +11,7 @@
       "registryDependencies": ["button"],
       "files": [
         {
-          "path": "registry/new-york/blocks/hello-world/hello-world.tsx",
+          "path": "registry/joyco/blocks/hello-world/hello-world.tsx",
           "type": "registry:component"
         }
       ]
@@ -25,7 +25,7 @@
       "registryDependencies": ["button", "input", "label", "textarea", "card"],
       "files": [
         {
-          "path": "registry/new-york/blocks/example-form/example-form.tsx",
+          "path": "registry/joyco/blocks/example-form/example-form.tsx",
           "type": "registry:component"
         }
       ]
@@ -38,24 +38,24 @@
       "registryDependencies": ["card"],
       "files": [
         {
-          "path": "registry/new-york/blocks/complex-component/page.tsx",
+          "path": "registry/joyco/blocks/complex-component/page.tsx",
           "type": "registry:page",
           "target": "app/pokemon/page.tsx"
         },
         {
-          "path": "registry/new-york/blocks/complex-component/components/pokemon-card.tsx",
+          "path": "registry/joyco/blocks/complex-component/components/pokemon-card.tsx",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/blocks/complex-component/components/pokemon-image.tsx",
+          "path": "registry/joyco/blocks/complex-component/components/pokemon-image.tsx",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/blocks/complex-component/lib/pokemon.ts",
+          "path": "registry/joyco/blocks/complex-component/lib/pokemon.ts",
           "type": "registry:lib"
         },
         {
-          "path": "registry/new-york/blocks/complex-component/hooks/use-pokemon.ts",
+          "path": "registry/joyco/blocks/complex-component/hooks/use-pokemon.ts",
           "type": "registry:hook"
         }
       ]
@@ -67,12 +67,28 @@
       "description": "A login form with a CSS file.",
       "files": [
         {
-          "path": "registry/new-york/blocks/example-with-css/example-card.tsx",
+          "path": "registry/joyco/blocks/example-with-css/example-card.tsx",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/blocks/example-with-css/example-card.css",
+          "path": "registry/joyco/blocks/example-with-css/example-card.css",
           "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "infinite-scroll",
+      "type": "registry:component",
+      "title": "Infinite Scroll",
+      "description": "A bias-based infinite scroll wrapper and hook.",
+      "files": [
+        {
+          "path": "registry/joyco/blocks/infinite-scroll/infinite-scroll.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/joyco/blocks/infinite-scroll/use-infinite-scroll.ts",
+          "type": "registry:hook"
         }
       ]
     }
