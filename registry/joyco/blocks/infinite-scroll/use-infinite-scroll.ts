@@ -150,12 +150,31 @@ export function useInfiniteScroll<TItem>(options: UseInfiniteScrollOptions<TItem
         const result = await loadPage({ offset, limit, page });
         const incoming = Array.isArray(result.items) ? result.items : [];
 
-        setItems((previous: TItem[]) => mergeItems(previous, incoming));
+        let nextLength = 0;
+        setItems((previous: TItem[]) => {
+          if (incoming.length === 0) {
+            nextLength = previous.length;
+            return previous;
+          }
 
-        if (typeof result.totalCount === 'number') {
-          setTotalCount(result.totalCount);
-        } else if (result.totalCount === null) {
-          setTotalCount(null);
+          const merged = mergeItems(previous, incoming);
+          nextLength = merged.length;
+          return merged;
+        });
+
+        const resolvedTotalCount =
+          incoming.length === 0
+            ? nextLength
+            : typeof result.totalCount === 'number'
+              ? result.totalCount
+              : result.totalCount === null
+                ? null
+                : incoming.length < limit
+                  ? nextLength
+                  : undefined;
+
+        if (typeof resolvedTotalCount !== 'undefined') {
+          setTotalCount(resolvedTotalCount);
         }
       } catch (cause) {
         setError(cause instanceof Error ? cause.message : 'Unknown error.');

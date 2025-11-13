@@ -81,7 +81,7 @@ function InfiniteScrollRoot({ children, ...rest }: RootProps) {
   return <div {...rest}>{children}</div>;
 }
 
-type ViewportProps = HTMLAttributes<HTMLDivElement>;
+type ViewportProps = HTMLAttributes<HTMLDivElement> & { ref?: React.RefObject<HTMLDivElement | null> };
 
 function InfiniteScrollViewport({ children, ...rest }: ViewportProps) {
   return <div {...rest}>{children}</div>;
