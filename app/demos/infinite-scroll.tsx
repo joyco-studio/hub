@@ -1,5 +1,5 @@
 'use client';
-import { getPokemonList } from '@/registry/joyco/blocks/complex-component/lib/pokemon';
+
 import { InfiniteScroll, useInfiniteScrollState } from '@/registry/joyco/blocks/infinite-scroll/infinite-scroll';
 import { LoadPageFn } from '@/registry/joyco/blocks/infinite-scroll/use-infinite-scroll';
 import { useEffect, useState } from 'react';
@@ -11,16 +11,20 @@ type Pokemon = {
 };
 
 const loadPage: LoadPageFn<Pokemon> = async ({ offset, limit, page }) => {
-  const response = await getPokemonList({ limit, offset, page: page ?? 1 });
+  const response = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}&page=${page}`);
+  const data = await response.json();
   return {
-    items: (response?.results.map((result) => ({ id: result.id, name: result.name, url: result.url })) ??
-      []) as Pokemon[],
-    totalCount: response?.results?.length ?? 0,
+    items: (data.results.map((result: { id: number; name: string; url: string }) => ({
+      id: result.id,
+      name: result.name,
+      url: result.url,
+    })) ?? []) as Pokemon[],
+    totalCount: data.count ?? 0,
   };
 };
 
 const InfiniteScrollDemoContent = () => {
-  const { visibleItems } = useInfiniteScrollState<Pokemon>();
+  const { visibleItems, hasMore } = useInfiniteScrollState<Pokemon>();
   return (
     <InfiniteScroll.Root
       className="max-h-96 overflow-y-auto w-full rounded-2xl border border-border p-4"
@@ -33,7 +37,7 @@ const InfiniteScrollDemoContent = () => {
           </InfiniteScroll.Item>
         ))}
       </InfiniteScroll.Viewport>
-      <InfiniteScroll.Trigger>Load More</InfiniteScroll.Trigger>
+      <InfiniteScroll.Trigger disabled={!hasMore}>Load More</InfiniteScroll.Trigger>
       <InfiniteScroll.Sentinel>Sentinel</InfiniteScroll.Sentinel>
       <InfiniteScroll.Debug />
     </InfiniteScroll.Root>
