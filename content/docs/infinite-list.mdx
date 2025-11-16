@@ -1,0 +1,80 @@
+---
+title: Infinite List
+description: A simplified infinite scroll component that manages pagination and child masking with virtual list behavior.
+---
+
+import { PokemonInfiniteList } from '@/components/pokemon-infinite-demo/pokemon-infinite-list';
+
+## Demo
+
+<PokemonInfiniteList />
+
+## Installation
+
+```bash
+npx shadcn@latest add @joyco/infinite-list
+```
+
+## API Reference
+
+### useInfiniteList
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `pageSize` | `number` | - | Number of items per page |
+| `initialItems` | `any[]` | - | Optional. Initial items array (used to calculate bias) |
+| `initialPage` | `number` | `1` | Starting page number |
+
+| Returns | Type | Description |
+|----------|------|-------------|
+| `offset` | `number` | Total items to fetch (includes bias for prefetching) |
+| `displayLimit` | `number` | Number of items to display |
+| `pageSize` | `number` | Items per page |
+| `nextPage` | `() => void` | Function to increment the page |
+
+### MaskedList
+
+The `MaskedList` component masks children to the `displayLimit`.
+
+#### Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `displayLimit` | `number` | Number of items to display (from useInfiniteList) |
+| `children` | `ReactNode` | React nodes to be masked |
+
+#### Usage Example
+
+```tsx
+import { useInfiniteList, MaskedList } from '@joyco/infinite-list';
+
+const list = useInfiniteList({
+  pageSize: 20,
+  initialItems: data,
+});
+
+const loadMore = () => {
+  list.nextPage();
+  // Fetch more items in the background
+};
+
+return (
+  <div>
+    <MaskedList {...list}>
+      {items.map(item => <Item key={item.id} {...item} />)}
+    </MaskedList>
+    <button onClick={loadMore}>Load More</button>
+  </div>
+);
+```
+
+## How it Works
+
+The component implements a virtual list pattern where you load more items than you display:
+
+1. **Initial Load**: Fetch `pageSize + bias` items (e.g., 20 + 20 = 40 items)
+2. **Display**: Show only `pageSize` items (e.g., 20 items)
+3. **Next Page**: When user clicks "Load More", show next 20 items instantly (already loaded)
+4. **Background Fetch**: Simultaneously fetch the next batch in the background
+
+**Bias Warning**: The hook will warn if `bias !== pageSize` to prevent items from appearing to append unexpectedly when the next page loads.

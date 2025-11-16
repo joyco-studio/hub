@@ -4,9 +4,9 @@
   "homepage": "https://registry.joyco.studio",
   "items": [
     {
-      "name": "infinite-scroll",
+      "name": "infinite-list",
       "type": "registry:component",
-      "title": "Infinite Scroll",
+      "title": "Infinite List",
       "description": "A bias-based infinite scroll wrapper and hook.",
       "files": [
         {
