@@ -31,26 +31,43 @@ npx shadcn@latest add @joyco/infinite-list
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `requestedPage` | `number` | Current page number |
-| `displayLimit` | `number` | Calculated as `requestedPage * pageSize` |
+| `offset` | `number` | Total items to fetch (includes bias for prefetching) |
+| `displayLimit` | `number` | Number of items to display |
 | `pageSize` | `number` | Items per page |
 | `bias` | `number` | Calculated as `Math.max(0, initialItems.length - pageSize)` |
 | `nextPage` | `() => void` | Function to increment the page |
-| `reset` | `() => void` | Function to reset to initial page |
-| `List` | `Component` | Component that masks children to displayLimit |
+
+### MaskedList Component
+
+The `MaskedList` component masks children to the `displayLimit`.
+
+#### Props
+
+Accepts all properties from `useInfiniteList` return value plus:
+- `children`: React nodes to be masked
 
 #### Usage Example
 
 ```tsx
-const { List, nextPage, displayLimit } = useInfiniteList({
+import { useInfiniteList, MaskedList } from '@joyco/infinite-list';
+
+const list = useInfiniteList({
   pageSize: 20,
   initialItems: data,
 });
 
+const loadMore = () => {
+  list.nextPage();
+  // Fetch more items in the background
+};
+
 return (
-  <List>
-    {items.map(item => <Item key={item.id} {...item} />)}
-  </List>
+  <div>
+    <MaskedList {...list}>
+      {items.map(item => <Item key={item.id} {...item} />)}
+    </MaskedList>
+    <button onClick={loadMore}>Load More</button>
+  </div>
 );
 ```
 

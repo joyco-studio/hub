@@ -3,34 +3,15 @@
 import * as React from 'react';
 import { Children, type ReactNode } from 'react';
 
-export interface UseInfiniteListOptions {
-  pageSize: number;
-  initialItems?: any[];
-  initialPage?: number;
-}
-
-export interface UseInfiniteListResult {
-  offset: number;
-  displayLimit: number;
-  pageSize: number;
-  bias: number;
-  nextPage: () => void;
-}
-
-export function MaskedList({ 
-  children, 
-  displayLimit 
-}: UseInfiniteListResult & { children: ReactNode }) {
-  const childArray = Children.toArray(children);
-  const visibleChildren = childArray.slice(0, displayLimit);
-  return <>{visibleChildren}</>;
-}
-
 export function useInfiniteList({
   pageSize,
   initialItems,
   initialPage = 1,
-}: UseInfiniteListOptions): UseInfiniteListResult {
+}: {
+  pageSize: number;
+  initialItems?: any[];
+  initialPage?: number;
+}) {
   const [requestedPage, setRequestedPage] = React.useState(initialPage);
 
   const bias = React.useMemo(
@@ -60,4 +41,13 @@ export function useInfiniteList({
     bias,
     nextPage
   };
+}
+
+export function MaskedList({ 
+  children, 
+  displayLimit 
+}: ReturnType<typeof useInfiniteList> & { children: ReactNode }) {
+  const childArray = Children.toArray(children);
+  const visibleChildren = childArray.slice(0, displayLimit);
+  return <>{visibleChildren}</>;
 }
