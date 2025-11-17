@@ -10,7 +10,7 @@
   "files": [
     {
       "path": "registry/joyco/blocks/marquee/marquee.tsx",
-      "content": "'use client';\n\nimport { Marquee as MarqueeComponent } from '@joycostudio/marquee/react';\n\nexport { MarqueeComponent as Marquee };\nexport { useMarquee } from '@joycostudio/marquee/react';\n\n",
+      "content": "'use client';\n\nimport { Marquee as MarqueeComponent, useMarquee as useMarqueeHook } from '@joycostudio/marquee/react';\n\nexport const useMarquee = useMarqueeHook;\n\nexport function Marquee({ children, ...props }: React.ComponentProps<typeof MarqueeComponent>) {\n  return (\n    <MarqueeComponent {...props}>\n      {children}\n    </MarqueeComponent>\n  );\n}\n",
       "type": "registry:component"
     }
   ]
