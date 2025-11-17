@@ -36,8 +36,6 @@ The `Marquee` component provides a smooth, performant scrolling animation using 
 #### Basic Usage
 
 ```tsx
-import { Marquee } from '@joyco/marquee';
-
 function App() {
   return (
     <Marquee speed={100} speedFactor={1} direction={1} play={true}>
@@ -74,26 +72,6 @@ The `useMarquee` hook returns a tuple containing:
 | `setSpeedFactor(factor)` | `factor: number` | Update the speed multiplier |
 | `setDirection(direction)` | `direction: 1 \| -1` | Change the scroll direction |
 | `destroy()` | - | Clean up the marquee (automatically called on unmount) |
-
-### Usage Example
-
-```tsx
-import { useMarquee, Marquee } from '@joyco/marquee';
-
-function ScrollBasedMarquee() {
-  const [ref, marquee] = useMarquee({ 
-    speed: 100, 
-    speedFactor: 1, 
-    direction: 1 
-  });
-
-  return (
-    <Marquee instance={[ref, marquee]}>
-      <div>Your content here</div>
-    </Marquee>
-  );
-}
-```
 
 ## Notes
 

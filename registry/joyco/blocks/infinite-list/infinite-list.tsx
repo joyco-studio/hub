@@ -1,7 +1,6 @@
 'use client';
 
-import * as React from 'react';
-import { Children, type ReactNode } from 'react';
+import { useState, useMemo, useCallback, Children } from 'react';
 
 export function useInfiniteList({
   pageSize,
@@ -12,9 +11,9 @@ export function useInfiniteList({
   initialItems?: any[];
   initialPage?: number;
 }) {
-  const [requestedPage, setRequestedPage] = React.useState(initialPage);
+  const [requestedPage, setRequestedPage] = useState(initialPage);
 
-  const bias = React.useMemo(
+  const bias = useMemo(
     () => {
       const bias = Math.max(0, (initialItems?.length ?? 0) - pageSize)
       if (bias !== pageSize && bias !== 0) {
@@ -30,7 +29,7 @@ export function useInfiniteList({
 
   const displayLimit = requestedPage * pageSize;
 
-  const nextPage = React.useCallback(() => {
+  const nextPage = useCallback(() => {
     setRequestedPage((current) => current + 1);
   }, []);
 
@@ -45,7 +44,7 @@ export function useInfiniteList({
 export function MaskedList({ 
   children, 
   displayLimit 
-}: ReturnType<typeof useInfiniteList> & { children: ReactNode }) {
+}: ReturnType<typeof useInfiniteList> & { children: React.ReactNode }) {
   const childArray = Children.toArray(children);
   const visibleChildren = childArray.slice(0, displayLimit);
   return <>{visibleChildren}</>;
