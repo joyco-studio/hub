@@ -3,7 +3,7 @@ title: Marquee
 description: The all in one marquee component.
 ---
 
-import { MarqueeDemo } from '@/components/marquee-demo/marquee-demo';
+import { MarqueeDemo } from '@/components/marquee-demo';
 
 ## Demo
 
@@ -17,7 +17,7 @@ npx shadcn@latest add @joyco/marquee
 
 ## API Reference
 
-### Marquee Component
+### Marquee
 
 The `Marquee` component provides a smooth, performant scrolling animation using the Web Animations API.
 
@@ -47,7 +47,7 @@ function App() {
 }
 ```
 
-### useMarquee Hook
+### useMarquee
 
 For more control, you can use the `useMarquee` hook. This is particularly useful when you need to:
 
@@ -58,16 +58,24 @@ For more control, you can use the `useMarquee` hook. This is particularly useful
 
 The `useMarquee` hook returns a tuple containing:
 
-- `rootRef`: A ref to attach to your container element
-- `marquee`: A marquee instance with the following methods:
-  - `play()`: Start the marquee animation
-  - `pause()`: Pause the marquee animation
-  - `setSpeed(speed: number)`: Update the base speed
-  - `setSpeedFactor(factor: number)`: Update the speed multiplier
-  - `setDirection(direction: 1 | -1)`: Change the scroll direction
-  - `destroy()`: Clean up the marquee (automatically called on unmount)
+| Item | Type | Description |
+|------|------|-------------|
+| `rootRef` | `RefObject<HTMLElement>` | A ref to attach to your container element |
+| `marquee` | `MarqueeInstance` | A marquee instance with control methods |
 
-#### Usage Example
+
+### MarqueeInstance
+
+| Method | Parameters | Description |
+|--------|------------|-------------|
+| `play()` | - | Start the marquee animation |
+| `pause()` | - | Pause the marquee animation |
+| `setSpeed(speed)` | `speed: number` | Update the base speed |
+| `setSpeedFactor(factor)` | `factor: number` | Update the speed multiplier |
+| `setDirection(direction)` | `direction: 1 \| -1` | Change the scroll direction |
+| `destroy()` | - | Clean up the marquee (automatically called on unmount) |
+
+### Usage Example
 
 ```tsx
 import { useMarquee, Marquee } from '@joyco/marquee';

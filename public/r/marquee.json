@@ -1,0 +1,14 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "marquee",
+  "type": "registry:component",
+  "title": "Marquee",
+  "description": "The all in one marquee component with smooth Web Animations API.",
+  "files": [
+    {
+      "path": "registry/joyco/blocks/marquee/marquee.tsx",
+      "content": "'use client';\n\nimport { Marquee as MarqueeComponent } from '@joycostudio/marquee/react';\n\nexport { MarqueeComponent as Marquee };\nexport { useMarquee } from '@joycostudio/marquee/react';\n\n",
+      "type": "registry:component"
+    }
+  ]
+}

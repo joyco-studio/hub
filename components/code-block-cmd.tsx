@@ -10,6 +10,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
+import { Check, Copy } from "lucide-react"
 
 export function CodeBlockCommand({
   __npm__,
@@ -80,13 +81,13 @@ export function CodeBlockCommand({
             })}
           </TabsList>
         </div>
-        <div className="no-scrollbar overflow-x-auto">
+        <div className="no-scrollbar overflow-x-auto bg-white dark:bg-black">
           {Object.entries(tabs).map(([key, value]) => {
             return (
               <TabsContent key={key} value={key} className="mt-0 px-4 py-3.5">
                 <pre>
                   <code
-                    className="relative font-mono text-sm leading-none text-green-300"
+                    className="relative font-mono text-sm leading-none dark:text-green-300 text-green-500"
                     data-language="bash"
                   >
                     {value}
@@ -104,7 +105,7 @@ export function CodeBlockCommand({
           className="absolute top-2 right-2 z-10 size-7 opacity-70 hover:opacity-100 focus-visible:opacity-100"
           onClick={copyCommand}
         >
-          {hasCopied ? "Copied!" : "Copy"}
+          {hasCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
         </Button>
     </div>
   )
