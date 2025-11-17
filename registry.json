@@ -25,7 +25,8 @@
           "path": "registry/joyco/blocks/marquee/marquee.tsx",
           "type": "registry:component"
         }
-      ]
+      ],
+      "dependencies": ["@joycostudio/marquee"]
     }
   ]
 }
