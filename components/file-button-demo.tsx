@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { FileInputButton } from "@/registry/joyco/blocks/file-input-button";
+import { FileInputButton } from "@/registry/joyco/blocks/file-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
