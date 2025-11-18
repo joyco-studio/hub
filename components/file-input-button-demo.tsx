@@ -45,7 +45,7 @@ export function FileInputButtonDemo() {
   return (
     <Card className="not-prose">
       <CardContent>
-        <div className="flex items-center justify-center mb-6">
+        <div className="flex items-center justify-center gap-2 mb-6">
           <FileInputButton 
             onUpload={handleUpload} 
             inputProps={{ multiple: true }}
@@ -57,7 +57,6 @@ export function FileInputButtonDemo() {
           {uploadedFiles.length > 0 && (
             <Button 
               variant="ghost" 
-              size="sm" 
               onClick={() => setUploadedFiles([])}
             >
               Clear All
