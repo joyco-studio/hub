@@ -48,11 +48,12 @@ export const useFileInput = ({ onUpload, inputProps = {} }: FileInputProps): Fil
   )
 }
 
-export const FileInputButton = ({ onUpload, inputProps = {}, children }: FileInputProps & { children: React.ReactNode }) => {
+export const FileInputButton = (props: FileInputProps & React.ComponentProps<typeof Button>) => {
+  const { inputProps, onUpload, children, ...buttonProps } = props
   const { handleClick, input } = useFileInput({ onUpload, inputProps })
 
   return (
-    <Button onClick={handleClick}>
+    <Button onClick={handleClick} {...buttonProps}>
       {input}
       {children}
     </Button>

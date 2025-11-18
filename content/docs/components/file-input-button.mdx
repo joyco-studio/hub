@@ -1,0 +1,208 @@
+---
+title: File Input Button
+description: A simple and flexible file upload button component with custom styling.
+---
+
+import { FileInputButtonDemo } from '@/components/file-input-button-demo';
+
+## Demo
+
+<FileInputButtonDemo />
+
+## Installation
+
+```bash
+npx shadcn@latest add @joyco/file-input-button
+```
+
+## API Reference
+
+### FileInputButton
+
+The `FileInputButton` component provides a simple way to create a styled file upload button that works with any children content.
+
+#### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `onUpload` | `(file: File) => Promise<any> \| void` | - | Callback function called when a file is selected |
+| `inputProps` | `React.InputHTMLAttributes<HTMLInputElement>` | `{}` | Additional props to pass to the hidden file input element |
+| `children` | `ReactNode` | - | The content to display inside the button |
+
+#### Basic Usage
+
+```tsx
+function App() {
+  const handleUpload = (file: File) => {
+    console.log("Selected file:", file);
+  };
+
+  return (
+    <FileInputButton onUpload={handleUpload}>
+      Upload File
+    </FileInputButton>
+  );
+}
+```
+
+#### Multiple Files
+
+```tsx
+function App() {
+  const handleUpload = (file: File) => {
+    // This will be called for each file
+    console.log("Selected file:", file);
+  };
+
+  return (
+    <FileInputButton 
+      onUpload={handleUpload}
+      inputProps={{ multiple: true }}
+    >
+      Upload Multiple Files
+    </FileInputButton>
+  );
+}
+```
+
+#### Accept Specific File Types
+
+```tsx
+function App() {
+  const handleUpload = (file: File) => {
+    console.log("Selected image:", file);
+  };
+
+  return (
+    <FileInputButton 
+      onUpload={handleUpload}
+      inputProps={{ accept: "image/*" }}
+    >
+      Upload Image
+    </FileInputButton>
+  );
+}
+```
+
+### useFileInput
+
+For more control, you can use the `useFileInput` hook. This is particularly useful when you need to:
+
+- Use a custom button component or element
+- Have more granular control over the file input behavior
+- Integrate with existing form systems
+
+#### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `onUpload` | `(file: File) => Promise<any> \| void` | Callback function called when a file is selected |
+| `inputProps` | `React.InputHTMLAttributes<HTMLInputElement>` | Additional props to pass to the hidden file input element |
+
+#### Returns
+
+The `useFileInput` hook returns an object containing:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `handleClick` | `() => void` | Function to trigger the file input dialog |
+| `input` | `React.ReactNode` | The hidden file input element to render |
+
+#### Hook Usage
+
+```tsx
+function CustomUploadButton() {
+  const { handleClick, input } = useFileInput({
+    onUpload: (file) => {
+      console.log("File selected:", file);
+    },
+    inputProps: {
+      accept: ".pdf,.doc,.docx",
+      multiple: true
+    }
+  });
+
+  return (
+    <div>
+      {input}
+      <button onClick={handleClick}>
+        Choose Files
+      </button>
+    </div>
+  );
+}
+```
+
+## Notes
+
+- The `onUpload` callback is called for each file individually when multiple files are selected
+- The component uses a hidden file input element that is triggered programmatically
+- The file input is completely hidden using CSS (not just `display: none`) to ensure it doesn't interfere with layout
+- You can pass any valid HTML input attributes through `inputProps` (e.g., `accept`, `multiple`, `capture`)
+
+## Common Use Cases
+
+### Image Upload
+
+```tsx
+<FileInputButton 
+  onUpload={handleImageUpload}
+  inputProps={{ accept: "image/png,image/jpeg,image/webp" }}
+>
+  <ImageIcon className="w-4 h-4 mr-2" />
+  Upload Image
+</FileInputButton>
+```
+
+### Document Upload
+
+```tsx
+<FileInputButton 
+  onUpload={handleDocumentUpload}
+  inputProps={{ accept: ".pdf,.doc,.docx,.txt" }}
+>
+  <FileText className="w-4 h-4 mr-2" />
+  Upload Document
+</FileInputButton>
+```
+
+### Camera Capture (Mobile)
+
+```tsx
+<FileInputButton 
+  onUpload={handlePhotoUpload}
+  inputProps={{ 
+    accept: "image/*",
+    capture: "environment" // or "user" for front camera
+  }}
+>
+  <Camera className="w-4 h-4 mr-2" />
+  Take Photo
+</FileInputButton>
+```
+
+### With Async Upload
+
+```tsx
+async function handleUpload(file: File) {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  try {
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData
+    });
+    
+    const data = await response.json();
+    console.log('Upload successful:', data);
+  } catch (error) {
+    console.error('Upload failed:', error);
+  }
+}
+
+<FileInputButton onUpload={handleUpload}>
+  Upload to Server
+</FileInputButton>
+```
+

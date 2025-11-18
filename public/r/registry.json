@@ -27,6 +27,19 @@
         }
       ],
       "dependencies": ["@joycostudio/marquee"]
+    },
+    {
+      "name": "file-input-button",
+      "type": "registry:component",
+      "title": "File Input Button",
+      "description": "A button that opens a file input when clicked.",
+      "files": [
+        {
+          "path": "registry/joyco/blocks/file-input-button.tsx",
+          "type": "registry:component"
+        }
+      ],
+      "registryDependencies": ["button"]
     }
   ]
 }
