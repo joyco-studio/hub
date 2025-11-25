@@ -18,7 +18,7 @@ const MobileMenuTrigger = React.forwardRef<
   <Dialog.Trigger
     ref={ref}
     className={cn(
-      "inline-flex group/menu-trigger items-center z-10 justify-center gap-2 rounded-md p-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+      "inline-flex group/menu-trigger items-center z-10 justify-center gap-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
       className
     )}
     {...props}
@@ -35,7 +35,7 @@ const MobileMenuClose = React.forwardRef<
   <Dialog.Close
     ref={ref}
     className={cn(
-      "inline-flex items-center justify-center rounded-md p-2 text-sm font-medium transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20",
+      "inline-flex items-center justify-center rounded-md p-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
       className
     )}
     {...props}
@@ -52,7 +52,7 @@ const MobileMenuContent = React.forwardRef<
   <Dialog.Content
     ref={ref}
     className={cn(
-      "fixed inset-0 pt-heading-height bg-background flex flex-col data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-4 data-[state=open]:slide-in-from-top-4",
+      "fixed inset-0 pt-heading-height bg-background flex flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-4 data-[state=open]:slide-in-from-top-4",
       className
     )}
     {...props}
@@ -68,7 +68,7 @@ const MobileMenuNav = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <nav
     ref={ref}
-    className={cn("flex flex-1 flex-col gap-1 p-6 overflow-y-auto", className)}
+    className={cn("flex flex-1 flex-col gap-1 p-4 overflow-y-auto", className)}
     {...props}
   />
 ))
@@ -85,7 +85,7 @@ const MobileMenuLink = React.forwardRef<
       <Comp
         ref={ref}
         className={cn(
-          "group flex items-center gap-3 rounded-lg py-3 text-lg text-foreground",
+          "group flex items-center gap-3 rounded-lg py-3 px-2 text-lg text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           className
         )}
         {...props}
