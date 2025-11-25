@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { MaskedList, useInfiniteList } from '@/registry/joyco/blocks/infinite-list';
 import { Button } from '@/components/ui/button';
 import { fetchPokemon, Pokemon } from './api';
-import { Card, CardContent } from '../ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 
 export function PokemonInfiniteListClient({ 
