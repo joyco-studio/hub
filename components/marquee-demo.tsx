@@ -182,7 +182,7 @@ export function MarqueeDemo() {
 
   return (
     <div className="not-prose">
-      <Card className="overflow-hidden rounded-b-none bg-fd-card">
+      <Card className="overflow-hidden rounded-b-none bg-card">
         <div className="py-6">
           <Marquee
             speed={100}
@@ -198,9 +198,9 @@ export function MarqueeDemo() {
         </div>
       </Card>
 
-      <div className="border-t-0 bg-fd-card border border-fd-border rounded-b-lg overflow-hidden">
+      <div className="border-t-0 bg-card border border-border rounded-b-lg overflow-hidden">
         <div className="grid grid-cols-2 sm:grid-cols-4">
-          <ControlButton onClick={() => setPlay(!play)} className={cn(!play && "bg-fd-accent/80 dark:bg-fd-accent/50")}>
+          <ControlButton onClick={() => setPlay(!play)} className={cn(!play && "bg-accent/80 dark:bg-accent/50")}>
             {play ? (
               <>
                 <Pause className="w-4 h-4 mr-1" />
@@ -216,7 +216,7 @@ export function MarqueeDemo() {
 
           <ControlButton
             onClick={() => setDirection(1)}
-            className={cn(direction === 1 && "bg-fd-accent/80 dark:bg-fd-accent/50", "max-sm:row-2")}
+            className={cn(direction === 1 && "bg-accent/80 dark:bg-accent/50", "max-sm:row-2")}
             disabled={direction === 1}
           >
             <ArrowLeft className="w-4 h-4 mr-1" />
@@ -225,7 +225,7 @@ export function MarqueeDemo() {
 
           <ControlButton
             onClick={() => setDirection(-1)}
-            className={cn(direction === -1 && "bg-fd-accent/80 dark:bg-fd-accent/50", "max-sm:row-2")}
+            className={cn(direction === -1 && "bg-accent/80 dark:bg-accent/50", "max-sm:row-2")}
             disabled={direction === -1}
           >
             Right
@@ -241,9 +241,9 @@ export function MarqueeDemo() {
               onValueChange={(value) => setSpeedPercent(Math.max(10, Math.min(100, value[0])))}
             >
               <SliderPrimitive.Track className="relative h-full w-full grow overflow-hidden cursor-ew-resize">
-                <SliderPrimitive.Range className="absolute h-full bg-fd-primary" />
+                <SliderPrimitive.Range className="absolute h-full bg-primary" />
                 <span 
-                  className={cn(percClassName, "text-fd-background")}
+                  className={cn(percClassName, "text-background")}
                   style={{
                     clipPath: `inset(0 ${100 - speedPercent}% 0 0)`
                   }}
@@ -251,7 +251,7 @@ export function MarqueeDemo() {
                   {speedPercent} px/s
                 </span>
                 <span 
-                  className={cn(percClassName, "text-fd-foreground")}
+                  className={cn(percClassName, "text-foreground")}
                   style={{
                     clipPath: `inset(0 0 0 ${speedPercent}%)`
                   }}
@@ -277,7 +277,7 @@ const ControlButton = ({
       variant="ghost"
       size="sm"
       className={cn(
-        "hover:bg-fd-accent/50 disabled:opacity-100 rounded-none flex-1 uppercase font-mono",
+        "hover:bg-accent/50 disabled:opacity-100 rounded-none flex-1 uppercase font-mono",
         className
       )}
       {...props}

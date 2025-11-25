@@ -1,0 +1,1 @@
+export { DemoPage as default } from "@/components/mobile-menu-demo"

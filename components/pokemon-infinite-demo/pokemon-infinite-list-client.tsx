@@ -33,8 +33,8 @@ export function PokemonInfiniteListClient({
   };
 
   return (
-    <div className="not-prose relative w-full h-[500px] overflow-auto p-4 bg-fd-card border border-fd-border rounded-lg">
-      <div className='sticky top-0 text-xs font-mono uppercase z-10 max-w-max ml-auto -mb-7 bg-fd-card/90 backdrop-blur-md  px-3 py-2 rounded-md border border-fd-border'>
+    <div className="not-prose relative w-full h-[500px] overflow-auto p-4 bg-card border border-border rounded-lg">
+      <div className='sticky top-0 text-xs font-mono uppercase z-10 max-w-max ml-auto -mb-7 bg-card/90 backdrop-blur-md  px-3 py-2 rounded-md border border-border'>
         Displayed: {list.displayLimit} | Loaded: {list.offset}
       </div>
     
@@ -47,7 +47,7 @@ export function PokemonInfiniteListClient({
               key={p.url}
               className='pt-0 pb-3 overflow-hidden gap-y-3'
             >
-              <Image className="w-full bg-fd-muted [image-rendering:pixelated] object-cover" src={p.image} alt={p.name} width={500} height={500} />
+              <Image className="w-full bg-muted [image-rendering:pixelated] object-cover" src={p.image} alt={p.name} width={500} height={500} />
               <CardContent className='px-3'>
                 <h3 className="font-semibold capitalize text-lg">{p.name}</h3>
               </CardContent>

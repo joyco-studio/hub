@@ -40,6 +40,19 @@
         }
       ],
       "registryDependencies": ["button"]
+    },
+    {
+      "name": "mobile-menu",
+      "type": "registry:component",
+      "title": "Mobile Menu",
+      "description": "A full-screen overlay mobile menu built with Radix Dialog.",
+      "files": [
+        {
+          "path": "registry/joyco/blocks/mobile-menu.tsx",
+          "type": "registry:component"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-dialog"]
     }
   ]
 }

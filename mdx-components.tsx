@@ -99,7 +99,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
   
       // Default codeblock.
       return (
-        <code className={cn("rounded-lg bg-fd-card p-3.5 border border-fd-border", className)} {...props} />
+        <code className={cn("rounded-lg bg-card p-3.5 border border-border", className)} {...props} />
       )
     },
     ...components,

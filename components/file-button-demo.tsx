@@ -71,15 +71,15 @@ export function FileInputButtonDemo() {
                 key={index}
                 className={cn(
                   "flex items-center gap-3 p-3 rounded-lg",
-                  "bg-fd-muted/50 border border-fd-border"
+                  "bg-muted/50 border border-border"
                 )}
               >
-                <div className="text-fd-muted-foreground">
+                <div className="text-muted-foreground">
                   {getFileIcon(file.type)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{file.name}</p>
-                  <p className="text-xs text-fd-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {formatFileSize(file.size)}
                   </p>
                 </div>
@@ -87,7 +87,7 @@ export function FileInputButtonDemo() {
             ))}
           </div>
         ) : (
-          <div className="text-center bg-fd-muted/50 border border-fd-border rounded-lg p-4 py-8 text-fd-muted-foreground text-sm">
+          <div className="text-center bg-muted/50 border border-border rounded-lg p-4 py-8 text-muted-foreground text-sm">
             No files uploaded yet
           </div>
         )}
