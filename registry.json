@@ -52,7 +52,7 @@
           "type": "registry:component"
         }
       ],
-      "dependencies": ["@radix-ui/react-dialog"]
+      "dependencies": ["@radix-ui/react-dialog", "@radix-ui/react-slot", "react-remove-scroll"]
     }
   ]
 }

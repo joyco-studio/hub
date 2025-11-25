@@ -9,11 +9,9 @@ import * as MobileMenu from "@/registry/joyco/blocks/mobile-menu"
 export function DemoPage() {
   return (
     <div className="min-h-svh bg-background w-full text-foreground font-sans">
-      {/* Header */}
       <header className="flex items-center justify-between px-6 h-heading-height border-b border-border sticky top-0 bg-background z-40">
         <div className="font-bold text-xl tracking-tight z-20 relative">NOT JOYCO</div>
 
-        {/* Desktop nav - visible on md+ */}
         <nav className="hidden md:flex items-center gap-8">
           <a href="#" className="text-sm font-medium text-foreground">
             Home
