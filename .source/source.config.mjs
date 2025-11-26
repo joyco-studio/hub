@@ -1,11 +1,6 @@
 // source.config.ts
 import rehypePrettyCode from "rehype-pretty-code";
-import {
-  defineConfig,
-  defineDocs,
-  frontmatterSchema,
-  metaSchema
-} from "fumadocs-mdx/config";
+import { defineConfig, defineDocs, frontmatterSchema, metaSchema } from "fumadocs-mdx/config";
 
 // lib/plugins.ts
 var transformers = [
@@ -57,7 +52,7 @@ var transformers = [
 
 // source.config.ts
 var docs = defineDocs({
-  dir: "content/docs",
+  dir: "content",
   docs: {
     schema: frontmatterSchema,
     postprocess: {
