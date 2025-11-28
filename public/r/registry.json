@@ -64,7 +64,8 @@
           "path": "registry/joyco/blocks/scroll-area.tsx",
           "type": "registry:component"
         }
-      ]
+      ],
+      "dependencies": ["@radix-ui/react-presence"]
     }
   ]
 }

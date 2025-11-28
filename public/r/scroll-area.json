@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Scroll Area",
   "description": "A scrollable area component with customizable top and bottom shadows that appear when content overflows.",
+  "dependencies": [
+    "@radix-ui/react-presence"
+  ],
   "files": [
     {
       "path": "registry/joyco/blocks/scroll-area.tsx",
