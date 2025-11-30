@@ -8,6 +8,10 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
+  title: {
+    template: '%s | JOYCO Registry',
+    default: 'JOYCO Registry',
+  },
   icons: {
     icon: [
       {

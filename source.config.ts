@@ -1,10 +1,12 @@
 import rehypePrettyCode from 'rehype-pretty-code'
+import { z } from 'zod'
 import {
   defineConfig,
   defineDocs,
   frontmatterSchema,
   metaSchema,
 } from 'fumadocs-mdx/config'
+
 import { transformers } from './lib/plugins'
 
 // You can customise Zod schemas for frontmatter and `meta.json` here
@@ -12,7 +14,9 @@ import { transformers } from './lib/plugins'
 export const docs = defineDocs({
   dir: 'content',
   docs: {
-    schema: frontmatterSchema,
+    schema: frontmatterSchema.extend({
+      maintainers: z.array(z.string()).default([]),
+    }),
     postprocess: {
       includeProcessedMarkdown: true,
     },
