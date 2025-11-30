@@ -1,6 +1,6 @@
 'use client'
 
-import ScrollArea from '@/registry/joyco/blocks/scroll-area'
+import * as ScrollArea from '@/registry/joyco/blocks/scroll-area'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useState } from 'react'
 import { Button } from '../ui/button'
@@ -65,29 +65,30 @@ function SimpleExample() {
   const [itemCount, setItemCount] = useState<number>(4)
 
   return (
-    <Card>
+    <Card className="not-prose">
       <CardHeader>
         <CardTitle>Simple Example</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="max-w-md mx-auto">
         <ScrollArea.Root
-          className="h-64"
+          className="h-96"
           topShadowGradient="fade-card fade-b"
           bottomShadowGradient="fade-card fade-t"
         >
-          <ScrollArea.Content className="space-y-4 p-6">
+          <ScrollArea.Content className="space-y-4">
             {Array.from({ length: itemCount }, (_, i) => (
               <SimpleItem key={i} item={items[i % items.length]} />
             ))}
           </ScrollArea.Content>
         </ScrollArea.Root>
         <div className="mt-4 flex gap-3">
-          <Button onClick={() => setItemCount(itemCount + 1)}>
+          <Button className="flex-1" onClick={() => setItemCount(itemCount + 1)}>
             <Plus className="h-4 w-4" />
             Add Item
           </Button>
           <Button
             variant="secondary"
+            className="flex-1"
             onClick={() => setItemCount(Math.max(1, itemCount - 1))}
             disabled={itemCount <= 1}
           >
@@ -163,7 +164,7 @@ export function ChevronExample() {
 const SimpleItem = ({ item }: { item: (typeof items)[number] }) => {
   const Icon = item.icon
   return (
-    <div className="bg-background rounded-lg border p-4 shadow-sm">
+    <div className="bg-background rounded-lg border p-4">
       <div className="mb-2 flex items-center gap-3">
         <div className={`${item.bg} rounded-lg p-2`}>
           <Icon className={`h-5 w-5 ${item.color}`} />

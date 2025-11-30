@@ -270,7 +270,7 @@ export const Content = React.forwardRef<
   const overflowClasses =
     orientation === 'horizontal'
       ? 'overflow-x-auto overflow-y-hidden'
-      : 'overflow-y-auto'
+      : 'overflow-y-auto h-full'
 
   return (
     <div

@@ -4,7 +4,11 @@ import { baseOptions } from '@/lib/layout.shared'
 
 export default function Layout({ children }: LayoutProps<'/'>) {
   return (
-    <DocsLayout tree={source.pageTree} {...baseOptions()}>
+    <DocsLayout
+      tree={source.pageTree}
+      sidebar={{ defaultOpenLevel: 1 }}
+      {...baseOptions()}
+    >
       {children}
     </DocsLayout>
   )
