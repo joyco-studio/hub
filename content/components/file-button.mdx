@@ -3,7 +3,7 @@ title: File Button
 description: A simple and flexible file upload button component with custom styling.
 ---
 
-import { FileInputButtonDemo } from '@/components/demos/file-button-demo';
+import { FileInputButtonDemo } from '@/components/demos/file-button-demo'
 
 ## Demo
 
@@ -23,25 +23,21 @@ The `FileInputButton` component provides a simple way to create a styled file up
 
 #### Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `onUpload` | `(file: File) => Promise<any> \| void` | - | Callback function called when a file is selected |
-| `inputProps` | `React.InputHTMLAttributes<HTMLInputElement>` | `{}` | Additional props to pass to the hidden file input element |
-| `children` | `ReactNode` | - | The content to display inside the button |
+| Prop         | Type                                          | Default | Description                                               |
+| ------------ | --------------------------------------------- | ------- | --------------------------------------------------------- |
+| `onUpload`   | `(file: File) => Promise<any> \| void`        | -       | Callback function called when a file is selected          |
+| `inputProps` | `React.InputHTMLAttributes<HTMLInputElement>` | `{}`    | Additional props to pass to the hidden file input element |
+| `children`   | `ReactNode`                                   | -       | The content to display inside the button                  |
 
 #### Basic Usage
 
 ```tsx
 function App() {
   const handleUpload = (file: File) => {
-    console.log("Selected file:", file);
-  };
+    console.log('Selected file:', file)
+  }
 
-  return (
-    <FileInputButton onUpload={handleUpload}>
-      Upload File
-    </FileInputButton>
-  );
+  return <FileInputButton onUpload={handleUpload}>Upload File</FileInputButton>
 }
 ```
 
@@ -51,17 +47,14 @@ function App() {
 function App() {
   const handleUpload = (file: File) => {
     // This will be called for each file
-    console.log("Selected file:", file);
-  };
+    console.log('Selected file:', file)
+  }
 
   return (
-    <FileInputButton 
-      onUpload={handleUpload}
-      inputProps={{ multiple: true }}
-    >
+    <FileInputButton onUpload={handleUpload} inputProps={{ multiple: true }}>
       Upload Multiple Files
     </FileInputButton>
-  );
+  )
 }
 ```
 
@@ -70,17 +63,14 @@ function App() {
 ```tsx
 function App() {
   const handleUpload = (file: File) => {
-    console.log("Selected image:", file);
-  };
+    console.log('Selected image:', file)
+  }
 
   return (
-    <FileInputButton 
-      onUpload={handleUpload}
-      inputProps={{ accept: "image/*" }}
-    >
+    <FileInputButton onUpload={handleUpload} inputProps={{ accept: 'image/*' }}>
       Upload Image
     </FileInputButton>
-  );
+  )
 }
 ```
 
@@ -94,19 +84,19 @@ For more control, you can use the `useFileInput` hook. This is particularly usef
 
 #### Parameters
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `onUpload` | `(file: File) => Promise<any> \| void` | Callback function called when a file is selected |
+| Parameter    | Type                                          | Description                                               |
+| ------------ | --------------------------------------------- | --------------------------------------------------------- |
+| `onUpload`   | `(file: File) => Promise<any> \| void`        | Callback function called when a file is selected          |
 | `inputProps` | `React.InputHTMLAttributes<HTMLInputElement>` | Additional props to pass to the hidden file input element |
 
 #### Returns
 
 The `useFileInput` hook returns an object containing:
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `handleClick` | `() => void` | Function to trigger the file input dialog |
-| `input` | `React.ReactNode` | The hidden file input element to render |
+| Property      | Type              | Description                               |
+| ------------- | ----------------- | ----------------------------------------- |
+| `handleClick` | `() => void`      | Function to trigger the file input dialog |
+| `input`       | `React.ReactNode` | The hidden file input element to render   |
 
 #### Hook Usage
 
@@ -114,22 +104,20 @@ The `useFileInput` hook returns an object containing:
 function CustomUploadButton() {
   const { handleClick, input } = useFileInput({
     onUpload: (file) => {
-      console.log("File selected:", file);
+      console.log('File selected:', file)
     },
     inputProps: {
-      accept: ".pdf,.doc,.docx",
-      multiple: true
-    }
-  });
+      accept: '.pdf,.doc,.docx',
+      multiple: true,
+    },
+  })
 
   return (
     <div>
       {input}
-      <button onClick={handleClick}>
-        Choose Files
-      </button>
+      <button onClick={handleClick}>Choose Files</button>
     </div>
-  );
+  )
 }
 ```
 

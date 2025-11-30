@@ -4,9 +4,7 @@
   "type": "registry:component",
   "title": "Marquee",
   "description": "The all in one marquee component with smooth Web Animations API.",
-  "dependencies": [
-    "@joycostudio/marquee"
-  ],
+  "dependencies": ["@joycostudio/marquee"],
   "files": [
     {
       "path": "registry/joyco/blocks/marquee.tsx",

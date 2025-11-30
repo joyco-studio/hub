@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button"
-import { useCallback, useId, useMemo } from "react"
+import { Button } from '@/components/ui/button'
+import { useCallback, useId, useMemo } from 'react'
 
 interface FileInputProps {
   onUpload: (file: File) => Promise<unknown> | void
@@ -11,11 +11,16 @@ interface FileInputReturn {
   input: React.ReactNode
 }
 
-export const useFileInput = ({ onUpload, inputProps = {} }: FileInputProps): FileInputReturn => {
+export const useFileInput = ({
+  onUpload,
+  inputProps = {},
+}: FileInputProps): FileInputReturn => {
   const id = useId()
 
   const handleClick = useCallback(() => {
-    const fileInput = document.getElementById(`${id}-hidden-file-input`) as HTMLInputElement
+    const fileInput = document.getElementById(
+      `${id}-hidden-file-input`
+    ) as HTMLInputElement
     fileInput?.click()
   }, [id])
 
@@ -38,7 +43,13 @@ export const useFileInput = ({ onUpload, inputProps = {} }: FileInputProps): Fil
         <input
           type="file"
           id={`${id}-hidden-file-input`}
-          style={{ width: 0, height: 0, opacity: 0, position: "absolute", pointerEvents: "none" }}
+          style={{
+            width: 0,
+            height: 0,
+            opacity: 0,
+            position: 'absolute',
+            pointerEvents: 'none',
+          }}
           onChange={handleFileChange}
           {...inputProps}
         />
@@ -48,7 +59,9 @@ export const useFileInput = ({ onUpload, inputProps = {} }: FileInputProps): Fil
   )
 }
 
-export const FileInputButton = (props: FileInputProps & React.ComponentProps<typeof Button>) => {
+export const FileInputButton = (
+  props: FileInputProps & React.ComponentProps<typeof Button>
+) => {
   const { inputProps, onUpload, children, ...buttonProps } = props
   const { handleClick, input } = useFileInput({ onUpload, inputProps })
 

@@ -4,9 +4,7 @@
   "type": "registry:component",
   "title": "File Button",
   "description": "A button that opens a file input when clicked.",
-  "registryDependencies": [
-    "button"
-  ],
+  "registryDependencies": ["button"],
   "files": [
     {
       "path": "registry/joyco/blocks/file-button.tsx",

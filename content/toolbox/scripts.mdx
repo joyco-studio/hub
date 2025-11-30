@@ -9,11 +9,11 @@ A collection of utility scripts that can be fetched and executed directly via HT
 
 These scripts are hosted on [GitHub](https://github.com/joyco-studio/scripts/tree/main/public) and can be run directly using `curl` and `python`. They're designed for batch image processing operations commonly needed in web development.
 
-| Script | Description |
-|--------|-------------|
-| `compress.py` | Batch compress images to WebP format |
-| `rename.py` | Sequential file renaming for image sequences |
-| `resize.py` | Batch resize images by dimensions or scale |
+| Script        | Description                                  |
+| ------------- | -------------------------------------------- |
+| `compress.py` | Batch compress images to WebP format         |
+| `rename.py`   | Sequential file renaming for image sequences |
+| `resize.py`   | Batch resize images by dimensions or scale   |
 
 ## Requirements
 
@@ -38,11 +38,11 @@ curl -s https://raw.githubusercontent.com/joyco-studio/scripts/main/public/compr
 
 ### Options
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `<input_dir>` | Directory containing images to compress | Required |
-| `-q, --quality` | WebP quality (0-100) | `80` |
-| `-o, --output` | Output directory | Same as input |
+| Option          | Description                             | Default       |
+| --------------- | --------------------------------------- | ------------- |
+| `<input_dir>`   | Directory containing images to compress | Required      |
+| `-q, --quality` | WebP quality (0-100)                    | `80`          |
+| `-o, --output`  | Output directory                        | Same as input |
 
 ### Example
 
@@ -78,12 +78,12 @@ curl -s https://raw.githubusercontent.com/joyco-studio/scripts/main/public/renam
 
 ### Options
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `<input_dir>` | Directory containing files to rename | Required |
-| `-p, --prefix` | Filename prefix | `frame` |
-| `-s, --start` | Starting number | `0` |
-| `-z, --zeros` | Zero-padding width | `4` |
+| Option         | Description                          | Default  |
+| -------------- | ------------------------------------ | -------- |
+| `<input_dir>`  | Directory containing files to rename | Required |
+| `-p, --prefix` | Filename prefix                      | `frame`  |
+| `-s, --start`  | Starting number                      | `0`      |
+| `-z, --zeros`  | Zero-padding width                   | `4`      |
 
 ### Example
 
@@ -119,13 +119,13 @@ curl -s https://raw.githubusercontent.com/joyco-studio/scripts/main/public/resiz
 
 ### Options
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `<input_dir>` | Directory containing images to resize | Required |
-| `-w, --width` | Target width in pixels | - |
-| `-h, --height` | Target height in pixels | - |
-| `-s, --scale` | Scale factor (e.g., 0.5 for half size) | - |
-| `-o, --output` | Output directory | Same as input |
+| Option         | Description                            | Default       |
+| -------------- | -------------------------------------- | ------------- |
+| `<input_dir>`  | Directory containing images to resize  | Required      |
+| `-w, --width`  | Target width in pixels                 | -             |
+| `-h, --height` | Target height in pixels                | -             |
+| `-s, --scale`  | Scale factor (e.g., 0.5 for half size) | -             |
+| `-o, --output` | Output directory                       | Same as input |
 
 ### Example
 
@@ -149,4 +149,3 @@ curl -s https://raw.githubusercontent.com/joyco-studio/scripts/main/public/resiz
   }
 }
 ```
-

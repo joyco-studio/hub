@@ -1,11 +1,11 @@
-"use client";
-import * as SliderPrimitive from "@radix-ui/react-slider";
-import { useState } from "react";
-import { Marquee } from "@/registry/joyco/blocks/marquee";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import { ArrowRight, ArrowLeft, Play, Pause } from "lucide-react";
+'use client'
+import * as SliderPrimitive from '@radix-ui/react-slider'
+import { useState } from 'react'
+import { Marquee } from '@/registry/joyco/blocks/marquee'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
+import { ArrowRight, ArrowLeft, Play, Pause } from 'lucide-react'
 
 // Logo Components with theme support
 const NasaLogo = ({ className }: { className?: string }) => (
@@ -29,7 +29,7 @@ const NasaLogo = ({ className }: { className?: string }) => (
       </g>
     </g>
   </svg>
-);
+)
 
 const ValveLogo = ({ className }: { className?: string }) => (
   <svg
@@ -64,10 +64,14 @@ const ValveLogo = ({ className }: { className?: string }) => (
       d="m 36.216559,2.5839498 c 0,0 2.004448,0 3.007495,0 0,0.3124244 0,0.9446725 0,0.9446725 h -1.95923 c 0,0 0,0.6971997 0,1.0474438 0.594429,0 1.188857,0 1.784108,0 0,0.3116022 0,0.6330703 0,0.9446725 -0.595251,0 -1.189679,0 -1.784108,0 0,0.3592881 0,0.7210426 0,1.0819749 0.653625,0 1.95923,0 1.95923,0 V 7.5482079 H 36.18285 l 0.03371,-4.9642581"
     />
   </svg>
-);
+)
 
 const SpaceXLogo = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 50" className={className}>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 400 50"
+    className={className}
+  >
     <g className="letter_s fill-current">
       <path d="M37.5 30.5H10.9v-6.6h34.3c-.9-2.8-3.8-5.4-8.9-5.4H11.4c-5.7 0-9 2.1-9 6.7v4.9c0 4 3.4 6.3 8.4 6.3h26.9v7H1.5c.9 3.8 3.8 5.8 9 5.8h27.1c5.7 0 8.5-2.2 8.5-6.9v-4.9c0-4.3-3.3-6.6-8.6-6.9z" />
     </g>
@@ -91,7 +95,7 @@ const SpaceXLogo = ({ className }: { className?: string }) => (
       <path d="M399 .7c-80 4.6-117 38.8-125.3 46.9l-1.7 1.6h14.8C326.8 9.1 384.3 2 399 .7z" />
     </g>
   </svg>
-);
+)
 
 const IBMLogo = ({ className }: { className?: string }) => (
   <svg
@@ -134,7 +138,10 @@ const IBMLogo = ({ className }: { className?: string }) => (
       <g id="M">
         <polygon points="555.57 81.22 742.67 81.22 733.06 53.288 555.57 53.288" />
         <polygon points="555.57 27.932 724.25 27.932 714.64 0 555.57 0" />
-        <polygon points="861.03 401.17 861.03 373.24 1e3 373.24 1e3 401.17" strokeWidth="1.0018" />
+        <polygon
+          points="861.03 401.17 861.03 373.24 1e3 373.24 1e3 401.17"
+          strokeWidth="1.0018"
+        />
         <polygon points="861.03 347.76 861.03 319.83 1e3 319.83 1e3 347.76" />
         <polygon points="777.73 182.54 769.91 159.96 694.43 159.96 611.03 159.96 611.03 187.89 694.43 187.89 694.43 162.24 703.25 187.89 852.22 187.89 861.03 162.24 861.03 187.89 944.43 187.89 944.43 159.96 861.03 159.96 785.56 159.96" />
         <polygon points="944.43 106.58 803.98 106.58 794.37 134.51 944.43 134.51" />
@@ -158,31 +165,31 @@ const IBMLogo = ({ className }: { className?: string }) => (
       />
     </g>
   </svg>
-);
+)
 
 const ITEMS = [
-  { id: 1, logo: IBMLogo, text: "IBM" },
-  { id: 2, logo: NasaLogo, text: "NASA" },
-  { id: 3, logo: SpaceXLogo, text: "SpaceX" },
-  { id: 4, logo: ValveLogo, text: "Valve" },
-  { id: 5, logo: IBMLogo, text: "IBM" },
-  { id: 6, logo: NasaLogo, text: "NASA" },
-  { id: 7, logo: SpaceXLogo, text: "SpaceX" },
-  { id: 8, logo: ValveLogo, text: "Valve" },
-];
-
+  { id: 1, logo: IBMLogo, text: 'IBM' },
+  { id: 2, logo: NasaLogo, text: 'NASA' },
+  { id: 3, logo: SpaceXLogo, text: 'SpaceX' },
+  { id: 4, logo: ValveLogo, text: 'Valve' },
+  { id: 5, logo: IBMLogo, text: 'IBM' },
+  { id: 6, logo: NasaLogo, text: 'NASA' },
+  { id: 7, logo: SpaceXLogo, text: 'SpaceX' },
+  { id: 8, logo: ValveLogo, text: 'Valve' },
+]
 
 export function MarqueeDemo() {
-  const [speedPercent, setSpeedPercent] = useState(50);
-  const [direction, setDirection] = useState<1 | -1>(1);
-  const [play, setPlay] = useState(true);
+  const [speedPercent, setSpeedPercent] = useState(50)
+  const [direction, setDirection] = useState<1 | -1>(1)
+  const [play, setPlay] = useState(true)
 
-  const speed = speedPercent / 100;
-  const percClassName = "text-sm absolute inset-0 z-10 flex items-center pointer-events-none justify-center font-medium whitespace-now uppercase nowrap font-mono"
+  const speed = speedPercent / 100
+  const percClassName =
+    'text-sm absolute inset-0 z-10 flex items-center pointer-events-none justify-center font-medium whitespace-now uppercase nowrap font-mono'
 
   return (
     <div className="not-prose">
-      <Card className="overflow-hidden rounded-b-none bg-card">
+      <Card className="bg-card overflow-hidden rounded-b-none">
         <div className="py-6">
           <Marquee
             speed={100}
@@ -191,24 +198,27 @@ export function MarqueeDemo() {
             play={play}
           >
             {ITEMS.map((item) => {
-              const LogoComponent = item.logo;
-              return <LogoComponent key={item.id} className="h-8 w-auto" />;
+              const LogoComponent = item.logo
+              return <LogoComponent key={item.id} className="h-8 w-auto" />
             })}
           </Marquee>
         </div>
       </Card>
 
-      <div className="border-t-0 bg-card border border-border rounded-b-lg overflow-hidden">
+      <div className="bg-card border-border overflow-hidden rounded-b-lg border border-t-0">
         <div className="grid grid-cols-2 sm:grid-cols-4">
-          <ControlButton onClick={() => setPlay(!play)} className={cn(!play && "bg-accent/80 dark:bg-accent/50")}>
+          <ControlButton
+            onClick={() => setPlay(!play)}
+            className={cn(!play && 'bg-accent/80 dark:bg-accent/50')}
+          >
             {play ? (
               <>
-                <Pause className="w-4 h-4 mr-1" />
+                <Pause className="mr-1 h-4 w-4" />
                 Pause
               </>
             ) : (
               <>
-                <Play className="w-4 h-4 mr-1" />
+                <Play className="mr-1 h-4 w-4" />
                 Play
               </>
             )}
@@ -216,44 +226,52 @@ export function MarqueeDemo() {
 
           <ControlButton
             onClick={() => setDirection(1)}
-            className={cn(direction === 1 && "bg-accent/80 dark:bg-accent/50", "max-sm:row-2")}
+            className={cn(
+              direction === 1 && 'bg-accent/80 dark:bg-accent/50',
+              'max-sm:row-2'
+            )}
             disabled={direction === 1}
           >
-            <ArrowLeft className="w-4 h-4 mr-1" />
+            <ArrowLeft className="mr-1 h-4 w-4" />
             Left
           </ControlButton>
 
           <ControlButton
             onClick={() => setDirection(-1)}
-            className={cn(direction === -1 && "bg-accent/80 dark:bg-accent/50", "max-sm:row-2")}
+            className={cn(
+              direction === -1 && 'bg-accent/80 dark:bg-accent/50',
+              'max-sm:row-2'
+            )}
             disabled={direction === -1}
           >
             Right
-            <ArrowRight className="w-4 h-4 mr-1" />
+            <ArrowRight className="mr-1 h-4 w-4" />
           </ControlButton>
 
           <div>
             <SliderPrimitive.Root
               className={cn(
-                "relative flex w-full h-full touch-none select-none items-center"
+                'relative flex h-full w-full touch-none items-center select-none'
               )}
               value={[speedPercent]}
-              onValueChange={(value) => setSpeedPercent(Math.max(10, Math.min(100, value[0])))}
+              onValueChange={(value) =>
+                setSpeedPercent(Math.max(10, Math.min(100, value[0])))
+              }
             >
-              <SliderPrimitive.Track className="relative h-full w-full grow overflow-hidden cursor-ew-resize">
-                <SliderPrimitive.Range className="absolute h-full bg-primary" />
-                <span 
-                  className={cn(percClassName, "text-background")}
+              <SliderPrimitive.Track className="relative h-full w-full grow cursor-ew-resize overflow-hidden">
+                <SliderPrimitive.Range className="bg-primary absolute h-full" />
+                <span
+                  className={cn(percClassName, 'text-background')}
                   style={{
-                    clipPath: `inset(0 ${100 - speedPercent}% 0 0)`
+                    clipPath: `inset(0 ${100 - speedPercent}% 0 0)`,
                   }}
                 >
                   {speedPercent} px/s
                 </span>
-                <span 
-                  className={cn(percClassName, "text-foreground")}
+                <span
+                  className={cn(percClassName, 'text-foreground')}
                   style={{
-                    clipPath: `inset(0 0 0 ${speedPercent}%)`
+                    clipPath: `inset(0 0 0 ${speedPercent}%)`,
                   }}
                 >
                   {speedPercent} px/s
@@ -264,7 +282,7 @@ export function MarqueeDemo() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 const ControlButton = ({
@@ -277,12 +295,12 @@ const ControlButton = ({
       variant="ghost"
       size="sm"
       className={cn(
-        "hover:bg-accent/50 disabled:opacity-100 rounded-none flex-1 uppercase font-mono",
+        'hover:bg-accent/50 flex-1 rounded-none font-mono uppercase disabled:opacity-100',
         className
       )}
       {...props}
     >
       {children}
     </Button>
-  );
-};
+  )
+}

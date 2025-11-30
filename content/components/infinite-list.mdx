@@ -3,7 +3,7 @@ title: Infinite List
 description: A simplified infinite scroll component that manages pagination and child masking with virtual list behavior.
 ---
 
-import { PokemonInfiniteList } from '@/components/demos/pokemon-infinite-demo/pokemon-infinite-list';
+import { PokemonInfiniteList } from '@/components/demos/pokemon-infinite-demo/pokemon-infinite-list'
 
 ## Demo
 
@@ -19,18 +19,18 @@ npx shadcn@latest add @joyco/infinite-list
 
 ### useInfiniteList
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `pageSize` | `number` | - | Number of items per page |
-| `initialItems` | `any[]` | - | Optional. Initial items array (used to calculate bias) |
-| `initialPage` | `number` | `1` | Starting page number |
+| Option         | Type     | Default | Description                                            |
+| -------------- | -------- | ------- | ------------------------------------------------------ |
+| `pageSize`     | `number` | -       | Number of items per page                               |
+| `initialItems` | `any[]`  | -       | Optional. Initial items array (used to calculate bias) |
+| `initialPage`  | `number` | `1`     | Starting page number                                   |
 
-| Returns | Type | Description |
-|----------|------|-------------|
-| `offset` | `number` | Total items to fetch (includes bias for prefetching) |
-| `displayLimit` | `number` | Number of items to display |
-| `pageSize` | `number` | Items per page |
-| `nextPage` | `() => void` | Function to increment the page |
+| Returns        | Type         | Description                                          |
+| -------------- | ------------ | ---------------------------------------------------- |
+| `offset`       | `number`     | Total items to fetch (includes bias for prefetching) |
+| `displayLimit` | `number`     | Number of items to display                           |
+| `pageSize`     | `number`     | Items per page                                       |
+| `nextPage`     | `() => void` | Function to increment the page                       |
 
 ### MaskedList
 
@@ -38,34 +38,36 @@ The `MaskedList` component masks children to the `displayLimit`.
 
 #### Props
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `displayLimit` | `number` | Number of items to display (from useInfiniteList) |
-| `children` | `ReactNode` | React nodes to be masked |
+| Prop           | Type        | Description                                       |
+| -------------- | ----------- | ------------------------------------------------- |
+| `displayLimit` | `number`    | Number of items to display (from useInfiniteList) |
+| `children`     | `ReactNode` | React nodes to be masked                          |
 
 #### Usage Example
 
 ```tsx
-import { useInfiniteList, MaskedList } from '@joyco/infinite-list';
+import { useInfiniteList, MaskedList } from '@joyco/infinite-list'
 
 const list = useInfiniteList({
   pageSize: 20,
   initialItems: data,
-});
+})
 
 const loadMore = () => {
-  list.nextPage();
+  list.nextPage()
   // Fetch more items in the background
-};
+}
 
 return (
   <div>
     <MaskedList {...list}>
-      {items.map(item => <Item key={item.id} {...item} />)}
+      {items.map((item) => (
+        <Item key={item.id} {...item} />
+      ))}
     </MaskedList>
     <button onClick={loadMore}>Load More</button>
   </div>
-);
+)
 ```
 
 ## How it Works

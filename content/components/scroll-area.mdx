@@ -3,7 +3,10 @@ title: Scroll Area
 description: A scrollable area component with customizable top and bottom shadows that appear when content overflows.
 ---
 
-import { ScrollAreaDemo, ChevronExample } from '@/components/demos/scroll-area-demo';
+import {
+  ScrollAreaDemo,
+  ChevronExample,
+} from '@/components/demos/scroll-area-demo'
 
 ## Demo
 
@@ -20,24 +23,24 @@ npx shadcn@latest add @joyco/scroll-area
 A basic scroll area with automatic shadow indicators:
 
 ```tsx
-import { ScrollArea } from '@/registry/joyco/blocks/scroll-area';
+import { ScrollArea } from '@/registry/joyco/blocks/scroll-area'
 
 function SimpleScrollArea() {
   return (
     <ScrollArea.Root className="h-64">
       <ScrollArea.Content className="space-y-4 p-6">
-        <div className="rounded-lg bg-background p-4 border shadow-sm">
-          <h3 className="font-semibold mb-2">Item 1</h3>
-          <p className="text-sm text-muted-foreground">Content here</p>
+        <div className="bg-background rounded-lg border p-4 shadow-sm">
+          <h3 className="mb-2 font-semibold">Item 1</h3>
+          <p className="text-muted-foreground text-sm">Content here</p>
         </div>
-        <div className="rounded-lg bg-background p-4 border shadow-sm">
-          <h3 className="font-semibold mb-2">Item 2</h3>
-          <p className="text-sm text-muted-foreground">More content</p>
+        <div className="bg-background rounded-lg border p-4 shadow-sm">
+          <h3 className="mb-2 font-semibold">Item 2</h3>
+          <p className="text-muted-foreground text-sm">More content</p>
         </div>
         {/* Add more items to see scrolling */}
       </ScrollArea.Content>
     </ScrollArea.Root>
-  );
+  )
 }
 ```
 
@@ -104,43 +107,43 @@ You can add custom UI elements (like chevron indicators) that show/hide based on
 Here's the code for the chevron indicators example:
 
 ```tsx
-import { ScrollArea } from '@/registry/joyco/blocks/scroll-area';
-import { ChevronUp, ChevronDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { ScrollArea } from '@/registry/joyco/blocks/scroll-area'
+import { ChevronUp, ChevronDown } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 function ScrollAreaWithChevrons() {
   return (
-    <ScrollArea.Root className="h-96 p-4 relative">
+    <ScrollArea.Root className="relative h-96 p-4">
       {/* Top chevron indicator */}
       <div
         className={cn(
-          'absolute left-1/2 top-2 -translate-x-1/2 z-30 pointer-events-none',
-          'group-data-[scroll-top=true]/scroll-area:opacity-100 group-data-[scroll-top=true]/scroll-area:animate-in group-data-[scroll-top=true]/scroll-area:fade-in group-data-[scroll-top=true]/scroll-area:duration-300',
-          'group-data-[scroll-top=false]/scroll-area:opacity-0 group-data-[scroll-top=false]/scroll-area:animate-out group-data-[scroll-top=false]/scroll-area:fade-out group-data-[scroll-top=false]/scroll-area:duration-300',
+          'pointer-events-none absolute top-2 left-1/2 z-30 -translate-x-1/2',
+          'group-data-[scroll-top=true]/scroll-area:animate-in group-data-[scroll-top=true]/scroll-area:fade-in group-data-[scroll-top=true]/scroll-area:opacity-100 group-data-[scroll-top=true]/scroll-area:duration-300',
+          'group-data-[scroll-top=false]/scroll-area:animate-out group-data-[scroll-top=false]/scroll-area:fade-out group-data-[scroll-top=false]/scroll-area:opacity-0 group-data-[scroll-top=false]/scroll-area:duration-300',
           'opacity-0'
         )}
       >
-        <ChevronUp className="w-5 h-5 text-muted-foreground" />
+        <ChevronUp className="text-muted-foreground h-5 w-5" />
       </div>
-      
+
       {/* Bottom chevron indicator */}
       <div
         className={cn(
-          'absolute left-1/2 bottom-2 -translate-x-1/2 z-30 pointer-events-none',
-          'group-data-[scroll-bottom=true]/scroll-area:opacity-100 group-data-[scroll-bottom=true]/scroll-area:animate-in group-data-[scroll-bottom=true]/scroll-area:fade-in group-data-[scroll-bottom=true]/scroll-area:duration-200',
-          'group-data-[scroll-bottom=false]/scroll-area:opacity-0 group-data-[scroll-bottom=false]/scroll-area:animate-out group-data-[scroll-bottom=false]/scroll-area:fade-out group-data-[scroll-bottom=false]/scroll-area:duration-200',
+          'pointer-events-none absolute bottom-2 left-1/2 z-30 -translate-x-1/2',
+          'group-data-[scroll-bottom=true]/scroll-area:animate-in group-data-[scroll-bottom=true]/scroll-area:fade-in group-data-[scroll-bottom=true]/scroll-area:opacity-100 group-data-[scroll-bottom=true]/scroll-area:duration-200',
+          'group-data-[scroll-bottom=false]/scroll-area:animate-out group-data-[scroll-bottom=false]/scroll-area:fade-out group-data-[scroll-bottom=false]/scroll-area:opacity-0 group-data-[scroll-bottom=false]/scroll-area:duration-200',
           'opacity-0'
         )}
       >
-        <ChevronDown className="w-5 h-5 text-muted-foreground" />
+        <ChevronDown className="text-muted-foreground h-5 w-5" />
       </div>
-      
+
       <ScrollArea.Content className="space-y-4 p-6">
         {/* Your scrollable content */}
         <div>Content here</div>
       </ScrollArea.Content>
     </ScrollArea.Root>
-  );
+  )
 }
 ```
 

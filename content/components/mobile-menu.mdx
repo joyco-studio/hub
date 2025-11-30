@@ -3,7 +3,7 @@ title: Mobile Menu
 description: A full-screen overlay mobile menu built with Radix Dialog.
 ---
 
-import { MobileMenuDemo } from '@/components/demos/mobile-menu-demo';
+import { MobileMenuDemo } from '@/components/demos/mobile-menu-demo'
 
 ## Demo
 
@@ -21,29 +21,29 @@ npx shadcn@latest add @joyco/mobile-menu
 
 The root component that manages the open/closed state of the mobile menu.
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `open` | `boolean` | - | Controlled open state |
-| `onOpenChange` | `(open: boolean) => void` | - | Callback when open state changes |
-| `defaultOpen` | `boolean` | `false` | Initial open state for uncontrolled usage |
+| Prop           | Type                      | Default | Description                               |
+| -------------- | ------------------------- | ------- | ----------------------------------------- |
+| `open`         | `boolean`                 | -       | Controlled open state                     |
+| `onOpenChange` | `(open: boolean) => void` | -       | Callback when open state changes          |
+| `defaultOpen`  | `boolean`                 | `false` | Initial open state for uncontrolled usage |
 
 ### MobileMenuTrigger
 
 The button that opens the mobile menu.
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `asChild` | `boolean` | `false` | Merge props onto child element instead of rendering a button |
-| `className` | `string` | - | Additional CSS classes |
+| Prop        | Type      | Default | Description                                                  |
+| ----------- | --------- | ------- | ------------------------------------------------------------ |
+| `asChild`   | `boolean` | `false` | Merge props onto child element instead of rendering a button |
+| `className` | `string`  | -       | Additional CSS classes                                       |
 
 ### MobileMenuContent
 
 The full-screen overlay content container with backdrop blur and animations.
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `className` | `string` | - | Additional CSS classes |
-| `children` | `ReactNode` | - | Menu content |
+| Prop        | Type        | Default | Description            |
+| ----------- | ----------- | ------- | ---------------------- |
+| `className` | `string`    | -       | Additional CSS classes |
+| `children`  | `ReactNode` | -       | Menu content           |
 
 ### MobileMenuHeader
 
@@ -57,11 +57,11 @@ A scrollable navigation container for menu links.
 
 An animated navigation link that automatically closes the menu on click.
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `href` | `string` | - | Link destination |
-| `asChild` | `boolean` | `false` | Render as child element (for use with Next.js Link) |
-| `className` | `string` | - | Additional CSS classes |
+| Prop        | Type      | Default | Description                                         |
+| ----------- | --------- | ------- | --------------------------------------------------- |
+| `href`      | `string`  | -       | Link destination                                    |
+| `asChild`   | `boolean` | `false` | Render as child element (for use with Next.js Link) |
+| `className` | `string`  | -       | Additional CSS classes                              |
 
 ### MobileMenuClose
 
@@ -83,8 +83,8 @@ import {
   MobileMenuLink,
   MobileMenuClose,
   MobileMenuFooter,
-} from "@/components/ui/mobile-menu";
-import { Menu, X } from "lucide-react";
+} from '@/components/ui/mobile-menu'
+import { Menu, X } from 'lucide-react'
 
 function App() {
   return (
@@ -112,16 +112,16 @@ function App() {
         </MobileMenuFooter>
       </MobileMenuContent>
     </MobileMenu>
-  );
+  )
 }
 ```
 
 ## With Next.js Link
 
 ```tsx
-import Link from "next/link";
+import Link from 'next/link'
 
-<MobileMenuNav>
+;<MobileMenuNav>
   <MobileMenuLink asChild>
     <Link href="/">Home</Link>
   </MobileMenuLink>
@@ -138,4 +138,3 @@ import Link from "next/link";
 - The overlay uses `backdrop-blur-md` for a modern frosted glass effect
 - `MobileMenuLink` automatically closes the menu when clicked
 - Works well with responsive layouts—typically show on mobile and hide on desktop using media queries
-

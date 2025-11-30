@@ -17,5 +17,5 @@ export const Logo = (props: React.SVGProps<SVGSVGElement>) => {
         fill="#FAFAFA"
       />
     </svg>
-  );
-};
+  )
+}

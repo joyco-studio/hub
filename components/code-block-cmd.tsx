@@ -1,23 +1,18 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import { Button } from "@/components/ui/button"
+import * as React from 'react'
+import { Button } from '@/components/ui/button'
 
-import { useConfig } from "@/hooks/use-config"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
-import { Check, Copy } from "lucide-react"
+import { useConfig } from '@/hooks/use-config'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Check, Copy } from 'lucide-react'
 
 export function CodeBlockCommand({
   __npm__,
   __yarn__,
   __pnpm__,
   __bun__,
-}: React.ComponentProps<"pre"> & {
+}: React.ComponentProps<'pre'> & {
   __npm__?: string
   __yarn__?: string
   __pnpm__?: string
@@ -33,7 +28,7 @@ export function CodeBlockCommand({
     }
   }, [hasCopied])
 
-  const packageManager = config.packageManager || "pnpm"
+  const packageManager = config.packageManager || 'pnpm'
   const tabs = React.useMemo(() => {
     return {
       pnpm: __pnpm__,
@@ -55,14 +50,14 @@ export function CodeBlockCommand({
   }, [packageManager, tabs])
 
   return (
-    <div className="not-prose overflow-x-auto bg-card rounded-lg border border-border">
+    <div className="not-prose bg-card border-border overflow-x-auto rounded-lg border">
       <Tabs
         value={packageManager}
         className="gap-0"
         onValueChange={(value) => {
           setConfig({
             ...config,
-            packageManager: value as "pnpm" | "npm" | "yarn" | "bun",
+            packageManager: value as 'pnpm' | 'npm' | 'yarn' | 'bun',
           })
         }}
       >
@@ -87,7 +82,7 @@ export function CodeBlockCommand({
               <TabsContent key={key} value={key} className="mt-0 px-4 py-3.5">
                 <pre>
                   <code
-                    className="relative font-mono text-sm leading-none dark:text-green-300 text-green-500"
+                    className="relative font-mono text-sm leading-none text-green-500 dark:text-green-300"
                     data-language="bash"
                   >
                     {value}
@@ -99,14 +94,18 @@ export function CodeBlockCommand({
         </div>
       </Tabs>
       <Button
-          data-slot="copy-button"
-          size="icon"
-          variant="ghost"
-          className="absolute top-2 right-2 z-10 size-7 opacity-70 hover:opacity-100 focus-visible:opacity-100"
-          onClick={copyCommand}
-        >
-          {hasCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-        </Button>
+        data-slot="copy-button"
+        size="icon"
+        variant="ghost"
+        className="absolute top-2 right-2 z-10 size-7 opacity-70 hover:opacity-100 focus-visible:opacity-100"
+        onClick={copyCommand}
+      >
+        {hasCopied ? (
+          <Check className="h-4 w-4" />
+        ) : (
+          <Copy className="h-4 w-4" />
+        )}
+      </Button>
     </div>
   )
 }
