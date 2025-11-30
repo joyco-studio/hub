@@ -2,7 +2,7 @@
 
 import * as ScrollArea from '@/registry/joyco/blocks/scroll-area'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Button } from '../ui/button'
 import {
   Plus,
@@ -63,26 +63,39 @@ export function ScrollAreaDemo() {
 
 function SimpleExample() {
   const [itemCount, setItemCount] = useState<number>(4)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: 'smooth',
+      })
+    }
+  }, [itemCount])
 
   return (
     <Card className="not-prose">
       <CardHeader>
         <CardTitle>Simple Example</CardTitle>
       </CardHeader>
-      <CardContent className="max-w-md mx-auto">
+      <CardContent className="mx-auto max-w-md">
         <ScrollArea.Root
           className="h-96"
           topShadowGradient="fade-card fade-b"
           bottomShadowGradient="fade-card fade-t"
         >
-          <ScrollArea.Content className="space-y-4">
+          <ScrollArea.Content ref={scrollRef} className="space-y-4">
             {Array.from({ length: itemCount }, (_, i) => (
               <SimpleItem key={i} item={items[i % items.length]} />
             ))}
           </ScrollArea.Content>
         </ScrollArea.Root>
         <div className="mt-4 flex gap-3">
-          <Button className="flex-1" onClick={() => setItemCount(itemCount + 1)}>
+          <Button
+            className="flex-1"
+            onClick={() => setItemCount(itemCount + 1)}
+          >
             <Plus className="h-4 w-4" />
             Add Item
           </Button>
@@ -103,6 +116,16 @@ function SimpleExample() {
 
 export function ChevronExample() {
   const [itemCount, setItemCount] = useState<number>(6)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: 'smooth',
+      })
+    }
+  }, [itemCount])
 
   return (
     <Card>
@@ -136,7 +159,7 @@ export function ChevronExample() {
           >
             <ChevronDown className="text-muted-foreground h-5 w-5" />
           </div>
-          <ScrollArea.Content className="space-y-4 p-6">
+          <ScrollArea.Content ref={scrollRef} className="space-y-4 p-6">
             {Array.from({ length: itemCount }, (_, i) => (
               <SimpleItem key={i} item={items[i % items.length]} />
             ))}
