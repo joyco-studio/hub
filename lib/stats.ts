@@ -5,8 +5,7 @@ export async function getDownloadStats(
 ): Promise<DownloadStats | null> {
   try {
     const response = await fetch(
-      `https://workers.joyco.studio/registry/${slug}/downloads`,
-      { next: { revalidate: 3600 } }
+      `https://workers.joyco.studio/registry/${slug}/downloads`
     )
     if (!response.ok) return null
     const json = await response.json()
@@ -16,4 +15,3 @@ export async function getDownloadStats(
     return null
   }
 }
-
