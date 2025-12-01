@@ -14,6 +14,12 @@ import { getDownloadStats } from '@/lib/stats'
 import { getMDXComponents } from '@/mdx-components'
 import { Maintainers } from '@/components/layout/maintainers'
 import { WeeklyDownloads } from '@/components/layout/weekly-downloads'
+import { InferPageType } from 'fumadocs-core/source'
+
+const getComponentSlug = (page: InferPageType<typeof source>) => {
+  if (page.slugs[0] !== 'components') return undefined
+  return page.slugs[page.slugs.length - 1]
+}
 
 export default async function Page(props: PageProps<'/[[...slug]]'>) {
   const params = await props.params
@@ -21,8 +27,8 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
   if (!page) notFound()
 
   const MDX = page.data.body
-  const componentSlug = page.slugs[page.slugs.length - 1]
-  const downloadStats = await getDownloadStats(componentSlug)
+  const componentSlug = getComponentSlug(page)
+  const downloadStats = componentSlug ? await getDownloadStats(componentSlug) : null
 
   return (
     <DocsPage
@@ -32,7 +38,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
         footer: (
           <div className='flex flex-col gap-4 py-2'>
             <Maintainers maintainers={page.data.maintainers} />
-            <WeeklyDownloads data={downloadStats} />
+            {downloadStats && <WeeklyDownloads data={downloadStats} />}
             {page.data.lastModified && (
               <PageLastUpdate className='opacity-50' date={new Date(page.data.lastModified)} />
             )}
