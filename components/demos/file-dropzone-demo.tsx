@@ -14,8 +14,8 @@ export function FileDropzoneDemo() {
         <FileDropzone
           accept="application/pdf,image/*"
           maxSizeMB={10}
-          // maxFiles={20}
-          // multiple={true}
+          maxFiles={20}
+          multiple={true}
           onUpload={handleUpload}
         />
       </CardContent>
