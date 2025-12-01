@@ -1,0 +1,371 @@
+---
+title: File Dropzone
+description: A drag-and-drop file upload component with image preview, validation, and error handling.
+maintainers: ['alejopequeno']
+---
+
+import { FileDropzoneDemo } from '@/components/demos/file-dropzone-demo'
+
+## Demo
+
+<FileDropzoneDemo />
+
+## Installation
+
+```bash
+npx shadcn@latest add @joyco/file-dropzone
+```
+
+## API Reference
+
+### FileDropzone Component
+
+The `FileDropzone` component is a ready-to-use drag-and-drop file upload area with built-in validation and preview.
+
+#### Props
+
+| Prop         | Type                                           | Default         | Description                                               |
+| ------------ | ---------------------------------------------- | --------------- | --------------------------------------------------------- |
+| `accept`     | `string`                                       | -               | Comma-separated list of accepted MIME types (optional)    |
+| `maxSizeMB`  | `number`                                       | `2`             | Maximum file size in megabytes                            |
+| `maxFiles`   | `number`                                       | `1` or `5`*     | Maximum number of files that can be uploaded              |
+| `multiple`   | `boolean`                                      | `false`         | Allow multiple file selection                             |
+| `onUpload`   | `(file: File) => Promise<unknown> \| void`     | -               | Callback called when a file is uploaded (optional)        |
+
+\* Defaults to `1` for single file mode, `5` for multiple file mode
+
+#### Basic Usage
+
+```tsx
+import { FileDropzone } from '@/components/file-dropzone'
+
+function App() {
+  return <FileDropzone />
+}
+```
+
+#### With Custom Settings
+
+```tsx
+import { FileDropzone } from '@/components/file-dropzone'
+
+function App() {
+  const handleUpload = async (file: File) => {
+    // Upload logic here
+    console.log('Uploading:', file.name)
+  }
+
+  return (
+    <FileDropzone
+      accept="image/png,image/jpeg"
+      maxSizeMB={5}
+      onUpload={handleUpload}
+    />
+  )
+}
+```
+
+#### Accept Any File Type
+
+```tsx
+import { FileDropzone } from '@/components/file-dropzone'
+
+function App() {
+  return (
+    <FileDropzone
+      maxSizeMB={10}
+      onUpload={(file) => console.log(file)}
+    />
+  )
+}
+```
+
+### useFileUpload Hook
+
+The `useFileUpload` hook provides complete file upload functionality with drag-and-drop support, validation, and state management.
+
+#### Parameters
+
+| Parameter  | Type                                      | Default | Description                                            |
+| ---------- | ----------------------------------------- | ------- | ------------------------------------------------------ |
+| `accept`   | `string`                                  | -       | Comma-separated list of accepted MIME types            |
+| `maxSize`  | `number`                                  | -       | Maximum file size in bytes                             |
+| `maxFiles` | `number`                                  | `1`     | Maximum number of files that can be uploaded           |
+| `onUpload` | `(file: File) => Promise<unknown> \| void` | -       | Optional callback called when a file is uploaded       |
+
+#### Returns
+
+The hook returns an object with all state and actions:
+
+**State:**
+
+| Property     | Type                 | Description                                |
+| ------------ | -------------------- | ------------------------------------------ |
+| `files`      | `FileWithPreview[]`  | Array of uploaded files with preview URLs  |
+| `isDragging` | `boolean`            | Whether a drag operation is in progress    |
+| `errors`     | `string[]`           | Array of validation error messages         |
+
+**Actions:**
+
+| Property           | Type                                                       | Description                                    |
+| ------------------ | ---------------------------------------------------------- | ---------------------------------------------- |
+| `addFiles`         | `(fileList: FileList \| File[]) => Promise<void>`          | Manually add files programmatically            |
+| `removeFile`       | `(id: string) => void`                                     | Remove a file by ID                            |
+| `clearErrors`      | `() => void`                                               | Clear all validation errors                    |
+| `openFileDialog`   | `() => void`                                               | Open the file picker dialog                    |
+| `getInputProps`    | `() => {...}`                                              | Returns props to spread on the input element   |
+| `handleDragEnter`  | `(e: React.DragEvent) => void`                             | Handler for drag enter events                  |
+| `handleDragLeave`  | `(e: React.DragEvent) => void`                             | Handler for drag leave events                  |
+| `handleDragOver`   | `(e: React.DragEvent) => void`                             | Handler for drag over events                   |
+| `handleDrop`       | `(e: React.DragEvent) => void`                             | Handler for drop events                        |
+
+**FileWithPreview Type:**
+
+```tsx
+interface FileWithPreview {
+  id: string          // Unique identifier for the file
+  file: File          // The File object
+  preview?: string    // Data URL for image preview
+}
+```
+
+## Usage Examples
+
+### Basic Dropzone
+
+```tsx
+'use client'
+
+import { useFileUpload } from '@/hooks/use-file-upload'
+
+function BasicDropzone() {
+  const {
+    files,
+    isDragging,
+    errors,
+    handleDragEnter,
+    handleDragLeave,
+    handleDragOver,
+    handleDrop,
+    getInputProps,
+  } = useFileUpload({
+    accept: 'image/*',
+    maxSize: 2 * 1024 * 1024, // 2MB
+  })
+
+  return (
+    <div
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+      data-dragging={isDragging}
+    >
+      <input {...getInputProps()} className="sr-only" />
+      <p>Drop your file here</p>
+      {errors.length > 0 && <p className="text-red-500">{errors[0]}</p>}
+    </div>
+  )
+}
+```
+
+### With Image Preview
+
+```tsx
+'use client'
+
+import { useFileUpload } from '@/hooks/use-file-upload'
+
+function ImageDropzone() {
+  const {
+    files,
+    isDragging,
+    handleDragEnter,
+    handleDragLeave,
+    handleDragOver,
+    handleDrop,
+    openFileDialog,
+    removeFile,
+    getInputProps,
+  } = useFileUpload({
+    accept: 'image/png,image/jpeg,image/jpg',
+    maxSize: 5 * 1024 * 1024, // 5MB
+  })
+
+  const previewUrl = files[0]?.preview
+
+  return (
+    <div>
+      <div
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      >
+        <input {...getInputProps()} className="sr-only" />
+        {previewUrl ? (
+          <img src={previewUrl} alt="Preview" />
+        ) : (
+          <button onClick={openFileDialog}>Select Image</button>
+        )}
+      </div>
+      {previewUrl && (
+        <button onClick={() => removeFile(files[0].id)}>Remove</button>
+      )}
+    </div>
+  )
+}
+```
+
+### Multiple Files with Validation
+
+```tsx
+'use client'
+
+import { useFileUpload } from '@/hooks/use-file-upload'
+
+function MultiFileDropzone() {
+  const {
+    files,
+    errors,
+    handleDragEnter,
+    handleDragLeave,
+    handleDragOver,
+    handleDrop,
+    openFileDialog,
+    removeFile,
+    getInputProps,
+  } = useFileUpload({
+    accept: 'image/*,.pdf',
+    maxSize: 10 * 1024 * 1024, // 10MB
+    maxFiles: 5,
+  })
+
+  return (
+    <div>
+      <div
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      >
+        <input {...getInputProps()} className="sr-only" />
+        <button onClick={openFileDialog}>
+          Upload up to 5 files
+        </button>
+      </div>
+
+      {errors.length > 0 && (
+        <div className="text-red-500">
+          {errors.map((error, i) => (
+            <p key={i}>{error}</p>
+          ))}
+        </div>
+      )}
+
+      <div className="space-y-2">
+        {files.map((file) => (
+          <div key={file.id} className="flex items-center gap-2">
+            <span>{file.file.name}</span>
+            <button onClick={() => removeFile(file.id)}>Remove</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+```
+
+### With Upload Handler
+
+```tsx
+'use client'
+
+import { useFileUpload } from '@/hooks/use-file-upload'
+
+function DropzoneWithUpload() {
+  const handleUpload = async (file: File) => {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+      const data = await response.json()
+      console.log('Upload successful:', data)
+    } catch (error) {
+      console.error('Upload failed:', error)
+    }
+  }
+
+  const {
+    files,
+    handleDragEnter,
+    handleDragLeave,
+    handleDragOver,
+    handleDrop,
+    getInputProps,
+  } = useFileUpload({
+    accept: 'image/*',
+    maxSize: 5 * 1024 * 1024,
+    onUpload: handleUpload, // Called for each valid file
+  })
+
+  return (
+    <div
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+    >
+      <input {...getInputProps()} className="sr-only" />
+      <p>Drop to upload</p>
+    </div>
+  )
+}
+```
+
+## Validation
+
+The hook automatically validates files based on the provided options:
+
+### File Type Validation
+
+```tsx
+// Accept specific MIME types
+accept: 'image/png,image/jpeg,image/jpg'
+
+// Accept all images
+accept: 'image/*'
+
+// Accept multiple types
+accept: 'image/*,video/*,.pdf'
+```
+
+### File Size Validation
+
+```tsx
+// 2MB limit
+maxSize: 2 * 1024 * 1024
+
+// 10MB limit
+maxSize: 10 * 1024 * 1024
+```
+
+When validation fails, the `errors` array will contain user-friendly error messages:
+- `"File type not accepted. Allowed: image/png,image/jpeg"`
+- `"File too large. Max size: 2.0MB"`
+
+## Notes
+
+- Image files automatically generate preview URLs using `FileReader`
+- Preview URLs are base64-encoded data URLs
+- Files are stored in component state and do not persist between renders
+- The `onUpload` callback is optional and called after validation passes
+- Each file gets a unique ID for easy removal
+- Drag counter ensures proper `isDragging` state management
+- The hook is fully type-safe with TypeScript
+- Supports both single and multiple file uploads
+- The `useFileUpload` hook also powers simple file buttons - see the [File Button](/components/file-button) documentation for simple usage without drag & drop

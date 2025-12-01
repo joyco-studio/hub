@@ -75,9 +75,9 @@ function App() {
 }
 ```
 
-### useFileInput
+### useFileUpload
 
-For more control, you can use the `useFileInput` hook. This is particularly useful when you need to:
+For more control, you can use the `useFileUpload` hook directly. This is particularly useful when you need to:
 
 - Use a custom button component or element
 - Have more granular control over the file input behavior
@@ -85,38 +85,41 @@ For more control, you can use the `useFileInput` hook. This is particularly usef
 
 #### Parameters
 
-| Parameter    | Type                                          | Description                                               |
-| ------------ | --------------------------------------------- | --------------------------------------------------------- |
-| `onUpload`   | `(file: File) => Promise<any> \| void`        | Callback function called when a file is selected          |
-| `inputProps` | `React.InputHTMLAttributes<HTMLInputElement>` | Additional props to pass to the hidden file input element |
+| Parameter  | Type                                      | Description                                      |
+| ---------- | ----------------------------------------- | ------------------------------------------------ |
+| `accept`   | `string`                                  | Comma-separated list of accepted MIME types      |
+| `maxSize`  | `number`                                  | Maximum file size in bytes                       |
+| `maxFiles` | `number`                                  | Maximum number of files (default: 1)             |
+| `onUpload` | `(file: File) => Promise<any> \| void`    | Callback function called when a file is selected |
 
 #### Returns
 
-The `useFileInput` hook returns an object containing:
+The hook returns an object with:
 
-| Property      | Type              | Description                               |
-| ------------- | ----------------- | ----------------------------------------- |
-| `handleClick` | `() => void`      | Function to trigger the file input dialog |
-| `input`       | `React.ReactNode` | The hidden file input element to render   |
+| Property         | Type         | Description                                  |
+| ---------------- | ------------ | -------------------------------------------- |
+| `openFileDialog` | `() => void` | Function to trigger the file input dialog    |
+| `getInputProps`  | `() => {...}`| Returns props to spread on the input element |
+| `files`          | `FileWithPreview[]` | Array of uploaded files with previews |
+| `errors`         | `string[]`   | Array of validation error messages           |
+| ...and more (see [File Dropzone](/components/file-dropzone) for full API) |
 
 #### Hook Usage
 
 ```tsx
 function CustomUploadButton() {
-  const { handleClick, input } = useFileInput({
+  const { openFileDialog, getInputProps } = useFileUpload({
+    accept: '.pdf,.doc,.docx',
+    maxSize: 10 * 1024 * 1024, // 10MB
     onUpload: (file) => {
       console.log('File selected:', file)
-    },
-    inputProps: {
-      accept: '.pdf,.doc,.docx',
-      multiple: true,
     },
   })
 
   return (
     <div>
-      {input}
-      <button onClick={handleClick}>Choose Files</button>
+      <input {...getInputProps()} className="sr-only" />
+      <button onClick={openFileDialog}>Choose Files</button>
     </div>
   )
 }
@@ -128,3 +131,4 @@ function CustomUploadButton() {
 - The component uses a hidden file input element that is triggered programmatically
 - The file input is completely hidden using CSS (not just `display: none`) to ensure it doesn't interfere with layout
 - You can pass any valid HTML input attributes through `inputProps` (e.g., `accept`, `multiple`, `capture`)
+- The `useFileUpload` hook also powers advanced dropzones with drag & drop - see the [File Dropzone](/components/file-dropzone) documentation
