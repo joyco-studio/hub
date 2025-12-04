@@ -1,24 +1,21 @@
 'use client'
 
 import { FileDropzone } from '@/registry/joyco/blocks/file-dropzone'
-import { Card, CardContent } from '@/components/ui/card'
 
-export default function FileDropzoneDemo() {
+function FileForm() {
   const handleUpload = (file: File) => {
     console.log('File uploaded:', file.name, file.type)
   }
 
   return (
-    <Card className="not-prose">
-      <CardContent>
-        <FileDropzone
-          accept="application/pdf,image/*"
-          maxSizeMB={10}
-          maxFiles={20}
-          multiple={true}
-          onUpload={handleUpload}
-        />
-      </CardContent>
-    </Card>
+    <FileDropzone
+      accept="application/pdf,image/*"
+      maxSizeMB={10}
+      maxFiles={20}
+      multiple={true}
+      onUpload={handleUpload}
+    />
   )
 }
+
+export default FileForm
