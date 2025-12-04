@@ -79,7 +79,7 @@ export function WeeklyDownloads({ data }: { data: DownloadStats | null }) {
           <AreaChart
             accessibilityLayer
             data={chartData}
-            margin={{ top: 0, right: 0, bottom: 1, left: 0 }}
+            margin={{ top: 1, right: 0, bottom: 1, left: 0 }}
             onMouseMove={(state) => {
               if (state.activePayload?.[0]?.payload) {
                 setHoveredData(state.activePayload[0].payload)

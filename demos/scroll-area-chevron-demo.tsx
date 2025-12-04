@@ -1,19 +1,10 @@
 'use client'
 
-import * as ScrollArea from '@/registry/joyco/blocks/scroll-area'
-import { useState, useRef, useEffect } from 'react'
-import { Button } from '../components/ui/button'
-import {
-  Plus,
-  Minus,
-  Sparkles,
-  Star,
-  Zap,
-  Heart,
-  Music,
-  Palette,
-} from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import * as ScrollArea from '@/registry/joyco/blocks/scroll-area'
+import { ChevronDown, ChevronUp, Heart, Minus, Music, Palette, Plus, Sparkles, Star, Zap } from 'lucide-react'
+import { useEffect, useRef, useState } from "react"
 
 const items = [
   {
@@ -54,8 +45,8 @@ const items = [
   },
 ]
 
-function ScrollAreaDemo() {
-  const [itemCount, setItemCount] = useState<number>(4)
+function ChevronExample() {
+  const [itemCount, setItemCount] = useState<number>(6)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -70,12 +61,31 @@ function ScrollAreaDemo() {
   return (
     <>
       <ScrollArea.Root
-        className="h-96 px-4"
+        className="relative h-96"
         topShadowGradient="bg-linear-to-b from-card to-transparent"
         bottomShadowGradient="bg-linear-to-t from-card to-transparent"
       >
-        <ScrollArea.Content ref={scrollRef} className="space-y-4">
-          {Array.from({ length: itemCount }, (_, i) => {
+        {/* Scroll indicator arrows */}
+        <div
+          className={cn(
+            'pointer-events-none absolute top-2 left-1/2 z-30 -translate-x-1/2 transition-opacity duration-300',
+            'group-data-[scroll-top=true]/scroll-area:opacity-100',
+            'opacity-0',
+          )}
+        >
+          <ChevronUp className="text-muted-foreground h-5 w-5" />
+        </div>
+        <div
+          className={cn(
+            'pointer-events-none absolute bottom-2 left-1/2 z-30 -translate-x-1/2 transition-opacity duration-300',
+            'group-data-[scroll-bottom=true]/scroll-area:opacity-100',
+            'opacity-0',
+          )}
+        >
+          <ChevronDown className="text-muted-foreground h-5 w-5" />
+        </div>
+        <ScrollArea.Content ref={scrollRef} className="space-y-4 p-6">
+        {Array.from({ length: itemCount }, (_, i) => {
             const item = items[i % items.length]
             const Icon = item.icon
             return (
@@ -96,13 +106,12 @@ function ScrollAreaDemo() {
         </ScrollArea.Content>
       </ScrollArea.Root>
       <div className="mt-4 flex gap-3">
-        <Button className="flex-1" onClick={() => setItemCount(itemCount + 1)}>
+        <Button onClick={() => setItemCount(itemCount + 1)}>
           <Plus className="h-4 w-4" />
           Add Item
         </Button>
         <Button
           variant="secondary"
-          className="flex-1"
           onClick={() => setItemCount(Math.max(1, itemCount - 1))}
           disabled={itemCount <= 1}
         >
@@ -114,4 +123,4 @@ function ScrollAreaDemo() {
   )
 }
 
-export default ScrollAreaDemo
+export default ChevronExample
