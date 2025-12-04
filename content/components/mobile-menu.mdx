@@ -19,35 +19,25 @@ npx shadcn@latest add https://registry.joyco.studio/r/mobile-menu.json
 ## Usage
 
 ```tsx
-import {
-  MobileMenu,
-  MobileMenuTrigger,
-  MobileMenuContent,
-  MobileMenuHeader,
-  MobileMenuNav,
-  MobileMenuLink,
-  MobileMenuClose,
-} from '@/components/ui/mobile-menu'
+import * as MobileMenu from '@/registry/joyco/blocks/mobile-menu'
 import { Menu, X } from 'lucide-react'
 
 function App() {
   return (
-    <MobileMenu>
-      <MobileMenuTrigger>
-        <Menu className="h-6 w-6" />
-      </MobileMenuTrigger>
-      <MobileMenuContent>
-        <MobileMenuHeader>
-          <span>Menu</span>
-          <MobileMenuClose>
-            <X className="h-6 w-6" />
-          </MobileMenuClose>
-        </MobileMenuHeader>
-        <MobileMenuNav>
-          <MobileMenuLink href="/">Home</MobileMenuLink>
-          <MobileMenuLink href="/about">About</MobileMenuLink>
-        </MobileMenuNav>
-      </MobileMenuContent>
+    <MobileMenu.Root>
+      <MobileMenu.Trigger>
+        <Menu className="size-6" />
+      </MobileMenu.Trigger>
+      <MobileMenu.Content>
+        <MobileMenu.Navigation>
+          <MobileMenu.Item href="/">Home</MobileMenu.Item>
+          <MobileMenu.Item href="/about">About</MobileMenu.Item>
+        </MobileMenu.Navigation>
+
+        <MobileMenu.Footer>
+          JOYCO © 2025
+        </MobileMenu.Footer>
+      </MobileMenu.Content>
     </MobileMenu>
   )
 }

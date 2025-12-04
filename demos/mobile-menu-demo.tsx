@@ -1,12 +1,9 @@
 'use client'
 
-import { Card } from '@/components/ui/card'
-import { ResizableIframe } from '@/components/preview/resizable-iframe'
-
 import { Menu, X } from 'lucide-react'
 import * as MobileMenu from '@/registry/joyco/blocks/mobile-menu'
 
-export function DemoPage() {
+function Header() {
   return (
     <div className="bg-background text-foreground min-h-svh w-full font-sans">
       <header className="h-heading-height border-border bg-background sticky top-0 z-40 flex items-center justify-between border-b px-6">
@@ -54,4 +51,4 @@ export function DemoPage() {
   )
 }
 
-export default DemoPage
+export default Header

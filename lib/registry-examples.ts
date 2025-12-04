@@ -91,7 +91,8 @@ export async function getRegistryExampleComponentFile(name: string) {
 async function getFileContent(filePath: string) {
   const raw = await readFile(filePath, 'utf-8')
   let code = raw
-  code = code.replaceAll('export default', 'export')
+  // code = code.replaceAll('export default', 'export')
+  code = code.replaceAll('/* eslint-disable react/no-children-prop */\n', '')
 
   return code
 }

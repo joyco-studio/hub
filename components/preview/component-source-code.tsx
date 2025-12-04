@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { BundledLanguage, codeToHtml } from 'shiki'
+import { BundledLanguage } from 'shiki'
 import { getRegistryExampleComponentFile } from '@/lib/registry-examples'
 import { ComponentCode } from './component-code'
 import { highlightCode } from '@/lib/plugins'
@@ -31,10 +31,6 @@ export async function ComponentSource({
   if (!code) {
     return null
   }
-
-  // Replace export default with export.
-  code = code.replaceAll('export default', 'export')
-  code = code.replaceAll('/* eslint-disable react/no-children-prop */\n', '')
 
   const highlightedCode = await highlightCode(code, language)
 
