@@ -1,0 +1,37 @@
+---
+title: File Dropzone
+description: A drag-and-drop file upload component with image preview, validation, and error handling.
+maintainers: ['alejopequeno']
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+## Demo
+
+<ComponentPreview name="file-dropzone-demo" />
+
+## Installation
+
+```bash
+npx shadcn@latest add https://registry.joyco.studio/r/file-dropzone.json
+```
+
+## Usage
+
+```tsx
+import { FileDropzone } from '@/registry/joyco/blocks/file-dropzone'
+
+function App() {
+  const handleUpload = async (file: File) => {
+    console.log('Uploading:', file.name)
+  }
+
+  return (
+    <FileDropzone
+      accept="image/png,image/jpeg"
+      maxSizeMB={5}
+      onUpload={handleUpload}
+    />
+  )
+}
+```

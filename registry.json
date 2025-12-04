@@ -26,7 +26,9 @@
           "type": "registry:component"
         }
       ],
-      "dependencies": ["@joycostudio/marquee"]
+      "dependencies": [
+        "@joycostudio/marquee"
+      ]
     },
     {
       "name": "file-button",
@@ -37,9 +39,34 @@
         {
           "path": "registry/joyco/blocks/file-button.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "hooks/use-file-upload.tsx",
+          "type": "registry:hook"
         }
       ],
-      "registryDependencies": ["button"]
+      "registryDependencies": [
+        "button"
+      ]
+    },
+    {
+      "name": "file-dropzone",
+      "type": "registry:component",
+      "title": "File Dropzone",
+      "description": "A drag-and-drop file upload component with image preview, validation, and error handling.",
+      "files": [
+        {
+          "path": "registry/joyco/blocks/file-dropzone.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "hooks/use-file-upload.tsx",
+          "type": "registry:hook"
+        }
+      ],
+      "registryDependencies": [
+        "button"
+      ]
     },
     {
       "name": "mobile-menu",
@@ -69,7 +96,9 @@
           "type": "registry:component"
         }
       ],
-      "dependencies": ["@radix-ui/react-presence"]
+      "dependencies": [
+        "@radix-ui/react-presence"
+      ]
     }
   ]
 }
