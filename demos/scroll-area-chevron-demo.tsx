@@ -3,50 +3,56 @@
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import * as ScrollArea from '@/registry/joyco/blocks/scroll-area'
-import { ChevronDown, ChevronUp, Heart, Minus, Music, Palette, Plus, Sparkles, Star, Zap } from 'lucide-react'
-import { useEffect, useRef, useState } from "react"
+import {
+  Bell,
+  Calendar,
+  ChevronDown,
+  CreditCard,
+  ChevronUp,
+  Mail,
+  Plus,
+  MessageSquare,
+  UserPlus,
+  X,
+} from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 
-const items = [
+const notifications = [
   {
-    icon: Sparkles,
-    title: 'Sparkling Magic',
-    color: 'text-purple-500',
-    bg: 'bg-purple-500/10',
+    icon: MessageSquare,
+    title: 'New comment',
+    description: 'Sarah left a comment on your post',
   },
   {
-    icon: Star,
-    title: 'Stellar Design',
-    color: 'text-amber-500',
-    bg: 'bg-amber-500/10',
+    icon: UserPlus,
+    title: 'New follower',
+    description: 'Alex started following you',
   },
   {
-    icon: Zap,
-    title: 'Lightning Fast',
-    color: 'text-blue-500',
-    bg: 'bg-blue-500/10',
+    icon: CreditCard,
+    title: 'Payment received',
+    description: 'You received $250.00 from Client Co.',
   },
   {
-    icon: Heart,
-    title: 'Heartfelt Experience',
-    color: 'text-rose-500',
-    bg: 'bg-rose-500/10',
+    icon: Bell,
+    title: 'Reminder',
+    description: 'Team standup meeting in 30 minutes',
   },
   {
-    icon: Music,
-    title: 'Harmonious Flow',
-    color: 'text-indigo-500',
-    bg: 'bg-indigo-500/10',
+    icon: Mail,
+    title: 'New message',
+    description: 'Jordan sent you a direct message',
   },
   {
-    icon: Palette,
-    title: 'Creative Palette',
-    color: 'text-emerald-500',
-    bg: 'bg-emerald-500/10',
+    icon: Calendar,
+    title: 'Event tomorrow',
+    description: 'Product launch scheduled for 9:00 AM',
   },
 ]
 
 function ChevronExample() {
-  const [itemCount, setItemCount] = useState<number>(6)
+  const [items, setItems] = useState<number[]>([0, 1, 2, 3, 4, 5, 6, 7])
+  const nextIdRef = useRef(4)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -56,70 +62,77 @@ function ChevronExample() {
         behavior: 'smooth',
       })
     }
-  }, [itemCount])
+  }, [items.length])
+
+  const addNotification = () => {
+    setItems((prev) => [...prev, nextIdRef.current++])
+  }
+
+  const dismissNotification = (id: number) => {
+    setItems((prev) => prev.filter((item) => item !== id))
+  }
 
   return (
-    <>
-      <ScrollArea.Root
-        className="relative h-96"
+    <div className="w-full px-4 mx-auto max-w-md">
+       <ScrollArea.Root
+        className="h-[400px] w-full"
         topShadowGradient="bg-linear-to-b from-card to-transparent"
         bottomShadowGradient="bg-linear-to-t from-card to-transparent"
       >
         {/* Scroll indicator arrows */}
         <div
           className={cn(
-            'pointer-events-none absolute top-2 left-1/2 z-30 -translate-x-1/2 transition-opacity duration-300',
+            'bg-background p-0.5 rounded-full border border-border pointer-events-none absolute top-2 left-1/2 z-30 -translate-x-1/2 transition-opacity duration-300',
             'group-data-[scroll-top=true]/scroll-area:opacity-100',
-            'opacity-0',
+            'opacity-0'
           )}
         >
           <ChevronUp className="text-muted-foreground h-5 w-5" />
         </div>
         <div
           className={cn(
-            'pointer-events-none absolute bottom-2 left-1/2 z-30 -translate-x-1/2 transition-opacity duration-300',
+            'bg-background p-0.5 rounded-full border border-border pointer-events-none absolute bottom-2 left-1/2 z-30 -translate-x-1/2 transition-opacity duration-300',
             'group-data-[scroll-bottom=true]/scroll-area:opacity-100',
-            'opacity-0',
+            'opacity-0'
           )}
         >
           <ChevronDown className="text-muted-foreground h-5 w-5" />
         </div>
-        <ScrollArea.Content ref={scrollRef} className="space-y-4 p-6">
-        {Array.from({ length: itemCount }, (_, i) => {
-            const item = items[i % items.length]
-            const Icon = item.icon
+        <ScrollArea.Content ref={scrollRef} className="space-y-2">
+          {items.map((id) => {
+            const notification = notifications[id % notifications.length]
+            const Icon = notification.icon
             return (
-              <div key={i} className="bg-background rounded-lg border p-4">
-                <div className="mb-2 flex items-center gap-3">
-                  <div className={cn('rounded-lg p-2', item.bg)}>
-                    <Icon className={cn('h-5 w-5', item.color)} />
+              <div key={id} className="bg-background rounded-lg border p-3">
+                <div className="flex items-start gap-3">
+                  <div className={cn('bg-muted rounded-sm p-2')}>
+                    <Icon className={cn('text-muted-foreground h-5 w-5')} />
                   </div>
-                  <h3 className="font-semibold">{item.title}</h3>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-medium">{notification.title}</h3>
+                    <p className="text-muted-foreground mt-0.5 text-xs">
+                      {notification.description}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => dismissNotification(id)}
+                    className="text-muted-foreground hover:text-foreground -mt-1 -mr-1 rounded p-1 transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
                 </div>
-                <p className="text-muted-foreground text-sm">
-                  Scroll down to see the bottom shadow appear, and scroll back
-                  up to see the top shadow.
-                </p>
               </div>
             )
           })}
         </ScrollArea.Content>
       </ScrollArea.Root>
-      <div className="mt-4 flex gap-3">
-        <Button onClick={() => setItemCount(itemCount + 1)}>
+      <div className="mt-4 w-full">
+        <Button className="w-full" onClick={addNotification}>
           <Plus className="h-4 w-4" />
-          Add Item
-        </Button>
-        <Button
-          variant="secondary"
-          onClick={() => setItemCount(Math.max(1, itemCount - 1))}
-          disabled={itemCount <= 1}
-        >
-          <Minus className="h-4 w-4" />
-          Remove Item
+          Trigger Notification
         </Button>
       </div>
-    </>
+    </div>
   )
 }
 
