@@ -99,31 +99,40 @@ function ChevronExample() {
           <ChevronDown className="text-muted-foreground h-5 w-5" />
         </div>
         <ScrollArea.Content ref={scrollRef} className="space-y-2">
-          {items.map((id) => {
-            const notification = notifications[id % notifications.length]
-            const Icon = notification.icon
-            return (
-              <div key={id} className="bg-background rounded-lg border p-3">
-                <div className="flex items-start gap-3">
-                  <div className={cn('bg-muted rounded-sm p-2')}>
-                    <Icon className={cn('text-muted-foreground h-5 w-5')} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-medium">{notification.title}</h3>
-                    <p className="text-muted-foreground mt-0.5 text-xs">
-                      {notification.description}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => dismissNotification(id)}
-                    className="text-muted-foreground hover:text-foreground -mt-1 -mr-1 rounded p-1 transition-colors"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
+          {items.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-48 text-center">
+              <div className="rounded-full bg-muted p-3 mb-3">
+                <Bell className="h-6 w-6 text-muted-foreground" />
               </div>
-            )
-          })}
+              <p className="text-muted-foreground text-sm">No notifications</p>
+            </div>
+          ) : (
+            items.map((id, index) => {
+              const notification = notifications[id % notifications.length]
+              const Icon = notification.icon
+              return (
+                <div key={`${id}-${index}`} className="bg-background rounded-lg border p-3">
+                  <div className="flex items-start gap-3">
+                    <div className={cn('bg-muted rounded-sm p-2')}>
+                      <Icon className={cn('text-muted-foreground h-5 w-5')} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-medium">{notification.title}</h3>
+                      <p className="text-muted-foreground mt-0.5 text-xs">
+                        {notification.description}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => dismissNotification(id)}
+                      className="text-muted-foreground hover:text-foreground -mt-1 -mr-1 rounded p-1 transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              )
+            })
+          )}
         </ScrollArea.Content>
       </ScrollArea.Root>
       <div className="mt-4 w-full">

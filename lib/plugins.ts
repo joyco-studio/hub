@@ -1,4 +1,5 @@
-import type { ShikiTransformer } from 'shiki'
+import { codeToHtml, type ShikiTransformer } from 'shiki'
+import { cn } from './utils'
 
 export const transformers = [
   {
@@ -54,3 +55,28 @@ export const transformers = [
     },
   },
 ] as ShikiTransformer[]
+
+export async function highlightCode(code: string, language: string = "tsx") {
+  const html = await codeToHtml(code, {
+    lang: language,
+    themes: {
+      dark: 'github-dark',
+      light: 'github-light-default',
+    },
+    transformers: [
+      {
+        pre(node) {
+          node.properties["class"] = cn("not-fumadocs-codeblock", node.properties["class"]?.toString())
+        },
+        code(node) {
+          node.properties["data-line-numbers"] = ""
+        },
+        line(node) {
+          node.properties["data-line"] = ""
+        },
+      },
+    ],
+  })
+
+  return html
+}

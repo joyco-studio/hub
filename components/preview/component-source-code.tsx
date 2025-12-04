@@ -2,6 +2,7 @@ import * as React from 'react'
 import { BundledLanguage, codeToHtml } from 'shiki'
 import { getRegistryExampleComponentFile } from '@/lib/registry-examples'
 import { ComponentCode } from './component-code'
+import { highlightCode } from '@/lib/plugins'
 
 export async function ComponentSource({
   name,
@@ -35,13 +36,7 @@ export async function ComponentSource({
   code = code.replaceAll('export default', 'export')
   code = code.replaceAll('/* eslint-disable react/no-children-prop */\n', '')
 
-  const highlightedCode = await codeToHtml(code, {
-    lang: language,
-    themes: {
-      dark: 'github-dark',
-      light: 'github-light-default',
-    },
-  })
+  const highlightedCode = await highlightCode(code, language)
 
   return (
     <ComponentCode

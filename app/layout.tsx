@@ -1,4 +1,4 @@
-import './globals.css'
+import './styles/globals.css'
 import { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { RootProvider } from 'fumadocs-ui/provider/next'
