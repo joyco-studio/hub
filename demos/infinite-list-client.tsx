@@ -6,7 +6,7 @@ import {
   useInfiniteList,
 } from '@/registry/joyco/blocks/infinite-list'
 import { Button } from '@/components/ui/button'
-import { Card, CardFooter, CardHeader } from '@/components/ui/card'
+import { Card, CardFooter } from '@/components/ui/card'
 import Image from 'next/image'
 
 type Pokemon = { name: string; url: string; image: string }
@@ -45,7 +45,11 @@ export function PokemonInfiniteListClient({
   }
 
   return (
-    <div className="not-prose h-[500px] w-full overflow-auto">
+    <div className="not-prose relative h-[500px] w-full overflow-auto">
+      <div className="bg-background/90 border-border sticky top-4 right-8 z-10 ml-auto w-fit rounded-lg border px-3 py-2 font-mono text-xs">
+        DISPLAYED: {Math.min(list.displayLimit, pokemon.length)} | LOADED:{' '}
+        {pokemon.length}
+      </div>
       <div className="flex flex-col gap-6 p-6">
         <h2 className="text-2xl font-semibold">Pokemon Infinite List</h2>
         <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3">
