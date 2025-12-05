@@ -39,6 +39,7 @@ export async function ComponentSource({
       highlightedCode={highlightedCode}
       language={language}
       title={title}
+      rawCode={code}
     />
   )
 }

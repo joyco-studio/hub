@@ -4,6 +4,7 @@ import { CodeTabs } from '@/components/code-tabs'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { cn } from './lib/utils'
 import { CodeBlockCommand } from './components/code-block-cmd'
+import { CodeBlock } from './components/code-block'
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
@@ -97,13 +98,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
 
       // Default codeblock.
       return (
-        <code
-          className={cn(
-            'bg-card border-border rounded-lg border p-3.5',
-            className
-          )}
-          {...props}
-        />
+        <CodeBlock className={className} __raw__={props.__raw__} {...props} />
       )
     },
     ...components,

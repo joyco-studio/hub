@@ -262,12 +262,18 @@ export const Content = React.forwardRef<HTMLDivElement, ScrollAreaContentProps>(
         ? 'overflow-x-auto overflow-y-hidden'
         : 'overflow-y-auto h-full'
 
+    const paddingClasses =
+      orientation === 'horizontal'
+        ? 'pb-2' // Padding bottom para empujar el scrollbar horizontal hacia abajo
+        : 'pr-2' // Padding right para empujar el scrollbar vertical hacia afuera
+
     return (
       <div
         ref={combinedRef}
         className={cn(
           '[scrollbar-color:hsl(0_0%_50%)] [scrollbar-gutter:stable] [scrollbar-width:thin]',
           overflowClasses,
+          paddingClasses,
           className
         )}
         {...props}
