@@ -1,5 +1,7 @@
 'use client'
 
+import Image from 'next/image'
+
 import { useState, useTransition } from 'react'
 import {
   MaskedList,
@@ -7,7 +9,6 @@ import {
 } from '@/registry/joyco/blocks/infinite-list'
 import { Button } from '@/components/ui/button'
 import { Card, CardFooter } from '@/components/ui/card'
-import Image from 'next/image'
 
 type Pokemon = { name: string; url: string; image: string }
 
@@ -63,6 +64,7 @@ export function PokemonInfiniteListClient({
                     width={500}
                     height={500}
                     className="h-full w-full object-cover [image-rendering:pixelated]"
+                    unoptimized
                   />
                 </div>
                 <CardFooter className="p-4">

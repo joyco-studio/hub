@@ -3,8 +3,9 @@
 import * as React from 'react'
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { cn } from '@/lib/utils'
-import { GripVertical, Monitor, Tablet, Smartphone } from 'lucide-react'
+import { GripVertical, Tablet, Smartphone } from 'lucide-react'
 import { PatternOverlay } from './pattern-overlay'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 interface ResizableIframeProps {
   /** The URL for the iframe */
@@ -41,10 +42,10 @@ const DEFAULT_BREAKPOINTS = [
   { label: 'xl', minWidth: 1280 },
 ]
 
-type DevicePreset = 'desktop' | 'mobile'
+type DevicePreset = 'tablet' | 'mobile'
 
 const DEVICE_PRESETS: Record<DevicePreset, number> = {
-  desktop: 800,
+  tablet: 768,
   mobile: 375,
 }
 
@@ -64,11 +65,11 @@ export function ResizableIframe({
 }: ResizableIframeProps) {
   // Detect which device preset matches the current width
   const detectDeviceFromWidth = useCallback((w: number): DevicePreset => {
-    const desktopDiff = Math.abs(w - DEVICE_PRESETS.desktop)
+    const tabletDiff = Math.abs(w - DEVICE_PRESETS.tablet)
     const mobileDiff = Math.abs(w - DEVICE_PRESETS.mobile)
 
-    if (desktopDiff <= mobileDiff) {
-      return 'desktop'
+    if (tabletDiff <= mobileDiff) {
+      return 'tablet'
     } else {
       return 'mobile'
     }
@@ -76,7 +77,7 @@ export function ResizableIframe({
 
   // Initialize width - use desktop preset if defaultWidth is the default value
   const initialWidth =
-    defaultWidth === 400 ? DEVICE_PRESETS.desktop : defaultWidth
+    defaultWidth === 400 ? DEVICE_PRESETS.tablet : defaultWidth
   const [width, setWidth] = useState(initialWidth)
   const [isDragging, setIsDragging] = useState(false)
   const [selectedDevice, setSelectedDevice] = useState<DevicePreset>(() =>
@@ -185,33 +186,48 @@ export function ResizableIframe({
           </div>
         )}
         <div className="ml-auto flex items-center gap-1 px-2">
-          <button
-            onClick={() => handleDeviceSelect('desktop')}
-            className={cn(
-              'flex items-center justify-center rounded-md p-1.5 transition-colors',
-              'hover:bg-accent hover:text-accent-foreground',
-              selectedDevice === 'desktop'
-                ? 'bg-accent text-accent-foreground'
-                : 'text-muted-foreground'
-            )}
-            aria-label="Desktop view"
-          >
-            <Monitor className="size-4" />
-          </button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => handleDeviceSelect('mobile')}
+                className={cn(
+                  'flex items-center justify-center rounded-md p-1.5 transition-colors',
+                  'hover:bg-accent hover:text-accent-foreground',
+                  selectedDevice === 'mobile'
+                    ? 'bg-accent text-accent-foreground'
+                    : 'text-muted-foreground'
+                )}
+                aria-label="Mobile view"
+              >
+                <Smartphone className="size-4" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              Mobile View
+            </TooltipContent>
+          </Tooltip>
 
-          <button
-            onClick={() => handleDeviceSelect('mobile')}
-            className={cn(
-              'flex items-center justify-center rounded-md p-1.5 transition-colors',
-              'hover:bg-accent hover:text-accent-foreground',
-              selectedDevice === 'mobile'
-                ? 'bg-accent text-accent-foreground'
-                : 'text-muted-foreground'
-            )}
-            aria-label="Mobile view"
-          >
-            <Smartphone className="size-4" />
-          </button>
+          
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => handleDeviceSelect('tablet')}
+                className={cn(
+                  'flex items-center justify-center rounded-md p-1.5 transition-colors',
+                  'hover:bg-accent hover:text-accent-foreground',
+                  selectedDevice === 'tablet'
+                    ? 'bg-accent text-accent-foreground'
+                    : 'text-muted-foreground'
+                )}
+                aria-label="Tablet view"
+              >
+                <Tablet className="size-4" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              Tablet View
+            </TooltipContent>
+          </Tooltip>
         </div>
       </div>
       <div className={cn('relative flex flex-col', className)}>
