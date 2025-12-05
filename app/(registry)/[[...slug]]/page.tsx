@@ -35,6 +35,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
       toc={page.data.toc}
       full={page.data.full}
       tableOfContent={{
+        style: 'clerk',
         footer: (
           <div className='flex flex-col gap-4 py-2'>
             <Maintainers maintainers={page.data.maintainers} />
