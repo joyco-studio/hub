@@ -71,17 +71,17 @@ function ScrollAreaDemo() {
   }
 
   return (
-    <div className="w-full px-4 mx-auto max-w-md">
+    <div className="mx-auto w-full max-w-md p-10">
       <ScrollArea.Root
-        className="h-[400px] w-full"
+        className="h-100 w-full"
         topShadowGradient="bg-linear-to-b from-card to-transparent"
         bottomShadowGradient="bg-linear-to-t from-card to-transparent"
       >
-        <ScrollArea.Content ref={scrollRef} className="space-y-2">
+        <ScrollArea.Content ref={scrollRef} className="fancy-scroll space-y-2">
           {items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-48 text-center">
-              <div className="rounded-full bg-muted p-3 mb-3">
-                <Bell className="h-6 w-6 text-muted-foreground" />
+            <div className="flex h-48 flex-col items-center justify-center text-center">
+              <div className="bg-muted mb-3 rounded-full p-3">
+                <Bell className="text-muted-foreground h-6 w-6" />
               </div>
               <p className="text-muted-foreground text-sm">No notifications</p>
             </div>
@@ -90,10 +90,13 @@ function ScrollAreaDemo() {
               const notification = notifications[id % notifications.length]
               const Icon = notification.icon
               return (
-                <div key={`${id}-${index}`} className="bg-background rounded-lg border p-3">
+                <div
+                  key={`${id}-${index}`}
+                  className="bg-background rounded-lg border p-3"
+                >
                   <div className="flex items-start gap-3">
-                    <div className={cn('rounded-sm p-2 bg-muted')}>
-                      <Icon className={cn('h-5 w-5 text-muted-foreground')} />
+                    <div className={cn('bg-muted rounded-sm p-2')}>
+                      <Icon className={cn('text-muted-foreground h-5 w-5')} />
                     </div>
                     <div className="min-w-0 flex-1">
                       <h3 className="font-medium">{notification.title}</h3>
@@ -103,7 +106,7 @@ function ScrollAreaDemo() {
                     </div>
                     <button
                       onClick={() => dismissNotification(id)}
-                      className="text-muted-foreground hover:text-foreground -mr-1 -mt-1 rounded p-1 transition-colors"
+                      className="text-muted-foreground hover:text-foreground -mt-1 -mr-1 rounded p-1 transition-colors"
                     >
                       <X className="h-4 w-4" />
                     </button>

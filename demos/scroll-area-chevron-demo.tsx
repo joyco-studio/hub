@@ -73,8 +73,8 @@ function ChevronExample() {
   }
 
   return (
-    <div className="w-full px-4 mx-auto max-w-md">
-       <ScrollArea.Root
+    <div className="mx-auto w-full max-w-md p-10">
+      <ScrollArea.Root
         className="h-[400px] w-full"
         topShadowGradient="bg-linear-to-b from-card to-transparent"
         bottomShadowGradient="bg-linear-to-t from-card to-transparent"
@@ -82,7 +82,7 @@ function ChevronExample() {
         {/* Scroll indicator arrows */}
         <div
           className={cn(
-            'bg-background p-0.5 rounded-full border border-border pointer-events-none absolute top-2 left-1/2 z-30 -translate-x-1/2 transition-opacity duration-300',
+            'bg-background border-border pointer-events-none absolute top-2 left-1/2 z-30 -translate-x-1/2 rounded-full border p-0.5 transition-opacity duration-300',
             'group-data-[scroll-top=true]/scroll-area:opacity-100',
             'opacity-0'
           )}
@@ -91,7 +91,7 @@ function ChevronExample() {
         </div>
         <div
           className={cn(
-            'bg-background p-0.5 rounded-full border border-border pointer-events-none absolute bottom-2 left-1/2 z-30 -translate-x-1/2 transition-opacity duration-300',
+            'bg-background border-border pointer-events-none absolute bottom-2 left-1/2 z-30 -translate-x-1/2 rounded-full border p-0.5 transition-opacity duration-300',
             'group-data-[scroll-bottom=true]/scroll-area:opacity-100',
             'opacity-0'
           )}
@@ -100,9 +100,9 @@ function ChevronExample() {
         </div>
         <ScrollArea.Content ref={scrollRef} className="space-y-2">
           {items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-48 text-center">
-              <div className="rounded-full bg-muted p-3 mb-3">
-                <Bell className="h-6 w-6 text-muted-foreground" />
+            <div className="flex h-48 flex-col items-center justify-center text-center">
+              <div className="bg-muted mb-3 rounded-full p-3">
+                <Bell className="text-muted-foreground h-6 w-6" />
               </div>
               <p className="text-muted-foreground text-sm">No notifications</p>
             </div>
@@ -111,7 +111,10 @@ function ChevronExample() {
               const notification = notifications[id % notifications.length]
               const Icon = notification.icon
               return (
-                <div key={`${id}-${index}`} className="bg-background rounded-lg border p-3">
+                <div
+                  key={`${id}-${index}`}
+                  className="bg-background rounded-lg border p-3"
+                >
                   <div className="flex items-start gap-3">
                     <div className={cn('bg-muted rounded-sm p-2')}>
                       <Icon className={cn('text-muted-foreground h-5 w-5')} />

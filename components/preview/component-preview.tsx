@@ -2,12 +2,15 @@ import { getRegistryExampleComponent } from '@/lib/registry-examples'
 import { cn } from '@/lib/utils'
 import { ComponentSource } from './component-source-code'
 import { ResizableIframe } from './resizable-iframe'
+import { lazy, Suspense } from 'react'
 
 interface ComponentPreviewProps extends React.ComponentProps<'div'> {
   name: string
   defaultWidth?: number
   height?: number | string
   resizable?: boolean
+  // if provided, will use the code example from the given file
+  codeExampleName?: string
 }
 export function ComponentPreview({
   name,
@@ -15,6 +18,7 @@ export function ComponentPreview({
   defaultWidth = 375,
   height = 600,
   resizable = false,
+  codeExampleName,
   ...props
 }: ComponentPreviewProps) {
   const Component = getRegistryExampleComponent(name)
@@ -30,8 +34,6 @@ export function ComponentPreview({
       </p>
     )
   }
-
-  const heightStyle = typeof height === 'number' ? `${height}px` : height
 
   return (
     <div
@@ -54,18 +56,16 @@ export function ComponentPreview({
               height={height}
             />
           ) : (
-            <iframe
-              src={`/view/${name}`}
-              className="w-full border-0"
-              style={{
-                height: heightStyle,
-              }}
-              title={`Preview of ${name} component`}
-            />
+            <LazyComponent name={name} />
           )}
         </div>
       </div>
-      <ComponentSource name={name} language="tsx" />
+      <ComponentSource name={codeExampleName ?? name} language="tsx" />
     </div>
   )
+}
+
+const LazyComponent = ({ name }: { name: string }) => {
+  const Component = lazy(() => import(`@/demos/${name}`))
+  return <Component />
 }

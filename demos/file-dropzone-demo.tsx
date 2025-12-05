@@ -8,13 +8,15 @@ function FileForm() {
   }
 
   return (
-    <FileDropzone
-      accept="application/pdf,image/*"
-      maxSizeMB={10}
-      maxFiles={20}
-      multiple={true}
-      onUpload={handleUpload}
-    />
+    <div className="flex flex-col gap-4 p-10">
+      <FileDropzone
+        accept="application/pdf,image/*"
+        maxSizeMB={10}
+        maxFiles={20}
+        multiple={true}
+        onUpload={handleUpload}
+      />
+    </div>
   )
 }
 

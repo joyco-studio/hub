@@ -1,7 +1,5 @@
 'use client'
-import * as React from 'react'
-import { Button } from '../ui/button'
-import { ChevronDown } from 'lucide-react'
+
 import { cn } from '@/lib/utils'
 
 export function ComponentCode({
