@@ -1,7 +1,7 @@
 [
   { "name": "Desmos", "link": "https://www.desmos.com/calculator" },
   { "name": "Vercel", "link": "https://vercel.com" },
-  { "name": "Easings", "link": "https://easings.net/" },
+  { "name": "Easings", "link": "https://www.easing.dev/" },
   { "name": "Claude", "link": "https://claude.ai/new" },
   { "name": "Linear", "link": "linear.app" },
   { "name": "Youtube", "link": "youtube.com" },
@@ -16,5 +16,16 @@
   {
     "name": "Tailwind Config",
     "link": "https://tailwindcss.com/docs/theme#default-theme-variable-reference"
+  },
+  { "name": "Font Transformer", "link": "https://transfonter.org/" },
+  { "name": "Favicon Generator", "link": "https://realfavicongenerator.net/" },
+  { "name": "JSON Debugger", "link": "https://jsonhero.io/" },
+  {
+    "name": "HEX Opacity Table",
+    "link": "https://gist.github.com/lopspower/03fb1cc0ac9f32ef38f4"
+  },
+  {
+    "name": "Smooth Gradient Generator",
+    "link": "https://smooth-overlays.vercel.app/"
   }
 ]
