@@ -1,0 +1,20 @@
+[
+  { "name": "Desmos", "link": "https://www.desmos.com/calculator" },
+  { "name": "Vercel", "link": "https://vercel.com" },
+  { "name": "Easings", "link": "https://easings.net/" },
+  { "name": "Claude", "link": "https://claude.ai/new" },
+  { "name": "Linear", "link": "linear.app" },
+  { "name": "Youtube", "link": "youtube.com" },
+  { "name": "joyco.studio", "link": "joyco.studio" },
+  { "name": "Lightpicker", "link": "https://lightpicker.vercel.app/" },
+  { "name": "Twitter", "link": "https://x.com" },
+  { "name": "Shadcn", "link": "https://ui.shadcn.com/docs/components" },
+  {
+    "name": "Registry",
+    "link": "https://registry.joyco.studio/components/file-button"
+  },
+  {
+    "name": "Tailwind Config",
+    "link": "https://tailwindcss.com/docs/theme#default-theme-variable-reference"
+  }
+]

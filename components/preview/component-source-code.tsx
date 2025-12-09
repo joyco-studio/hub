@@ -1,16 +1,17 @@
 import * as React from 'react'
 import { BundledLanguage } from 'shiki'
 import { getRegistryExampleComponentFile } from '@/lib/registry-examples'
-import { ComponentCode } from './component-code'
-import { highlightCode } from '@/lib/plugins'
+import { CodeBlock } from '../code-block'
+import { highlightCode } from '@/lib/shiki'
 
 export async function ComponentSource({
   name,
   title,
   language = 'tsx',
+  maxHeight = 400,
 }: React.ComponentProps<'div'> & {
   name?: string
-
+  maxHeight?: number
   title?: string
   language: BundledLanguage
 }) {
@@ -19,9 +20,6 @@ export async function ComponentSource({
   }
 
   let code: string | undefined
-
-  // from the name we should remove all from <name><-demo...>.<file-extension>
-  // we should remove all from -demo
 
   if (name) {
     const files = await getRegistryExampleComponentFile(name)
@@ -35,11 +33,12 @@ export async function ComponentSource({
   const highlightedCode = await highlightCode(code, language)
 
   return (
-    <ComponentCode
+    <CodeBlock
       highlightedCode={highlightedCode}
       language={language}
       title={title}
       rawCode={code}
+      maxHeight={maxHeight}
     />
   )
 }

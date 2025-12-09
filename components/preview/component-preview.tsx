@@ -2,7 +2,7 @@ import { getRegistryExampleComponent } from '@/lib/registry-examples'
 import { cn } from '@/lib/utils'
 import { ComponentSource } from './component-source-code'
 import { ResizableIframe } from './resizable-iframe'
-import { lazy, Suspense } from 'react'
+import { lazy } from 'react'
 
 interface ComponentPreviewProps extends React.ComponentProps<'div'> {
   name: string
@@ -12,6 +12,7 @@ interface ComponentPreviewProps extends React.ComponentProps<'div'> {
   // if provided, will use the code example from the given file
   codeExampleName?: string
 }
+
 export function ComponentPreview({
   name,
   className,

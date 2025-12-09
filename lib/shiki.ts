@@ -1,5 +1,26 @@
-import { codeToHtml, type ShikiTransformer } from 'shiki'
+import { codeToHtml, type ShikiTransformer, BuiltinLanguage } from 'shiki'
 import { cn } from './utils'
+
+export const LANGUAGE_MAP: Record<string, BuiltinLanguage> = {
+  json: 'json',
+  js: 'javascript',
+  ts: 'typescript',
+  tsx: 'tsx',
+  jsx: 'jsx',
+  md: 'markdown',
+  mdx: 'mdx',
+  css: 'css',
+  html: 'html',
+  yml: 'yaml',
+  yaml: 'yaml',
+  sh: 'bash',
+  bash: 'bash',
+  py: 'python',
+}
+
+export function getLanguageFromExtension(ext: string): string {
+  return LANGUAGE_MAP[ext] || ext || 'text'
+}
 
 export const transformers = [
   {
@@ -56,6 +77,10 @@ export const transformers = [
   },
 ] as ShikiTransformer[]
 
+export const codeClasses = {
+  pre: "not-fumadocs-codeblock group/code relative w-full overflow-auto p-3 has-[[data-slot='command-block']]:p-0 has-[[data-line-numbers]]:px-0"
+}
+
 export async function highlightCode(code: string, language: string = "tsx") {
   const html = await codeToHtml(code, {
     lang: language,
@@ -66,7 +91,7 @@ export async function highlightCode(code: string, language: string = "tsx") {
     transformers: [
       {
         pre(node) {
-          node.properties["class"] = cn("not-fumadocs-codeblock", node.properties["class"]?.toString())
+          node.properties["class"] = cn(codeClasses.pre, node.properties["class"]?.toString())
         },
         code(node) {
           node.properties["data-line-numbers"] = ""

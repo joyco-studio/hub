@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'github.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'qfxa88yauvyse9vr.public.blob.vercel-storage.com',
+      }
     ],
   },
 }

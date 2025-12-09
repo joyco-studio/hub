@@ -1,11 +1,10 @@
 'use client'
 
 import * as React from 'react'
-import { Button } from '@/components/ui/button'
 
+import { CopyButton } from '@/components/copy-button'
 import { useConfig } from '@/hooks/use-config'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Check, Copy } from 'lucide-react'
 
 export function CodeBlockCommand({
   __npm__,
@@ -19,14 +18,6 @@ export function CodeBlockCommand({
   __bun__?: string
 }) {
   const [config, setConfig] = useConfig()
-  const [hasCopied, setHasCopied] = React.useState(false)
-
-  React.useEffect(() => {
-    if (hasCopied) {
-      const timer = setTimeout(() => setHasCopied(false), 2000)
-      return () => clearTimeout(timer)
-    }
-  }, [hasCopied])
 
   const packageManager = config.packageManager || 'pnpm'
   const tabs = React.useMemo(() => {
@@ -38,19 +29,10 @@ export function CodeBlockCommand({
     }
   }, [__npm__, __pnpm__, __yarn__, __bun__])
 
-  const copyCommand = React.useCallback(() => {
-    const command = tabs[packageManager]
-
-    if (!command) {
-      return
-    }
-
-    navigator.clipboard.writeText(command)
-    setHasCopied(true)
-  }, [packageManager, tabs])
+  const command = tabs[packageManager]
 
   return (
-    <div className="not-prose bg-card border-border overflow-x-auto rounded-lg border">
+    <div data-slot="command-block" className="not-prose bg-card overflow-x-auto rounded-lg">
       <Tabs
         value={packageManager}
         className="gap-0"
@@ -61,8 +43,8 @@ export function CodeBlockCommand({
           })
         }}
       >
-        <div className="border-border flex items-center gap-2 border-b px-3 py-1">
-          <TabsList className="rounded-none bg-transparent p-0">
+        <div className="border-border flex items-center gap-2 border-b px-3 py-2">
+          <TabsList className="rounded-none bg-transparent p-0 h-auto">
             {Object.entries(tabs).map(([key]) => {
               return (
                 <TabsTrigger
@@ -93,19 +75,13 @@ export function CodeBlockCommand({
           })}
         </div>
       </Tabs>
-      <Button
-        data-slot="copy-button"
-        size="icon"
-        variant="ghost"
-        className="absolute top-2 right-2 z-10 size-7 opacity-70 hover:opacity-100 focus-visible:opacity-100"
-        onClick={copyCommand}
-      >
-        {hasCopied ? (
-          <Check className="h-4 w-4" />
-        ) : (
-          <Copy className="h-4 w-4" />
-        )}
-      </Button>
+      {command && (
+        <CopyButton
+          value={command}
+          className="top-2"
+          forceVisible
+        />
+      )}
     </div>
   )
 }

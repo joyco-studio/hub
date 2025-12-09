@@ -73,7 +73,7 @@
   --code: var(--card);
   --code-foreground: var(--card-foreground);
   --code-highlight: oklch(0.96 0 0);
-  --code-number: oklch(0.56 0 0);
+  --code-number: oklch(0.56 0 0 / 0.5);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -109,9 +109,9 @@
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
   --code: var(--card);
-  --code-foreground: var(--surface-foreground);
+  --code-foreground: var(--card-foreground);
   --code-highlight: oklch(0.27 0 0);
-  --code-number: oklch(0.72 0 0);
+  --code-number: oklch(0.72 0 0 / 0.5);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
