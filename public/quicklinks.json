@@ -7,6 +7,7 @@
   { "name": "ChatGPT", "link": "https://chatgpt.com/" },
   { "name": "Linear", "link": "linear.app" },
   { "name": "Shadcn", "link": "https://ui.shadcn.com/docs/components" },
+  { "name": "Dice UI", "link": "https://www.diceui.com/docs/introduction" },
   {
     "name": "Registry",
     "link": "https://registry.joyco.studio/components/file-button"
