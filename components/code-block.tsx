@@ -20,24 +20,22 @@ export function CodeBlock({
     <figure
       data-rehype-pretty-code-figure=""
       className="not-prose group/code"
+      data-slot="code-block"
     >
       {title && (
-        <figcaption
-          data-rehype-pretty-code-title=""
-          data-language={language}
-        >
+        <figcaption data-rehype-pretty-code-title="" data-language={language}>
           <span>{title}</span>
         </figcaption>
       )}
       {rawCode && <CopyButton forceVisible={!!title} value={rawCode} />}
 
       <div
-        style={{
-          '--pre-max-height': maxHeight ? `${maxHeight}px` : 'unset',
-        } as React.CSSProperties}
-        className={cn(
-          '[&>pre]:max-h-(--pre-max-height)'
-        )}
+        style={
+          {
+            '--pre-max-height': maxHeight ? `${maxHeight}px` : 'unset',
+          } as React.CSSProperties
+        }
+        className={cn('[&>pre]:max-h-(--pre-max-height)')}
         dangerouslySetInnerHTML={{ __html: highlightedCode }}
       />
     </figure>
