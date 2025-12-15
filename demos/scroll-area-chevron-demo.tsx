@@ -54,14 +54,17 @@ function ChevronExample() {
   const [items, setItems] = useState<number[]>([0, 1, 2, 3, 4, 5, 6, 7])
   const nextIdRef = useRef(4)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const prevLengthRef = useRef(items.length)
 
   useEffect(() => {
-    if (scrollRef.current) {
+    // Only scroll when items are added (length increases)
+    if (items.length > prevLengthRef.current && scrollRef.current) {
       scrollRef.current.scrollTo({
         top: scrollRef.current.scrollHeight,
         behavior: 'smooth',
       })
     }
+    prevLengthRef.current = items.length
   }, [items.length])
 
   const addNotification = () => {
