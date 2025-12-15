@@ -1,0 +1,192 @@
+---
+title: 01 - The Slot Approach
+maintainers: ['matiasperz']
+---
+
+What happens when you have a component that renders multiple children, and you want to expose a way to style those to the parent component? Let’s take this `CardLink` component as example:
+
+```tsx
+export function CardLink({
+  href,
+  title,
+  description,
+  className,
+}: {
+  href: string
+  title: React.ReactNode
+  description: React.ReactNode
+  className?: string
+}) {
+  return (
+    <Card
+      className={cn("hover:bg-accent/50", className)}
+      asChild
+    >
+      <Link href={href}>
+        <div>
+          {title}
+          <ArrowRightIcon />
+        </div>
+        <p>{description}</p>
+      </Link>
+    </Card>
+  )
+}
+```
+
+You’d probably expose a `titleClassName` and `descriptionClassName`, in addition to the existing `className` right?
+
+```diff
+  export function CardLink({
+    href,
+    title,
+    description,
+    className,
+++  titleClassName,
+++  descriptionClassName
+  }: {
+    href: string
+    title: React.ReactNode
+    description: React.ReactNode
+    className?: string
+++  titleClassName?: string
+++  descriptionClassName?: string
+  }) {
+    return (
+      <Card
+        className={cn("hover:bg-accent/50", className)}
+        asChild
+      >
+        <Link href={href}>
+++	      <div className={titleClassName}>
+            {title}
+            <ArrowRightIcon />
+          </div>
+++        <p className={descriptionClassName}>{description}</p>
+        </Link>
+      </Card>
+    )
+  }
+```
+
+This has been the classic and most straight forward way of doing it, you can find this in almost every codebase. This is not wrong at all, and it’s good for 1 or 2 extra `classNames` but it’s not clean and makes props grow making interaction with your components messier. There’s a cleaner, css-first approach I’d like to show you
+
+## The data-slot approach
+
+You are not in charge of exposing and connecting props to your elements manually no more. You just name your inner elements with a `data-slot=[name]` which makes them queryable from it’s parent.
+
+```diff
+  export function CardLink({
+    href,
+    title,
+    description,
+    className,
+--  titleClassName,
+--  descriptionClassName
+  }: {
+    href: string
+    title: React.ReactNode
+    description: React.ReactNode
+    className?: string
+--  titleClassName?: string
+--  descriptionClassName?: string
+  }) {
+    return (
+      <Card
+        className={cn("hover:bg-accent/50", className)}
+        asChild
+      >
+        <Link href={href}>
+--	      <div className={titleClassName}>
+++	      <div data-slot="card-title">
+            {title}
+            <ArrowRightIcon />
+          </div>
+--        <p className={descriptionClassName}>{description}</p>
+++        <p data-slot="card-description">{description}</p>
+        </Link>
+      </Card>
+    )
+  }
+```
+
+As long as your root element has a `className` tied to it, you’ll be able to target the inner slots with the `**:data-[]` css selector. Let’s set the `card-description` opacity to **50%**:
+
+```jsx
+<CardLink className="**:data-[slot=card-description]:opacity-50" />
+```
+
+This means “target all the `card-description` slots inside this `<CardLink />` scope”
+
+```jsx
+& [data-slot="card-description"] {
+  opacity: 50%;
+}
+```
+
+## Plays nice with composability
+
+If you paid attention you had noticed I didn’t used the shadcn’s `<CardTitle />` and `<CardDescription />`, this is because those components already have it’s `data-slot=[name]`.
+
+```jsx
+function CardTitle({ className, ...props }: React.ComponentProps<'div'>) {
+  return (
+    <div
+      data-slot="card-title"
+      className={cn('leading-none font-semibold', className)}
+      {...props}
+    />
+  )
+}
+
+function CardDescription({ className, ...props }: React.ComponentProps<'div'>) {
+  return (
+    <div
+      data-slot="card-description"
+      className={cn('text-muted-foreground text-sm', className)}
+      {...props}
+    />
+  )
+}
+
+```
+
+This is cool because it means that if you use your existing UI blocks to create new ones (like our `CardLink`) these data-names will be inherited. So our final component would end up much compact with no feature loss:
+
+```jsx
+export function CardLink({
+  href,
+  title,
+  description,
+  className,
+}: {
+  href: string
+  title: React.ReactNode
+  description: React.ReactNode
+  className?: string
+}) {
+  return (
+    <Card
+      className={cn(
+        'hover:bg-accent/50',
+        className
+      )}
+      asChild
+    >
+      <Link href={href}>
+        <CardHeader>
+          <CardTitle>
+            {title}
+            <ArrowRightIcon />
+          </CardTitle>
+          <CardDescription>{description}</CardDescription>
+        </CardHeader>
+      </Link>
+    </Card>
+  )
+}
+```
+
+```jsx
+<CardLink className="**:data-[slot=card-description]:opacity-50" />
+```
