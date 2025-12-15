@@ -41,6 +41,7 @@ export function ComponentPreview({
       className={cn(
         'group not-prose border-border relative overflow-clip rounded-lg border',
         '*:data-[slot="code-block"]:mt-0 *:data-[slot="code-block"]:rounded-none',
+        '**:data-[slot="copy-button"]:right-6',
         className
       )}
       {...props}
