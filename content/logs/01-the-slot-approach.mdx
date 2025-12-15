@@ -4,7 +4,7 @@ title: 01 - The Slot Approach
 
 What happens when you have a component that renders multiple children, and you want to expose a way to style those to the parent component? Let’s take this `CardLink` component as example:
 
-```tsx
+```tsx showLineNumbers
 export function CardLink({
   href,
   title,
@@ -35,7 +35,7 @@ export function CardLink({
 
 You’d probably expose a `titleClassName` and `descriptionClassName`, in addition to the existing `className` right?
 
-```diff
+```diff showLineNumbers
   export function CardLink({
     href,
     title,
@@ -74,7 +74,7 @@ This has been the classic and most straight forward way of doing it, you can fin
 
 You are not in charge of exposing and connecting props to your elements manually no more. You just name your inner elements with a `data-slot=[name]` which makes them queryable from it’s parent.
 
-```diff
+```diff showLineNumbers
   export function CardLink({
     href,
     title,
@@ -111,13 +111,13 @@ You are not in charge of exposing and connecting props to your elements manually
 
 As long as your root element has a `className` tied to it, you’ll be able to target the inner slots with the `**:data-[]` css selector. Let’s set the `card-description` opacity to **50%**:
 
-```jsx
+```jsx showLineNumbers
 <CardLink className="**:data-[slot=card-description]:opacity-50" />
 ```
 
 This means “target all the `card-description` slots inside this `<CardLink />` scope”
 
-```jsx
+```css showLineNumbers
 & [data-slot="card-description"] {
   opacity: 50%;
 }
@@ -127,7 +127,7 @@ This means “target all the `card-description` slots inside this `<CardLink />`
 
 If you paid attention you had noticed I didn’t used the shadcn’s `<CardTitle />` and `<CardDescription />`, this is because those components already have it’s `data-slot=[name]`.
 
-```jsx
+```jsx showLineNumbers
 function CardTitle({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -152,7 +152,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<'div'>) {
 
 This is cool because it means that if you use your existing UI blocks to create new ones (like our `CardLink`) these data-names will be inherited. So our final component would end up much compact with no feature loss:
 
-```jsx
+```jsx showLineNumbers
 export function CardLink({
   href,
   title,
