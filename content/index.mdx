@@ -1,15 +1,21 @@
 ---
 title: Welcome, Rebel
-description: A registry of components for just for Rebels.
+description: The JOYCO Registry is a public knowledge hub the team uses to share knowledge and resources. It contains a collection of components, tools and resources that are used internally.
 ---
+import { ArrowRightIcon } from 'lucide-react'
+import { CardLinkGrid, CardLink } from '@/components/card-link'
 
-Welcome to the JOYCO's shadcn registry.
+## Quick Links
+You can find two main categories of content in the registry:
 
-## What is Next?
+<CardLinkGrid>
+  <CardLink href="/components" title={<>Components <ArrowRightIcon className='group-hover/card-title:translate-x-1 transition-transform' /></>} description="Shadcn UI components and hooks." />
+  <CardLink href="/toolbox" title={<>Toolbox <ArrowRightIcon className='group-hover/card-title:translate-x-1 transition-transform' /></>} description="Scripts, tools and resources." />
+</CardLinkGrid>
 
-Add this registry to your project.
-
-```json
+## Add this registry to your project
+Paste this into your `components.json` file to pull components like `@joyco/{component}.json`.
+```json title="components.json"
 "registries": {
   "@joyco": "https://registry.joyco.studio/r/{name}.json"
 }

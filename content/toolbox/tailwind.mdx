@@ -1,0 +1,13 @@
+---
+title: Tailwind
+description: A collection of Tailwind CSS classes and utilities.
+maintainers: ['matiasperz']
+---
+
+## Hover + focus variant
+
+We call this the `hocus` variant. It's a custom variant that combines the `hover` and `focus-visible` variants. Use this to style elements that should be styled when hovered or focused.
+
+```css title="globals.css"
+@custom-variant hocus (&:is(:hover, :focus-visible));
+```
