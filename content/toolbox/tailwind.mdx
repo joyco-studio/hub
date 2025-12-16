@@ -11,3 +11,17 @@ We call this `hocus`, it combines the `hover` and `focus-visible` variants. Use 
 ```css title="globals.css"
 @custom-variant hocus (&:is(:hover, :focus-visible));
 ```
+
+## Set line-height per font size
+Configure the line-height for each font size.
+
+```css title="globals.css"
+@theme {
+  --text-tiny: 0.625rem;
+  --text-tiny--line-height: 1.5rem; 
+  --text-tiny--letter-spacing: 0.125rem; 
+  --text-tiny--font-weight: 500; 
+}
+```
+
+> Docs: [font-size docs](https://tailwindcss.com/docs/font-size#customizing-your-theme)
