@@ -185,7 +185,7 @@ export function ChatViewport({
     <div
       ref={viewportRef}
       className={cn(
-        'bg-muted/40 border-border flex overflow-y-auto rounded-xl border px-4',
+        'bg-muted/40 border-border flex flex-col overflow-y-auto rounded-xl border px-4',
         className
       )}
       {...props}

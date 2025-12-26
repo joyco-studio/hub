@@ -145,7 +145,7 @@ export function ChatDemo() {
                   <ChatMessageRow key={message.id} variant={message.role}>
                     <ChatMessageAvatar
                       src={message.avatar}
-                      fallback={message.name?.charAt(0)}
+                      fallback={message.fallback}
                       alt={message.name}
                     />
                     <ChatMessageBubble>{message.content}</ChatMessageBubble>
