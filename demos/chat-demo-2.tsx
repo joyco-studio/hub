@@ -67,25 +67,12 @@ export function ChatDemo() {
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-6">
         <ChatViewport className="h-96">
           <ChatMessages className="w-full py-3">
-            {chat.map((message) => {
-              if (message.type === 'message') {
-                return (
-                  <ChatMessageRow key={message.id} variant={message.role}>
-                    <ChatMessageBubble>{message.content}</ChatMessageBubble>
-                    <ChatMessageTime dateTime={message.timestamp} />
-                  </ChatMessageRow>
-                )
-              }
-
-              return (
-                <div
-                  className="text-muted-foreground my-6 text-center text-sm"
-                  key={message.id}
-                >
-                  {message.content}
-                </div>
-              )
-            })}
+            {chat.map((message) => (
+              <ChatMessageRow key={message.id} variant={message.role}>
+                <ChatMessageBubble>{message.content}</ChatMessageBubble>
+                <ChatMessageTime dateTime={message.timestamp} />
+              </ChatMessageRow>
+            ))}
           </ChatMessages>
         </ChatViewport>
 
