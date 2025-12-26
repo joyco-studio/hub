@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { ArrowUpIcon } from 'lucide-react'
+import { ArrowUpIcon, Loader2Icon } from 'lucide-react'
 import debounce from 'debounce'
 import useMeasure from 'react-use-measure'
 
@@ -459,8 +459,10 @@ export function ChatInputField({
 
 export function ChatInputSubmit({
   className,
+  loading,
+  disabled,
   ...props
-}: React.ComponentProps<typeof InputGroupButton>) {
+}: React.ComponentProps<typeof InputGroupButton> & { loading?: boolean }) {
   return (
     <InputGroupAddon align="inline-end" className={className}>
       <InputGroupButton
@@ -468,9 +470,10 @@ export function ChatInputSubmit({
         type="submit"
         className="rounded-full"
         size="icon-sm"
+        disabled={disabled || loading}
         {...props}
       >
-        <ArrowUpIcon />
+        {loading ? <Loader2Icon className="animate-spin" /> : <ArrowUpIcon />}
         <span className="sr-only">Send</span>
       </InputGroupButton>
     </InputGroupAddon>

@@ -94,9 +94,11 @@ export function ChatDemo() {
     []
   )
 
-  const stream = useStreamToken(updateMessageContent)
+  const { stream, isStreaming } = useStreamToken(updateMessageContent)
 
   const handleSubmit = (msg: string) => {
+    if (isStreaming) return
+
     const userMessage: Message = {
       type: 'message',
       id: Date.now().toString(),
@@ -115,24 +117,21 @@ export function ChatDemo() {
     const assistantId = (Date.now() + 1).toString()
     const assistantTimestamp = new Date()
 
-    setTimeout(() => {
-      // Add empty message first
-      setChat((prev) => [
-        ...prev,
-        {
-          type: 'message',
-          id: assistantId,
-          avatar: JOYCO_AVATAR,
-          name: 'Assistant',
-          content: '',
-          fallback: 'A',
-          role: 'system',
-          timestamp: assistantTimestamp,
-        },
-      ])
+    setChat((prev) => [
+      ...prev,
+      {
+        type: 'message',
+        id: assistantId,
+        avatar: JOYCO_AVATAR,
+        name: 'Assistant',
+        content: '',
+        fallback: 'A',
+        role: 'system',
+        timestamp: assistantTimestamp,
+      },
+    ])
 
-      stream(assistantId, responseText)
-    }, 500)
+    stream(assistantId, responseText)
   }
 
   return (
@@ -178,7 +177,7 @@ export function ChatDemo() {
               setInput(e.target.value)
             }
           />
-          <ChatInputSubmit disabled={!input.trim()} />
+          <ChatInputSubmit disabled={!input.trim()} loading={isStreaming} />
         </ChatInputArea>
       </div>
     </Chat>
@@ -191,14 +190,19 @@ function useStreamToken(
 ) {
   const { minDelay = 30, maxDelay = 80 } = options ?? {}
   const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [isStreaming, setIsStreaming] = React.useState(false)
 
   const stream = React.useCallback(
     (id: string, text: string) => {
       const tokens = text.split(/(\s+)/).filter(Boolean)
       let tokenIndex = 0
+      setIsStreaming(true)
 
       const streamToken = () => {
-        if (tokenIndex >= tokens.length) return
+        if (tokenIndex >= tokens.length) {
+          setIsStreaming(false)
+          return
+        }
 
         tokenIndex++
         const currentContent = tokens.slice(0, tokenIndex).join('')
@@ -221,7 +225,7 @@ function useStreamToken(
     }
   }, [])
 
-  return stream
+  return { stream, isStreaming }
 }
 
 export default ChatDemo
