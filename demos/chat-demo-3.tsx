@@ -25,22 +25,22 @@ const initialChat: Message[] = [
   {
     type: 'message',
     id: '1',
-    content: 'There are no avatars in this chat.',
-    role: 'self',
+    content: 'Buy $JOYCO',
+    role: 'peer',
     timestamp: new Date(Date.now() - 1000 * 60 * 4),
   },
   {
     type: 'message',
     id: '2',
-    content: 'So no one knows am I?',
-    role: 'peer',
+    content: 'Wym?',
+    role: 'self',
     timestamp: new Date(Date.now() - 1000 * 60 * 3),
   },
   {
     type: 'message',
     id: '3',
-    content: 'Please behave',
-    role: 'self',
+    content: 'Thank me later',
+    role: 'peer',
     timestamp: new Date(Date.now() - 1000 * 60 * 5),
   },
 ]
@@ -94,7 +94,7 @@ export function ChatDemo() {
             <ChatInputArea className="dark:bg-card rounded-lg">
               <ChatInputField
                 multiline
-                placeholder="Type... or not"
+                placeholder="Joyco says..."
                 value={input}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                   setInput(e.target.value)
