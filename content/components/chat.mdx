@@ -1,0 +1,119 @@
+---
+title: Chat Input
+description: A composable chat input component with multiline support.
+maintainers: ['matiasperz']
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+## Demo
+
+<ComponentPreview name="chat-demo" />
+
+## Installation
+
+```bash
+npx shadcn@latest add https://registry.joyco.studio/r/chat.json
+```
+
+## Usage
+
+```tsx showLineNumbers
+import {
+  ChatInputArea,
+  ChatInputField,
+  ChatInputSubmit,
+  ChatViewport,
+  ChatMessages,
+  ChatMessage,
+  ChatMessageBubble,
+  ChatMessageTime,
+} from '@joyco/chat'
+
+function App() {
+  const [messages, setMessages] = useState<Message[]>([])
+  const [input, setInput] = useState('')
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault()
+    // Handle sending message...
+  }
+
+  return (
+    <div>
+      <ChatViewport className="h-96">
+        <ChatMessages>
+          {messages.map((message) => (
+            <ChatMessage key={message.id} variant={message.role}>
+              <ChatMessageBubble variant={message.role}>
+                {message.content}
+              </ChatMessageBubble>
+              <ChatMessageTime dateTime={message.timestamp.toISOString()}>
+                {message.timestamp.toLocaleTimeString()}
+              </ChatMessageTime>
+            </ChatMessage>
+          ))}
+        </ChatMessages>
+      </ChatViewport>
+
+      <form onSubmit={handleSubmit}>
+        <ChatInputArea>
+          <ChatInputField
+            multiline
+            placeholder="Type a message..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+          />
+          <ChatInputSubmit />
+        </ChatInputArea>
+      </form>
+    </div>
+  )
+}
+```
+
+## Components
+
+### ChatViewport
+
+A scrollable container for the chat messages area with styled border and background.
+
+### ChatMessages
+
+A container for chat messages with proper sizing.
+
+### ChatMessage
+
+Wrapper component that handles message alignment based on variant.
+
+| Prop      | Type                                     | Default  | Description                          |
+| --------- | ---------------------------------------- | -------- | ------------------------------------ |
+| `variant` | `"self"` \| `"peer"` \| `"system"`       | `"self"` | Aligns message to the right or left. |
+
+### ChatMessageBubble
+
+The styled message bubble component.
+
+| Prop      | Type                                     | Default  | Description                                        |
+| --------- | ---------------------------------------- | -------- | -------------------------------------------------- |
+| `variant` | `"self"` \| `"peer"` \| `"system"`       | `"self"` | Applies self (primary) or peer/system (muted) styles. |
+
+### ChatMessageTime
+
+A semantic `<time>` element for displaying message timestamps.
+
+### ChatInputArea
+
+The container component that wraps the input field and submit button. It extends the `InputGroup` component with chat-specific styling.
+
+### ChatInputField
+
+The text input field. Supports both single-line and multiline modes.
+
+| Prop        | Type      | Default | Description                                                                                           |
+| ----------- | --------- | ------- | ----------------------------------------------------------------------------------------------------- |
+| `multiline` | `boolean` | `false` | When `true`, renders a textarea that expands with content. When `false`, renders a single-line input. |
+
+### ChatInputSubmit
+
+The submit button with an arrow icon. Positioned at the end of the input area.
