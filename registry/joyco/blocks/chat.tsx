@@ -292,7 +292,7 @@ export function ChatMessageBubble({
   return (
     <div
       className={cn(
-        'w-fit max-w-56 min-w-0 rounded-2xl text-sm wrap-break-word whitespace-pre-wrap [grid-area:message] group-not-data-[variant=system]/message-row:px-4 group-not-data-[variant=system]/message-row:py-2',
+        'w-fit max-w-96 min-w-0 rounded-2xl text-sm wrap-break-word whitespace-pre-wrap [grid-area:message] group-not-data-[variant=system]/message-row:px-4 group-not-data-[variant=system]/message-row:py-2',
         /* Self */
         'group-data-[variant=self]/message-row:bg-primary group-data-[variant=self]/message-row:text-primary-foreground',
         /* Peer */

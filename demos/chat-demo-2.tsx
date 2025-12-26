@@ -64,14 +64,12 @@ export function ChatDemo() {
 
   return (
     <Chat onSubmit={handleSubmit}>
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-6">
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-6 [--primary:var(--color-mint-green)] [--ring:var(--color-mint-green)]">
         <ChatViewport className="h-96">
           <ChatMessages className="w-full py-3">
             {chat.map((message) => (
               <ChatMessageRow key={message.id} variant={message.role}>
-                <ChatMessageBubble className="group-data-[variant=self]/message-row:bg-mint-green">
-                  {message.content}
-                </ChatMessageBubble>
+                <ChatMessageBubble>{message.content}</ChatMessageBubble>
                 <ChatMessageTime dateTime={message.timestamp} />
               </ChatMessageRow>
             ))}
@@ -86,10 +84,7 @@ export function ChatDemo() {
               setInput(e.target.value)
             }
           />
-          <ChatInputSubmit
-            className="*:[button]:bg-mint-green"
-            disabled={!input.trim()}
-          />
+          <ChatInputSubmit disabled={!input.trim()} />
         </ChatInputArea>
       </div>
     </Chat>

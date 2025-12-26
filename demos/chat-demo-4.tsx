@@ -67,12 +67,12 @@ export function ChatDemo() {
 
   return (
     <Chat onSubmit={handleSubmit}>
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-6">
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-6 [--radius:0] [--primary:var(--color-mustard-yellow)] [--ring:var(--color-mustard-yellow)]">
         <ChatViewport className="h-96">
           <ChatMessages className="w-full py-3">
             {chat.map((message, idx) => (
               <ChatMessageRow key={message.id} variant={message.role}>
-                <ChatMessageBubble className="group-data-[variant=self]/message-row:bg-mustard-yellow rounded-none group-data-[variant=self]/message-row:text-black">
+                <ChatMessageBubble>
                   {message.content}
                 </ChatMessageBubble>
                 <ChatMessageAddon align="inline">
@@ -103,7 +103,7 @@ export function ChatDemo() {
           </ChatMessages>
 
           <div className="from-card sticky bottom-0 z-10 mt-auto bg-linear-to-t to-transparent pb-4">
-            <ChatInputArea className="bg-card dark:bg-card has-[[data-slot=input-group-control]:focus-visible]:border-mustard-yellow has-[[data-slot=input-group-control]:focus-visible]:ring-mustard-yellow/50 rounded-none">
+            <ChatInputArea className="bg-card dark:bg-card rounded-none">
               <ChatInputField
                 multiline
                 placeholder="MONKEY CHAT..."
@@ -113,7 +113,7 @@ export function ChatDemo() {
                 }
               />
               <ChatInputSubmit
-                className="*:[button]:bg-mustard-yellow *:[button]:rounded-none *:[button]:text-black *:[button]:hover:bg-[color-mix(in_oklch,var(--color-mustard-yellow)_90%,white)]"
+                className="*:[button]:rounded-none"
                 disabled={!input.trim()}
               />
             </ChatInputArea>

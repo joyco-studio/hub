@@ -27,21 +27,21 @@ const initialChat: Message[] = [
     id: '1',
     content: 'Buy $JOYCO',
     role: 'peer',
-    timestamp: new Date("2025-12-26T03:00:00.000Z"),
+    timestamp: new Date('2025-12-26T03:00:00.000Z'),
   },
   {
     type: 'message',
     id: '2',
     content: 'Wym?',
     role: 'self',
-    timestamp: new Date("2025-12-26T03:01:00.000Z"),
+    timestamp: new Date('2025-12-26T03:01:00.000Z'),
   },
   {
     type: 'message',
     id: '3',
     content: 'Thank me later',
     role: 'peer',
-    timestamp: new Date("2025-12-26T03:03:00.000Z"),
+    timestamp: new Date('2025-12-26T03:03:00.000Z'),
   },
 ]
 
@@ -64,7 +64,7 @@ export function ChatDemo() {
 
   return (
     <Chat onSubmit={handleSubmit}>
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-6">
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-6 [--primary-foreground:var(--color-white)] [--primary:var(--color-joyco-blue)] [--ring:var(--color-joyco-blue)]">
         <div className="bg-card border-border relative rounded-xl border">
           <MonkyChatLogo className="absolute top-1/2 left-1/2 size-32 -translate-x-1/2 -translate-y-[70%] opacity-5" />
 
@@ -72,7 +72,7 @@ export function ChatDemo() {
             <ChatMessages className="w-full py-3">
               {chat.map((message) => (
                 <ChatMessageRow key={message.id} variant={message.role}>
-                  <ChatMessageBubble className="group-data-[variant=self]/message-row:bg-joyco-blue rounded-lg group-data-[variant=peer]/message-row:rounded-bl-none group-data-[variant=self]/message-row:rounded-br-none group-data-[variant=self]/message-row:text-white">
+                  <ChatMessageBubble className="rounded-lg group-data-[variant=peer]/message-row:rounded-bl-none group-data-[variant=self]/message-row:rounded-br-none">
                     {message.content}
                   </ChatMessageBubble>
                   <ChatMessageTime dateTime={message.timestamp} />
@@ -81,7 +81,7 @@ export function ChatDemo() {
             </ChatMessages>
 
             <div className="from-card sticky bottom-0 z-10 mt-auto bg-linear-to-t to-transparent pb-4">
-              <ChatInputArea className="bg-card dark:bg-card has-[[data-slot=input-group-control]:focus-visible]:border-joyco-blue has-[[data-slot=input-group-control]:focus-visible]:ring-joyco-blue/50 rounded-lg">
+              <ChatInputArea className="bg-card dark:bg-card rounded-lg">
                 <ChatInputField
                   multiline
                   placeholder="M.O.N.K.Y CHAT..."
@@ -91,7 +91,7 @@ export function ChatDemo() {
                   }
                 />
                 <ChatInputSubmit
-                  className="*:[button]:bg-joyco-blue *:[button]:rounded-sm *:[button]:text-white *:[button]:hover:bg-[color-mix(in_oklch,var(--color-joyco-blue)_90%,white)]"
+                  className="*:[button]:rounded-sm"
                   disabled={!input.trim()}
                 />
               </ChatInputArea>
