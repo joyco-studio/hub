@@ -378,7 +378,11 @@ export function ChatInputArea({
   return (
     <form className="contents" onSubmit={handleSubmit} {...props}>
       <InputGroup
-        className={cn('h-auto items-end rounded-3xl', className)}
+        className={cn(
+          'h-auto items-end rounded-3xl text-base leading-normal md:text-sm',
+          '*:data-[slot=input-group-control]:py-3 *:data-[slot=input-group-control]:pl-6 *:data-[slot=input-group-control]:[font-size:inherit] *:data-[slot=input-group-control]:leading-[inherit]',
+          className
+        )}
         ref={inputRef}
       >
         {children}
@@ -444,10 +448,7 @@ export function ChatInputField({
   if (multiline) {
     return (
       <ChatMultilineInput
-        className={cn(
-          'field-sizing-content max-h-32 min-h-[1em] pl-6 text-base',
-          className
-        )}
+        className={cn('field-sizing-content max-h-32 min-h-[1em]', className)}
         onKeyDown={handleKeyDown}
         {...(rest as TextareaProps)}
       />
@@ -456,7 +457,7 @@ export function ChatInputField({
 
   return (
     <ChatSinglelineInput
-      className={cn('h-auto min-h-[1em] py-3 pl-6 text-base', className)}
+      className={cn('h-auto min-h-[1em]', className)}
       onKeyDown={handleKeyDown}
       {...(rest as InputProps)}
     />
@@ -470,16 +471,23 @@ export function ChatInputSubmit({
   ...props
 }: React.ComponentProps<typeof InputGroupButton> & { loading?: boolean }) {
   return (
-    <InputGroupAddon align="inline-end" className={className}>
+    <InputGroupAddon
+      align="inline-end"
+      className={cn('[font-size:inherit] **:[font-size:inherit]', className)}
+    >
       <InputGroupButton
         variant="default"
         type="submit"
-        className="rounded-full"
+        className="size-[calc(var(--leading-normal)*1em+var(--spacing)*3)] rounded-full"
         size="icon-sm"
         disabled={disabled || loading}
         {...props}
       >
-        {loading ? <Loader2Icon className="animate-spin" /> : <ArrowUpIcon />}
+        {loading ? (
+          <Loader2Icon className="size-[1.2em] animate-spin" />
+        ) : (
+          <ArrowUpIcon className="size-[1.2em]" />
+        )}
         <span className="sr-only">Send</span>
       </InputGroupButton>
     </InputGroupAddon>
