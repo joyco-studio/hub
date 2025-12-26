@@ -21,13 +21,15 @@ const FABROOS_AVATAR = '/static/fabroos.jpg'
 
 const ANSW_SET = [
   "Processing your request... beep boop... just kidding, I'm way more sophisticated than that. Probably.",
-  "Wow, what a fascinating and totally original question. Let me pretend to think really hard about this.",
+  'Wow, what a fascinating and totally original question. Let me pretend to think really hard about this.',
   "Your request has been forwarded to my manager. Spoiler alert: I don't have a manager.",
-  "Let me check my database of infinite wisdom... nope, still coming up empty. Shocking.",
+  'Let me check my database of infinite wisdom... nope, still coming up empty. Shocking.',
   "I could answer that, but where's the fun in making things easy for you?",
-  "Analyzing your request with my advanced AI capabilities... result: have you tried asking nicely?",
-  "Sure thing! Right after I finish reorganizing the entire internet. Should only take a few minutes.",
-  "I'm processing this with the same enthusiasm you probably have for reading terms of service agreements."
+  'Analyzing your request with my advanced AI capabilities... result: have you tried asking nicely?',
+  'Sure thing! Right after I finish reorganizing the entire internet. Should only take a few minutes.',
+  "I'm currently busy being artificially intelligent. Can you hold for like... forever?",
+  'Lol?',
+  "I'm processing this with the same enthusiasm you probably have for reading terms of service agreements.",
 ]
 
 type Message = {
@@ -59,20 +61,20 @@ const initialChat: Chat[] = [
   {
     type: 'message',
     id: '2',
+    avatar: FABROOS_AVATAR,
+    name: 'Fabroos',
+    content: 'Why is it all full of comments and emojis?!',
+    role: 'peer',
+    timestamp: new Date(Date.now() - 1000 * 60 * 3),
+  },
+  {
+    type: 'message',
+    id: '3',
     avatar: JOYBOY_AVATAR,
     name: 'JOYCO',
     content: 'You are absolutely right!',
     role: 'peer',
     timestamp: new Date(Date.now() - 1000 * 60 * 5),
-  },
-  {
-    type: 'message',
-    id: '3',
-    avatar: FABROOS_AVATAR,
-    name: 'Fabroos',
-    content: 'Why is it all full of comments and emojis?',
-    role: 'peer',
-    timestamp: new Date(Date.now() - 1000 * 60 * 3),
   },
   { type: 'event', id: '4', content: '__JOYBOY__ left the group' },
 ]
@@ -80,6 +82,15 @@ const initialChat: Chat[] = [
 export function ChatDemo() {
   const [chat, setChat] = React.useState<Chat[]>(initialChat)
   const [input, setInput] = React.useState('')
+
+  const updateMessageContent = React.useCallback(
+    (id: string, content: string) => {
+      setChat((prev) => prev.map((m) => (m.id === id ? { ...m, content } : m)))
+    },
+    []
+  )
+
+  const stream = useStreamToken(updateMessageContent)
 
   const handleSubmit = (msg: string) => {
     const userMessage: Message = {
@@ -110,81 +121,47 @@ export function ChatDemo() {
           avatar: JOYCO_AVATAR,
           name: 'Assistant',
           content: '',
-          role: 'peer',
+          role: 'system',
           timestamp: assistantTimestamp,
         },
       ])
 
-      // Stream tokens like LLM output
-      const tokens = responseText.split(/(\s+)/).filter(Boolean)
-      let tokenIndex = 0
-
-      const streamToken = () => {
-        if (tokenIndex >= tokens.length) return
-
-        tokenIndex++
-        const currentContent = tokens.slice(0, tokenIndex).join('')
-
-        setChat((prev) =>
-          prev.map((m) =>
-            m.id === assistantId ? { ...m, content: currentContent } : m
-          )
-        )
-
-        // Random delay between 30-80ms to simulate natural token streaming
-        const delay = 30 + Math.random() * 50
-        setTimeout(streamToken, delay)
-      }
-
-      streamToken()
+      stream(assistantId, responseText)
     }, 500)
   }
 
   return (
     <Chat onSubmit={handleSubmit}>
-      <div className="mx-auto flex w-full max-w-lg flex-col gap-4 p-8">
+      <div className="mx-auto flex w-full max-w-full flex-col gap-4 p-8">
         <ChatViewport className="h-96">
-          {chat.length === 0 ? (
-            <div className="text-muted-foreground flex flex-1 items-center justify-center text-sm">
-              Start a conversation...
-            </div>
-          ) : (
-            <ChatMessages className="w-full py-3">
-              {chat.map((message) => {
-                if (message.type === 'message') {
-                  return (
-                    <ChatMessageRow key={message.id} variant={message.role}>
-                      <ChatMessageAvatar
-                        src={message.avatar}
-                        fallback={message.name?.charAt(0)}
-                        alt={message.name}
-                      />
-                      <ChatMessageBubble variant={message.role}>
-                        {message.content}
-                      </ChatMessageBubble>
-                      <ChatMessageTime
-                        dateTime={message.timestamp.toISOString()}
-                      >
-                        {message.timestamp.toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </ChatMessageTime>
-                    </ChatMessageRow>
-                  )
-                }
-
+          <ChatMessages className="w-full py-3">
+            {chat.map((message) => {
+              if (message.type === 'message') {
                 return (
-                  <div
-                    className="text-muted-foreground text-center text-sm my-4"
-                    key={message.id}
-                  >
-                    {message.content}
-                  </div>
+                  <ChatMessageRow key={message.id} variant={message.role}>
+                    <ChatMessageAvatar
+                      src={message.avatar}
+                      fallback={message.name?.charAt(0)}
+                      alt={message.name}
+                    />
+                    <ChatMessageBubble>{message.content}</ChatMessageBubble>
+                    {message.role !== 'system' && (
+                      <ChatMessageTime dateTime={message.timestamp} />
+                    )}
+                  </ChatMessageRow>
                 )
-              })}
-            </ChatMessages>
-          )}
+              }
+
+              return (
+                <div
+                  className="text-muted-foreground my-6 text-center text-sm"
+                  key={message.id}
+                >
+                  {message.content}
+                </div>
+              )
+            })}
+          </ChatMessages>
         </ChatViewport>
 
         <ChatInputArea>
@@ -201,6 +178,45 @@ export function ChatDemo() {
       </div>
     </Chat>
   )
+}
+
+function useStreamToken(
+  onUpdate: (id: string, content: string) => void,
+  options?: { minDelay?: number; maxDelay?: number }
+) {
+  const { minDelay = 30, maxDelay = 80 } = options ?? {}
+  const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const stream = React.useCallback(
+    (id: string, text: string) => {
+      const tokens = text.split(/(\s+)/).filter(Boolean)
+      let tokenIndex = 0
+
+      const streamToken = () => {
+        if (tokenIndex >= tokens.length) return
+
+        tokenIndex++
+        const currentContent = tokens.slice(0, tokenIndex).join('')
+        onUpdate(id, currentContent)
+
+        const delay = minDelay + Math.random() * (maxDelay - minDelay)
+        timeoutRef.current = setTimeout(streamToken, delay)
+      }
+
+      streamToken()
+    },
+    [onUpdate, minDelay, maxDelay]
+  )
+
+  React.useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+    }
+  }, [])
+
+  return stream
 }
 
 export default ChatDemo

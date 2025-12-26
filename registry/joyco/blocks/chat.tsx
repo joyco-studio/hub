@@ -54,7 +54,6 @@ export function Chat({ onSubmit, bottomThreshold = 24, children }: ChatProps) {
   const [isAtBottom, setIsAtBottom] = React.useState(true)
   const { interruptedRef, interrupt } = useUserInterruption(200)
   const viewportRef = React.useRef<HTMLDivElement>(null)
-  const inputRef = React.useRef<HTMLFormElement>(null)
 
   const isAtBottomRef = React.useRef(true)
   const isScrollingToBottomRef = React.useRef(false)
@@ -230,10 +229,10 @@ export function ChatMessageRow({
     <div
       data-variant={variant}
       className={cn(
-        'group/message-bubble my-3 grid gap-y-1',
+        'group/message-row my-4 grid items-center',
         variant === 'self'
-          ? 'grid-cols-[minmax(0,1fr)_auto] justify-items-end [grid-template-areas:"message_avatar""datetime_none"]'
-          : 'grid-cols-[auto_minmax(0,1fr)] justify-items-start [grid-template-areas:"avatar_message""none_datetime"]',
+          ? 'grid-cols-[minmax(0,1fr)_auto] justify-items-end [grid-template-areas:"message_avatar""addon_none"]'
+          : 'grid-cols-[auto_minmax(0,1fr)] justify-items-start [grid-template-areas:"avatar_message""none_addon"]',
         className
       )}
       {...props}
@@ -262,7 +261,7 @@ export function ChatMessageAvatar({
   return (
     <Avatar
       className={cn(
-        'size-8 shrink-0 self-end [grid-area:avatar] group-data-variant/message-bubble:group-not-data-[variant=self]/message-bubble:mr-2 group-data-[variant=self]/message-bubble:ml-2',
+        'size-8 shrink-0 self-end [grid-area:avatar] group-not-data-[variant=self]/message-row:mr-2 group-data-[variant=self]/message-row:ml-2',
         className
       )}
       title={alt}
@@ -278,23 +277,22 @@ export function ChatMessageAvatar({
  * ChatMessageBubble
  * -------------------------------------------------------------------------------------------------*/
 
-type ChatMessageBubbleProps = React.ComponentProps<'div'> & {
-  variant?: ChatMessageVariant
-}
+type ChatMessageBubbleProps = React.ComponentProps<'div'>
 
 export function ChatMessageBubble({
   className,
-  variant = 'self',
   ...props
 }: ChatMessageBubbleProps) {
   return (
     <div
-      data-variant={variant}
       className={cn(
-        'w-fit max-w-full min-w-0 rounded-2xl px-4 py-2 text-sm wrap-break-word whitespace-pre-wrap [grid-area:message]',
-        variant === 'self'
-          ? 'bg-primary text-primary-foreground'
-          : 'bg-muted text-foreground',
+        'w-fit max-w-96 min-w-0 rounded-2xl text-sm wrap-break-word whitespace-pre-wrap [grid-area:message] group-not-data-[variant=system]/message-row:px-4 group-not-data-[variant=system]/message-row:py-2',
+        /* Self */
+        'group-data-[variant=self]/message-row:bg-primary group-data-[variant=self]/message-row:text-primary-foreground',
+        /* Peer */
+        'group-data-[variant=peer]/message-row:bg-muted group-data-[variant=peer]/message-row:text-foreground',
+        /* System */
+        'group-data-[variant=system]/message-row:text-muted-foreground group-data-[variant=system]/message-row:px-1',
         className
       )}
       {...props}
@@ -308,16 +306,25 @@ export function ChatMessageBubble({
 
 export function ChatMessageTime({
   className,
+  dateTime,
+  children,
   ...props
-}: React.ComponentProps<'time'>) {
+}: Omit<React.ComponentProps<'time'>, 'dateTime'> & { dateTime: Date }) {
   return (
     <time
       className={cn(
-        'text-muted-foreground text-xs [grid-area:datetime]',
+        'text-muted-foreground mt-2 text-xs [grid-area:addon]',
         className
       )}
+      dateTime={dateTime.toISOString()}
       {...props}
-    />
+    >
+      {children ??
+        dateTime.toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        })}
+    </time>
   )
 }
 
