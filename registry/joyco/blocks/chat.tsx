@@ -360,7 +360,7 @@ export function ChatInputArea({
     e.preventDefault()
 
     const formData = new FormData(e.currentTarget)
-    const message = formData.get('message')?.toString()
+    const message = formData.get('message')?.toString().trim()
 
     if (!message) return
 
