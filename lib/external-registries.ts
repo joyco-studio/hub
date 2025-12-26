@@ -31,13 +31,15 @@ export interface ExternalComponent {
   registry: string
   /** Full URL to the component's documentation page */
   externalUrl: string
+  /**
+   * Full URL to the component's registry JSON file.
+   * This enables installation via your registry domain:
+   * `npx shadcn@latest add https://registry.joyco.studio/r/{slug}.json`
+   * which redirects to this URL.
+   */
+  externalRegistryUrl: string
   /** Optional tags/categories */
   tags?: string[]
-  /**
-   * If true, the component page will immediately redirect to the external URL.
-   * If false (default), a content page will be shown with info and a link to the external registry.
-   */
-  redirect?: boolean
 }
 
 /**
@@ -58,7 +60,7 @@ export const externalRegistries: ExternalRegistry[] = [
  *
  * These components will:
  * - Appear in your site's navigation under /components/[slug]
- * - Redirect to the externalUrl when accessed
+ * - Have their registry JSON redirect: /r/{slug}.json → externalRegistryUrl
  */
 export const externalComponents: ExternalComponent[] = [
   {
@@ -68,22 +70,21 @@ export const externalComponents: ExternalComponent[] = [
       'A fully-featured media player component with support for video and audio playback, controls, and accessibility.',
     registry: 'diceui',
     externalUrl: 'https://www.diceui.com/docs/components/media-player',
+    externalRegistryUrl: 'https://www.diceui.com/r/media-player.json',
     tags: ['media', 'video', 'audio', 'player'],
   },
 ]
 
 /**
  * Get all external component redirects for Next.js config
- * Only includes components with redirect: true
+ * Redirects /r/{slug}.json to the external registry's JSON file
  */
 export function getExternalComponentRedirects() {
-  return externalComponents
-    .filter((component) => component.redirect === true)
-    .map((component) => ({
-      source: `/components/${component.slug}`,
-      destination: component.externalUrl,
-      permanent: false,
-    }))
+  return externalComponents.map((component) => ({
+    source: `/r/${component.slug}.json`,
+    destination: component.externalRegistryUrl,
+    permanent: false,
+  }))
 }
 
 /**
