@@ -1,5 +1,6 @@
 import { createMDX } from 'fumadocs-mdx/next'
 import { NextConfig } from 'next'
+import { getExternalComponentRedirects } from './lib/external-registries'
 
 const withMDX = createMDX()
 
@@ -18,12 +19,15 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'qfxa88yauvyse9vr.public.blob.vercel-storage.com',
-      }
+      },
     ],
   },
   env: {
     NEXT_PUBLIC_VERCEL_URL: process.env.VERCEL_URL,
     NEXT_PUBLIC_VERCEL_BRANCH_URL: process.env.VERCEL_BRANCH_URL,
+  },
+  async redirects() {
+    return getExternalComponentRedirects()
   },
 }
 
