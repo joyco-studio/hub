@@ -72,13 +72,13 @@ export function ChatDemo() {
           <ChatMessages className="w-full py-3">
             {chat.map((message, idx) => (
               <ChatMessageRow key={message.id} variant={message.role}>
-                <ChatMessageBubble className="group-data-[variant=self]/message-row:bg-joyco-blue rounded-lg group-data-[variant=peer]/message-row:rounded-bl-none group-data-[variant=self]/message-row:rounded-br-none group-data-[variant=self]/message-row:text-white">
+                <ChatMessageBubble className="group-data-[variant=self]/message-row:bg-mustard-yellow rounded-none group-data-[variant=self]/message-row:text-black">
                   {message.content}
                 </ChatMessageBubble>
                 <ChatMessageAddon align="inline">
                   <Button
                     variant="secondary"
-                    className="rounded-full"
+                    className="rounded-none"
                     size="icon-sm"
                     title="React"
                   >
@@ -103,7 +103,7 @@ export function ChatDemo() {
           </ChatMessages>
 
           <div className="from-card sticky bottom-0 z-10 mt-auto bg-linear-to-t to-transparent pb-4">
-            <ChatInputArea className="bg-card dark:bg-card has-[[data-slot=input-group-control]:focus-visible]:border-joyco-blue has-[[data-slot=input-group-control]:focus-visible]:ring-joyco-blue/50 rounded-lg">
+            <ChatInputArea className="bg-card dark:bg-card has-[[data-slot=input-group-control]:focus-visible]:border-mustard-yellow has-[[data-slot=input-group-control]:focus-visible]:ring-mustard-yellow/50 rounded-none">
               <ChatInputField
                 multiline
                 placeholder="MONKEY CHAT..."
@@ -113,7 +113,7 @@ export function ChatDemo() {
                 }
               />
               <ChatInputSubmit
-                className="*:[button]:bg-joyco-blue *:[button]:rounded-sm *:[button]:text-white *:[button]:hover:bg-[color-mix(in_oklch,var(--color-joyco-blue)_90%,white)]"
+                className="*:[button]:bg-mustard-yellow *:[button]:rounded-none *:[button]:text-black *:[button]:hover:bg-[color-mix(in_oklch,var(--color-mustard-yellow)_90%,white)]"
                 disabled={!input.trim()}
               />
             </ChatInputArea>

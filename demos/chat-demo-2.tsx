@@ -69,7 +69,9 @@ export function ChatDemo() {
           <ChatMessages className="w-full py-3">
             {chat.map((message) => (
               <ChatMessageRow key={message.id} variant={message.role}>
-                <ChatMessageBubble>{message.content}</ChatMessageBubble>
+                <ChatMessageBubble className="group-data-[variant=self]/message-row:bg-mint-green">
+                  {message.content}
+                </ChatMessageBubble>
                 <ChatMessageTime dateTime={message.timestamp} />
               </ChatMessageRow>
             ))}

@@ -50,6 +50,8 @@
 
   /* Custom colors */
   --color-joyco-blue: oklch(0.4717 0.2373 263.42);
+  --color-mustard-yellow: oklch(0.8696 0.1733 90.76);
+  --color-mint-green: oklch(0.8836 0.0989 147.16);
 
   /* Spacing */
   --spacing-heading-height: 64px;
