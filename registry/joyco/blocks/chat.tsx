@@ -117,6 +117,12 @@ export function Chat({ onSubmit, bottomThreshold = 24, children }: ChatProps) {
     viewport.addEventListener('touchstart', handleUserInterrupt, {
       passive: true,
     })
+
+    return () => {
+      viewport.removeEventListener('scroll', handleScroll)
+      viewport.removeEventListener('wheel', handleUserInterrupt)
+      viewport.removeEventListener('touchstart', handleUserInterrupt)
+    }
   }, [bottomThreshold, interrupt, checkIfAtBottom])
 
   const onViewportHeightChange = React.useCallback(
