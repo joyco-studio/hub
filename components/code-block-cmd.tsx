@@ -61,7 +61,7 @@ export function CodeBlockCommand({
         <div className="no-scrollbar overflow-x-auto bg-white dark:bg-black">
           {Object.entries(tabs).map(([key, value]) => {
             return (
-              <TabsContent key={key} value={key} className="mt-0 px-4 py-3.5">
+              <TabsContent key={key} value={key} className="mt-0 w-max px-4 py-3.5">
                 <pre>
                   <code
                     className="relative font-mono text-sm leading-none text-green-500 dark:text-green-300"
