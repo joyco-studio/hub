@@ -48,6 +48,9 @@
   --color-code-highlight: var(--code-highlight);
   --color-code-number: var(--code-number);
 
+  /* Custom colors */
+  --color-joyco-blue: oklch(0.4717 0.2373 263.42);
+
   /* Spacing */
   --spacing-heading-height: 64px;
 }

@@ -30,5 +30,6 @@
   {
     "name": "PNG Compressor",
     "link": "https://tinypng.com/"
-  }  
+  },
+  { "name": "OKLCH Picker", "link": "https://oklch.com/" }
 ]
