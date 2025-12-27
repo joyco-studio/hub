@@ -14,15 +14,6 @@ import { ComponentPreview } from '@/components/preview/component-preview'
 npx shadcn@latest add https://registry.joyco.studio/r/hls-video-player.json
 ```
 
-## Features
-
-- **Headless** - No UI included, meant to be connected to your custom controls
-- **Native HLS detection** - Automatically uses native HLS on Safari/iOS, falls back to HLS.js elsewhere
-- **Lazy loading** - HLS.js is only loaded when needed (not on native HLS browsers)
-- **Error handling** - Built-in error recovery for network and media errors
-- **Quality control** - Access to quality levels and manual switching
-- **Aspect ratio** - Maintains aspect ratio via mandatory width/height props
-
 ## Usage
 
 ```tsx showLineNumbers
@@ -49,47 +40,25 @@ function App() {
 
 ## Props
 
-| Prop            | Type                                  | Required | Description                                        |
-| --------------- | ------------------------------------- | -------- | -------------------------------------------------- |
-| `src`           | `string`                              | ✓        | The HLS stream URL (.m3u8) or regular video source |
-| `width`         | `number`                              | ✓        | Video width (used for aspect ratio)                |
-| `height`        | `number`                              | ✓        | Video height (used for aspect ratio)               |
-| `debug`         | `boolean`                             |          | Enable debug logging                               |
-| `onHlsError`    | `(error: HLSVideoError) => void`      |          | HLS error callback                                 |
-| `onVideoError`  | `ReactEventHandler<HTMLVideoElement>` |          | Native video error callback                        |
-| `onReady`       | `() => void`                          |          | Called when video is ready to play                 |
-| `onHlsLoaded`   | `() => void`                          |          | Called when HLS.js library is loaded               |
-| `startTime`     | `number`                              |          | Start playback at specific time (seconds)          |
-| `maxResolution` | `number`                              |          | Cap max resolution (e.g., 720, 1080)               |
-| `minResolution` | `number`                              |          | Set minimum resolution                             |
+| Prop            | Type                                  | Description                                        |
+| --------------- | ------------------------------------- | -------------------------------------------------- |
+| `src`           | `string`                              | The HLS stream URL (.m3u8) or regular video source |
+| `width`         | `number`                              | Video width (used for aspect ratio)                |
+| `height`        | `number`                              | Video height (used for aspect ratio)               |
+| `debug`         | `boolean`                             | Enable debug logging                               |
+| `onHlsError`    | `(error: HLSVideoError) => void`      | HLS error callback                                 |
+| `onVideoError`  | `ReactEventHandler<HTMLVideoElement>` | Native video error callback                        |
+| `onReady`       | `() => void`                          | Called when video is ready to play                 |
+| `onHlsLoaded`   | `() => void`                          | Called when HLS.js library is loaded               |
+| `startTime`     | `number`                              | Start playback at specific time (seconds)          |
+| `maxResolution` | `number`                              | Cap max resolution (e.g., 720, 1080)               |
+| `minResolution` | `number`                              | Set minimum resolution                             |
 
-Plus all standard HTML video attributes (`autoPlay`, `muted`, `loop`, `playsInline`, etc.)
+## With Media Player Controls
 
-## Ref API
+Combine with the [Media Player](/docs/components/media-player) component for a full-featured video player UI:
 
-Access the player ref for programmatic control:
-
-```tsx showLineNumbers
-const playerRef = useRef<HLSVideoPlayerRef>(null)
-
-// Access the underlying video element
-playerRef.current?.video?.play()
-playerRef.current?.video?.pause()
-
-// Check if using HLS.js (vs native)
-const isUsingHls = playerRef.current?.isUsingHls
-
-// Get available quality levels (HLS.js only)
-const levels = playerRef.current?.levels
-// [{ height: 1080, width: 1920, bitrate: 5000000 }, ...]
-
-// Set quality level manually (-1 for auto)
-playerRef.current?.setQuality(2) // third quality level
-playerRef.current?.setQuality(-1) // auto
-
-// Retry after error
-playerRef.current?.retry()
-```
+<ComponentPreview name="hls-video-player-with-controls-demo" />
 
 ## Error Handling
 
@@ -115,177 +84,6 @@ function App() {
       height={1080}
       onHlsError={handleError}
     />
-  )
-}
-```
-
-## Custom Controls Example
-
-Build your own media player UI inspired by [diceui/media-player](https://www.diceui.com/docs/components/media-player):
-
-```tsx showLineNumbers
-import { useRef, useState, useEffect } from 'react'
-import { Play, Pause, Volume2, VolumeX, Maximize, Loader2 } from 'lucide-react'
-import {
-  HLSVideoPlayer,
-  type HLSVideoPlayerRef,
-} from '@/components/hls-video-player'
-import { Slider } from '@/components/ui/slider'
-import { cn } from '@/lib/utils'
-
-function VideoPlayer({ src }: { src: string }) {
-  const playerRef = useRef<HLSVideoPlayerRef>(null)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [isReady, setIsReady] = useState(false)
-  const [isMuted, setIsMuted] = useState(false)
-  const [currentTime, setCurrentTime] = useState(0)
-  const [duration, setDuration] = useState(0)
-  const [volume, setVolume] = useState(1)
-
-  useEffect(() => {
-    const video = playerRef.current?.video
-    if (!video) return
-
-    const onTimeUpdate = () => setCurrentTime(video.currentTime)
-    const onDurationChange = () => setDuration(video.duration)
-    const onPlay = () => setIsPlaying(true)
-    const onPause = () => setIsPlaying(false)
-
-    video.addEventListener('timeupdate', onTimeUpdate)
-    video.addEventListener('durationchange', onDurationChange)
-    video.addEventListener('play', onPlay)
-    video.addEventListener('pause', onPause)
-
-    return () => {
-      video.removeEventListener('timeupdate', onTimeUpdate)
-      video.removeEventListener('durationchange', onDurationChange)
-      video.removeEventListener('play', onPlay)
-      video.removeEventListener('pause', onPause)
-    }
-  }, [isReady])
-
-  const togglePlay = () => {
-    const video = playerRef.current?.video
-    if (!video) return
-    video.paused ? video.play() : video.pause()
-  }
-
-  const toggleMute = () => {
-    const video = playerRef.current?.video
-    if (!video) return
-    video.muted = !video.muted
-    setIsMuted(video.muted)
-  }
-
-  const handleSeek = (value: number[]) => {
-    const video = playerRef.current?.video
-    if (!video) return
-    video.currentTime = value[0]
-  }
-
-  const handleVolumeChange = (value: number[]) => {
-    const video = playerRef.current?.video
-    if (!video) return
-    video.volume = value[0]
-    setVolume(value[0])
-  }
-
-  const toggleFullscreen = () => {
-    const video = playerRef.current?.video
-    if (!video) return
-    if (document.fullscreenElement) {
-      document.exitFullscreen()
-    } else {
-      video.requestFullscreen()
-    }
-  }
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = Math.floor(seconds % 60)
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
-
-  return (
-    <div className="group relative overflow-hidden rounded-lg bg-black">
-      <HLSVideoPlayer
-        ref={playerRef}
-        src={src}
-        width={1920}
-        height={1080}
-        onReady={() => setIsReady(true)}
-        playsInline
-        className="w-full"
-      />
-
-      {/* Loading overlay */}
-      {!isReady && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Loader2 className="size-8 animate-spin text-white" />
-        </div>
-      )}
-
-      {/* Controls overlay */}
-      <div
-        className={cn(
-          'absolute inset-x-0 bottom-0 flex flex-col gap-2 bg-gradient-to-t from-black/80 to-transparent p-4 transition-opacity',
-          'opacity-0 group-hover:opacity-100'
-        )}
-      >
-        {/* Seek bar */}
-        <Slider
-          value={[currentTime]}
-          max={duration || 100}
-          step={0.1}
-          onValueChange={handleSeek}
-          className="w-full"
-        />
-
-        {/* Controls row */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={togglePlay}
-            className="text-white hover:text-white/80"
-          >
-            {isPlaying ? (
-              <Pause className="size-5" />
-            ) : (
-              <Play className="size-5" />
-            )}
-          </button>
-
-          <button
-            onClick={toggleMute}
-            className="text-white hover:text-white/80"
-          >
-            {isMuted ? (
-              <VolumeX className="size-5" />
-            ) : (
-              <Volume2 className="size-5" />
-            )}
-          </button>
-
-          <Slider
-            value={[volume]}
-            max={1}
-            step={0.01}
-            onValueChange={handleVolumeChange}
-            className="w-20"
-          />
-
-          <span className="flex-1 text-xs text-white">
-            {formatTime(currentTime)} / {formatTime(duration)}
-          </span>
-
-          <button
-            onClick={toggleFullscreen}
-            className="text-white hover:text-white/80"
-          >
-            <Maximize className="size-5" />
-          </button>
-        </div>
-      </div>
-    </div>
   )
 }
 ```

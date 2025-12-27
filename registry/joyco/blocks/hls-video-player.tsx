@@ -3,6 +3,7 @@
 import * as React from 'react'
 import type Hls from 'hls.js'
 import type { ErrorData, ManifestParsedData, LevelSwitchedData } from 'hls.js'
+import { useComposedRefs } from '@/lib/compose-refs'
 
 /* -------------------------------------------------------------------------------------------------
  * Types
@@ -21,6 +22,8 @@ export interface HLSVideoPlayerProps extends Omit<
   React.VideoHTMLAttributes<HTMLVideoElement>,
   'src' | 'width' | 'height' | 'onError'
 > {
+  /** Ref to the underlying video element */
+  ref?: React.Ref<HTMLVideoElement>
   /** The HLS stream URL (.m3u8) or regular video source */
   src: string
   /** Video width (required for aspect ratio) */
@@ -43,21 +46,6 @@ export interface HLSVideoPlayerProps extends Omit<
   maxResolution?: number
   /** Minimum resolution to use (e.g., 480, 720) */
   minResolution?: number
-}
-
-export interface HLSVideoPlayerRef {
-  /** The underlying video element */
-  video: HTMLVideoElement | null
-  /** Whether HLS.js is being used (vs native HLS) */
-  isUsingHls: boolean
-  /** Current playback quality level (when using HLS.js) */
-  currentLevel: number
-  /** Available quality levels (when using HLS.js) */
-  levels: Array<{ height: number; width: number; bitrate: number }>
-  /** Set quality level manually (-1 for auto) */
-  setQuality: (level: number) => void
-  /** Retry loading after an error */
-  retry: () => void
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -90,34 +78,25 @@ function createHlsError(
  * HLSVideoPlayer
  * -------------------------------------------------------------------------------------------------*/
 
-export const HLSVideoPlayer = React.forwardRef<
-  HLSVideoPlayerRef,
-  HLSVideoPlayerProps
->(function HLSVideoPlayer(
-  {
-    src,
-    width,
-    height,
-    debug = false,
-    onHlsError,
-    onVideoError,
-    onReady,
-    onHlsLoaded,
-    startTime,
-    maxResolution,
-    minResolution,
-    autoPlay,
-    ...videoProps
-  },
-  ref
-) {
+export function HLSVideoPlayer({
+  ref,
+  src,
+  width,
+  height,
+  debug = false,
+  onHlsError,
+  onVideoError,
+  onReady,
+  onHlsLoaded,
+  startTime,
+  maxResolution,
+  minResolution,
+  autoPlay,
+  ...videoProps
+}: HLSVideoPlayerProps) {
   const videoRef = React.useRef<HTMLVideoElement>(null)
   const hlsRef = React.useRef<Hls | null>(null)
   const [isUsingHls, setIsUsingHls] = React.useState(false)
-  const [currentLevel, setCurrentLevel] = React.useState(-1)
-  const [levels, setLevels] = React.useState<
-    Array<{ height: number; width: number; bitrate: number }>
-  >([])
 
   const log = React.useCallback(
     (...args: unknown[]) => {
@@ -136,34 +115,7 @@ export const HLSVideoPlayer = React.forwardRef<
     [onHlsError, log]
   )
 
-  const setQuality = React.useCallback((level: number) => {
-    if (hlsRef.current) {
-      hlsRef.current.currentLevel = level
-      setCurrentLevel(level)
-    }
-  }, [])
-
-  const retry = React.useCallback(() => {
-    if (hlsRef.current) {
-      hlsRef.current.startLoad()
-    } else if (videoRef.current) {
-      videoRef.current.load()
-    }
-  }, [])
-
-  // Expose ref API
-  React.useImperativeHandle(
-    ref,
-    () => ({
-      video: videoRef.current,
-      isUsingHls,
-      currentLevel,
-      levels,
-      setQuality,
-      retry,
-    }),
-    [isUsingHls, currentLevel, levels, setQuality, retry]
-  )
+  const composedRef = useComposedRefs(ref, videoRef)
 
   // Initialize HLS or native playback
   React.useEffect(() => {
@@ -234,22 +186,20 @@ export const HLSVideoPlayer = React.forwardRef<
             if (destroyed) return
             log('Manifest parsed, levels:', data.levels.length)
 
-            const availableLevels = data.levels.map((level) => ({
-              height: level.height,
-              width: level.width,
-              bitrate: level.bitrate,
-            }))
-            setLevels(availableLevels)
-
             // Apply resolution constraints
             if (maxResolution || minResolution) {
-              const validLevels = availableLevels
-                .map((l, i) => ({ ...l, index: i }))
-                .filter((l) => {
-                  if (maxResolution && l.height > maxResolution) return false
-                  if (minResolution && l.height < minResolution) return false
-                  return true
-                })
+              const availableLevels = data.levels.map((level, i) => ({
+                height: level.height,
+                width: level.width,
+                bitrate: level.bitrate,
+                index: i,
+              }))
+
+              const validLevels = availableLevels.filter((l) => {
+                if (maxResolution && l.height > maxResolution) return false
+                if (minResolution && l.height < minResolution) return false
+                return true
+              })
 
               if (validLevels.length > 0 && maxResolution && hls) {
                 // Set to highest valid level
@@ -257,7 +207,6 @@ export const HLSVideoPlayer = React.forwardRef<
                   curr.height > prev.height ? curr : prev
                 )
                 hls.currentLevel = maxLevel.index
-                setCurrentLevel(maxLevel.index)
               }
             }
 
@@ -276,7 +225,6 @@ export const HLSVideoPlayer = React.forwardRef<
           (_event, data: LevelSwitchedData) => {
             if (destroyed) return
             log('Level switched to:', data.level)
-            setCurrentLevel(data.level)
           }
         )
 
@@ -414,9 +362,10 @@ export const HLSVideoPlayer = React.forwardRef<
 
   return (
     <video
-      ref={videoRef}
+      ref={composedRef}
       width={width}
       height={height}
+      autoPlay={autoPlay}
       style={{
         aspectRatio,
         ...videoProps.style,
@@ -426,4 +375,4 @@ export const HLSVideoPlayer = React.forwardRef<
       {...videoProps}
     />
   )
-})
+}
