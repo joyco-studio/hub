@@ -19,6 +19,7 @@ import {
   MentionList,
   MentionItem,
   MentionItemText,
+  MentionHighlight,
 } from '@/components/ui/mention'
 import { ArrowUpIcon } from 'lucide-react'
 
@@ -82,28 +83,6 @@ export function ChatWithMentionDemo() {
     setInput('')
   }
 
-  // Parse message content to highlight mentions
-  const renderMessageContent = (content: string) => {
-    const parts = content.split(/(@\w+)/g)
-    return parts.map((part, index) => {
-      if (part.startsWith('@')) {
-        const username = part.slice(1)
-        const user = USERS.find((u) => u.username === username)
-        if (user) {
-          return (
-            <span
-              key={index}
-              className="bg-primary/10 text-primary rounded px-1 font-medium"
-            >
-              {part}
-            </span>
-          )
-        }
-      }
-      return part
-    })
-  }
-
   return (
     <Chat onSubmit={handleSubmit}>
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-6">
@@ -117,7 +96,11 @@ export function ChatWithMentionDemo() {
                   alt={message.name}
                 />
                 <ChatMessageBubble>
-                  {renderMessageContent(message.content)}
+                  <MentionHighlight
+                    mentionClassName="bg-violet-500/20 text-violet-600 dark:text-violet-400 rounded px-0.5 font-medium"
+                  >
+                    {message.content}
+                  </MentionHighlight>
                 </ChatMessageBubble>
                 <ChatMessageTime dateTime={message.timestamp} />
               </ChatMessageRow>
@@ -132,16 +115,31 @@ export function ChatWithMentionDemo() {
             trigger="@"
           >
             <ChatInputArea>
-              <MentionInput asChild>
-                <ChatInputField
-                  multiline
-                  placeholder="Type @ to mention someone..."
-                  value={input}
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                    setInput(e.target.value)
-                  }
-                />
-              </MentionInput>
+              <div className="relative flex-1">
+                {/* Highlight overlay */}
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 flex items-center overflow-hidden px-3 py-2 text-sm"
+                >
+                  <MentionHighlight
+                    mentionClassName="bg-violet-500/20 text-violet-600 dark:text-violet-400 rounded px-0.5 font-medium"
+                  >
+                    {input}
+                  </MentionHighlight>
+                </div>
+                {/* Actual input with asChild to use ChatInputField */}
+                <MentionInput asChild>
+                  <ChatInputField
+                    multiline
+                    placeholder="Type @ to mention someone..."
+                    value={input}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                      setInput(e.target.value)
+                    }
+                    className="text-transparent caret-foreground"
+                  />
+                </MentionInput>
+              </div>
               <ChatInputSubmit disabled={!input.trim()}>
                 <ArrowUpIcon className="size-[1.2em]" />
                 <span className="sr-only">Send</span>

@@ -35,6 +35,7 @@ import {
   MentionList,
   MentionItem,
   MentionItemText,
+  MentionHighlight,
 } from '@/components/ui/mention'
 
 const users = [
@@ -56,6 +57,26 @@ function App() {
         ))}
       </MentionList>
     </Mention>
+  )
+}
+```
+
+## Highlighting Mentions
+
+Use `MentionHighlight` to render text with styled mention pills:
+
+```tsx showLineNumbers
+import { MentionHighlight } from '@/components/ui/mention'
+
+function MessageBubble({ content }: { content: string }) {
+  return (
+    <div className="rounded-lg bg-muted p-3">
+      <MentionHighlight
+        mentionClassName="bg-violet-500/20 text-violet-600 dark:text-violet-400 rounded px-0.5 font-medium"
+      >
+        {content}
+      </MentionHighlight>
+    </div>
   )
 }
 ```

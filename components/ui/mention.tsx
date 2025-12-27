@@ -144,7 +144,7 @@ function Mention({
  * -----------------------------------------------------------------------------------------------*/
 
 interface MentionInputProps
-  extends React.InputHTMLAttributes<HTMLInputElement | HTMLTextAreaElement> {
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement | HTMLTextAreaElement>, 'value' | 'onChange'> {
   asChild?: boolean
 }
 
@@ -164,6 +164,10 @@ const MentionInput = React.forwardRef<
     },
     [forwardedRef, context.inputRef]
   )
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    context.onValueChange(e.target.value)
+  }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!context.isOpen) return
@@ -209,6 +213,8 @@ const MentionInput = React.forwardRef<
     <input
       ref={composedRef as React.Ref<HTMLInputElement>}
       className={className}
+      value={context.value}
+      onChange={handleChange}
       onKeyDown={handleKeyDown}
       {...props}
     />
@@ -322,6 +328,39 @@ const MentionItemIndicator = React.forwardRef<
 })
 MentionItemIndicator.displayName = 'MentionItemIndicator'
 
+/* -------------------------------------------------------------------------------------------------
+ * MentionHighlight - Helper to render text with highlighted mentions
+ * -----------------------------------------------------------------------------------------------*/
+
+interface MentionHighlightProps {
+  children: string
+  className?: string
+  mentionClassName?: string
+}
+
+function MentionHighlight({
+  children,
+  className,
+  mentionClassName = 'bg-violet-500/20 text-violet-600 dark:text-violet-400 rounded px-1 font-medium',
+}: MentionHighlightProps) {
+  const parts = children.split(/(@\w+)/g)
+  
+  return (
+    <span className={className}>
+      {parts.map((part, index) => {
+        if (part.startsWith('@')) {
+          return (
+            <span key={index} className={mentionClassName}>
+              {part}
+            </span>
+          )
+        }
+        return part
+      })}
+    </span>
+  )
+}
+
 export {
   Mention,
   MentionInput,
@@ -329,4 +368,5 @@ export {
   MentionItem,
   MentionItemText,
   MentionItemIndicator,
+  MentionHighlight,
 }
