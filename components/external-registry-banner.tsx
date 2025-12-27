@@ -19,7 +19,7 @@ export function ExternalRegistryBanner({
   return (
     <div
       className={cn(
-        'not-prose bg-muted/50 border-border mb-6 flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between',
+        'not-prose my-6 first:mt-0 last:mb-0 bg-muted/50 border-border mb-6 flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between',
         className
       )}
     >

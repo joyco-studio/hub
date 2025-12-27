@@ -5,19 +5,20 @@ externalRegistry:
   name: Dice UI
   url: https://www.diceui.com/docs/components/media-player
   registryUrl: https://www.diceui.com/r/media-player.json
-docLinks:
-  - label: 'Dice UI Docs'
-    href: 'https://www.diceui.com/docs/components/media-player'
 ---
 
+import { ComponentPreview } from '@/components/preview/component-preview'
 import { ExternalRegistryBanner } from '@/components/external-registry-banner'
 import { Dice4 } from 'lucide-react'
 
 <ExternalRegistryBanner
   name="Dice UI"
   icon={<Dice4 />}
-  url="https://www.diceui.com/docs/components/media-player"
+  registryUrl="https://www.diceui.com/"
+  componentUrl="https://www.diceui.com/docs/components/media-player"
 />
+
+<ComponentPreview name="media-player-demo" />
 
 ## Installation
 

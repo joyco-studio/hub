@@ -19,6 +19,7 @@
     "hooks": "@/hooks"
   },
   "registries": {
-    "@joyco": "https://registry.joyco.studio/r/{name}.json"
+    "@joyco": "https://registry.joyco.studio/r/{name}.json",
+    "@diceui": "https://diceui.com/r/{name}.json"
   }
 }
