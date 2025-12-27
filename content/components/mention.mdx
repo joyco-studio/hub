@@ -7,6 +7,7 @@ externalRegistry:
   registryUrl: https://www.diceui.com/r/mention.json
 ---
 
+import { ComponentPreview } from '@/components/preview/component-preview'
 import { ExternalRegistryBanner } from '@/components/external-registry-banner'
 import { Dice4 } from 'lucide-react'
 
@@ -17,8 +18,50 @@ import { Dice4 } from 'lucide-react'
   componentUrl="https://www.diceui.com/docs/components/mention"
 />
 
+<ComponentPreview name="mention-demo" />
+
 ## Installation
 
 ```bash
 npx shadcn@latest add https://www.diceui.com/r/mention.json
 ```
+
+## Usage
+
+```tsx showLineNumbers
+import {
+  Mention,
+  MentionInput,
+  MentionList,
+  MentionItem,
+  MentionItemText,
+} from '@/components/ui/mention'
+
+const users = [
+  { id: '1', name: 'John Doe', username: 'johndoe' },
+  { id: '2', name: 'Jane Smith', username: 'janesmith' },
+]
+
+function App() {
+  const [value, setValue] = React.useState('')
+
+  return (
+    <Mention value={value} onValueChange={setValue} trigger="@">
+      <MentionInput placeholder="Type @ to mention someone..." />
+      <MentionList>
+        {users.map((user) => (
+          <MentionItem key={user.id} value={user.username}>
+            <MentionItemText>{user.name}</MentionItemText>
+          </MentionItem>
+        ))}
+      </MentionList>
+    </Mention>
+  )
+}
+```
+
+## With Chat Component
+
+Combine with the [Chat](/components/chat) component to enable mentions in a chat interface:
+
+<ComponentPreview name="chat-with-mention-demo" />
