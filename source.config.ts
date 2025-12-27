@@ -25,6 +25,17 @@ export const docs = defineDocs({
           })
         )
         .default([]),
+      // External registry component configuration
+      externalRegistry: z
+        .object({
+          /** Name of the external registry (e.g., "Dice UI") */
+          name: z.string(),
+          /** URL to the component on the external registry */
+          url: z.string(),
+          /** URL to the registry JSON file for shadcn installation */
+          registryUrl: z.string(),
+        })
+        .optional(),
     }),
     postprocess: {
       includeProcessedMarkdown: true,

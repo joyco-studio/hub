@@ -1,0 +1,27 @@
+---
+title: Media Player
+description: A fully-featured media player component with support for video and audio playback controls, and accessibility.
+externalRegistry:
+  name: Dice UI
+  url: https://www.diceui.com/docs/components/media-player
+  registryUrl: https://www.diceui.com/r/media-player.json
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+import { ExternalRegistryBanner } from '@/components/external-registry-banner'
+import { Dice4 } from 'lucide-react'
+
+<ExternalRegistryBanner
+  name="Dice UI"
+  icon={<Dice4 />}
+  registryUrl="https://www.diceui.com/"
+  componentUrl="https://www.diceui.com/docs/components/media-player"
+/>
+
+<ComponentPreview name="media-player-demo" />
+
+## Installation
+
+```bash
+npx shadcn@latest add https://registry.joyco.studio/r/media-player.json
+```
