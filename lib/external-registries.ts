@@ -1,4 +1,6 @@
-import { source } from '@/lib/source'
+import fs from 'node:fs'
+import path from 'node:path'
+import matter from 'gray-matter'
 
 export interface ExternalComponent {
   slug: string
@@ -15,36 +17,74 @@ export interface ExternalComponent {
   externalRegistryUrl: string
 }
 
-/**
- * Get all external component redirects for Next.js config
- * Redirects /r/{slug}.json to the external registry's JSON file
- */
-export function getExternalComponentRedirects() {
-  return source
-    .getPages()
-    .filter((page) => page.data.externalRegistry?.registryUrl)
-    .map((page) => ({
-      source: `/r/${page.slugs.at(-1)}.json`,
-      destination: page.data.externalRegistry!.registryUrl,
-      permanent: false,
-    }))
+interface Frontmatter {
+  title: string
+  description?: string
+  externalRegistry?: {
+    name: string
+    url: string
+    registryUrl: string
+  }
 }
 
+/**
+ * Get all external component redirects for Next.js config
+ * Reads MDX frontmatter directly (works at config time)
+ */
+export function getExternalComponentRedirects() {
+  const contentDir = path.join(process.cwd(), 'content', 'components')
+
+  if (!fs.existsSync(contentDir)) {
+    return []
+  }
+
+  const files = fs.readdirSync(contentDir).filter((f) => f.endsWith('.mdx'))
+  const redirects: { source: string; destination: string; permanent: boolean }[] = []
+
+  for (const file of files) {
+    const content = fs.readFileSync(path.join(contentDir, file), 'utf-8')
+    const { data } = matter(content)
+    const frontmatter = data as Frontmatter
+
+    if (frontmatter.externalRegistry?.registryUrl) {
+      const slug = file.replace('.mdx', '')
+      redirects.push({
+        source: `/r/${slug}.json`,
+        destination: frontmatter.externalRegistry.registryUrl,
+        permanent: false,
+      })
+    }
+  }
+
+  return redirects
+}
+
+/**
+ * Get external component by slug
+ */
 export function getExternalComponentBySlug(
   slug: string
 ): ExternalComponent | undefined {
-  const page = source
-    .getPages()
-    .find((p) => p.slugs.at(-1) === slug && p.data.externalRegistry)
+  const filePath = path.join(process.cwd(), 'content', 'components', `${slug}.mdx`)
 
-  if (!page?.data.externalRegistry) return undefined
+  if (!fs.existsSync(filePath)) {
+    return undefined
+  }
+
+  const content = fs.readFileSync(filePath, 'utf-8')
+  const { data } = matter(content)
+  const frontmatter = data as Frontmatter
+
+  if (!frontmatter.externalRegistry) {
+    return undefined
+  }
 
   return {
     slug,
-    title: page.data.title,
-    description: page.data.description ?? '',
-    externalUrl: page.data.externalRegistry.url,
-    externalRegistryUrl: page.data.externalRegistry.registryUrl,
-    registry: page.data.externalRegistry.name,
+    title: frontmatter.title,
+    description: frontmatter.description ?? '',
+    externalUrl: frontmatter.externalRegistry.url,
+    externalRegistryUrl: frontmatter.externalRegistry.registryUrl,
+    registry: frontmatter.externalRegistry.name,
   }
 }
