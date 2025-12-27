@@ -114,16 +114,31 @@ export function ChatWithMentionDemo() {
           trigger="@"
         >
           <ChatInputArea>
-            <MentionInput asChild>
-              <ChatInputField
-                multiline
-                placeholder="Type @ to mention someone..."
-                value={input}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                  setInput(e.target.value)
-                }
-              />
-            </MentionInput>
+            <div className="relative flex-1">
+              {/* Highlight overlay - matches InputGroupTextarea: px-3 py-3 */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 whitespace-pre-wrap break-words px-3 py-3 text-base md:text-sm"
+              >
+                <MentionHighlight
+                  mentionClassName="bg-violet-500/20 text-violet-600 dark:text-violet-400 rounded px-0.5 font-medium"
+                >
+                  {input}
+                </MentionHighlight>
+              </div>
+              {/* Actual input */}
+              <MentionInput asChild>
+                <ChatInputField
+                  multiline
+                  placeholder="Type @ to mention someone..."
+                  value={input}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                    setInput(e.target.value)
+                  }
+                  className="text-transparent caret-foreground"
+                />
+              </MentionInput>
+            </div>
             <ChatInputSubmit disabled={!input.trim()}>
               <ArrowUpIcon className="size-[1.2em]" />
               <span className="sr-only">Send</span>

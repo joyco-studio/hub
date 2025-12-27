@@ -7,6 +7,7 @@ import {
   MentionList,
   MentionItem,
   MentionItemText,
+  MentionHighlight,
 } from '@/components/ui/mention'
 
 const USERS = [
@@ -30,11 +31,25 @@ export function MentionDemo() {
           onValueChange={setValue}
           trigger="@"
         >
-          <MentionInput
-            id="mention-input"
-            placeholder="Type @ to mention someone..."
-            className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          />
+          <div className="relative">
+            {/* Highlight overlay - matches input styling exactly */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 flex h-9 w-full items-center overflow-hidden px-3 py-1 text-base md:text-sm"
+            >
+              <MentionHighlight
+                mentionClassName="bg-violet-500/20 text-violet-600 dark:text-violet-400 rounded px-0.5 font-medium"
+              >
+                {value}
+              </MentionHighlight>
+            </div>
+            {/* Actual input - text is transparent, only caret shows */}
+            <MentionInput
+              id="mention-input"
+              placeholder="Type @ to mention someone..."
+              className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-9 w-full rounded-md border px-3 py-1 text-base text-transparent caret-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+            />
+          </div>
           <MentionList className="bg-popover text-popover-foreground absolute z-50 mt-1 max-h-60 w-64 overflow-auto rounded-md border p-1 shadow-md">
             {USERS.map((user) => (
               <MentionItem
