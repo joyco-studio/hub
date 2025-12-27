@@ -108,11 +108,15 @@ export function ChatWithMentionDemo() {
 
         <Mention value={input} onValueChange={setInput} trigger="@">
           <ChatInputArea>
-            <div className="relative flex-1">
-              {/* Overlay: py-3 pl-6, text-base md:text-sm leading-normal - matches ChatInputArea styles */}
+            {/* 
+              Wrapper with grid to stack overlay and input perfectly.
+              Both children occupy the same grid cell.
+            */}
+            <div className="relative grid flex-1">
+              {/* Overlay - exact same padding as ChatInputField: py-3 pl-6 pr-3 */}
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-0 py-3 pl-6 text-base leading-normal md:text-sm"
+                className="pointer-events-none col-start-1 row-start-1 whitespace-pre-wrap break-words py-3 pl-6 pr-3 text-base leading-normal md:text-sm"
               >
                 <MentionHighlight
                   mentionClassName="bg-violet-500/20 text-violet-600 dark:text-violet-400 rounded px-0.5 font-medium"
@@ -120,6 +124,7 @@ export function ChatWithMentionDemo() {
                   {input}
                 </MentionHighlight>
               </div>
+              {/* Input - transparent text, visible caret */}
               <MentionInput asChild>
                 <ChatInputField
                   multiline
@@ -128,7 +133,7 @@ export function ChatWithMentionDemo() {
                   onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                     setInput(e.target.value)
                   }
-                  className="text-transparent caret-foreground"
+                  className="col-start-1 row-start-1 text-transparent caret-foreground"
                 />
               </MentionInput>
             </div>
