@@ -119,6 +119,10 @@
         {
           "path": "registry/joyco/blocks/hls-video-player.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "lib/compose-refs.ts",
+          "type": "registry:lib"
         }
       ],
       "dependencies": ["hls.js"]
