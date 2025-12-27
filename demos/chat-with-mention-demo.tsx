@@ -108,68 +108,51 @@ export function ChatWithMentionDemo() {
           </ChatMessages>
         </ChatViewport>
 
-        <div className="relative">
-          <Mention
-            value={input}
-            onValueChange={setInput}
-            trigger="@"
-          >
-            <ChatInputArea>
-              <div className="relative flex-1">
-                {/* Highlight overlay */}
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-0 flex items-center overflow-hidden px-3 py-2 text-sm"
-                >
-                  <MentionHighlight
-                    mentionClassName="bg-violet-500/20 text-violet-600 dark:text-violet-400 rounded px-0.5 font-medium"
-                  >
-                    {input}
-                  </MentionHighlight>
+        <Mention
+          value={input}
+          onValueChange={setInput}
+          trigger="@"
+        >
+          <ChatInputArea>
+            <MentionInput asChild>
+              <ChatInputField
+                multiline
+                placeholder="Type @ to mention someone..."
+                value={input}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                  setInput(e.target.value)
+                }
+              />
+            </MentionInput>
+            <ChatInputSubmit disabled={!input.trim()}>
+              <ArrowUpIcon className="size-[1.2em]" />
+              <span className="sr-only">Send</span>
+            </ChatInputSubmit>
+          </ChatInputArea>
+          <MentionList className="bg-popover text-popover-foreground absolute bottom-full left-0 z-50 mb-2 max-h-48 w-64 overflow-auto rounded-md border p-1 shadow-md">
+            {USERS.map((user) => (
+              <MentionItem
+                key={user.id}
+                value={user.username}
+                className="hover:bg-accent hover:text-accent-foreground relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+              >
+                <img
+                  src={user.avatar}
+                  alt={user.name}
+                  className="h-6 w-6 rounded-full"
+                />
+                <div className="flex flex-col">
+                  <MentionItemText className="font-medium">
+                    {user.name}
+                  </MentionItemText>
+                  <span className="text-muted-foreground text-xs">
+                    @{user.username}
+                  </span>
                 </div>
-                {/* Actual input with asChild to use ChatInputField */}
-                <MentionInput asChild>
-                  <ChatInputField
-                    multiline
-                    placeholder="Type @ to mention someone..."
-                    value={input}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                      setInput(e.target.value)
-                    }
-                    className="text-transparent caret-foreground"
-                  />
-                </MentionInput>
-              </div>
-              <ChatInputSubmit disabled={!input.trim()}>
-                <ArrowUpIcon className="size-[1.2em]" />
-                <span className="sr-only">Send</span>
-              </ChatInputSubmit>
-            </ChatInputArea>
-            <MentionList className="bg-popover text-popover-foreground absolute bottom-full left-0 z-50 mb-2 max-h-48 w-64 overflow-auto rounded-md border p-1 shadow-md">
-              {USERS.map((user) => (
-                <MentionItem
-                  key={user.id}
-                  value={user.username}
-                  className="hover:bg-accent hover:text-accent-foreground relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-                >
-                  <img
-                    src={user.avatar}
-                    alt={user.name}
-                    className="h-6 w-6 rounded-full"
-                  />
-                  <div className="flex flex-col">
-                    <MentionItemText className="font-medium">
-                      {user.name}
-                    </MentionItemText>
-                    <span className="text-muted-foreground text-xs">
-                      @{user.username}
-                    </span>
-                  </div>
-                </MentionItem>
-              ))}
-            </MentionList>
-          </Mention>
-        </div>
+              </MentionItem>
+            ))}
+          </MentionList>
+        </Mention>
       </div>
     </Chat>
   )
