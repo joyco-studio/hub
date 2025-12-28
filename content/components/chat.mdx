@@ -16,7 +16,7 @@ npx shadcn@latest add https://registry.joyco.studio/r/chat.json
 
 ## Usage
 
-```tsx showLineNumbers
+```tsx
 import {
   Chat,
   ChatInputArea,
@@ -30,45 +30,22 @@ import {
   ChatMessageTime,
 } from '@/components/chat'
 
-function App() {
-  const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState('')
+<Chat>
+  <ChatViewport>
+    <ChatMessages>
+      <ChatMessageRow>
+        <ChatMessageAvatar />
+        <ChatMessageBubble />
+        <ChatMessageTime />
+      </ChatMessageRow>
+    </ChatMessages>
+  </ChatViewport>
 
-  const handleSubmit = (message: string) => {
-    // Handle sending message...
-    setInput('')
-  }
-
-  return (
-    <Chat onSubmit={handleSubmit}>
-      <ChatViewport className="h-96">
-        <ChatMessages>
-          {messages.map((message) => (
-            <ChatMessageRow key={message.id} variant={message.role}>
-              <ChatMessageAvatar
-                src={message.avatar}
-                alt={message.name}
-                fallback={message.name?.charAt(0)}
-              />
-              <ChatMessageBubble>{message.content}</ChatMessageBubble>
-              <ChatMessageTime dateTime={message.timestamp} />
-            </ChatMessageRow>
-          ))}
-        </ChatMessages>
-      </ChatViewport>
-
-      <ChatInputArea>
-        <ChatInputField
-          multiline
-          placeholder="Type a message..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-        />
-        <ChatInputSubmit />
-      </ChatInputArea>
-    </Chat>
-  )
-}
+  <ChatInputArea>
+    <ChatInputField />
+    <ChatInputSubmit />
+  </ChatInputArea>
+</Chat>
 ```
 
 ## No avatars & single line input
