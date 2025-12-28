@@ -12,6 +12,7 @@ import {
   ChatMessageBubble,
   ChatMessageTime,
   ChatMessageAddon,
+  type ChatSubmitEvent,
 } from '@/registry/joyco/blocks/chat'
 import { Button } from '@/components/ui/button'
 import { Check, CheckCheck, EllipsisVertical, SmilePlus } from 'lucide-react'
@@ -52,11 +53,11 @@ export function ChatDemo() {
   const [chat, setChat] = React.useState<Message[]>(initialChat)
   const [input, setInput] = React.useState('')
 
-  const handleSubmit = (msg: string) => {
+  const handleSubmit = (e: ChatSubmitEvent) => {
     const userMessage: Message = {
       type: 'message',
       id: Date.now().toString(),
-      content: msg,
+      content: e.message,
       role: 'self',
       timestamp: new Date(),
     }

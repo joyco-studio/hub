@@ -1,10 +1,10 @@
+/* eslint-disable @next/next/no-img-element */
 'use client'
 
 import * as React from 'react'
 import {
   Chat,
   ChatInputArea,
-  ChatInputField,
   ChatInputSubmit,
   ChatViewport,
   ChatMessages,
@@ -12,93 +12,138 @@ import {
   ChatMessageBubble,
   ChatMessageTime,
   ChatMessageAvatar,
+  ChatInputField,
+  type ChatSubmitEvent,
 } from '@/registry/joyco/blocks/chat'
 import {
   Mention,
   MentionInput,
-  MentionList,
+  MentionContent,
   MentionItem,
-  MentionItemText,
-  MentionHighlight,
 } from '@/components/ui/mention'
+import * as MentionPrimitive from "@diceui/mention";
 import { ArrowUpIcon } from 'lucide-react'
 
 const MTPRZ_AVATAR = '/static/matiasperz.jpg'
+const JOYCO_AVATAR = '/static/joyco.jpg'
 const JOYBOY_AVATAR = '/static/joyboy.jpg'
 const FABROOS_AVATAR = '/static/fabroos.jpg'
 
-const USERS = [
-  { id: '1', name: 'Matias Perez', username: 'matiasperz', avatar: MTPRZ_AVATAR },
+const users = [
+  {
+    id: '1',
+    name: 'Matias Perez',
+    username: 'matiasperz',
+    avatar: MTPRZ_AVATAR,
+  },
+  { id: '2', name: 'Joyco', username: 'joyco', avatar: JOYCO_AVATAR },
   { id: '3', name: 'Joyboy', username: 'joyboy', avatar: JOYBOY_AVATAR },
   { id: '4', name: 'Fabroos', username: 'fabroos', avatar: FABROOS_AVATAR },
 ]
 
 type Message = {
   id: string
-  avatar: string
-  name: string
+  avatar?: string
+  name?: string
+  fallback?: string
   content: string
   role: 'self' | 'peer'
   timestamp: Date
 }
 
-const initialMessages: Message[] = [
+const initialChat: Message[] = [
   {
     id: '1',
     avatar: FABROOS_AVATAR,
     name: 'Fabroos',
-    content: 'Hey team! Who should I assign this task to?',
+    fallback: 'F',
+    content: 'Hey @matiasperz, did you see the new component?',
     role: 'peer',
-    timestamp: new Date('2025-12-26T10:00:00.000Z'),
+    timestamp: new Date('2025-12-26T01:00:00.000Z'),
   },
   {
     id: '2',
+    avatar: MTPRZ_AVATAR,
+    name: 'You',
+    fallback: 'M',
+    content: 'Yes! @joyboy and @joyco helped with the design',
+    role: 'self',
+    timestamp: new Date('2025-12-26T01:01:00.000Z'),
+  },
+  {
+    id: '3',
     avatar: JOYBOY_AVATAR,
     name: 'Joyboy',
-    content: '@matiasperz would be perfect for this!',
+    fallback: 'J',
+    content: "It's looking great! 🎉",
     role: 'peer',
-    timestamp: new Date('2025-12-26T10:01:00.000Z'),
+    timestamp: new Date('2025-12-26T01:02:00.000Z'),
   },
 ]
 
+function MentionHighlight({
+  children,
+  className,
+}: {
+  children: string
+  className?: string
+}) {
+  const parts = children.split(/(@\w+)/g)
+
+  return (
+    <span className={className}>
+      {parts.map((part, index) => {
+        if (part.startsWith('@')) {
+          return (
+            <span
+              key={index}
+              className="rounded bg-blue-200 px-0.5 py-px text-blue-950 dark:bg-blue-800 dark:text-blue-50"
+            >
+              {part}
+            </span>
+          )
+        }
+        return part
+      })}
+    </span>
+  )
+}
+
 export function ChatWithMentionDemo() {
-  const [messages, setMessages] = React.useState<Message[]>(initialMessages)
+  const [chat, setChat] = React.useState<Message[]>(initialChat)
+  const [mentions, setMentions] = React.useState<string[]>([])
   const [input, setInput] = React.useState('')
 
-  const handleSubmit = (msg: string) => {
-    if (!msg.trim()) return
-
+  const handleSubmit = (e: ChatSubmitEvent) => {
     const userMessage: Message = {
       id: Date.now().toString(),
       avatar: MTPRZ_AVATAR,
       name: 'You',
-      content: msg,
+      fallback: 'M',
+      content: e.message,
       role: 'self',
       timestamp: new Date(),
     }
 
-    setMessages((prev) => [...prev, userMessage])
+    setChat((prev) => [...prev, userMessage])
+    setMentions([])
     setInput('')
   }
 
   return (
     <Chat onSubmit={handleSubmit}>
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-6">
-        <ChatViewport className="h-80">
+        <ChatViewport className="h-96">
           <ChatMessages className="w-full py-3">
-            {messages.map((message) => (
+            {chat.map((message) => (
               <ChatMessageRow key={message.id} variant={message.role}>
                 <ChatMessageAvatar
                   src={message.avatar}
-                  fallback={message.name.charAt(0)}
+                  fallback={message.fallback}
                   alt={message.name}
                 />
                 <ChatMessageBubble>
-                  <MentionHighlight
-                    mentionClassName="bg-violet-500/20 text-violet-600 dark:text-violet-400 rounded px-0.5 font-medium"
-                  >
-                    {message.content}
-                  </MentionHighlight>
+                  <MentionHighlight>{message.content}</MentionHighlight>
                 </ChatMessageBubble>
                 <ChatMessageTime dateTime={message.timestamp} />
               </ChatMessageRow>
@@ -106,63 +151,61 @@ export function ChatWithMentionDemo() {
           </ChatMessages>
         </ChatViewport>
 
-        <Mention value={input} onValueChange={setInput} trigger="@">
-          <ChatInputArea>
-            <div className="grid flex-1">
-              {/* Overlay - matches input padding exactly */}
-              <div
-                aria-hidden="true"
-                className="pointer-events-none col-start-1 row-start-1 whitespace-pre-wrap break-words py-3 pl-6 pr-3 text-base leading-normal md:text-sm"
-              >
-                <MentionHighlight
-                  mentionClassName="bg-violet-500/20 text-violet-600 dark:text-violet-400 rounded px-0.5 font-medium"
-                >
-                  {input}
-                </MentionHighlight>
-              </div>
-              {/* Input - re-apply ChatInputArea styles since wrapper breaks the * selector */}
-              <MentionInput asChild>
-                <ChatInputField
-                  multiline
-                  placeholder="Type @ to mention someone..."
-                  value={input}
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                    setInput(e.target.value)
-                  }
-                  className="col-start-1 row-start-1 py-3 pl-6 text-transparent caret-foreground [font-size:inherit] leading-[inherit]"
-                />
-              </MentionInput>
-            </div>
-            <ChatInputSubmit disabled={!input.trim()}>
-              <ArrowUpIcon className="size-[1.2em]" />
-              <span className="sr-only">Send</span>
-            </ChatInputSubmit>
-          </ChatInputArea>
-          <MentionList className="bg-popover text-popover-foreground absolute bottom-full left-0 z-50 mb-2 max-h-48 w-64 overflow-auto rounded-md border p-1 shadow-md">
-            {USERS.map((user) => (
-              <MentionItem
-                key={user.id}
-                value={user.username}
-                className="hover:bg-accent hover:text-accent-foreground relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-              >
-                <img
-                  src={user.avatar}
-                  alt={user.name}
-                  className="h-6 w-6 rounded-full"
-                />
-                <div className="flex flex-col">
-                  <MentionItemText className="font-medium">
-                    {user.name}
-                  </MentionItemText>
-                  <span className="text-muted-foreground text-xs">
-                    @{user.username}
-                  </span>
-                </div>
-              </MentionItem>
-            ))}
-          </MentionList>
-        </Mention>
+        <ChatInputArea>
+          <Mention
+            trigger="@"
+            inputValue={input}
+            onInputValueChange={setInput}
+            value={mentions}
+            onValueChange={setMentions}
+            className="flex-1"
+          >
+            <MentionPrimitive.Input asChild>
+              <ChatInputField
+                placeholder="Type @ to mention someone..."
+                multiline
+              />
+            </MentionPrimitive.Input>
+            <MentionContent>
+              {users.map((user) => (
+                <MentionItem key={user.id} value={user.username}>
+                  <img
+                    src={user.avatar}
+                    alt={user.name}
+                    className="size-6 rounded-full"
+                  />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">{user.name}</span>
+                    <span className="text-muted-foreground text-xs">
+                      @{user.username}
+                    </span>
+                  </div>
+                </MentionItem>
+              ))}
+            </MentionContent>
+          </Mention>
+          <ChatInputSubmit disabled={input.length === 0}>
+            <ArrowUpIcon className="size-[1.2em]" />
+            <span className="sr-only">Send</span>
+          </ChatInputSubmit>
+        </ChatInputArea>
       </div>
+      <style>{
+        /* css */ `
+        @layer utilities {
+          .safe-field-sizing-content {
+            height: 0;
+          }
+
+          @supports (field-sizing: content) {
+            .safe-field-sizing-content {
+              field-sizing: content;
+              height: auto;
+            }
+          }
+        }
+      `
+      }</style>
     </Chat>
   )
 }

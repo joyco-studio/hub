@@ -13,6 +13,7 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
+    "@diceui/mention": "^0.8.0",
     "@joycostudio/marquee": "^0.0.12",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -31,8 +32,8 @@
     "fumadocs-core": "16.2.3",
     "fumadocs-mdx": "14.0.4",
     "fumadocs-ui": "16.2.3",
-    "hls.js": "^1.6.15",
     "gray-matter": "^4.0.3",
+    "hls.js": "^1.6.15",
     "jotai": "^2.15.1",
     "lucide-react": "^0.552.0",
     "media-chrome": "^4.17.2",

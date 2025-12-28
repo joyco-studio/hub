@@ -69,10 +69,8 @@ import { MentionHighlight } from '@/components/ui/mention'
 
 function MessageBubble({ content }: { content: string }) {
   return (
-    <div className="rounded-lg bg-muted p-3">
-      <MentionHighlight
-        mentionClassName="bg-violet-500/20 text-violet-600 dark:text-violet-400 rounded px-0.5 font-medium"
-      >
+    <div className="bg-muted rounded-lg p-3">
+      <MentionHighlight mentionClassName="bg-violet-500/20 text-violet-600 dark:text-violet-400 rounded px-0.5 font-medium">
         {content}
       </MentionHighlight>
     </div>

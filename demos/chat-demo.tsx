@@ -12,6 +12,7 @@ import {
   ChatMessageBubble,
   ChatMessageTime,
   ChatMessageAvatar,
+  type ChatSubmitEvent,
 } from '@/registry/joyco/blocks/chat'
 import { ArrowUpIcon, Square } from 'lucide-react'
 
@@ -97,7 +98,7 @@ export function ChatDemo() {
 
   const { stream, abort, isStreaming } = useStreamToken(updateMessageContent)
 
-  const handleSubmit = (msg: string) => {
+  const handleSubmit = (e: ChatSubmitEvent) => {
     if (isStreaming) return
 
     const userMessage: Message = {
@@ -105,7 +106,7 @@ export function ChatDemo() {
       id: Date.now().toString(),
       avatar: MTPRZ_AVATAR,
       name: 'You',
-      content: msg,
+      content: e.message,
       role: 'self',
       timestamp: new Date(),
     }

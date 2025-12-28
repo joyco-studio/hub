@@ -15,17 +15,44 @@ import {
 } from '@/components/ui/input-group'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { useUserInterruption } from '@/hooks/use-interruption'
+import { useComposedRefs } from '@/lib/compose-refs'
 
 type ChatMessageVariant = 'self' | 'peer' | 'system'
+
+/* -------------------------------------------------------------------------------------------------
+ * ChatSubmitEvent
+ * -------------------------------------------------------------------------------------------------*/
+
+export class ChatSubmitEvent {
+  readonly form: HTMLFormElement
+  readonly input: HTMLInputElement | HTMLTextAreaElement | null
+  readonly message: string
+  defaultPrevented = false
+
+  constructor(data: {
+    form: HTMLFormElement
+    input: HTMLInputElement | HTMLTextAreaElement | null
+    message: string
+  }) {
+    this.form = data.form
+    this.input = data.input
+    this.message = data.message
+  }
+
+  preventDefault() {
+    this.defaultPrevented = true
+  }
+}
 
 /* -------------------------------------------------------------------------------------------------
  * Chat Context
  * -------------------------------------------------------------------------------------------------*/
 
 type ChatContextValue = {
+  inputRef: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>
   viewportRef: React.RefObject<HTMLDivElement | null>
   scrollToBottom: (behavior?: ScrollBehavior) => void
-  onSubmit?: (message: string) => void
+  onSubmit?: (event: ChatSubmitEvent) => void
   onViewportHeightChange: (height: number) => void
   onInputHeightChange: (height: number) => void
 }
@@ -45,7 +72,7 @@ function useChatContext() {
  * -------------------------------------------------------------------------------------------------*/
 
 type ChatProps = {
-  onSubmit?: (message: string) => void
+  onSubmit?: (event: ChatSubmitEvent) => void
   bottomThreshold?: number
   children: React.ReactNode
 }
@@ -54,6 +81,7 @@ export function Chat({ onSubmit, bottomThreshold = 24, children }: ChatProps) {
   const [isAtBottom, setIsAtBottom] = React.useState(true)
   const { interruptedRef, interrupt } = useUserInterruption(200)
   const viewportRef = React.useRef<HTMLDivElement>(null)
+  const inputRef = React.useRef<HTMLInputElement | HTMLTextAreaElement>(null)
 
   const isAtBottomRef = React.useRef(true)
   const isScrollingToBottomRef = React.useRef(false)
@@ -158,6 +186,7 @@ export function Chat({ onSubmit, bottomThreshold = 24, children }: ChatProps) {
   const contextValue = React.useMemo<ChatContextValue>(
     () => ({
       viewportRef,
+      inputRef,
       scrollToBottom,
       onSubmit,
       onViewportHeightChange,
@@ -381,20 +410,36 @@ export function ChatInputArea({
 }: ChatInputAreaProps) {
   const {
     onSubmit: onSubmitContext,
+    inputRef,
     scrollToBottom,
     onInputHeightChange,
   } = useChatContext()
-  const [inputRef, { height }] = useMeasure()
+  const [areaRef, { height }] = useMeasure()
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    const formData = new FormData(e.currentTarget)
-    const message = formData.get('message')?.toString().trim()
+    const form = e.currentTarget
+    const input = inputRef.current
+    const message = input?.value.trim()
 
-    if (!message) return
+    console.log('message', message)
+    console.log('input', input)
+    console.log('form', form)
 
-    onSubmitContext?.(message)
+    if (!message || !input) return
+
+    const event = new ChatSubmitEvent({
+      form,
+      input,
+      message,
+    })
+
+    onSubmitContext?.(event)
+
+    if (!event.defaultPrevented) {
+      form.reset()
+    }
 
     requestAnimationFrame(() => {
       scrollToBottom('smooth')
@@ -410,11 +455,11 @@ export function ChatInputArea({
       <InputGroup
         className={cn(
           'h-auto items-end rounded-3xl text-base leading-normal md:text-sm',
-          '*:data-[slot=input-group-control]:py-3 *:data-[slot=input-group-control]:pl-6 *:data-[slot=input-group-control]:[font-size:inherit] *:data-[slot=input-group-control]:leading-[inherit]',
+          '**:data-[slot=input-group-control]:py-3 **:data-[slot=input-group-control]:pl-6 **:data-[slot=input-group-control]:[font-size:inherit] **:data-[slot=input-group-control]:leading-[inherit]',
           '[--input-area-height:calc(--spacing(6)+var(--leading-normal)*1em)]',
           className
         )}
-        ref={inputRef}
+        ref={areaRef}
       >
         {children}
       </InputGroup>
@@ -423,9 +468,11 @@ export function ChatInputArea({
 }
 
 function ChatMultilineInput({
+  ref,
   ...props
 }: React.ComponentProps<typeof InputGroupTextarea>) {
   const textareaRef = React.useRef<HTMLTextAreaElement>(null)
+  const composedRef = useComposedRefs<HTMLTextAreaElement>(ref, textareaRef)
 
   React.useEffect(() => {
     const textarea = textareaRef.current
@@ -451,7 +498,7 @@ function ChatMultilineInput({
     }
   }, [])
 
-  return <InputGroupTextarea name="message" ref={textareaRef} {...props} />
+  return <InputGroupTextarea name="message" {...props} ref={composedRef} />
 }
 
 function ChatSinglelineInput({
@@ -469,58 +516,74 @@ type InputProps = Omit<
   'multiline'
 >
 
-type ChatInputProps = { multiline?: boolean } & (TextareaProps | InputProps)
+type ChatInputProps =
+  | ({ multiline: true } & TextareaProps)
+  | ({ multiline: false } & InputProps)
 
-export function ChatInputField({
-  className,
-  multiline = false,
-  ...rest
-}: ChatInputProps) {
-  const handleKeyDown = (
-    e: React.KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>
+export function ChatInputField({ ref, ...rest }: ChatInputProps) {
+  const { inputRef } = useChatContext()
+  const composedRef = useComposedRefs<HTMLInputElement | HTMLTextAreaElement>(
+    ref,
+    inputRef
+  )
+
+  const submitOnEnter = (
+    e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey && !e.defaultPrevented) {
       e.preventDefault()
       e.currentTarget.form?.requestSubmit()
     }
   }
 
-  if (multiline) {
+  if (rest.multiline) {
+    const { className, onKeyDown, multiline: _, ..._rest } = rest
+
     return (
       <>
         <style>{
           /* css */ `
-        @layer utilities {
-          .safe-field-sizing-content {
-            height: 0;
-          }
+            @layer utilities {
+              .safe-field-sizing-content {
+                height: 0;
+              }
 
-          @supports (field-sizing: content) {
-            .safe-field-sizing-content {
-              field-sizing: content;
-              height: auto;
+              @supports (field-sizing: content) {
+                .safe-field-sizing-content {
+                  field-sizing: content;
+                  height: auto;
+                }
+              }
             }
-          }
-        }
-      `
+          `
         }</style>
         <ChatMultilineInput
           className={cn(
             'safe-field-sizing-content max-h-32 min-h-(--input-area-height)',
             className
           )}
-          onKeyDown={handleKeyDown}
-          {...(rest as TextareaProps)}
+          onKeyDown={(e) => {
+            onKeyDown?.(e)
+            submitOnEnter(e)
+          }}
+          {..._rest}
+          ref={composedRef}
         />
       </>
     )
   }
 
+  const { className, onKeyDown, multiline: _, ..._rest } = rest
+
   return (
     <ChatSinglelineInput
       className={cn('h-(--input-area-height)', className)}
-      onKeyDown={handleKeyDown}
-      {...(rest as InputProps)}
+      onKeyDown={(e) => {
+        onKeyDown?.(e)
+        submitOnEnter(e)
+      }}
+      {..._rest}
+      ref={composedRef}
     />
   )
 }

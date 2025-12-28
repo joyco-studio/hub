@@ -11,6 +11,7 @@ import {
   ChatMessageRow,
   ChatMessageBubble,
   ChatMessageTime,
+  type ChatSubmitEvent,
 } from '@/registry/joyco/blocks/chat'
 
 type Message = {
@@ -49,11 +50,11 @@ export function ChatDemo() {
   const [chat, setChat] = React.useState<Message[]>(initialChat)
   const [input, setInput] = React.useState('')
 
-  const handleSubmit = (msg: string) => {
+  const handleSubmit = (e: ChatSubmitEvent) => {
     const userMessage: Message = {
       type: 'message',
       id: Date.now().toString(),
-      content: msg,
+      content: e.message,
       role: 'self',
       timestamp: new Date(),
     }
@@ -78,9 +79,10 @@ export function ChatDemo() {
 
         <ChatInputArea>
           <ChatInputField
+            multiline={false}
             placeholder="Type... or not"
             value={input}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setInput(e.target.value)
             }
           />
