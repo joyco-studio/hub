@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# Pre-commit hook to ensure registry is up to date
+# This prevents pushing component updates with an outdated registry
+
+# Get list of staged files
+STAGED_FILES=$(git diff --cached --name-only)
+
+# Check if any registry source files are being committed
+# This includes: registry/, hooks/, lib/, registry.json, components.json
+REGISTRY_CHANGED=$(echo "$STAGED_FILES" | grep -E '^(registry/|hooks/|lib/|registry\.json|components\.json)' || true)
+
+if [ -z "$REGISTRY_CHANGED" ]; then
+  # No registry-related files are being committed, skip the check
+  exit 0
+fi
+
+echo "🔨 Registry source files detected in commit, building registry..."
+
+# Build the registry
+pnpm build:registry
+
+# Check if any files in public/r/ were modified after the build
+REGISTRY_DIFF=$(git diff --name-only public/r/)
+
+if [ -n "$REGISTRY_DIFF" ]; then
+  echo ""
+  echo "📦 Registry files were updated by the build:"
+  echo "$REGISTRY_DIFF" | sed 's/^/   /'
+  echo ""
+  echo "✅ Automatically staging updated registry files..."
+  
+  # Stage the updated registry files
+  git add public/r/
+  
+  echo "   Done! Registry files have been added to your commit."
+fi
+
+echo ""

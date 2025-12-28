@@ -10,7 +10,8 @@
     "build:registry": "shadcn build",
     "lint": "eslint",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "prepare": "husky"
   },
   "dependencies": {
     "@joycostudio/marquee": "^0.0.12",
@@ -31,8 +32,8 @@
     "fumadocs-core": "16.2.3",
     "fumadocs-mdx": "14.0.4",
     "fumadocs-ui": "16.2.3",
-    "hls.js": "^1.6.15",
     "gray-matter": "^4.0.3",
+    "hls.js": "^1.6.15",
     "jotai": "^2.15.1",
     "lucide-react": "^0.552.0",
     "media-chrome": "^4.17.2",
@@ -58,6 +59,7 @@
     "eslint": "^9.39.1",
     "eslint-config-next": "16.0.1",
     "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
     "postcss": "^8.5.6",
     "prettier": "^3.7.3",
     "prettier-plugin-tailwindcss": "^0.7.1",
