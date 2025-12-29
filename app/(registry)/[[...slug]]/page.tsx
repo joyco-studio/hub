@@ -9,13 +9,14 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { createRelativeLink } from 'fumadocs-ui/mdx'
 
-import { getPageImage, source } from '@/lib/source'
+import { getPageImage, getLLMText, source } from '@/lib/source'
 import { getDownloadStats } from '@/lib/stats'
 import { getMDXComponents } from '@/mdx-components'
 import { Maintainers } from '@/components/layout/maintainers'
 import { WeeklyDownloads } from '@/components/layout/weekly-downloads'
 import { InferPageType } from 'fumadocs-core/source'
 import { DocLinks } from '@/components/layout/doc-links'
+import { PageActions } from '@/components/layout/page-actions'
 
 const getComponentSlug = (page: InferPageType<typeof source>) => {
   if (page.slugs[0] !== 'components') return undefined
@@ -34,6 +35,8 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
     ? await getDownloadStats(componentSlug)
     : null
   const docLinks = page.data.docLinks
+  const llmText = await getLLMText(page)
+  const llmUrl = `/${page.slugs.join('/')}.md`
 
   return (
     <DocsPage
@@ -55,7 +58,10 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
         ),
       }}
     >
-      <DocsTitle>{page.data.title}</DocsTitle>
+      <div className="flex items-center justify-between gap-4">
+        <DocsTitle>{page.data.title}</DocsTitle>
+        <PageActions content={llmText} llmUrl={llmUrl} />
+      </div>
       <DocsDescription className="mb-1">
         {page.data.description}
       </DocsDescription>
