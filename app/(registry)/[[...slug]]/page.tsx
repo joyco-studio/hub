@@ -16,6 +16,7 @@ import { Maintainers } from '@/components/layout/maintainers'
 import { WeeklyDownloads } from '@/components/layout/weekly-downloads'
 import { InferPageType } from 'fumadocs-core/source'
 import { DocLinks } from '@/components/layout/doc-links'
+import { PageActions } from '@/components/layout/page-actions'
 
 const getComponentSlug = (page: InferPageType<typeof source>) => {
   if (page.slugs[0] !== 'components') return undefined
@@ -60,6 +61,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
         {page.data.description}
       </DocsDescription>
       <DocLinks links={docLinks} className="mb-4" />
+      <PageActions slugs={page.slugs} className="mb-4" />
       <DocsBody>
         <MDX
           components={getMDXComponents({
