@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 'use client'
 
 import * as React from 'react'
@@ -15,13 +14,8 @@ import {
   ChatInputField,
   type ChatSubmitEvent,
 } from '@/registry/joyco/blocks/chat'
-import {
-  Mention,
-  MentionInput,
-  MentionContent,
-  MentionItem,
-} from '@/components/ui/mention'
-import * as MentionPrimitive from "@diceui/mention";
+import { Mention, MentionContent, MentionItem } from '@/components/ui/mention'
+import * as MentionPrimitive from '@diceui/mention'
 import { ArrowUpIcon } from 'lucide-react'
 
 const MTPRZ_AVATAR = '/static/matiasperz.jpg'
@@ -115,6 +109,7 @@ export function ChatWithMentionDemo() {
   const [input, setInput] = React.useState('')
 
   const handleSubmit = (e: ChatSubmitEvent) => {
+    e.preventDefault()
     const userMessage: Message = {
       id: Date.now().toString(),
       avatar: MTPRZ_AVATAR,
@@ -158,7 +153,6 @@ export function ChatWithMentionDemo() {
             onInputValueChange={setInput}
             value={mentions}
             onValueChange={setMentions}
-            className="flex-1"
           >
             <MentionPrimitive.Input asChild>
               <ChatInputField

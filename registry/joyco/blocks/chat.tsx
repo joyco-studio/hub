@@ -423,10 +423,6 @@ export function ChatInputArea({
     const input = inputRef.current
     const message = input?.value.trim()
 
-    console.log('message', message)
-    console.log('input', input)
-    console.log('form', form)
-
     if (!message || !input) return
 
     const event = new ChatSubmitEvent({
@@ -456,6 +452,7 @@ export function ChatInputArea({
         className={cn(
           'h-auto items-end rounded-3xl text-base leading-normal md:text-sm',
           '**:data-[slot=input-group-control]:py-3 **:data-[slot=input-group-control]:pl-6 **:data-[slot=input-group-control]:[font-size:inherit] **:data-[slot=input-group-control]:leading-[inherit]',
+          '**:data-[slot=mention]:contents **:data-[slot=mention]:[&>div]:min-w-0 **:data-[slot=mention]:[&>div]:flex-1',
           '[--input-area-height:calc(--spacing(6)+var(--leading-normal)*1em)]',
           className
         )}
