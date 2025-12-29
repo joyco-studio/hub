@@ -9,7 +9,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { createRelativeLink } from 'fumadocs-ui/mdx'
 
-import { getPageImage, source } from '@/lib/source'
+import { getPageImage, getLLMText, source } from '@/lib/source'
 import { getDownloadStats } from '@/lib/stats'
 import { getMDXComponents } from '@/mdx-components'
 import { Maintainers } from '@/components/layout/maintainers'
@@ -35,6 +35,8 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
     ? await getDownloadStats(componentSlug)
     : null
   const docLinks = page.data.docLinks
+  const llmText = await getLLMText(page)
+  const llmUrl = `/llm/${page.slugs.join('/')}`
 
   return (
     <DocsPage
@@ -56,12 +58,14 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
         ),
       }}
     >
-      <DocsTitle>{page.data.title}</DocsTitle>
+      <div className="flex items-center justify-between gap-4">
+        <DocsTitle>{page.data.title}</DocsTitle>
+        <PageActions content={llmText} llmUrl={llmUrl} />
+      </div>
       <DocsDescription className="mb-1">
         {page.data.description}
       </DocsDescription>
       <DocLinks links={docLinks} className="mb-4" />
-      <PageActions slugs={page.slugs} className="mb-4" />
       <DocsBody>
         <MDX
           components={getMDXComponents({

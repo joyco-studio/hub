@@ -6,15 +6,15 @@ import { Check, Copy, ExternalLink } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function PageActions({
-  slugs,
+  content,
+  llmUrl,
   className,
 }: {
-  slugs: string[]
+  content: string
+  llmUrl: string
   className?: string
 }) {
   const [hasCopied, setHasCopied] = React.useState(false)
-
-  const llmUrl = `/llm/${slugs.join('/')}`
 
   React.useEffect(() => {
     if (hasCopied) {
@@ -23,36 +23,36 @@ export function PageActions({
     }
   }, [hasCopied])
 
-  const copyToClipboard = React.useCallback(async () => {
-    try {
-      const response = await fetch(llmUrl)
-      const text = await response.text()
-      await navigator.clipboard.writeText(text)
-      setHasCopied(true)
-    } catch (error) {
-      console.error('Failed to copy page content:', error)
-    }
-  }, [llmUrl])
+  const copyToClipboard = React.useCallback(() => {
+    navigator.clipboard.writeText(content)
+    setHasCopied(true)
+  }, [content])
 
   const openMarkdown = React.useCallback(() => {
     window.open(llmUrl, '_blank', 'noopener,noreferrer')
   }, [llmUrl])
 
   return (
-    <div
-      className={cn('not-prose my-0 flex flex-wrap gap-x-2 gap-y-1', className)}
-    >
-      <Button variant="outline" size="sm" onClick={copyToClipboard}>
+    <div className={cn('not-prose flex gap-x-1', className)}>
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        onClick={copyToClipboard}
+        title="Copy page as Markdown"
+      >
         {hasCopied ? (
           <Check className="size-4" />
         ) : (
           <Copy className="size-4" />
         )}
-        {hasCopied ? 'Copied!' : 'Copy Page'}
       </Button>
-      <Button variant="outline" size="sm" onClick={openMarkdown}>
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        onClick={openMarkdown}
+        title="View as Markdown"
+      >
         <ExternalLink className="size-4" />
-        View as Markdown
       </Button>
     </div>
   )
