@@ -1,32 +1,14 @@
 import fs from 'fs'
 import path from 'path'
+import { getLanguageFromExtension, stripFrontmatter } from '@/lib/shiki'
 
 /**
- * Gets the language identifier from a file extension
+ * Validates that a path is within the project directory to prevent path traversal attacks
  */
-function getLanguageFromExtension(ext: string): string {
-  const extensionMap: Record<string, string> = {
-    ts: 'typescript',
-    tsx: 'tsx',
-    js: 'javascript',
-    jsx: 'jsx',
-    json: 'json',
-    md: 'markdown',
-    css: 'css',
-    html: 'html',
-    sh: 'bash',
-    bash: 'bash',
-    yml: 'yaml',
-    yaml: 'yaml',
-  }
-  return extensionMap[ext] || ext
-}
-
-/**
- * Strips frontmatter from content (for guideline files)
- */
-function stripFrontmatter(content: string): string {
-  return content.replace(/^---\n[\s\S]*?\n---\n*/m, '')
+function isPathWithinProject(filePath: string, baseDir: string): boolean {
+  const resolvedPath = path.resolve(baseDir, filePath)
+  const normalizedBase = path.resolve(baseDir)
+  return resolvedPath.startsWith(normalizedBase + path.sep)
 }
 
 /**
@@ -54,8 +36,16 @@ export function processMdxForLLMs(content: string): string {
 
   processed = processed.replace(componentPreviewRegex, (match, name) => {
     try {
-      // Demo files are in the /demos directory
-      const demoPath = path.join(process.cwd(), 'demos', `${name}.tsx`)
+      const baseDir = process.cwd()
+      const demosDir = path.join(baseDir, 'demos')
+
+      // Validate path to prevent path traversal attacks
+      if (!isPathWithinProject(path.join('demos', `${name}.tsx`), baseDir)) {
+        console.warn(`Path traversal attempt blocked: ${name}`)
+        return match
+      }
+
+      const demoPath = path.join(demosDir, `${name}.tsx`)
 
       if (!fs.existsSync(demoPath)) {
         console.warn(`Demo file not found: ${demoPath}`)
@@ -79,7 +69,15 @@ ${source}
 
   processed = processed.replace(fileCodeblockRegex, (match, filePath) => {
     try {
-      const fullPath = path.join(process.cwd(), filePath)
+      const baseDir = process.cwd()
+
+      // Validate path to prevent path traversal attacks
+      if (!isPathWithinProject(filePath, baseDir)) {
+        console.warn(`Path traversal attempt blocked: ${filePath}`)
+        return match
+      }
+
+      const fullPath = path.join(baseDir, filePath)
 
       if (!fs.existsSync(fullPath)) {
         console.warn(`File not found: ${fullPath}`)

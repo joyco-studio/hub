@@ -1,14 +1,13 @@
 import * as fs from 'fs/promises'
 import * as path from 'path'
-import { highlightCode, getLanguageFromExtension } from '@/lib/shiki'
+import {
+  highlightCode,
+  getLanguageFromExtension,
+  stripFrontmatter,
+} from '@/lib/shiki'
 import { CodeBlock } from '@/components/code-block'
 import { DownloadFileButton } from './download-button'
 import { Separator } from './ui/separator'
-
-function stripFrontmatter(content: string): string {
-  const frontmatterRegex = /^---\n[\s\S]*?\n---\n*/
-  return content.replace(frontmatterRegex, '')
-}
 
 export async function FileCodeblock({
   filePath,

@@ -22,6 +22,13 @@ export function getLanguageFromExtension(ext: string): string {
   return LANGUAGE_MAP[ext] || ext || 'text'
 }
 
+/**
+ * Strips frontmatter from content (for guideline files)
+ */
+export function stripFrontmatter(content: string): string {
+  return content.replace(/^---\n[\s\S]*?\n---\n*/m, '')
+}
+
 export const transformers = [
   {
     code(node) {
