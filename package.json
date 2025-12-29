@@ -10,7 +10,8 @@
     "build:registry": "shadcn build",
     "lint": "eslint",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "prepare": "husky"
   },
   "dependencies": {
     "@diceui/mention": "^0.8.0",
@@ -59,6 +60,7 @@
     "eslint": "^9.39.1",
     "eslint-config-next": "16.0.1",
     "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
     "postcss": "^8.5.6",
     "prettier": "^3.7.3",
     "prettier-plugin-tailwindcss": "^0.7.1",
