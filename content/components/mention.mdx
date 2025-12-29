@@ -23,12 +23,12 @@ import { Dice4 } from 'lucide-react'
 ## Installation
 
 ```bash
-npx shadcn@latest add https://www.diceui.com/r/mention.json
+npx shadcn@latest add https://registry.joyco.studio/r/mention.json
 ```
 
 ## Usage
 
-```tsx showLineNumbers
+```tsx
 import {
   Mention,
   MentionInput,
@@ -37,45 +37,14 @@ import {
   MentionItemText,
 } from '@/components/ui/mention'
 
-const users = [
-  { id: '1', name: 'John Doe', username: 'johndoe' },
-  { id: '2', name: 'Jane Smith', username: 'janesmith' },
-]
-
-function App() {
-  const [value, setValue] = React.useState('')
-
-  return (
-    <Mention value={value} onValueChange={setValue} trigger="@">
-      <MentionInput placeholder="Type @ to mention someone..." />
-      <MentionList>
-        {users.map((user) => (
-          <MentionItem key={user.id} value={user.username}>
-            <MentionItemText>{user.name}</MentionItemText>
-          </MentionItem>
-        ))}
-      </MentionList>
-    </Mention>
-  )
-}
-```
-
-## Highlighting Mentions
-
-Use `MentionHighlight` to render text with styled mention pills:
-
-```tsx showLineNumbers
-import { MentionHighlight } from '@/components/ui/mention'
-
-function MessageBubble({ content }: { content: string }) {
-  return (
-    <div className="bg-muted rounded-lg p-3">
-      <MentionHighlight mentionClassName="bg-violet-500/20 text-violet-600 dark:text-violet-400 rounded px-0.5 font-medium">
-        {content}
-      </MentionHighlight>
-    </div>
-  )
-}
+<Mention>
+  <MentionInput />
+  <MentionList>
+    <MentionItem>
+      <MentionItemText />
+    </MentionItem>
+  </MentionList>
+</Mention>
 ```
 
 ## With Chat Component

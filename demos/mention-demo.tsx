@@ -9,18 +9,27 @@ import {
   MentionLabel,
 } from '@/components/ui/mention'
 
-const users = [
-  { id: '1', name: 'Matias Perez', username: 'matiasperz' },
-  { id: '2', name: 'Joyco', username: 'joyco' },
-  { id: '3', name: 'Joyboy', username: 'joyboy' },
-  { id: '4', name: 'Fabroos', username: 'fabroos' },
-]
+const MTPRZ_AVATAR = '/static/matiasperz.jpg'
+const JOYCO_AVATAR = '/static/joyco.jpg'
+const JOYBOY_AVATAR = '/static/joyboy.jpg'
+const FABROOS_AVATAR = '/static/fabroos.jpg'
 
+const users = [
+  {
+    id: '1',
+    name: 'Matias Perez',
+    username: 'matiasperz',
+    avatar: MTPRZ_AVATAR,
+  },
+  { id: '2', name: 'Joyco', username: 'joyco', avatar: JOYCO_AVATAR },
+  { id: '3', name: 'Joyboy', username: 'joyboy', avatar: JOYBOY_AVATAR },
+  { id: '4', name: 'Fabroos', username: 'fabroos', avatar: FABROOS_AVATAR },
+]
 export function MentionDemo() {
   const [value, setValue] = React.useState<string[]>([])
 
   return (
-    <Mention className="not-prose w-full py-6 px-4 mx-auto max-w-[400px]">
+    <Mention className="not-prose mx-auto w-full max-w-[400px] px-4 py-6">
       <MentionLabel>Mention someone</MentionLabel>
       <Mention trigger="@" value={value} onValueChange={setValue}>
         <MentionInput placeholder="Type @ to mention someone..." asChild>
@@ -29,8 +38,13 @@ export function MentionDemo() {
         <MentionContent>
           {users.map((user) => (
             <MentionItem key={user.id} value={user.username}>
+              <img
+                src={user.avatar}
+                alt={user.name}
+                className="size-6 rounded-full"
+              />
               <div className="flex flex-col">
-                <span>{user.name}</span>
+                <span className="text-sm font-medium">{user.name}</span>
                 <span className="text-muted-foreground text-xs">
                   @{user.username}
                 </span>
@@ -41,6 +55,6 @@ export function MentionDemo() {
       </Mention>
     </Mention>
   )
-}
+} 
 
 export default MentionDemo
