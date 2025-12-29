@@ -30,7 +30,7 @@ export function CardLink({ href, title, description, className }) {
   )
 }
 
-// Usage - styling inner elements via CSS selector
+// Final Result
 <CardLink className="**:data-[slot=card-description]:opacity-50" />
 ```
 
