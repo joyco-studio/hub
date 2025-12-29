@@ -19,25 +19,24 @@ npx shadcn@latest add https://registry.joyco.studio/r/mobile-menu.json
 
 ## Usage
 
-```tsx showLineNumbers
-import * as MobileMenu from '@/registry/joyco/blocks/mobile-menu'
-import { Menu, X } from 'lucide-react'
+```tsx
+import {
+  MobileMenu,
+  MobileMenuTrigger,
+  MobileMenuContent,
+  MobileMenuNavigation,
+  MobileMenuItem,
+  MobileMenuFooter,
+} from '@/components/mobile-menu'
 
-function App() {
-  return (
-    <MobileMenu.Root>
-      <MobileMenu.Trigger>
-        <Menu className="size-6" />
-      </MobileMenu.Trigger>
-      <MobileMenu.Content>
-        <MobileMenu.Navigation>
-          <MobileMenu.Item href="/">Home</MobileMenu.Item>
-          <MobileMenu.Item href="/about">About</MobileMenu.Item>
-        </MobileMenu.Navigation>
-
-        <MobileMenu.Footer>JOYCO © 2025</MobileMenu.Footer>
-      </MobileMenu.Content>
-    </MobileMenu.Root>
-  )
-}
+<MobileMenu>
+  <MobileMenuTrigger />
+  <MobileMenuContent>
+    <MobileMenuNavigation>
+      <MobileMenuItem href="/">Home</MobileMenuItem>
+      <MobileMenuItem href="/about">About</MobileMenuItem>
+    </MobileMenuNavigation>
+    <MobileMenuFooter>JOYCO © 2025</MobileMenuFooter>
+  </MobileMenuContent>
+</MobileMenu>
 ```

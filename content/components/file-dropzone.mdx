@@ -16,20 +16,12 @@ npx shadcn@latest add https://registry.joyco.studio/r/file-dropzone.json
 
 ## Usage
 
-```tsx showLineNumbers
-import { FileDropzone } from '@/registry/joyco/blocks/file-dropzone'
+```tsx
+import { FileDropzone } from '@/components/file-dropzone'
 
-function App() {
-  const handleUpload = async (file: File) => {
-    console.log('Uploading:', file.name)
-  }
-
-  return (
-    <FileDropzone
-      accept="image/png,image/jpeg"
-      maxSizeMB={5}
-      onUpload={handleUpload}
-    />
-  )
-}
+<FileDropzone
+  accept="image/png,image/jpeg"
+  maxSizeMB={5}
+  onUpload={handleUpload}
+/>
 ```

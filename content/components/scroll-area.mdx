@@ -20,19 +20,15 @@ npx shadcn@latest add https://registry.joyco.studio/r/scroll-area.json
 
 ## Usage
 
-```tsx showLineNumbers
+```tsx
 import {
   ScrollAreaViewport,
   ScrollAreaContent,
-} from '@/registry/joyco/blocks/scroll-area'
+} from '@/components/scroll-area'
 
-function App() {
-  return (
-    <ScrollAreaViewport className="h-64">
-      <ScrollAreaContent className="space-y-4 p-6">
-        <div>Content here</div>
-      </ScrollAreaContent>
-    </ScrollAreaViewport>
-  )
-}
+<ScrollAreaViewport>
+  <ScrollAreaContent>
+    <div>Content here</div>
+  </ScrollAreaContent>
+</ScrollAreaViewport>
 ```

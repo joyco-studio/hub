@@ -16,26 +16,17 @@ npx shadcn@latest add https://registry.joyco.studio/r/hls-video-player.json
 
 ## Usage
 
-```tsx showLineNumbers
-import {
-  HLSVideoPlayer,
-  type HLSVideoPlayerRef,
-} from '@/components/hls-video-player'
+```tsx
+import { HLSVideoPlayer } from '@/components/hls-video-player'
 
-function App() {
-  const ref = useRef<HTMLVideoElement>(null)
-
-  return (
-    <HLSVideoPlayer
-      ref={ref}
-      src="https://example.com/stream.m3u8"
-      width={1920}
-      height={1080}
-      onReady={() => console.log('Ready to play')}
-      onHlsError={(error) => console.error(error)}
-    />
-  )
-}
+<HLSVideoPlayer
+  ref={ref}
+  src="https://example.com/stream.m3u8"
+  width={1920}
+  height={1080}
+  onReady={onReady}
+  onHlsError={onHlsError}
+/>
 ```
 
 ## Props

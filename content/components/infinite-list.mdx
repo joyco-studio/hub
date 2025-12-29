@@ -19,19 +19,12 @@ npx shadcn@latest add https://registry.joyco.studio/r/infinite-list.json
 
 ## Usage
 
-```tsx showLineNumbers
-import { useInfiniteList, MaskedList } from '@joyco/infinite-list'
+```tsx
+import { useInfiniteList, MaskedList } from '@/components/infinite-list'
 
-const list = useInfiniteList({
-  pageSize: 20,
-  initialItems: data,
-})
-
-return (
-  <MaskedList {...list}>
-    {items.map((item) => (
-      <Item key={item.id} {...item} />
-    ))}
-  </MaskedList>
-)
+<MaskedList {...list}>
+  {items.map((item) => (
+    <Item key={item.id} {...item} />
+  ))}
+</MaskedList>
 ```

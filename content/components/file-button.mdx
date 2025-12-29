@@ -16,14 +16,10 @@ npx shadcn@latest add https://registry.joyco.studio/r/file-button.json
 
 ## Usage
 
-```tsx showLineNumbers
-import { FileInputButton } from '@joyco/file-button'
+```tsx
+import { FileInputButton } from '@/components/file-button'
 
-function App() {
-  const handleUpload = (file: File) => {
-    console.log('Selected file:', file)
-  }
-
-  return <FileInputButton onUpload={handleUpload}>Upload File</FileInputButton>
-}
+<FileInputButton onUpload={handleUpload}>
+  Upload File
+</FileInputButton>
 ```
