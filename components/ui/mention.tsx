@@ -26,7 +26,7 @@ function MentionLabel({
   return (
     <MentionPrimitive.Label
       data-slot="mention-label"
-      className={cn("px-0.5 font-semibold text-sm", className)}
+      className={cn("px-0.5 py-1.5 font-semibold text-sm", className)}
       {...props}
     />
   );
