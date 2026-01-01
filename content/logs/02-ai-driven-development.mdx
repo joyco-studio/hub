@@ -1,0 +1,37 @@
+---
+title: 02 - AI Driven Development
+---
+
+## The main attention thread
+
+This is where you put your main focus on, stuff that kind of too complex to explain to the agents and needs manual or more granular agent intervention. While you focus on this, you could have long running background agents taking care of more trivial stuff. I'm even waiting for [Codex](https://openai.com/codex/) to finish an implementation of a new component for the registry as I write this, this is where the multiplier factor of agents kicks in.
+
+## Ask the code
+
+If you are asked to write a feature into an unexplored codebase by yourself, use Cursor in "Ask Mode" to make your questions, don't waste time exploring manually, this usually takes you into long sessions of context extensive research that us humans struggle with. AI does a fantastic job on pointing you the right places. You can even take your own notes to keep track of the important stuff.
+
+## Long running agents
+
+This is a new field I dived into recently. I mainly use Cursor for my daily workflow, most of my Cursor sessions end up in 1 minute, and I get angry when that doesn't happen. That's because I use Cursor as my "main attention thread" tool. I don't want to stare at the chain of thought and tool callings for more than 1 minute, and Cursor does a great job on keeping my intervention span low.
+
+On the opposite side, when Cursor takes 3 / 4 mins to do something, and it's taking time from my main thread, I get really mad if it outputs slop. So for long running stuff like refactors or big new features, I prefer to defer that work to a non blocking place. I tested two tools I'd like to introduce you to.
+
+### Codex (GPT 5.1 - Codex)
+
+Codex CLI is pretty reliable when it comes to long running tasks, and this is its default behavior, most of my Codex sessions are about 3/4 minutes, and the results are surprisingly good. Before starting, [Codex](https://openai.com/codex/) does an extensive research over the code to find how you do stuff, what are the files involved on the new task and grabs as most context as it can before proceeding. I use this along side my shorter Cursor sessions for background local stuff.
+
+{/* ![Codex CLI screenshot](IMAGE_URL_1) */}
+
+### Cursor Cloud Agents
+
+When I want simpler trivial stuff like "Integrate Vercel Analytics" or "Add this new documentation entry" or a simple backlog ticket, I definitely want to defer this to somewhere else while I take care of more important stuff. "Cursor Cloud Agents" fit the needs pretty well, it doesn't run on your computer, you tell it what to do, it creates a new branch out from your current HEAD branch, and runs in a sandbox in the cloud. When it finishes, it appears as a new PR where you can review the changes and even ask further.
+
+{/* ![Cursor Cloud Agents task](IMAGE_URL_2) */}
+
+{/* ![Cursor Cloud Agents PR view](IMAGE_URL_3) */}
+
+## About reviews
+
+As a studio we agree on a set of [guidelines](https://registry.joyco.studio/toolbox/pr-guidelines) to maintain code quality. These are not stuff that a linter could catch, these involve logic, data management, and even file-naming. In the past, I used to review these myself, occupying my "**main attention thread**", but now we have better tools like [Greptile](https://www.greptile.com/), we load a set of guidelines that the model can load to find specific violations on the PR diff. This applies to both human code and agent code, like new PR from the "Cursor Cloud Agent". We collaborate as a team on augmenting these guidelines to refine what we ship while delegating most of these to specialized agents.
+
+{/* ![Greptile review](IMAGE_URL_4) */}
