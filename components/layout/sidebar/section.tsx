@@ -71,7 +71,7 @@ export function SidebarSection({
       </button>
 
       {isOpen && (
-        <div className="border-border ml-4 flex flex-col border-l">
+        <div className="border-border mx-4 flex flex-col border-l-2">
           {folder.children.map((child) => {
             if (child.type === 'page') {
               const itemMeta = meta[child.url] ?? {}
@@ -82,10 +82,10 @@ export function SidebarSection({
                   key={child.url}
                   href={child.url}
                   className={cn(
-                    'flex items-center gap-2 py-1.5 pr-4 pl-4 font-mono text-sm tracking-wide uppercase transition-colors',
+                    '-ml-[2px] flex items-center gap-2 py-1.5 pr-4 pl-4 font-mono text-sm tracking-wide uppercase transition-colors',
                     isItemActive
-                      ? 'text-foreground font-medium'
-                      : 'text-muted-foreground hover:text-foreground'
+                      ? 'text-foreground border-primary border-l-2 font-medium'
+                      : 'text-muted-foreground hover:text-foreground hover:border-foreground/50 border-l-2'
                   )}
                 >
                   {itemMeta.dot && (
