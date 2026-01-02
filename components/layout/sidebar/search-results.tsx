@@ -102,8 +102,8 @@ export function SearchResults({ results, query }: SearchResultsProps) {
                 'text-foreground'
               )}
             >
-              <Icon className="size-4" />
-              <span className="font-mono text-sm font-medium tracking-wide uppercase">
+              <Icon className="size-3.5" />
+              <span className="font-mono text-xs font-medium tracking-wide uppercase">
                 {label}
               </span>
             </div>
@@ -126,7 +126,7 @@ export function SearchResults({ results, query }: SearchResultsProps) {
                     href={pageUrl}
                     className={cn(
                       'flex flex-col gap-0.5 py-1.5 pr-4 pl-4 transition-colors',
-                      'text-muted-foreground hover:text-foreground'
+                      'text-muted-foreground hover:text-foreground hover:bg-accent'
                     )}
                   >
                     <span className="font-mono text-sm tracking-wide uppercase">
