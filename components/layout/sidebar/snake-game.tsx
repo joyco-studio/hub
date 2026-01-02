@@ -6,9 +6,12 @@ import * as React from 'react'
 
 type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT'
 type Position = { x: number; y: number }
+type HighscoreEntry = { score: number; date: string }
 
 const GRID_SIZE = 12
 const INITIAL_SPEED = 150
+const STORAGE_KEY = 'snake-highscores'
+const MAX_HIGHSCORES = 4
 
 export function SnakeGame() {
   const containerRef = React.useRef<HTMLDivElement>(null)
@@ -21,8 +24,49 @@ export function SnakeGame() {
   const [score, setScore] = React.useState(0)
   const [isPlaying, setIsPlaying] = React.useState(false)
   const [theme, setTheme] = React.useState('')
+  const [highscores, setHighscores] = React.useState<HighscoreEntry[]>([])
 
   const directionRef = React.useRef(direction)
+  const lastMovedDirectionRef = React.useRef(direction)
+
+  // Load highscores from localStorage on mount
+  React.useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (stored) {
+        setHighscores(JSON.parse(stored))
+      }
+    } catch {
+      // Ignore localStorage errors
+    }
+  }, [])
+
+  // Save highscore when game ends
+  React.useEffect(() => {
+    if (gameOver && score > 0) {
+      const newEntry: HighscoreEntry = {
+        score,
+        date: new Date().toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+        }),
+      }
+
+      setHighscores((prev) => {
+        const updated = [...prev, newEntry]
+          .sort((a, b) => b.score - a.score)
+          .slice(0, MAX_HIGHSCORES)
+
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+        } catch {
+          // Ignore localStorage errors
+        }
+
+        return updated
+      })
+    }
+  }, [gameOver, score])
 
   // Update ref when direction changes
   React.useEffect(() => {
@@ -80,29 +124,37 @@ export function SnakeGame() {
     setSnake(initialSnake)
     setFood(generateFood(initialSnake))
     setDirection('RIGHT')
+    lastMovedDirectionRef.current = 'RIGHT'
     setGameOver(false)
     setScore(0)
     setIsPlaying(true)
   }, [generateFood])
 
-  // Handle keyboard input
+  // Handle keyboard input - check against last MOVED direction to prevent rapid reversal
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isPlaying) return
 
       const key = e.key
-      const current = directionRef.current
+      // Check against the last direction the snake actually moved, not the queued direction
+      const lastMoved = lastMovedDirectionRef.current
 
-      if ((key === 'ArrowUp' || key === 'w') && current !== 'DOWN') {
+      if ((key === 'ArrowUp' || key === 'w') && lastMoved !== 'DOWN') {
         setDirection('UP')
         e.preventDefault()
-      } else if ((key === 'ArrowDown' || key === 's') && current !== 'UP') {
+      } else if ((key === 'ArrowDown' || key === 's') && lastMoved !== 'UP') {
         setDirection('DOWN')
         e.preventDefault()
-      } else if ((key === 'ArrowLeft' || key === 'a') && current !== 'RIGHT') {
+      } else if (
+        (key === 'ArrowLeft' || key === 'a') &&
+        lastMoved !== 'RIGHT'
+      ) {
         setDirection('LEFT')
         e.preventDefault()
-      } else if ((key === 'ArrowRight' || key === 'd') && current !== 'LEFT') {
+      } else if (
+        (key === 'ArrowRight' || key === 'd') &&
+        lastMoved !== 'LEFT'
+      ) {
         setDirection('RIGHT')
         e.preventDefault()
       }
@@ -120,6 +172,9 @@ export function SnakeGame() {
       setSnake((prev) => {
         const head = { ...prev[0] }
         const dir = directionRef.current
+
+        // Update the last moved direction BEFORE moving
+        lastMovedDirectionRef.current = dir
 
         if (dir === 'UP') head.y -= 1
         if (dir === 'DOWN') head.y += 1
@@ -245,11 +300,30 @@ export function SnakeGame() {
             </span>
           </div>
         ) : (
-          <Button size="sm" onClick={resetGame} className="flex-1 uppercase">
+          <Button size="sm" onClick={resetGame} className="w-full uppercase">
             Play Snake
           </Button>
         )}
       </div>
+      {highscores.length > 0 && (
+        <div className="border-background bg-accent/10 flex w-full flex-col border-t-4 px-3 py-2">
+          <span className="text-muted-foreground/60 mb-1 text-[10px] uppercase">
+            Highscores
+          </span>
+          {highscores.map((entry, i) => (
+            <div
+              key={`${entry.score}-${entry.date}-${i}`}
+              className="text-muted-foreground flex items-center justify-between text-xs"
+            >
+              <span>
+                <span className="text-foreground font-bold">{entry.score}</span>{' '}
+                pts
+              </span>
+              <span className="text-muted-foreground/60">{entry.date}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
