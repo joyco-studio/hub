@@ -1,11 +1,13 @@
 'use client'
 
-import { sitemap, SitemapItem } from '@/lib/sitemap'
+import { sitemap } from '@/lib/sitemap'
 import Link from 'next/link'
-import React from 'react'
+import React, { SVGProps } from 'react'
 import { Logo } from '../logos'
 import { cn } from '@/lib/utils'
 import { usePathname } from 'next/navigation'
+import { Button } from '../ui/button'
+import { ThemeToggle } from './theme-toggle'
 
 export const NavAside = () => {
   const pathname = usePathname()
@@ -16,38 +18,56 @@ export const NavAside = () => {
         <Logo />
       </div>
       {sitemap.map((item) => (
-        <NavAsideItem
+        <AsideButton
           key={item.href}
-          item={item}
+          href={item.href}
+          icon={item.icon}
+          label={item.label}
           active={pathname.startsWith(item.href)}
         />
       ))}
       <div className="bg-muted flex-1" />
+      <ThemeToggle />
     </div>
   )
 }
 
-const NavAsideItem = ({
-  item,
-  active,
-}: {
-  item: SitemapItem
-  active: boolean
-}) => {
-  return (
-    <Link
-      href={item.href}
-      className={cn(
-        'bg-muted flex items-center justify-center gap-2 font-mono font-medium tracking-wide uppercase',
-        active
-          ? 'w-aside-width bg-accent text-accent-foreground rotate-180 px-6 [writing-mode:vertical-rl]'
-          : 'size-aside-width hover:brightness-95'
-      )}
-    >
-      <item.icon className="size-5" />
+export type AsideButtonProps = {
+  icon: React.ComponentType<SVGProps<SVGSVGElement>>
+  label: string
+  active?: boolean
+} & ({ href: string; onClick?: never } | { href?: never; onClick: () => void })
+
+export const AsideButton = ({
+  icon: Icon,
+  label,
+  active = false,
+  href,
+  onClick,
+}: AsideButtonProps) => {
+  const content = (
+    <>
+      <Icon className={cn('size-5', active ? 'rotate-90' : '')} />
       <span className={cn('text-sm 2xl:text-base', active ? '' : 'sr-only')}>
-        {item.label}
+        {label}
       </span>
-    </Link>
+    </>
+  )
+
+  return (
+    <Button
+      variant="muted"
+      size="icon"
+      className={cn(
+        'bg-muted w-aside-width flex items-center justify-center gap-2 font-mono font-medium tracking-wide uppercase transition-none',
+        active
+          ? 'bg-accent text-accent-foreground h-auto rotate-180 px-6 [writing-mode:vertical-rl]'
+          : 'h-aside-width size-aside-width hover:brightness-95'
+      )}
+      asChild={!!href}
+      onClick={onClick}
+    >
+      {href ? <Link href={href}>{content}</Link> : content}
+    </Button>
   )
 }
