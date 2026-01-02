@@ -1,0 +1,42 @@
+---
+title: Matrix
+description: A LED matrix display component for creating animated pixel patterns, loading indicators, and VU meters.
+externalRegistry:
+  name: ElevenLabs UI
+  url: https://ui.elevenlabs.io/docs/components/matrix
+  registryUrl: https://ui.elevenlabs.io/r/matrix.json
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+import { ExternalRegistryBanner } from '@/components/external-registry-banner'
+import { ElevenLabsLogo } from '@/components/logos'
+
+<ExternalRegistryBanner
+  name="ElevenLabs UI"
+  icon={<ElevenLabsLogo className="size-5" />}
+  registryUrl="https://ui.elevenlabs.io/"
+  componentUrl="https://ui.elevenlabs.io/docs/components/matrix"
+/>
+
+<ComponentPreview name="matrix-demo" />
+
+## Installation
+
+```bash
+npx shadcn@latest add https://r.joyco.studio/matrix.json
+```
+
+## Usage
+
+```tsx
+import { Matrix, wave } from '@/components/ui/matrix'
+
+<Matrix
+  rows={7}
+  cols={7}
+  frames={wave}
+  fps={24}
+  loop
+  autoplay
+/>
+```
