@@ -15,7 +15,7 @@ export function MatrixDemo() {
         size={12}
         gap={3}
         palette={{
-          on: '#10b981',
+          on: '#ffffff',
           off: 'var(--muted-foreground)',
         }}
       />
