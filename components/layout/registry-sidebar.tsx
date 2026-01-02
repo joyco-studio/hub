@@ -226,7 +226,7 @@ export function RegistrySidebar({ tree, itemMeta = {} }: RegistrySidebarProps) {
   )
 
   return (
-    <div className="registry-sidebar flex h-full w-full flex-col gap-1">
+    <div className="registry-sidebar flex h-full w-full flex-col gap-1 text-sm">
       {/* Search */}
       <SearchTrigger />
 

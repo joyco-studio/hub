@@ -58,29 +58,35 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
         ),
       }}
     >
-      <div className="flex items-center justify-between gap-4">
-        <DocsTitle className="leading-tight">{page.data.title}</DocsTitle>
-        <PageActions
-          className="max-sm:hidden"
-          content={llmText}
-          llmUrl={llmUrl}
-        />
+      <div className="mx-auto max-w-2xl 2xl:max-w-3xl">
+        <div className="flex items-center justify-between gap-4">
+          <DocsTitle className="leading-tight">{page.data.title}</DocsTitle>
+          <PageActions
+            className="max-sm:hidden"
+            content={llmText}
+            llmUrl={llmUrl}
+          />
+        </div>
+        <DocsDescription className="mb-1">
+          {page.data.description}
+        </DocsDescription>
+        <div className="mb-4 flex items-center justify-between gap-8">
+          <DocLinks links={docLinks} />
+          <PageActions
+            className="sm:hidden"
+            content={llmText}
+            llmUrl={llmUrl}
+          />
+        </div>
+        <DocsBody>
+          <MDX
+            components={getMDXComponents({
+              // this allows you to link to other pages with relative file paths
+              a: createRelativeLink(source, page),
+            })}
+          />
+        </DocsBody>
       </div>
-      <DocsDescription className="mb-1">
-        {page.data.description}
-      </DocsDescription>
-      <div className="mb-4 flex items-center justify-between gap-8">
-        <DocLinks links={docLinks} />
-        <PageActions className="sm:hidden" content={llmText} llmUrl={llmUrl} />
-      </div>
-      <DocsBody>
-        <MDX
-          components={getMDXComponents({
-            // this allows you to link to other pages with relative file paths
-            a: createRelativeLink(source, page),
-          })}
-        />
-      </DocsBody>
     </DocsPage>
   )
 }

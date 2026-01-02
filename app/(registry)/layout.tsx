@@ -20,7 +20,7 @@ export default function Layout({ children }: LayoutProps<'/'>) {
   return (
     <div className="flex min-h-screen">
       {/* Custom sidebar - fully controlled */}
-      <aside className="sticky top-0 hidden h-screen w-[268px] shrink-0 flex-col md:flex">
+      <aside className="w-sidebar-width sticky top-0 hidden h-screen shrink-0 flex-col md:flex">
         <RegistrySidebar tree={source.pageTree} itemMeta={itemMeta} />
       </aside>
 
