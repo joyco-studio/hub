@@ -47,8 +47,8 @@ export default function Layout({ children }: LayoutProps<'/'>) {
       suppressHydrationWarning
     >
       <body className="relative grid grid-cols-[var(--aside-width,4rem)_auto] gap-1">
+        <NavAside />
         <RootProvider>
-          <NavAside />
           <div className="relative flex min-h-screen flex-1 flex-col">
             {children}
           </div>

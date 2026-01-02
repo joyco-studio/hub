@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import { usePathname } from 'next/navigation'
 import { Button } from '../ui/button'
 import { ThemeToggle } from './theme-toggle'
+import { Slot } from '@radix-ui/react-slot'
 
 export const NavAside = () => {
   const pathname = usePathname()
@@ -20,11 +21,13 @@ export const NavAside = () => {
       {sitemap.map((item) => (
         <AsideButton
           key={item.href}
-          href={item.href}
           icon={item.icon}
           label={item.label}
           active={pathname.startsWith(item.href)}
-        />
+          asChild
+        >
+          <Link href={item.href} />
+        </AsideButton>
       ))}
       <div className="bg-muted flex-1" />
       <ThemeToggle />
@@ -32,42 +35,55 @@ export const NavAside = () => {
   )
 }
 
-export type AsideButtonProps = {
+export type AsideButtonProps = Omit<
+  React.ComponentProps<typeof Button>,
+  'variant' | 'size'
+> & {
   icon: React.ComponentType<SVGProps<SVGSVGElement>>
   label: string
   active?: boolean
-} & ({ href: string; onClick?: never } | { href?: never; onClick: () => void })
+}
 
 export const AsideButton = ({
   icon: Icon,
   label,
   active = false,
-  href,
-  onClick,
+  className,
+  children,
+  asChild,
+  ...props
 }: AsideButtonProps) => {
   const content = (
     <>
-      <Icon className={cn('size-5', active ? 'rotate-90' : '')} />
-      <span className={cn('text-sm 2xl:text-base', active ? '' : 'sr-only')}>
+      <Icon className={cn('size-5', active && 'rotate-90')} />
+      <span className={cn('text-sm 2xl:text-base', !active && 'sr-only')}>
         {label}
       </span>
     </>
   )
 
+  const buttonClassName = cn(
+    'bg-muted w-aside-width flex items-center justify-center gap-2 font-mono font-medium tracking-wide uppercase transition-none',
+    active
+      ? 'bg-accent text-accent-foreground h-auto rotate-180 px-6 [writing-mode:vertical-rl]'
+      : 'h-aside-width size-aside-width hover:brightness-95',
+    className
+  )
+
+  if (asChild && React.isValidElement(children)) {
+    return (
+      <Slot className={buttonClassName} {...props}>
+        {React.cloneElement(
+          children as React.ReactElement<{ children?: React.ReactNode }>,
+          { children: content }
+        )}
+      </Slot>
+    )
+  }
+
   return (
-    <Button
-      variant="muted"
-      size="icon"
-      className={cn(
-        'bg-muted w-aside-width flex items-center justify-center gap-2 font-mono font-medium tracking-wide uppercase transition-none',
-        active
-          ? 'bg-accent text-accent-foreground h-auto rotate-180 px-6 [writing-mode:vertical-rl]'
-          : 'h-aside-width size-aside-width hover:brightness-95'
-      )}
-      asChild={!!href}
-      onClick={onClick}
-    >
-      {href ? <Link href={href}>{content}</Link> : content}
+    <Button variant="muted" size="icon" className={buttonClassName} {...props}>
+      {content}
     </Button>
   )
 }
