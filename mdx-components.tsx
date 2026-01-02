@@ -8,6 +8,7 @@ import { FileCodeblock } from './components/code-source'
 import { CopyButton } from './components/copy-button'
 import { codeClasses } from './lib/shiki'
 import Image from 'next/image'
+import { ImageCols } from '@/components/image-cols'
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
@@ -20,6 +21,12 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
       ...props
     }: React.ComponentProps<typeof Image>) => (
       <Image className={cn('rounded-lg', className)} alt={alt} {...props} />
+    ),
+    ImageCols: ({
+      className,
+      ...props
+    }: React.ComponentProps<typeof ImageCols>) => (
+      <ImageCols className={className} {...props} />
     ),
     Tabs: ({ className, ...props }: React.ComponentProps<typeof Tabs>) => {
       return <Tabs className={cn('relative w-full', className)} {...props} />
