@@ -15,9 +15,10 @@ export async function FileCodeblock({
   language,
 }: {
   filePath: string
-  title?: string
-  language?: string
-}) {
+} & Omit<
+  React.ComponentProps<typeof CodeBlock>,
+  'rawCode' | 'highlightedCode'
+>) {
   let content: string
   const publicPath = path.join(process.cwd(), filePath)
   const fileName = path.basename(filePath)

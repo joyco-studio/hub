@@ -2,5 +2,5 @@
   :where(figure[data-rehype-pretty-code-figure]):not(
     :where(.not-prose, .not-prose *)
   ) {
-  @apply my-6;
+  @apply my-6 first:mt-0 last:mb-0;
 }

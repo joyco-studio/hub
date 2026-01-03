@@ -120,7 +120,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
       )
     },
     figure: ({ className, ...props }: React.ComponentProps<'figure'>) => {
-      return <figure className={cn('', className)} {...props} />
+      return <figure className={cn(className)} {...props} />
     },
     pre: ({ className, ...props }: React.ComponentProps<'pre'>) => {
       return <pre className={cn(codeClasses.pre, className)} {...props} />

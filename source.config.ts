@@ -1,5 +1,6 @@
 import lastModified from 'fumadocs-mdx/plugins/last-modified'
 import rehypePrettyCode from 'rehype-pretty-code'
+import { Element } from 'hast'
 import { z } from 'zod'
 import {
   defineConfig,
@@ -9,6 +10,7 @@ import {
 } from 'fumadocs-mdx/config'
 
 import { transformers } from './lib/shiki'
+import { cn } from './lib/utils'
 
 // You can customise Zod schemas for frontmatter and `meta.json` here
 // see https://fumadocs.dev/docs/mdx/collections
@@ -58,6 +60,13 @@ export default defineConfig({
             light: 'github-light-default',
           },
           transformers,
+          onVisitTitle(node: Element) {
+            if (!node.properties) return
+            node.properties['class'] = cn(
+              'not-prose',
+              node.properties['class']?.toString()
+            )
+          },
         },
       ])
       return plugins

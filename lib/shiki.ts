@@ -80,7 +80,7 @@ export const transformers = [
           node.properties['__bun__'] = raw.replace('npm run', 'bun')
         }
       }
-    },
+    }
   },
 ] as ShikiTransformer[]
 
@@ -97,20 +97,20 @@ export async function highlightCode(code: string, language: string = 'tsx') {
     },
     transformers: [
       {
+        code(node) {
+          node.properties['data-line-numbers'] = ''
+        },
         pre(node) {
           node.properties['class'] = cn(
             codeClasses.pre,
             node.properties['class']?.toString()
           )
         },
-        code(node) {
-          node.properties['data-line-numbers'] = ''
-        },
         line(node) {
           node.properties['data-line'] = ''
-        },
-      },
-    ],
+        }
+      }
+    ]
   })
 
   return html

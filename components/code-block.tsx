@@ -12,7 +12,7 @@ export function CodeBlock({
 }: {
   highlightedCode: string
   language: string
-  title: string | undefined
+  title?: string
   rawCode?: string
   maxHeight?: number
 }) {
