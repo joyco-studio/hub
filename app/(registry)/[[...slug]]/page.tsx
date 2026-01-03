@@ -15,7 +15,7 @@ import { getMDXComponents } from '@/mdx-components'
 import { Maintainers } from '@/components/layout/maintainers'
 import { WeeklyDownloads } from '@/components/layout/weekly-downloads'
 import { InferPageType } from 'fumadocs-core/source'
-import { DocLinks } from '@/components/layout/doc-links'
+import { DocsLinks } from '@/components/layout/doc-links'
 import { PageActions } from '@/components/layout/page-actions'
 
 const getComponentSlug = (page: InferPageType<typeof source>) => {
@@ -69,8 +69,8 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
       <DocsDescription className="mb-1">
         {page.data.description}
       </DocsDescription>
-      <div className="mb-4 flex items-center justify-between gap-8">
-        <DocLinks links={docLinks} />
+      <div className="mb-4 hidden items-center justify-between gap-8 has-data-[slot=doc-links]:flex max-sm:flex">
+        <DocsLinks links={docLinks} />
         <PageActions className="sm:hidden" content={llmText} llmUrl={llmUrl} />
       </div>
       <DocsBody>
