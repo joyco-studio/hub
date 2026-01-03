@@ -5,7 +5,6 @@
   border-radius: var(--radius-lg);
   border-width: 0px;
   border-color: var(--border);
-  margin-top: calc(var(--spacing) * 6);
   overflow: hidden;
   font-size: var(--text-sm);
   outline: none;

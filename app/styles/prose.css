@@ -1,0 +1,6 @@
+.prose
+  :where(figure[data-rehype-pretty-code-figure]):not(
+    :where(.not-prose, .not-prose *)
+  ) {
+  @apply my-6;
+}

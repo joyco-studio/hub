@@ -4,6 +4,7 @@
 @import 'tw-animate-css';
 @import 'tailwindcss-better-gradient';
 @import './shiki.css' layer(components);
+@import './prose.css' layer(utilities);
 
 @custom-variant hocus (&:is(:hover, :focus-visible));
 
