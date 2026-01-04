@@ -3,86 +3,100 @@
 import * as React from 'react'
 
 import { CopyButton } from '@/components/copy-button'
-import { useConfig } from '@/hooks/use-config'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { cn } from '@/lib/utils'
+
+export type CommandTab = {
+  label: string
+  content: string
+}
+
+type CodeBlockCommandProps = {
+  tabs: CommandTab[]
+  defaultTab?: string
+  activeTab?: string
+  onTabChange?: (tab: string) => void
+  className?: string
+}
 
 export function CodeBlockCommand({
-  __npm__,
-  __yarn__,
-  __pnpm__,
-  __bun__,
-}: React.ComponentProps<'pre'> & {
-  __npm__?: string
-  __yarn__?: string
-  __pnpm__?: string
-  __bun__?: string
-}) {
-  const [config, setConfig] = useConfig()
+  tabs,
+  defaultTab,
+  activeTab,
+  onTabChange,
+  className,
+}: CodeBlockCommandProps) {
+  const [internalTab, setInternalTab] = React.useState(
+    () => defaultTab ?? tabs[0]?.label ?? ''
+  )
 
-  const packageManager = config.packageManager || 'pnpm'
-  const tabs = React.useMemo(() => {
-    return {
-      pnpm: __pnpm__,
-      npm: __npm__,
-      yarn: __yarn__,
-      bun: __bun__,
+  const currentTab = activeTab ?? internalTab
+  const currentContent =
+    tabs.find((tab) => tab.label === currentTab)?.content ?? ''
+
+  const handleTabChange = (value: string) => {
+    if (!activeTab) {
+      setInternalTab(value)
     }
-  }, [__npm__, __pnpm__, __yarn__, __bun__])
+    onTabChange?.(value)
+  }
 
-  const command = tabs[packageManager]
+  if (tabs.length === 0) return null
 
   return (
     <div
       data-slot="command-block"
-      className="not-prose bg-card overflow-x-auto rounded-lg"
+      className={cn('not-prose bg-card overflow-x-auto rounded-lg', className)}
     >
       <Tabs
-        value={packageManager}
+        value={currentTab}
         className="gap-0"
-        onValueChange={(value) => {
-          setConfig({
-            ...config,
-            packageManager: value as 'pnpm' | 'npm' | 'yarn' | 'bun',
-          })
-        }}
+        onValueChange={handleTabChange}
       >
-        <div className="border-border flex items-center gap-2 border-b px-3 py-2">
-          <TabsList className="h-auto rounded-none bg-transparent p-0">
-            {Object.entries(tabs).map(([key]) => {
-              return (
-                <TabsTrigger
-                  key={key}
-                  value={key}
-                  className="data-[state=active]:bg-accent data-[state=active]:border-border h-7 border border-transparent pt-0.5 data-[state=active]:shadow-none"
-                >
-                  {key}
-                </TabsTrigger>
-              )
-            })}
+        <div
+          data-slot="command-header"
+          className="border-border flex items-center gap-2 border-b px-3 py-2"
+        >
+          <TabsList
+            data-slot="command-tabs"
+            className="h-auto rounded-none bg-transparent p-0"
+          >
+            {tabs.map((tab) => (
+              <TabsTrigger
+                key={tab.label}
+                value={tab.label}
+                className="data-[state=active]:bg-accent data-[state=active]:border-border h-7 border border-transparent pt-0.5 data-[state=active]:shadow-none"
+              >
+                {tab.label}
+              </TabsTrigger>
+            ))}
           </TabsList>
         </div>
-        <div className="no-scrollbar overflow-x-auto bg-white dark:bg-black">
-          {Object.entries(tabs).map(([key, value]) => {
-            return (
-              <TabsContent
-                key={key}
-                value={key}
-                className="mt-0 w-max px-4 py-3.5"
-              >
-                <pre>
-                  <code
-                    className="relative font-mono text-sm leading-none text-green-500 dark:text-green-300"
-                    data-language="bash"
-                  >
-                    {value}
-                  </code>
-                </pre>
-              </TabsContent>
-            )
-          })}
+        <div
+          data-slot="command-content"
+          className="no-scrollbar overflow-x-auto bg-white dark:bg-black"
+        >
+          {tabs.map((tab) => (
+            <TabsContent
+              key={tab.label}
+              value={tab.label}
+              className="mt-0 w-max px-4 py-3.5"
+            >
+              <pre>
+                <code
+                  className="relative font-mono text-sm leading-none text-green-500 dark:text-green-300"
+                  data-language="bash"
+                >
+                  {tab.content}
+                </code>
+              </pre>
+            </TabsContent>
+          ))}
         </div>
       </Tabs>
-      {command && <CopyButton value={command} className="top-2" forceVisible />}
+      {currentContent && (
+        <CopyButton value={currentContent} className="top-2" forceVisible />
+      )}
     </div>
   )
 }

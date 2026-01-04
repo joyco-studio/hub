@@ -79,6 +79,12 @@ export const transformers = [
           node.properties['__pnpm__'] = raw.replace('npm run', 'pnpm')
           node.properties['__bun__'] = raw.replace('npm run', 'bun')
         }
+
+        if (raw.includes('@joycostudio/scripts') && raw.includes('agents -s')) {
+          node.properties['__cursor__'] = raw.replace(/agents -s \w+/, 'agents -s cursor')
+          node.properties['__codex__'] = raw.replace(/agents -s \w+/, 'agents -s codex')
+          node.properties['__claude__'] = raw.replace(/agents -s \w+/, 'agents -s claude')
+        }
       }
     }
   },
