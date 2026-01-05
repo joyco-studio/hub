@@ -4,6 +4,7 @@ import { type ReactNode } from 'react'
 import { Text } from 'lucide-react'
 import { TOCScrollArea } from '@/components/toc'
 import { TOCItems } from '@/components/toc/clerk'
+import { useLayout } from '@/hooks/use-layout'
 import { cn } from '@/lib/utils'
 
 export interface ClerkTOCProps {
@@ -22,6 +23,8 @@ export interface ClerkTOCProps {
 }
 
 export function TOC({ header, footer, className }: ClerkTOCProps) {
+  const { layout } = useLayout()
+
   return (
     <div
       id="nd-toc"
@@ -47,7 +50,13 @@ export function TOC({ header, footer, className }: ClerkTOCProps) {
         {footer}
         <div className="bg-muted flex-1" />
       </div>
-      <div className="bg-muted min-w-aside-width flex-1" />
+      {/* Filler panel - only visible at 2xl+ when in fixed layout */}
+      <div
+        className={cn(
+          'bg-muted min-w-aside-width hidden flex-1',
+          layout === 'fixed' && '2xl:block'
+        )}
+      />
     </div>
   )
 }

@@ -121,8 +121,13 @@ export function RegistrySidebar({ tree, itemMeta = {} }: RegistrySidebarProps) {
 
   return (
     <div className="sticky top-0 hidden h-screen shrink-0 gap-1 [grid-area:sidebar] md:flex md:justify-end">
-      {/* NavAside - category navigation */}
-      <div className={cn('bg-muted flex-1', layout === 'full' && 'hidden')} />
+      {/* Filler panel - only visible at 2xl+ when in fixed layout */}
+      <div
+        className={cn(
+          'bg-muted hidden flex-1',
+          layout === 'fixed' && '2xl:block'
+        )}
+      />
       <NavAside />
 
       {/* Sidebar content */}
