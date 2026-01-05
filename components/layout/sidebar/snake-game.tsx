@@ -164,6 +164,59 @@ export function SnakeGame() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isPlaying])
 
+  // Handle touch/swipe input for mobile
+  const touchStartRef = React.useRef<{ x: number; y: number } | null>(null)
+
+  React.useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const handleTouchStart = (e: TouchEvent) => {
+      const touch = e.touches[0]
+      touchStartRef.current = { x: touch.clientX, y: touch.clientY }
+    }
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (!isPlaying || !touchStartRef.current) return
+
+      const touch = e.changedTouches[0]
+      const deltaX = touch.clientX - touchStartRef.current.x
+      const deltaY = touch.clientY - touchStartRef.current.y
+
+      // Minimum swipe distance threshold
+      const minSwipe = 30
+
+      // Check against the last direction the snake actually moved
+      const lastMoved = lastMovedDirectionRef.current
+
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        // Horizontal swipe
+        if (deltaX > minSwipe && lastMoved !== 'LEFT') {
+          setDirection('RIGHT')
+        } else if (deltaX < -minSwipe && lastMoved !== 'RIGHT') {
+          setDirection('LEFT')
+        }
+      } else {
+        // Vertical swipe
+        if (deltaY > minSwipe && lastMoved !== 'UP') {
+          setDirection('DOWN')
+        } else if (deltaY < -minSwipe && lastMoved !== 'DOWN') {
+          setDirection('UP')
+        }
+      }
+
+      touchStartRef.current = null
+    }
+
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: true })
+    canvas.addEventListener('touchend', handleTouchEnd, { passive: true })
+
+    return () => {
+      canvas.removeEventListener('touchstart', handleTouchStart)
+      canvas.removeEventListener('touchend', handleTouchEnd)
+    }
+  }, [isPlaying])
+
   // Game loop
   React.useEffect(() => {
     if (!isPlaying || gameOver) return
@@ -291,9 +344,16 @@ export function SnakeGame() {
             </div>
             <span className="flex h-8 w-full shrink items-center pl-2">
               <div className="ml-auto flex gap-1">
-                {['W', 'A', 'S', 'D'].map((key) => (
-                  <Badge variant="key" key={key}>
-                    {key}
+                {/* Desktop: WASD, Mobile: Arrows */}
+                {[
+                  { desktop: 'W', mobile: '↑' },
+                  { desktop: 'A', mobile: '←' },
+                  { desktop: 'S', mobile: '↓' },
+                  { desktop: 'D', mobile: '→' },
+                ].map(({ desktop, mobile }) => (
+                  <Badge variant="key" key={desktop}>
+                    <span className="max-md:hidden">{desktop}</span>
+                    <span className="md:hidden">{mobile}</span>
                   </Badge>
                 ))}
               </div>

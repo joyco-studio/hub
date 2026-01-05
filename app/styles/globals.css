@@ -14,6 +14,8 @@
   --default-font-family: var(--font-sans);
   --default-font-family-mono: var(--font-mono);
 
+  --spacing-mobile-header: var(--mobile-header-height);
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -108,6 +110,23 @@
 :root {
   --aside-width: 4rem;
   --sidebar-width: 268px;
+  --mobile-header-height: 3rem;
+
+  /* Z-index system for consistent layering */
+  --z-content: 1;
+  --z-sticky: 10;
+  --z-toc-popover: 30;
+  --z-header: 40;
+  --z-overlay: 50;
+  --z-mobile-nav: 60;
+}
+
+/* Mobile: collapse sidebar width variables so inline style calc evaluates to 0 */
+@media (max-width: 767px) {
+  :root {
+    --aside-width: 0px;
+    --sidebar-width: 0px;
+  }
 }
 
 .dark {
@@ -233,6 +252,18 @@
 }
 
 @layer components {
+  /* CCTV striped backdrop effect */
+  .cctv-backdrop {
+    background-image: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 6px,
+      rgba(0, 0, 0, 0.3) 6px,
+      rgba(0, 0, 0, 0.3) 12px
+    );
+    background-size: 100% 12px;
+  }
+
   /* Fancy scrollbar styles */
   .fancy-scroll {
     scrollbar-width: thin;
@@ -341,6 +372,16 @@ html {
 
 html.layout-full {
   --fd-layout-width: 100%;
+}
+
+/* Mobile layout adjustments for custom MobileNav */
+@media (max-width: 767px) {
+  /* Account for our custom MobileNav header height (h-14 = 56px) */
+  #nd-docs-layout {
+    --fd-header-height: var(--mobile-header-height) !important;
+    --fd-sidebar-width: 0px !important;
+    --fd-toc-width: 0px !important;
+  }
 }
 
 html.dark .shiki,

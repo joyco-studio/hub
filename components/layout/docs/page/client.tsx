@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import {
   type ComponentProps,
@@ -10,45 +10,57 @@ import {
   useMemo,
   useRef,
   useState,
-} from 'react';
-import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
-import Link from 'fumadocs-core/link';
-import { cn } from '../../../../lib/cn';
-import { useI18n } from 'fumadocs-ui/contexts/i18n';
-import { useTreeContext, useTreePath } from 'fumadocs-ui/contexts/tree';
-import type * as PageTree from 'fumadocs-core/page-tree';
-import { usePathname } from 'fumadocs-core/framework';
-import { type BreadcrumbOptions, getBreadcrumbItemsFromPath } from 'fumadocs-core/breadcrumb';
-import { isActive } from '../../../../lib/urls';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../../../ui/collapsible';
-import { useTOCItems } from '../../../toc';
-import { useActiveAnchor } from 'fumadocs-core/toc';
-import { LayoutContext } from '../client';
-import { useFooterItems } from 'fumadocs-ui/utils/use-footer-items';
+} from 'react'
+import CaretDownIcon from '@/components/icons/caret-down'
+import CaretLeftIcon from '@/components/icons/caret-left'
+import CaretRightIcon from '@/components/icons/caret-right'
+import Link from 'fumadocs-core/link'
+import { cn } from '../../../../lib/cn'
+import { useI18n } from 'fumadocs-ui/contexts/i18n'
+import { useTreeContext, useTreePath } from 'fumadocs-ui/contexts/tree'
+import type * as PageTree from 'fumadocs-core/page-tree'
+import { usePathname } from 'fumadocs-core/framework'
+import {
+  type BreadcrumbOptions,
+  getBreadcrumbItemsFromPath,
+} from 'fumadocs-core/breadcrumb'
+import { isActive } from '../../../../lib/urls'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '../../../ui/collapsible'
+import { useTOCItems } from '../../../toc'
+import { useActiveAnchor } from 'fumadocs-core/toc'
+import { useFooterItems } from 'fumadocs-ui/utils/use-footer-items'
 
 const TocPopoverContext = createContext<{
-  open: boolean;
-  setOpen: (open: boolean) => void;
-} | null>(null);
+  open: boolean
+  setOpen: (open: boolean) => void
+} | null>(null)
 
-export function PageTOCPopover({ className, children, ...rest }: ComponentProps<'div'>) {
-  const ref = useRef<HTMLElement>(null);
-  const [open, setOpen] = useState(false);
-  const { isNavTransparent } = use(LayoutContext)!;
+export function PageTOCPopover({
+  className,
+  children,
+  ...rest
+}: ComponentProps<'div'>) {
+  const ref = useRef<HTMLElement>(null)
+  const [open, setOpen] = useState(false)
 
   const onClick = useEffectEvent((e: Event) => {
-    if (!open) return;
+    if (!open) return
 
-    if (ref.current && !ref.current.contains(e.target as HTMLElement)) setOpen(false);
-  });
+    if (ref.current && !ref.current.contains(e.target as HTMLElement))
+      setOpen(false)
+  })
 
   useEffect(() => {
-    window.addEventListener('click', onClick);
+    window.addEventListener('click', onClick)
 
     return () => {
-      window.removeEventListener('click', onClick);
-    };
-  }, []);
+      window.removeEventListener('click', onClick)
+    }
+  }, [])
 
   return (
     <TocPopoverContext
@@ -57,7 +69,7 @@ export function PageTOCPopover({ className, children, ...rest }: ComponentProps<
           open,
           setOpen,
         }),
-        [setOpen, open],
+        [setOpen, open]
       )}
     >
       <Collapsible
@@ -65,58 +77,54 @@ export function PageTOCPopover({ className, children, ...rest }: ComponentProps<
         onOpenChange={setOpen}
         data-toc-popover=""
         className={cn(
-          'sticky top-(--fd-docs-row-2) z-10 [grid-area:toc-popover] h-(--fd-toc-popover-height) xl:hidden max-xl:layout:[--fd-toc-popover-height:--spacing(10)]',
-          className,
+          'max-xl:layout:[--fd-toc-popover-height:--spacing(10)] sticky top-(--fd-docs-row-2) z-(--z-toc-popover) h-(--fd-toc-popover-height) [grid-area:toc-popover] xl:hidden',
+          className
         )}
         {...rest}
       >
-        <header
-          ref={ref}
-          className={cn(
-            'border-b backdrop-blur-sm transition-colors',
-            (!isNavTransparent || open) && 'bg-fd-background/80',
-            open && 'shadow-lg',
-          )}
-        >
+        <header ref={ref} className="bg-background font-mono">
           {children}
         </header>
       </Collapsible>
     </TocPopoverContext>
-  );
+  )
 }
 
-export function PageTOCPopoverTrigger({ className, ...props }: ComponentProps<'button'>) {
-  const { text } = useI18n();
-  const { open } = use(TocPopoverContext)!;
-  const items = useTOCItems();
-  const active = useActiveAnchor();
+export function PageTOCPopoverTrigger({
+  className,
+  ...props
+}: ComponentProps<'button'>) {
+  const { text } = useI18n()
+  const { open } = use(TocPopoverContext)!
+  const items = useTOCItems()
+  const active = useActiveAnchor()
   const selected = useMemo(
     () => items.findIndex((item) => active === item.url.slice(1)),
-    [items, active],
-  );
-  const path = useTreePath().at(-1);
-  const showItem = selected !== -1 && !open;
+    [items, active]
+  )
+  const path = useTreePath().at(-1)
+  const showItem = selected !== -1 && !open
 
   return (
     <CollapsibleTrigger
       className={cn(
-        'flex w-full h-10 items-center text-sm text-fd-muted-foreground gap-2.5 px-4 py-2.5 text-start focus-visible:outline-none [&_svg]:size-4 md:px-6',
-        className,
+        'text-fd-muted-foreground flex h-10 w-full items-center gap-2.5 px-4 py-2.5 text-start text-xs tracking-wide uppercase focus-visible:outline-none md:px-6 [&_svg]:size-4',
+        className
       )}
       data-toc-popover-trigger=""
       {...props}
     >
-      <ProgressCircle
+      <ProgressSquare
         value={(selected + 1) / Math.max(1, items.length)}
         max={1}
-        className={cn('shrink-0', open && 'text-fd-primary')}
+        className={cn('shrink-0', open && 'text-primary')}
       />
-      <span className="grid flex-1 *:my-auto *:row-start-1 *:col-start-1">
+      <span className="grid flex-1 *:col-start-1 *:row-start-1 *:my-auto">
         <span
           className={cn(
             'truncate transition-[opacity,translate,color]',
-            open && 'text-fd-foreground',
-            showItem && 'opacity-0 -translate-y-full pointer-events-none',
+            open && 'text-foreground',
+            showItem && 'pointer-events-none -translate-y-full opacity-0'
           )}
         >
           {path?.name ?? text.toc}
@@ -124,50 +132,53 @@ export function PageTOCPopoverTrigger({ className, ...props }: ComponentProps<'b
         <span
           className={cn(
             'truncate transition-[opacity,translate]',
-            !showItem && 'opacity-0 translate-y-full pointer-events-none',
+            !showItem && 'pointer-events-none translate-y-full opacity-0'
           )}
         >
           {items[selected]?.title}
         </span>
       </span>
-      <ChevronDown className={cn('shrink-0 transition-transform mx-0.5', open && 'rotate-180')} />
+      <CaretDownIcon
+        className={cn(
+          'mx-0.5 size-4 shrink-0 transition-transform',
+          open && 'rotate-180'
+        )}
+      />
     </CollapsibleTrigger>
-  );
+  )
 }
 
-interface ProgressCircleProps extends Omit<React.ComponentProps<'svg'>, 'strokeWidth'> {
-  value: number;
-  strokeWidth?: number;
-  size?: number;
-  min?: number;
-  max?: number;
+interface ProgressSquareProps extends Omit<
+  React.ComponentProps<'svg'>,
+  'strokeWidth'
+> {
+  value: number
+  strokeWidth?: number
+  size?: number
+  min?: number
+  max?: number
 }
 
 function clamp(input: number, min: number, max: number): number {
-  if (input < min) return min;
-  if (input > max) return max;
-  return input;
+  if (input < min) return min
+  if (input > max) return max
+  return input
 }
 
-function ProgressCircle({
+function ProgressSquare({
   value,
   strokeWidth = 2,
-  size = 24,
+  size = 16,
   min = 0,
   max = 100,
   ...restSvgProps
-}: ProgressCircleProps) {
-  const normalizedValue = clamp(value, min, max);
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const progress = (normalizedValue / max) * circumference;
-  const circleProps = {
-    cx: size / 2,
-    cy: size / 2,
-    r: radius,
-    fill: 'none',
-    strokeWidth,
-  };
+}: ProgressSquareProps) {
+  const normalizedValue = clamp(value, min, max)
+  // Square perimeter = 4 * side, but we draw from inside so side = size - strokeWidth
+  const innerSize = size - strokeWidth
+  const perimeter = 4 * innerSize
+  const progress = (normalizedValue / max) * perimeter
+  const offset = strokeWidth / 2
 
   return (
     <svg
@@ -178,18 +189,32 @@ function ProgressCircle({
       aria-valuemax={max}
       {...restSvgProps}
     >
-      <circle {...circleProps} className="stroke-current/25" />
-      <circle
-        {...circleProps}
+      {/* Background square */}
+      <rect
+        x={offset}
+        y={offset}
+        width={innerSize}
+        height={innerSize}
+        fill="none"
+        strokeWidth={strokeWidth}
+        className="stroke-current/25"
+      />
+      {/* Progress square */}
+      <rect
+        x={offset}
+        y={offset}
+        width={innerSize}
+        height={innerSize}
+        fill="none"
         stroke="currentColor"
-        strokeDasharray={circumference}
-        strokeDashoffset={circumference - progress}
-        strokeLinecap="round"
-        transform={`rotate(-90 ${size / 2} ${size / 2})`}
+        strokeWidth={strokeWidth}
+        strokeDasharray={perimeter}
+        strokeDashoffset={perimeter - progress}
         className="transition-all"
+        style={{ transformOrigin: 'center' }}
       />
     </svg>
-  );
+  )
 }
 
 export function PageTOCPopoverContent(props: ComponentProps<'div'>) {
@@ -197,58 +222,63 @@ export function PageTOCPopoverContent(props: ComponentProps<'div'>) {
     <CollapsibleContent
       data-toc-popover-content=""
       {...props}
-      className={cn('flex flex-col px-4 max-h-[50vh] md:px-6', props.className)}
+      className={cn('flex max-h-[50vh] flex-col px-4 md:px-6', props.className)}
     >
       {props.children}
     </CollapsibleContent>
-  );
+  )
 }
 
 export function PageLastUpdate({
   date: value,
   ...props
 }: Omit<ComponentProps<'p'>, 'children'> & { date: Date }) {
-  const { text } = useI18n();
-  const [date, setDate] = useState('');
+  const { text } = useI18n()
+  const [date, setDate] = useState('')
 
   useEffect(() => {
     // to the timezone of client
-    setDate(value.toLocaleDateString());
-  }, [value]);
+    setDate(value.toLocaleDateString())
+  }, [value])
 
   return (
-    <p {...props} className={cn('text-sm text-fd-muted-foreground', props.className)}>
+    <p
+      {...props}
+      className={cn('text-fd-muted-foreground text-sm', props.className)}
+    >
       {text.lastUpdate} {date}
     </p>
-  );
+  )
 }
 
-type Item = Pick<PageTree.Item, 'name' | 'description' | 'url'>;
+type Item = Pick<PageTree.Item, 'name' | 'description' | 'url'>
 export interface FooterProps extends ComponentProps<'div'> {
   /**
    * Items including information for the next and previous page
    */
   items?: {
-    previous?: Item;
-    next?: Item;
-  };
+    previous?: Item
+    next?: Item
+  }
 }
 
 export function PageFooter({ items, ...props }: FooterProps) {
-  const footerList = useFooterItems();
-  const pathname = usePathname();
+  const footerList = useFooterItems()
+  const pathname = usePathname()
 
   const { previous, next } = useMemo(() => {
-    if (items) return items;
+    if (items) return items
 
-    const idx = footerList.findIndex((item) => isActive(item.url, pathname, false));
+    const idx = footerList.findIndex((item) =>
+      isActive(item.url, pathname, false)
+    )
 
-    if (idx === -1) return {};
+    if (idx === -1) return {}
     return {
       previous: footerList[idx - 1],
       next: footerList[idx + 1],
-    };
-  }, [footerList, items, pathname]);
+    }
+  }, [footerList, items, pathname])
 
   return (
     <div
@@ -256,31 +286,31 @@ export function PageFooter({ items, ...props }: FooterProps) {
       className={cn(
         '@container grid gap-4',
         previous && next ? 'grid-cols-2' : 'grid-cols-1',
-        props.className,
+        props.className
       )}
     >
       {previous ? <FooterItem item={previous} index={0} /> : null}
       {next ? <FooterItem item={next} index={1} /> : null}
     </div>
-  );
+  )
 }
 
 function FooterItem({ item, index }: { item: Item; index: 0 | 1 }) {
-  const { text } = useI18n();
-  const Icon = index === 0 ? ChevronLeft : ChevronRight;
+  const { text } = useI18n()
+  const Icon = index === 0 ? CaretLeftIcon : CaretRightIcon
 
   return (
     <Link
       href={item.url}
       className={cn(
-        'flex flex-col gap-2 rounded-lg border p-4 text-sm transition-colors hover:bg-fd-accent/80 hover:text-fd-accent-foreground @max-lg:col-span-full',
-        index === 1 && 'text-end',
+        'hover:bg-fd-accent/80 hover:text-fd-accent-foreground flex flex-col gap-2 rounded-lg border p-4 text-sm transition-colors @max-lg:col-span-full',
+        index === 1 && 'text-end'
       )}
     >
       <div
         className={cn(
           'inline-flex items-center gap-1.5 font-medium',
-          index === 1 && 'flex-row-reverse',
+          index === 1 && 'flex-row-reverse'
         )}
       >
         <Icon className="-mx-1 size-4 shrink-0 rtl:rotate-180" />
@@ -290,10 +320,10 @@ function FooterItem({ item, index }: { item: Item; index: 0 | 1 }) {
         {item.description ?? (index === 0 ? text.previousPage : text.nextPage)}
       </p>
     </Link>
-  );
+  )
 }
 
-export type BreadcrumbProps = BreadcrumbOptions & ComponentProps<'div'>;
+export type BreadcrumbProps = BreadcrumbOptions & ComponentProps<'div'>
 
 export function PageBreadcrumb({
   includeRoot,
@@ -301,29 +331,35 @@ export function PageBreadcrumb({
   includePage,
   ...props
 }: BreadcrumbProps) {
-  const path = useTreePath();
-  const { root } = useTreeContext();
+  const path = useTreePath()
+  const { root } = useTreeContext()
   const items = useMemo(() => {
     return getBreadcrumbItemsFromPath(root, path, {
       includePage,
       includeSeparator,
       includeRoot,
-    });
-  }, [includePage, includeRoot, includeSeparator, path, root]);
+    })
+  }, [includePage, includeRoot, includeSeparator, path, root])
 
-  if (items.length === 0) return null;
+  if (items.length === 0) return null
 
   return (
     <div
       {...props}
-      className={cn('flex items-center gap-1.5 text-sm text-fd-muted-foreground', props.className)}
+      className={cn(
+        'text-fd-muted-foreground flex items-center gap-1.5 text-sm',
+        props.className
+      )}
     >
       {items.map((item, i) => {
-        const className = cn('truncate', i === items.length - 1 && 'text-fd-primary font-medium');
+        const className = cn(
+          'truncate',
+          i === items.length - 1 && 'text-fd-primary font-medium'
+        )
 
         return (
           <Fragment key={i}>
-            {i !== 0 && <ChevronRight className="size-3.5 shrink-0" />}
+            {i !== 0 && <CaretRightIcon className="size-3.5 shrink-0" />}
             {item.url ? (
               <Link
                 href={item.url}
@@ -335,8 +371,8 @@ export function PageBreadcrumb({
               <span className={className}>{item.name}</span>
             )}
           </Fragment>
-        );
+        )
       })}
     </div>
-  );
+  )
 }

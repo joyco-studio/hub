@@ -7,6 +7,7 @@ import {
 } from '@/components/layout/docs/client'
 import { LayoutProvider } from '@/hooks/use-layout'
 import { RegistrySidebar } from '@/components/layout/sidebar'
+import { MobileNav } from '@/components/layout/mobile-nav'
 
 // Optional: Define item metadata for badges/dots
 const itemMeta: Record<
@@ -23,6 +24,7 @@ export default function Layout({ children }: LayoutProps<'/'>) {
     <LayoutProvider defaultLayout="fixed" storageKey="layout">
       <TreeContextProvider tree={source.pageTree}>
         <LayoutContextProvider>
+          <MobileNav tree={source.pageTree} itemMeta={itemMeta} />
           <LayoutBody
             style={
               {

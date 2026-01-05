@@ -1,5 +1,6 @@
 'use client';
-import { ChevronDown, ExternalLink } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
+import CaretDownIcon from '@/components/icons/caret-down';
 import {
   type ComponentProps,
   createContext,
@@ -307,9 +308,9 @@ export function SidebarFolderTrigger({ children, ...props }: CollapsibleTriggerP
     return (
       <CollapsibleTrigger {...props}>
         {children}
-        <ChevronDown
+        <CaretDownIcon
           data-icon
-          className={cn('ms-auto transition-transform', !open && '-rotate-90')}
+          className={cn('ms-auto size-4 transition-transform', !open && '-rotate-90')}
         />
       </CollapsibleTrigger>
     );
@@ -346,9 +347,9 @@ export function SidebarFolderLink({ children, ...props }: LinkProps) {
     >
       {children}
       {collapsible && (
-        <ChevronDown
+        <CaretDownIcon
           data-icon
-          className={cn('ms-auto transition-transform', !open && '-rotate-90')}
+          className={cn('ms-auto size-4 transition-transform', !open && '-rotate-90')}
         />
       )}
     </Link>

@@ -262,7 +262,7 @@ export function DocsLayout({
               (nav.component ?? (
                 <LayoutHeader
                   id="nd-subnav"
-                  className="max-md:layout:[--fd-header-height:--spacing(14)] data-[transparent=false]:bg-fd-background/80 sticky top-(--fd-docs-row-1) z-30 flex h-(--fd-header-height) items-center border-b ps-4 pe-2.5 backdrop-blur-sm transition-colors [grid-area:header] md:hidden"
+                  className="max-md:layout:[--fd-header-height:--spacing(14)] data-[transparent=false]:bg-fd-background/80 sticky top-(--fd-docs-row-1) z-(--z-header) flex h-(--fd-header-height) items-center border-b ps-4 pe-2.5 backdrop-blur-sm transition-colors [grid-area:header] md:hidden"
                 >
                   {renderTitleNav(nav, {
                     className: 'inline-flex items-center gap-2.5 font-semibold',
@@ -291,7 +291,7 @@ export function DocsLayout({
             {tabMode === 'top' && tabs.length > 0 && (
               <LayoutTabs
                 options={tabs}
-                className="bg-fd-background z-10 border-b px-6 pt-3 max-md:hidden xl:px-8"
+                className="bg-fd-background z-(--z-sticky) border-b px-6 pt-3 max-md:hidden xl:px-8"
               />
             )}
             {children}

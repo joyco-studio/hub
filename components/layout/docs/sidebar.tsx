@@ -62,10 +62,10 @@ export function SidebarDrawer({
 }: ComponentProps<typeof Base.SidebarDrawerContent>) {
   return (
     <>
-      <Base.SidebarDrawerOverlay className="data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out fixed inset-0 z-40 backdrop-blur-xs" />
+      <Base.SidebarDrawerOverlay className="data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out fixed inset-0 z-(--z-overlay) backdrop-blur-xs" />
       <Base.SidebarDrawerContent
         className={cn(
-          'bg-fd-background data-[state=open]:animate-fd-sidebar-in data-[state=closed]:animate-fd-sidebar-out fixed inset-y-0 end-0 z-40 flex w-[85%] max-w-[380px] flex-col border-s text-[0.9375rem] shadow-lg',
+          'bg-fd-background data-[state=open]:animate-fd-sidebar-in data-[state=closed]:animate-fd-sidebar-out fixed inset-y-0 end-0 z-(--z-overlay) flex w-[85%] max-w-[380px] flex-col border-s text-[0.9375rem] shadow-lg',
           className
         )}
         {...props}
