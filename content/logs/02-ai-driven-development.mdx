@@ -55,15 +55,17 @@ We maintain a comprehensive set of global guidelines that shape how our agents b
 
 ## The `.md` standard for documentation URLs
 
-When sharing docs, prefer the **canonical `.md` URL** instead of copy-pasting whatever URL you happen to be on in the browser.
+This is what I do: when I’m chatting with agents, I **never paste the “pretty website” URL**. I use the `.md` version as a documentation standard, because it’s the cleanest way to attach *real context* to a conversation.
 
-The `.md` suffix is a small convention that makes links:
+The rule is simple: **same path, add `.md`**.
 
-- **Predictable**: it’s always “the same path, plus `.md`”.
-- **Tool-friendly**: agents, scripts, and scrapers can reliably fetch markdown (instead of HTML/navigation chrome).
-- **Stable to reference**: the intent is “this is documentation content”, not “this is a routed web page”.
+Why it matters in practice:
 
-For example, the `.md` URL for this page is:
+- **Agents get source**: markdown content, not a page full of layout/navigation.
+- **Links are consistent**: every doc reference looks the same and is easy to generate.
+- **Better “context handles”**: I can drop a `.md` link in a prompt and it’s unambiguous that I’m pointing at documentation content.
+
+Example (this page):
 
 - [`https://registry.joyco.studio/logs/02-ai-driven-development.md`](https://registry.joyco.studio/logs/02-ai-driven-development.md)
 
