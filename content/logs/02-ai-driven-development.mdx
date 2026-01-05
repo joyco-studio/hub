@@ -53,17 +53,17 @@ When I want simpler trivial stuff like "Integrate Vercel Analytics" or "Add this
 
 We maintain a comprehensive set of global guidelines that shape how our agents behave. These guidelines are stored in a markdown file that gets loaded into the agent's context. You can explore the complete [AGENTS.md](/toolbox/agents) for more details.
 
-## The `.md` standard for documentation URLs
+## Referencing documentation
 
-This is what I do: when I’m chatting with agents, I **never paste the “pretty website” URL**. I use the `.md` version as a documentation standard, because it’s the cleanest way to attach *real context* to a conversation.
+This is how I reference documentation when I’m talking to agents: I link the **`.md` version of the page**, not whatever URL I’m currently viewing in the browser.
 
-The rule is simple: **same path, add `.md`**.
+My standard is: **same path, add `.md`**.
 
-Why it matters in practice:
+It works better for agent conversations because:
 
-- **Agents get source**: markdown content, not a page full of layout/navigation.
-- **Links are consistent**: every doc reference looks the same and is easy to generate.
-- **Better “context handles”**: I can drop a `.md` link in a prompt and it’s unambiguous that I’m pointing at documentation content.
+- **It’s the actual content**: clean markdown, not a rendered page with layout/navigation.
+- **It’s consistent**: every docs link follows the same shape, so it’s easy to produce and scan.
+- **It’s unambiguous context**: dropping a `.md` link in a prompt clearly signals “use this as documentation source”.
 
 Example (this page):
 
