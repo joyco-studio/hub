@@ -53,6 +53,20 @@ When I want simpler trivial stuff like "Integrate Vercel Analytics" or "Add this
 
 We maintain a comprehensive set of global guidelines that shape how our agents behave. These guidelines are stored in a markdown file that gets loaded into the agent's context. You can explore the complete [AGENTS.md](/toolbox/agents) for more details.
 
+## The `.md` standard for documentation URLs
+
+When sharing docs, prefer the **canonical `.md` URL** instead of copy-pasting whatever URL you happen to be on in the browser.
+
+The `.md` suffix is a small convention that makes links:
+
+- **Predictable**: it’s always “the same path, plus `.md`”.
+- **Tool-friendly**: agents, scripts, and scrapers can reliably fetch markdown (instead of HTML/navigation chrome).
+- **Stable to reference**: the intent is “this is documentation content”, not “this is a routed web page”.
+
+For example, the `.md` URL for this page is:
+
+- [`https://registry.joyco.studio/logs/02-ai-driven-development.md`](https://registry.joyco.studio/logs/02-ai-driven-development.md)
+
 ## About reviews
 
 As a studio we agree on a set of [PR Guidelines](/toolbox/pr-guidelines) to maintain code quality. These are not stuff that a linter could catch, these involve stuff like logic and data management. In the past, I used to review these myself, occupying my "**main attention thread**", but now we have better tools like [Greptile](https://www.greptile.com/), we load a set of guidelines that the model can load to find specific violations on the PR diff. This applies to both human code and agent code, like new PR from the "Cursor Cloud Agent". We collaborate as a team on augmenting these guidelines to refine what we ship while delegating most of these to specialized agents.
