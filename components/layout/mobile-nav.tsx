@@ -180,7 +180,7 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
             {/* Section dropdown - toggles menu open/close */}
             <button
               onClick={() => setState(state === 'menu' ? 'closed' : 'menu')}
-              className="bg-muted flex h-full min-w-0 flex-1 items-center gap-2 px-4 font-mono text-xs font-medium tracking-wide uppercase"
+              className="bg-accent flex h-full min-w-0 flex-1 items-center gap-2 px-4 font-mono text-xs font-medium tracking-wide uppercase"
             >
               <span className="text-muted-foreground shrink-0">JOYCO:</span>
               <span className="truncate">{currentSectionName}</span>
@@ -193,7 +193,7 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
               className="bg-muted flex h-full shrink-0 items-center gap-2 px-4 font-mono text-xs tracking-wide uppercase"
             >
               <SearchIcon className="size-4" />
-              <span className="max-[400px]:hidden">Search</span>
+              <span className="opacity-70 max-[400px]:hidden">Search</span>
             </button>
           </>
         )}
