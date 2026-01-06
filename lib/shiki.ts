@@ -85,7 +85,7 @@ export const transformers = [
 ] as ShikiTransformer[]
 
 export const codeClasses = {
-  pre: "not-fumadocs-codeblock group/code relative w-full overflow-auto p-3 has-[[data-slot='command-block']]:p-0 has-[[data-line-numbers]]:px-0",
+  pre: "not-fumadocs-codeblock group/code relative w-full overflow-auto p-3 has-[[data-slot='command-block']]:p-0 has-[[data-line-numbers]]:px-0 bg-muted",
 }
 
 export async function highlightCode(code: string, language: string = 'tsx') {

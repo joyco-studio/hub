@@ -108,14 +108,14 @@ export function PageTOCPopoverTrigger({
   return (
     <CollapsibleTrigger
       className={cn(
-        'text-fd-muted-foreground flex h-10 w-full items-center text-start text-xs tracking-wide uppercase focus-visible:outline-none [&_svg]:size-4',
+        'px-content-sides text-fd-muted-foreground flex h-10 w-full items-center text-start text-xs tracking-wide uppercase focus-visible:outline-none [&_svg]:size-4',
         className
       )}
       data-toc-popover-trigger=""
       {...props}
     >
       {/* Inner container matching page content max-width */}
-      <div className="mx-auto flex w-full max-w-[900px] items-center gap-2.5 px-4 md:px-6 xl:px-8">
+      <div className="mx-auto flex w-full max-w-2xl items-center gap-2.5 2xl:max-w-3xl">
         <ProgressSquare
           value={(selected + 1) / Math.max(1, items.length)}
           max={1}
@@ -228,7 +228,7 @@ export function PageTOCPopoverContent(props: ComponentProps<'div'>) {
       className={cn('flex max-h-[50vh] flex-col', props.className)}
     >
       {/* Inner container matching page content max-width */}
-      <div className="mx-auto w-full max-w-[900px] px-4 md:px-6 xl:px-8">
+      <div className="px-content-sides mx-auto w-full max-w-2xl 2xl:max-w-3xl">
         {props.children}
       </div>
     </CollapsibleContent>
@@ -290,7 +290,7 @@ export function PageFooter({ items, ...props }: FooterProps) {
     <div
       {...props}
       className={cn(
-        '@container grid gap-4',
+        '@container mx-auto grid w-full max-w-2xl gap-4 2xl:max-w-3xl',
         previous && next ? 'grid-cols-2' : 'grid-cols-1',
         props.className
       )}
