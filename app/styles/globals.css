@@ -144,6 +144,40 @@
   }
 }
 
+/* Custom scrollbar styling */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) transparent;
+}
+
+*::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 8px;
+  height: 8px;
+  background: transparent;
+}
+
+*::-webkit-scrollbar-track {
+  -webkit-appearance: none;
+  background: transparent;
+  border-radius: 0 !important;
+}
+
+*::-webkit-scrollbar-thumb {
+  -webkit-appearance: none;
+  background-color: var(--accent);
+  border-radius: 0 !important;
+  border: none;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in oklab, var(--accent) 80%, var(--foreground));
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 .dark {
   --background: oklch(0.1684 0 0);
   --foreground: oklch(0.985 0 0);
@@ -297,20 +331,15 @@
 
   .fancy-scroll::-webkit-scrollbar-track {
     background: transparent;
-    border-radius: 10px;
   }
 
   .fancy-scroll::-webkit-scrollbar-thumb {
-    background: color-mix(in oklab, var(--muted-foreground) 30%, transparent);
-    border-radius: 10px;
-    border: 2px solid transparent;
-    background-clip: padding-box;
-    transition: background 0.2s ease;
+    background-color: var(--accent);
+    border-radius: 0;
   }
 
   .fancy-scroll::-webkit-scrollbar-thumb:hover {
-    background: color-mix(in oklab, var(--muted-foreground) 50%, transparent);
-    background-clip: padding-box;
+    background-color: color-mix(in oklab, var(--accent) 80%, var(--foreground));
   }
 
   .fancy-scroll::-webkit-scrollbar-corner {
@@ -335,20 +364,15 @@
 
   .fancy-scroll > pre::-webkit-scrollbar-track {
     background: transparent;
-    border-radius: 10px;
   }
 
   .fancy-scroll > pre::-webkit-scrollbar-thumb {
-    background: color-mix(in oklab, var(--muted-foreground) 30%, transparent);
-    border-radius: 10px;
-    border: 2px solid transparent;
-    background-clip: padding-box;
-    transition: background 0.2s ease;
+    background-color: var(--accent);
+    border-radius: 0;
   }
 
   .fancy-scroll > pre::-webkit-scrollbar-thumb:hover {
-    background: color-mix(in oklab, var(--muted-foreground) 50%, transparent);
-    background-clip: padding-box;
+    background-color: color-mix(in oklab, var(--accent) 80%, var(--foreground));
   }
 
   .scrollbar-none {
