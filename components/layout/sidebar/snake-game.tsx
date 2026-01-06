@@ -8,17 +8,41 @@ type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT'
 type Position = { x: number; y: number }
 type HighscoreEntry = { score: number; date: string }
 
-const GRID_SIZE = 12
+const GRID_SIZE = 20
+const INITIAL_SNAKE_LENGTH = 3
 const INITIAL_SPEED = 150
 const STORAGE_KEY = 'snake-highscores'
 const MAX_HIGHSCORES = 4
+
+function getInitialSnake(): Position[] {
+  const y = Math.floor(GRID_SIZE / 2)
+  const headX = Math.floor(GRID_SIZE / 2)
+
+  return Array.from({ length: INITIAL_SNAKE_LENGTH }, (_, i) => ({
+    x: headX - i,
+    y,
+  }))
+}
+
+function generateFood(currentSnake: Position[]) {
+  let newFood: Position
+  do {
+    newFood = {
+      x: Math.floor(Math.random() * GRID_SIZE),
+      y: Math.floor(Math.random() * GRID_SIZE),
+    }
+  } while (currentSnake.some((s) => s.x === newFood.x && s.y === newFood.y))
+  return newFood
+}
 
 export function SnakeGame() {
   const containerRef = React.useRef<HTMLDivElement>(null)
   const canvasRef = React.useRef<HTMLCanvasElement>(null)
   const [canvasSize, setCanvasSize] = React.useState(180)
-  const [snake, setSnake] = React.useState<Position[]>([{ x: 6, y: 6 }])
-  const [food, setFood] = React.useState<Position>({ x: 9, y: 9 })
+  const [snake, setSnake] = React.useState<Position[]>(() => getInitialSnake())
+  const [food, setFood] = React.useState<Position>(() =>
+    generateFood(getInitialSnake())
+  )
   const [direction, setDirection] = React.useState<Direction>('RIGHT')
   const [gameOver, setGameOver] = React.useState(false)
   const [score, setScore] = React.useState(0)
@@ -108,19 +132,8 @@ export function SnakeGame() {
     return () => observer.disconnect()
   }, [])
 
-  const generateFood = React.useCallback((currentSnake: Position[]) => {
-    let newFood: Position
-    do {
-      newFood = {
-        x: Math.floor(Math.random() * GRID_SIZE),
-        y: Math.floor(Math.random() * GRID_SIZE),
-      }
-    } while (currentSnake.some((s) => s.x === newFood.x && s.y === newFood.y))
-    return newFood
-  }, [])
-
   const resetGame = React.useCallback(() => {
-    const initialSnake = [{ x: 6, y: 6 }]
+    const initialSnake = getInitialSnake()
     setSnake(initialSnake)
     setFood(generateFood(initialSnake))
     setDirection('RIGHT')
@@ -128,7 +141,7 @@ export function SnakeGame() {
     setGameOver(false)
     setScore(0)
     setIsPlaying(true)
-  }, [generateFood])
+  }, [])
 
   // Handle keyboard input - check against last MOVED direction to prevent rapid reversal
   React.useEffect(() => {
@@ -269,7 +282,7 @@ export function SnakeGame() {
 
     const interval = setInterval(moveSnake, INITIAL_SPEED)
     return () => clearInterval(interval)
-  }, [isPlaying, gameOver, food, generateFood])
+  }, [isPlaying, gameOver, food])
 
   // Draw game with HiDPI support
   React.useEffect(() => {
