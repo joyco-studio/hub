@@ -305,26 +305,39 @@ function FooterItem({ item, index }: { item: Item; index: 0 | 1 }) {
   const { text } = useI18n()
   const Icon = index === 0 ? CaretLeftIcon : CaretRightIcon
 
+  const arrowPanel = (
+    <div className="bg-muted flex items-center justify-center px-6">
+      <Icon className="size-5 shrink-0 rtl:rotate-180" />
+    </div>
+  )
+
+  const contentPanel = (
+    <div className="bg-accent flex flex-1 flex-col justify-center gap-1 p-4">
+      <p className="font-mono text-sm font-medium tracking-wide uppercase">
+        {item.name}
+      </p>
+      <p className="text-muted-foreground line-clamp-2 text-sm">
+        {item.description ?? (index === 0 ? text.previousPage : text.nextPage)}
+      </p>
+    </div>
+  )
+
   return (
     <Link
       href={item.url}
-      className={cn(
-        'bg-accent text-accent-foreground hover:bg-accent/80 mt-10 flex flex-col gap-2 p-4 text-sm transition-colors @max-lg:col-span-full',
-        index === 1 && 'text-end'
-      )}
+      className="group mt-10 flex min-h-24 gap-1 transition-opacity hover:opacity-90 @max-lg:col-span-full"
     >
-      <div
-        className={cn(
-          'inline-flex items-center gap-1.5 font-medium',
-          index === 1 && 'flex-row-reverse'
-        )}
-      >
-        <Icon className="-mx-1 size-4 shrink-0 rtl:rotate-180" />
-        <p>{item.name}</p>
-      </div>
-      <p className="text-fd-muted-foreground truncate">
-        {item.description ?? (index === 0 ? text.previousPage : text.nextPage)}
-      </p>
+      {index === 0 ? (
+        <>
+          {arrowPanel}
+          {contentPanel}
+        </>
+      ) : (
+        <>
+          {contentPanel}
+          {arrowPanel}
+        </>
+      )}
     </Link>
   )
 }

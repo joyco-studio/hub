@@ -41,16 +41,6 @@ export function Maintainers({ maintainers, lastModified }: MaintainersProps) {
           </a>
         ))}
       </div>
-
-      {lastModified && (
-        <span className="text-muted-foreground/60 my-1 px-2 py-1 font-mono text-xs">
-          {lastModified.toLocaleDateString('en-US', {
-            day: 'numeric',
-            month: 'numeric',
-            year: 'numeric',
-          })}
-        </span>
-      )}
     </div>
   )
 }
