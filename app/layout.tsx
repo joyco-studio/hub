@@ -36,6 +36,9 @@ export const metadata: Metadata = {
       },
     ],
   },
+  viewport: {
+    maximumScale: 1, // handle zoom on mobile
+  },
 }
 
 export default function Layout({ children }: LayoutProps<'/'>) {
@@ -60,6 +63,9 @@ export default function Layout({ children }: LayoutProps<'/'>) {
       </head>
       <body>
         <RootProvider
+          search={{
+            enabled: false,
+          }}
           theme={{
             themes: ['light', 'dark', 'radio', 'terminal'],
             defaultTheme: 'dark',

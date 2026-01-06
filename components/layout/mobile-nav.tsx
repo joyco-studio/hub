@@ -172,7 +172,7 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search..."
-              className="text-foreground placeholder:text-muted-foreground min-w-0 flex-1 bg-transparent font-mono text-xs tracking-wide uppercase outline-none"
+              className="text-foreground placeholder:text-muted-foreground min-w-0 flex-1 bg-transparent font-mono text-base tracking-wide uppercase outline-none"
             />
           </div>
         ) : (

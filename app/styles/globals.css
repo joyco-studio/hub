@@ -417,3 +417,10 @@ html.terminal [data-rehype-pretty-code-figure] span {
   font-weight: normal !important;
   text-decoration: none !important;
 }
+
+@utility overscroll-behavior-none {
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+  isolation: isolate;
+}
