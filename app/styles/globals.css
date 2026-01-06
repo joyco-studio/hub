@@ -393,3 +393,17 @@ html.dark .shiki span {
   font-weight: var(--shiki-dark-font-weight) !important;
   text-decoration: var(--shiki-dark-text-decoration) !important;
 }
+
+/* Terminal theme: monochrome code - just use foreground color */
+html.terminal .shiki,
+html.terminal .shiki span,
+html.terminal [data-line] span,
+html.terminal [data-rehype-pretty-code-figure] span {
+  color: var(--foreground) !important;
+  --shiki-light: var(--foreground) !important;
+  --shiki-dark: var(--foreground) !important;
+  background-color: transparent !important;
+  font-style: normal !important;
+  font-weight: normal !important;
+  text-decoration: none !important;
+}
