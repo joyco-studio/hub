@@ -50,10 +50,7 @@ export function ComponentPreview({
         <div
           title={undefined}
           /* For demos, we want to override project theme to default shadcn themes to favor a consistent appearance for the cloning user */
-          className={cn(
-            'bg-preview my-0 w-full overflow-hidden rounded-none',
-            'dark:override-shadcn-default-dark radio:override-shadcn-default-light light:override-shadcn-default-light terminal:override-shadcn-default-radio'
-          )}
+          className="bg-preview my-0 w-full overflow-hidden rounded-none"
         >
           {resizable ? (
             <ResizableIframe
@@ -74,5 +71,9 @@ export function ComponentPreview({
 
 const LazyComponent = ({ name }: { name: string }) => {
   const Component = lazy(() => import(`@/demos/${name}`))
-  return <Component />
+  return (
+    <div className="dark:override-shadcn-default-dark radio:override-shadcn-default-light light:override-shadcn-default-light terminal:override-shadcn-default-radio contents">
+      <Component />
+    </div>
+  )
 }
