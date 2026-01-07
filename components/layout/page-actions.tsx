@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { CopyButton } from '@/components/copy-button'
-import { ArrowUpRight, Copy } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
+import CopyIcon from '@/components/icons/copy'
 import { cn } from '@/lib/utils'
 import { Button } from '../ui/button'
 
@@ -29,7 +30,7 @@ export function PageActions({
               'Copied!'
             ) : (
               <>
-                Copy Markdown <Copy className="size-3" />
+                Copy Markdown <CopyIcon className="size-3" />
               </>
             )}
           </>
