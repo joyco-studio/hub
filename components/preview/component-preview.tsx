@@ -49,7 +49,11 @@ export function ComponentPreview({
       <div className={cn('preview bg-card relative flex')}>
         <div
           title={undefined}
-          className="bg-card my-0 w-full overflow-hidden rounded-none"
+          /* For demos, we want to override project theme to default shadcn themes to favor a consistent appearance for the cloning user */
+          className={cn(
+            'my-0 w-full overflow-hidden rounded-none',
+            'dark:override-shadcn-default-dark radio:override-shadcn-default-light light:override-shadcn-default-light terminal:override-shadcn-default-radio'
+          )}
         >
           {resizable ? (
             <ResizableIframe

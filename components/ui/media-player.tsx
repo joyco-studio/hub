@@ -751,7 +751,7 @@ function MediaPlayerImpl(props: MediaPlayerProps) {
         onKeyDown={onKeyDown}
         onKeyUp={onKeyUp}
         className={cn(
-          'dark bg-background focus-visible:border-ring focus-visible:ring-ring/50 relative isolate flex flex-col overflow-hidden rounded-lg outline-none focus-visible:ring-[3px] data-disabled:pointer-events-none data-disabled:opacity-50 [&_video]:relative [&_video]:object-contain',
+          'bg-background focus-visible:border-ring focus-visible:ring-ring/50 relative isolate flex flex-col overflow-hidden rounded-lg outline-none focus-visible:ring-[3px] data-disabled:pointer-events-none data-disabled:opacity-50 [&_video]:relative [&_video]:object-contain',
           'in-[:fullscreen]:flex in-[:fullscreen]:h-full in-[:fullscreen]:max-h-screen in-[:fullscreen]:flex-col in-[:fullscreen]:justify-between data-[state=fullscreen]:[&_video]:size-full',
           "**:data-slider:relative [&_[data-slider]::before]:absolute [&_[data-slider]::before]:inset-x-0 [&_[data-slider]::before]:-top-4 [&_[data-slider]::before]:-bottom-2 [&_[data-slider]::before]:z-10 [&_[data-slider]::before]:h-8 [&_[data-slider]::before]:cursor-pointer [&_[data-slider]::before]:content-[''] [&_[data-slot='media-player-seek']:not([data-hovering])::before]:cursor-default",
           '[&_video::-webkit-media-text-track-display]:top-auto! [&_video::-webkit-media-text-track-display]:bottom-[4%]! [&_video::-webkit-media-text-track-display]:mb-0! data-controls-visible:[&_video::-webkit-media-text-track-display]:bottom-[13%]! data-[state=fullscreen]:[&_video::-webkit-media-text-track-display]:bottom-[7%]! data-[state=fullscreen]:data-controls-visible:[&_video::-webkit-media-text-track-display]:bottom-[9%]!',
@@ -862,7 +862,7 @@ function MediaPlayerControls(props: DivProps) {
       data-visible={controlsVisible ? '' : undefined}
       dir={context.dir}
       className={cn(
-        'dark pointer-events-none absolute right-0 bottom-0 left-0 z-50 flex items-center gap-2 px-4 py-3 opacity-0 transition-opacity duration-200 in-[:fullscreen]:px-6 in-[:fullscreen]:py-4 data-visible:pointer-events-auto data-visible:opacity-100',
+        'pointer-events-none absolute right-0 bottom-0 left-0 z-50 flex items-center gap-2 px-4 py-3 opacity-0 transition-opacity duration-200 in-[:fullscreen]:px-6 in-[:fullscreen]:py-4 data-visible:pointer-events-auto data-visible:opacity-100',
         className
       )}
       {...controlsProps}

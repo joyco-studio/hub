@@ -24,7 +24,7 @@ export function ExternalRegistryBanner({
       )}
     >
       <div className="flex items-start gap-3">
-        <div className="bg-foreground/10 text-foreground flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
+        <div className="bg-foreground/10 text-foreground flex h-10 w-10 shrink-0 items-center justify-center">
           {icon || <ExternalLink className="h-5 w-5" />}
         </div>
         <div>

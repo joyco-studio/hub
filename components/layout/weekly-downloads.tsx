@@ -59,7 +59,7 @@ export function WeeklyDownloads({ data }: { data: DownloadStats | null }) {
           Downloads
         </span>
       </div>
-      <div className="flex flex-col gap-1 border-l-2 px-2 pb-2">
+      <div className="flex flex-col gap-1 px-2 pb-2">
         <div className="flex items-baseline gap-2">
           {hoveredData ? (
             <>
