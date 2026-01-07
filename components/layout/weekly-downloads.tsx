@@ -14,7 +14,7 @@ export interface DownloadStats {
 const chartConfig = {
   downloads: {
     label: 'Downloads',
-    color: 'var(--chart-1)',
+    color: 'var(--primary)',
   },
 } satisfies ChartConfig
 
