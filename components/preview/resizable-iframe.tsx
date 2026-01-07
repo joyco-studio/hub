@@ -3,13 +3,17 @@
 import * as React from 'react'
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { cn } from '@/lib/utils'
-import { GripVertical, Tablet, Smartphone } from 'lucide-react'
+import { GripVertical } from 'lucide-react'
+import PhoneIcon from '@/components/icons/phone'
+import TabletIcon from '@/components/icons/tablet'
 import { PatternOverlay } from './pattern-overlay'
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { Badge } from '../ui/badge'
+import { Button } from '../ui/button'
 
 interface ResizableIframeProps {
   /** The URL for the iframe */
@@ -178,59 +182,49 @@ export function ResizableIframe({
   // absolute inset-0
   return (
     <div className="flex flex-col">
-      <div className="bg-card border-border z-10 flex items-center justify-between border-b">
+      <div className="border-background z-10 flex justify-between gap-1 border-b-4">
         {showIndicator && (
-          <div className="text-foreground z-10 flex items-center gap-2 px-4 py-2">
+          <div className="bg-muted text-foreground z-10 flex items-center gap-2 py-2 pr-6 pl-4">
             <span className="text-foreground font-mono text-sm font-medium">
               {Math.round(width)}px
             </span>
-            <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 font-mono text-xs">
+            <Badge variant="accent" className="h-4 font-mono text-[10px]">
               {getBreakpointLabel(width)}
-            </span>
+            </Badge>
           </div>
         )}
-        <div className="ml-auto flex items-center gap-1 px-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => handleDeviceSelect('mobile')}
-                className={cn(
-                  'flex items-center justify-center rounded-md p-1.5 transition-colors',
-                  'hover:bg-accent hover:text-accent-foreground',
-                  selectedDevice === 'mobile'
-                    ? 'bg-accent text-accent-foreground'
-                    : 'text-muted-foreground'
-                )}
-                aria-label="Mobile view"
-              >
-                <Smartphone className="size-4" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>Mobile View</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => handleDeviceSelect('tablet')}
-                className={cn(
-                  'flex items-center justify-center rounded-md p-1.5 transition-colors',
-                  'hover:bg-accent hover:text-accent-foreground',
-                  selectedDevice === 'tablet'
-                    ? 'bg-accent text-accent-foreground'
-                    : 'text-muted-foreground'
-                )}
-                aria-label="Tablet view"
-              >
-                <Tablet className="size-4" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>Tablet View</TooltipContent>
-          </Tooltip>
+        <div className="bg-muted/50 flex-1 self-stretch" />
+        <div className="ml-auto flex items-center gap-1">
+          {[
+            {
+              device: 'mobile',
+              label: 'Mobile View',
+              icon: PhoneIcon,
+            },
+            {
+              device: 'tablet',
+              label: 'Tablet View',
+              icon: TabletIcon,
+            },
+          ].map(({ device, label, icon: Icon }) => (
+            <Tooltip key={device}>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  variant={selectedDevice === device ? 'accent' : 'muted'}
+                  onClick={() => handleDeviceSelect(device as DevicePreset)}
+                  aria-label={`${label}`}
+                >
+                  <Icon className="size-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{label}</TooltipContent>
+            </Tooltip>
+          ))}
         </div>
       </div>
       <div className={cn('relative flex flex-col', className)}>
-        <PatternOverlay className="bg-card pointer-events-none absolute inset-0" />
+        <PatternOverlay className="bg-preview pointer-events-none absolute inset-0" />
 
         <div
           ref={containerRef}

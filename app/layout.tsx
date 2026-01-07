@@ -22,17 +22,24 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
+      // SVG with embedded CSS handles dark/light automatically via prefers-color-scheme
       {
         url: '/icon.svg',
-        href: '/icon.svg',
         type: 'image/svg+xml',
-        sizes: '32x32',
+        sizes: 'any',
       },
+      // PNG fallbacks for browsers without SVG favicon support
       {
-        url: '/icon.png',
-        href: '/icon.png',
+        url: '/icon-32x32.png',
         type: 'image/png',
         sizes: '32x32',
+        media: '(prefers-color-scheme: dark)',
+      },
+      {
+        url: '/icon-light.png',
+        type: 'image/png',
+        sizes: '32x32',
+        media: '(prefers-color-scheme: light)',
       },
     ],
   },

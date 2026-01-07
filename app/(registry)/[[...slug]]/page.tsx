@@ -139,7 +139,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
           <Separator brackets align="bottom" className="mb-4" />
 
           {/* Doc links */}
-          <div className="mb-4 hidden items-center justify-between gap-8 has-data-[slot=doc-links]:flex max-sm:flex">
+          <div className="mb-6 hidden items-center justify-between gap-8 has-data-[slot=doc-links]:flex max-sm:flex md:mb-10">
             <DocLinks links={docLinks} />
             <PageActions
               className="sm:hidden"

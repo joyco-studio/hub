@@ -1,7 +1,7 @@
 'use client'
 
 import { type ReactNode } from 'react'
-import { Text } from 'lucide-react'
+import TextScanIcon from '@/components/icons/text-scan'
 import { TOCScrollArea } from '@/components/toc'
 import { TOCItems } from '@/components/toc/clerk'
 import { useLayout } from '@/hooks/use-layout'
@@ -40,7 +40,7 @@ export function TOC({ header, footer, className }: ClerkTOCProps) {
             id="toc-title"
             className="text-muted-foreground inline-flex items-center gap-1.5 text-xs font-medium"
           >
-            <Text className="size-4" />
+            <TextScanIcon className="size-4" />
             <span>On this page</span>
           </h3>
           <TOCScrollArea>

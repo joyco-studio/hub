@@ -47,16 +47,24 @@ export function CodeBlockCommand({
     <div
       data-slot="command-block"
       className={cn(
-        'not-prose relative flex flex-col overflow-hidden',
+        'not-prose bg-background relative flex flex-col overflow-hidden',
         className
       )}
     >
-      <Tabs value={currentTab} onValueChange={handleTabChange}>
+      <Tabs
+        className="grid gap-y-1"
+        value={currentTab}
+        onValueChange={handleTabChange}
+      >
         {/* Header row with tabs and copy button */}
-        <div className="bg-background border-background flex gap-1 border-b-4">
+        <div className="flex gap-1">
           <TabsList className="bg-transparent">
             {tabs.map((tab) => (
-              <TabsTrigger key={tab.label} value={tab.label}>
+              <TabsTrigger
+                className="data-[state=active]:bg-accent hover:bg-muted/50"
+                key={tab.label}
+                value={tab.label}
+              >
                 {tab.label}
               </TabsTrigger>
             ))}
@@ -70,7 +78,7 @@ export function CodeBlockCommand({
               variant="ghost"
               absolute={false}
               forceVisible
-              className="bg-muted size-9"
+              className="bg-muted size-9 opacity-100"
             />
           )}
         </div>
@@ -81,7 +89,7 @@ export function CodeBlockCommand({
             <TabsContent
               key={tab.label}
               value={tab.label}
-              className="no-scrollbar mt-0"
+              className="no-scrollbar bg-accent/80 mt-0"
             >
               <pre className="m-0">
                 <code

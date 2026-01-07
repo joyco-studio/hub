@@ -38,27 +38,16 @@ export function SidebarSearch({ query, setQuery }: SidebarSearchProps) {
         placeholder="Search"
         className="text-foreground placeholder:text-muted-foreground h-full min-w-0 flex-1 bg-transparent font-mono text-sm tracking-wide uppercase outline-none"
       />
-      {query ? (
-        <Badge
-          asChild
-          variant="key"
-          className="cursor-pointer"
-          onClick={() => {
-            setQuery('')
-            inputRef.current?.focus()
-          }}
-        >
-          <button>Clear</button>
-        </Badge>
-      ) : (
+      {!query && (
         <Badge variant="key" asChild>
           <button
             onClick={() => {
               inputRef.current?.focus()
             }}
+            className="text-sm leading-none"
           >
-            <kbd>
-              <span className="text-[10px]">⌘</span>
+            <kbd className='inline-flex gap-0.5 items-center'>
+              <span className='text-[1.2em]'>⌘</span>
               <span>K</span>
             </kbd>
           </button>

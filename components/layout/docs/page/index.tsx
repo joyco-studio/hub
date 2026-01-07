@@ -1,7 +1,8 @@
 import type { ComponentProps, ReactNode } from 'react'
 import { cn } from '../../../../lib/cn'
 import { buttonVariants } from '../../../ui/button'
-import { Edit, Text } from 'lucide-react'
+import { Edit } from 'lucide-react'
+import TextScanIcon from '@/components/icons/text-scan'
 import { I18nLabel } from 'fumadocs-ui/contexts/i18n'
 import {
   type BreadcrumbProps,
@@ -161,7 +162,7 @@ export function DocsPage({
               id="toc-title"
               className="text-muted-foreground inline-flex items-center gap-1.5 text-sm"
             >
-              <Text className="size-4" />
+              <TextScanIcon className="size-4" />
               <I18nLabel label="toc" />
             </h3>
             <TOCScrollArea>

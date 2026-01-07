@@ -2,7 +2,8 @@
 
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
-import { Check, Copy } from 'lucide-react'
+import { Check } from 'lucide-react'
+import CopyIcon from '@/components/icons/copy'
 import { cn } from '@/lib/utils'
 
 export function useCopyToClipboard(timeout = 2000) {
@@ -65,7 +66,7 @@ export function CopyButton({
       ) : hasCopied ? (
         <Check className="h-4 w-4" />
       ) : (
-        <Copy className="h-4 w-4" />
+        <CopyIcon className="h-4 w-4" />
       )}
     </Button>
   )

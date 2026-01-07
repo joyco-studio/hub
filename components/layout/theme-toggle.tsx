@@ -33,11 +33,14 @@ type ThemePreviewProps = {
 
 export const ThemePreview = ({ themeClass, className }: ThemePreviewProps) => (
   <div
-    className={cn('grid rotate-45 grid-cols-2 gap-px p-px bg-border/30 ', themeClass, className)}
+    className={cn(
+      'bg-border grid rotate-45 grid-cols-2 gap-px p-px',
+      className
+    )}
   >
     {['bg-primary', 'bg-secondary', 'bg-foreground', 'bg-background'].map(
       (cls) => (
-        <div key={cls} className={cn(cls, 'size-2.5')} />
+        <div key={cls} className={cn(cls, themeClass, 'size-2.5')} />
       )
     )}
   </div>
