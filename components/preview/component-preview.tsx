@@ -46,23 +46,22 @@ export function ComponentPreview({
       )}
       {...props}
     >
-      <div className="relative flex">
-        <div
-          title={undefined}
-          /* For demos, we want to override project theme to default shadcn themes to favor a consistent appearance for the cloning user */
-          className="bg-preview my-0 w-full overflow-hidden rounded-none"
-        >
-          {resizable ? (
+      <div className="relative my-0 flex w-full overflow-hidden rounded-none">
+        {resizable ? (
+          <div className='w-full'>
             <ResizableIframe
               src={`/view/${name}`}
               defaultWidth={defaultWidth}
               minWidth={280}
               height={height}
             />
-          ) : (
+          </div>
+        ) : (
+          /* For demos, we want to override project theme to default shadcn themes to favor a consistent appearance for the cloning user */
+          <div className="dark:override-shadcn-default-dark radio:override-shadcn-default-light light:override-shadcn-default-light terminal:override-shadcn-default-radio bg-preview h-full w-full">
             <LazyComponent name={name} />
-          )}
-        </div>
+          </div>
+        )}
       </div>
       <ComponentSource name={codeExampleName ?? name} language="tsx" />
     </div>
@@ -71,9 +70,5 @@ export function ComponentPreview({
 
 const LazyComponent = ({ name }: { name: string }) => {
   const Component = lazy(() => import(`@/demos/${name}`))
-  return (
-    <div className="dark:override-shadcn-default-dark radio:override-shadcn-default-light light:override-shadcn-default-light terminal:override-shadcn-default-radio contents">
-      <Component />
-    </div>
-  )
+  return <Component />
 }

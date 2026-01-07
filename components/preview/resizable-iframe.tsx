@@ -224,7 +224,7 @@ export function ResizableIframe({
         </div>
       </div>
       <div className={cn('relative flex flex-col', className)}>
-        <PatternOverlay className="bg-card pointer-events-none absolute inset-0" />
+        <PatternOverlay className="bg-preview pointer-events-none absolute inset-0" />
 
         <div
           ref={containerRef}
