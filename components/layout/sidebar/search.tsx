@@ -40,6 +40,7 @@ export function SidebarSearch({ query, setQuery }: SidebarSearchProps) {
       />
       {query ? (
         <Badge
+          asChild
           variant="key"
           className="cursor-pointer"
           onClick={() => {
@@ -47,14 +48,20 @@ export function SidebarSearch({ query, setQuery }: SidebarSearchProps) {
             inputRef.current?.focus()
           }}
         >
-          Clear
+          <button>Clear</button>
         </Badge>
       ) : (
         <Badge variant="key" asChild>
-          <kbd>
-            <span className="text-[10px]">⌘</span>
-            <span>K</span>
-          </kbd>
+          <button
+            onClick={() => {
+              inputRef.current?.focus()
+            }}
+          >
+            <kbd>
+              <span className="text-[10px]">⌘</span>
+              <span>K</span>
+            </kbd>
+          </button>
         </Badge>
       )}
     </div>
