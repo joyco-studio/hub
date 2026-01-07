@@ -1,0 +1,51 @@
+---
+title: Typewriter
+description: A typewriter text component powered by the Web Animations API (type → hold → delete → next).
+maintainers: ['fabroos']
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+<ComponentPreview name="typewriter-demo" height={360} />
+
+## Installation
+
+```bash
+npx shadcn@latest add https://r.joyco.studio/typewriter.json
+```
+
+## Usage
+
+```tsx
+import { Typewriter } from '@/components/typewriter'
+
+<p>
+  Build{' '}
+  <Typewriter
+    texts={['faster', 'safer', 'smarter']}
+    msPerChar={60}        // typing speed
+    pauseMs={900}         // hold time (fully typed)
+    deleteMsPerChar={45}  // delete speed
+    gapMs={150}           // delay before next word
+  />
+</p>
+```
+
+## Props
+
+- **texts**: `string[]` — Phrases to type. When more than one is provided, the component can cycle.
+- **autoPlay**: `boolean` — Automatically cycle phrases (defaults to `texts.length > 1`). Disabled when `prefers-reduced-motion` is enabled.
+- **index / defaultIndex / onIndexChange**: Control the active phrase (controlled/uncontrolled).
+- **msPerChar**: `number` — Typing speed per character.
+- **pauseMs**: `number` — Pause after typing completes before advancing.
+- **deleteMsPerChar**: `number` — Delete speed per character (defaults to `msPerChar`).
+- **gapMs**: `number` — Pause after deleting completes before starting the next word.
+- **loop**: `boolean` — Loop back to the first phrase after the last.
+- **caret**: `boolean` — Show/hide the blinking caret.
+- **ariaLive**: `"off" | "polite" | "assertive"` — Screen reader announcement mode (defaults to `"off"`).
+
+## Accessibility
+
+- **ARIA live region**: Controlled via `ariaLive`. Default is `"off"` to avoid noisy announcements while cycling.
+- **Reduced motion**: When `prefers-reduced-motion` is enabled, the full text is shown immediately, the caret is hidden, and autoplay is disabled.
+
