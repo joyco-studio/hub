@@ -19,12 +19,12 @@ export function ExternalRegistryBanner({
   return (
     <div
       className={cn(
-        'not-prose bg-accent my-6 mb-6 flex flex-col gap-4 p-4 pl-2.5 first:mt-0 last:mb-0 sm:flex-row sm:items-center sm:justify-between',
+        'not-prose bg-card my-6 mb-6 flex flex-col gap-4 p-4 pl-2.5 first:mt-0 last:mb-0 sm:flex-row sm:items-center sm:justify-between',
         className
       )}
     >
       <div className="flex items-start gap-3">
-        <div className="bg-primary/10 text-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
+        <div className="bg-foreground/10 text-foreground flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
           {icon || <ExternalLink className="h-5 w-5" />}
         </div>
         <div>
