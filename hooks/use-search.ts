@@ -33,7 +33,6 @@ export function useSearch() {
       })
         .then((res) => res.json())
         .then((data: SearchResult[]) => {
-          // Only update if this is still the current query
           setResults(data)
           setResultsForQuery(query)
         })
@@ -49,11 +48,17 @@ export function useSearch() {
   }, [query])
 
   // Derive display state:
-  // - hasResults: we have results TO SHOW for the CURRENT query
-  // - isEmpty: we confirmed no results for the CURRENT query
-  // - else: idle or loading (show default content)
-  const hasResults = resultsForQuery === query && results.length > 0
-  const isEmpty = resultsForQuery === query && results.length === 0 && query.length >= MIN_QUERY_LENGTH
+  // Key insight: if we're showing results, keep showing them until new results arrive
+  const isSearching = query.length >= MIN_QUERY_LENGTH
+  const hasLoadedResults = resultsForQuery.length >= MIN_QUERY_LENGTH
+  const resultsMatch = resultsForQuery === query
+
+  // hasResults: show results if we have any loaded (even if for previous query while loading)
+  // But only if we're still in search mode (query >= 2)
+  const hasResults = isSearching && hasLoadedResults && results.length > 0
+
+  // isEmpty: only when we've confirmed no results for the CURRENT query specifically
+  const isEmpty = isSearching && resultsMatch && results.length === 0
 
   return {
     query,
