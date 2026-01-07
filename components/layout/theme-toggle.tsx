@@ -4,6 +4,11 @@ import * as React from 'react'
 import { useTheme } from 'next-themes'
 import { cn } from '@/lib/utils'
 import { AsideButton } from './nav-aside'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 /* -------------------------------------------------------------------------------------------------
  * Theme configuration
@@ -102,16 +107,23 @@ function ThemeOptions({ onSelect }: { onSelect: () => void }) {
   return (
     <div className="flex flex-col gap-1">
       {availableThemes.map((t) => (
-        <AsideButton
-          key={t.name}
-          onClick={() => {
-            setTheme(t.name)
-            onSelect()
-          }}
-        >
-          <ThemePreview themeClass={t.name} />
-          <span className="sr-only">{t.label}</span>
-        </AsideButton>
+        <Tooltip key={t.name}>
+          <TooltipTrigger asChild>
+            <AsideButton
+              onClick={() => {
+                setTheme(t.name)
+                onSelect()
+              }}
+              aria-label={t.label}
+            >
+              <ThemePreview themeClass={t.name} />
+              <span className="sr-only">{t.label}</span>
+            </AsideButton>
+          </TooltipTrigger>
+          <TooltipContent side="right" align="center" sideOffset={10}>
+            {t.label}
+          </TooltipContent>
+        </Tooltip>
       ))}
     </div>
   )
