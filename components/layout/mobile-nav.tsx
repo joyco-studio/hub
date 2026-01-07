@@ -281,7 +281,7 @@ function MobileMenuSection({ folder, itemMeta = {} }: MobileMenuSectionProps) {
       </button>
 
       {isOpen && (
-        <div className="bg-accent/50 flex flex-col pb-2">
+        <div className="bg-accent/50 flex flex-col">
           {folder.children.map((child) => {
             if (child.type === 'page') {
               const meta = itemMeta[child.url] ?? {}
