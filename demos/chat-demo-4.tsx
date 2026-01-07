@@ -68,7 +68,7 @@ export function ChatDemo() {
 
   return (
     <Chat onSubmit={handleSubmit}>
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-6 [--primary:var(--color-mustard-yellow)] [--radius:0] [--ring:var(--color-mustard-yellow)]">
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-6 [--primary-foreground:var(--color-black)] [--primary:var(--color-mustard-yellow)] [--radius:0] [--ring:var(--color-mustard-yellow)]">
         <ChatViewport className="h-96">
           <ChatMessages className="w-full py-3">
             {chat.map((message, idx) => (
@@ -97,7 +97,7 @@ export function ChatDemo() {
           </ChatMessages>
 
           <div className="from-card sticky bottom-0 z-10 mt-auto bg-linear-to-t to-transparent pb-4">
-            <ChatInputArea className="bg-card dark:bg-card rounded-none">
+            <ChatInputArea className="bg-card rounded-none">
               <ChatInputField
                 multiline
                 placeholder="Type your secret..."

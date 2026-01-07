@@ -14,7 +14,7 @@ export interface DownloadStats {
 const chartConfig = {
   downloads: {
     label: 'Downloads',
-    color: 'var(--chart-1)',
+    color: 'var(--primary)',
   },
 } satisfies ChartConfig
 
@@ -52,28 +52,32 @@ export function WeeklyDownloads({ data }: { data: DownloadStats | null }) {
   const lastDayDownloads = chartData[chartData.length - 1]?.downloads ?? 0
 
   return (
-    <div className="flex flex-col">
-      <h3 className="text-fd-muted-foreground inline-flex items-center gap-1.5 text-sm">
-        <DownloadIcon className="size-4" />
-        Weekly Downloads
-      </h3>
-      <div className="flex flex-col gap-1 py-3">
+    <div className="bg-muted flex flex-col px-6 py-4">
+      <div className="text-foreground flex items-center gap-2 py-2">
+        <DownloadIcon className="size-3" />
+        <span className="font-mono text-xs font-medium tracking-wide uppercase">
+          Downloads
+        </span>
+      </div>
+      <div className="flex flex-col gap-1 px-0 py-2">
         <div className="flex items-baseline gap-2">
           {hoveredData ? (
             <>
-              <span className="text-fd-foreground text-lg font-semibold tabular-nums">
+              <span className="text-foreground font-mono text-lg font-semibold tabular-nums">
                 {formatNumber(hoveredData.downloads)}
               </span>
-              <span className="text-fd-muted-foreground text-xs">
+              <span className="text-muted-foreground font-mono text-xs">
                 {hoveredData.day}
               </span>
             </>
           ) : (
             <>
-              <span className="text-fd-foreground text-lg font-semibold tabular-nums">
+              <span className="text-foreground font-mono text-lg font-semibold tabular-nums">
                 {formatNumber(totalDownloads)}
               </span>
-              <span className="text-fd-muted-foreground text-xs">Total</span>
+              <span className="text-muted-foreground font-mono text-xs">
+                Total
+              </span>
             </>
           )}
         </div>
@@ -114,7 +118,7 @@ export function WeeklyDownloads({ data }: { data: DownloadStats | null }) {
             />
           </AreaChart>
         </ChartContainer>
-        <span className="text-muted-foreground text-xs opacity-50">
+        <span className="text-muted-foreground font-mono text-xs opacity-50">
           {lastDayDownloads} downloads today
         </span>
       </div>

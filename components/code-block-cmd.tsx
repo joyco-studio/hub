@@ -46,45 +46,54 @@ export function CodeBlockCommand({
   return (
     <div
       data-slot="command-block"
-      className={cn('not-prose bg-card overflow-x-auto rounded-lg', className)}
+      className={cn(
+        'not-prose bg-background relative flex flex-col overflow-hidden',
+        className
+      )}
     >
       <Tabs
+        className="grid gap-y-1"
         value={currentTab}
-        className="gap-0"
         onValueChange={handleTabChange}
       >
-        <div
-          data-slot="command-header"
-          className="border-border flex items-center gap-2 border-b px-3 py-2"
-        >
-          <TabsList
-            data-slot="command-tabs"
-            className="h-auto rounded-none bg-transparent p-0"
-          >
+        {/* Header row with tabs and copy button */}
+        <div className="flex gap-1">
+          <TabsList className="bg-transparent">
             {tabs.map((tab) => (
               <TabsTrigger
+                className="data-[state=active]:bg-accent hover:bg-muted/50"
                 key={tab.label}
                 value={tab.label}
-                className="data-[state=active]:bg-accent data-[state=active]:border-border h-7 border border-transparent pt-0.5 data-[state=active]:shadow-none"
               >
                 {tab.label}
               </TabsTrigger>
             ))}
           </TabsList>
+          {/* Flex filler */}
+          <div className="bg-muted flex-1 self-stretch" />
+          {/* Copy button */}
+          {currentContent && (
+            <CopyButton
+              value={currentContent}
+              variant="ghost"
+              absolute={false}
+              forceVisible
+              className="bg-muted size-9 opacity-100"
+            />
+          )}
         </div>
-        <div
-          data-slot="command-content"
-          className="no-scrollbar overflow-x-auto bg-white dark:bg-black"
-        >
+
+        {/* Command content */}
+        <div className="bg-code !scrollbar-none relative overflow-x-auto overscroll-x-none overscroll-y-none">
           {tabs.map((tab) => (
             <TabsContent
               key={tab.label}
               value={tab.label}
-              className="mt-0 w-max px-4 py-3.5"
+              className="no-scrollbar bg-accent/80 mt-0"
             >
-              <pre>
+              <pre className="m-0">
                 <code
-                  className="relative font-mono text-sm leading-none text-green-500 dark:text-green-300"
+                  className="text-code-foreground no-scrollbar block w-fit px-4 py-3 font-mono text-sm"
                   data-language="bash"
                 >
                   {tab.content}
@@ -94,9 +103,6 @@ export function CodeBlockCommand({
           ))}
         </div>
       </Tabs>
-      {currentContent && (
-        <CopyButton value={currentContent} className="top-2" forceVisible />
-      )}
     </div>
   )
 }

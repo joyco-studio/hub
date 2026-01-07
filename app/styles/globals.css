@@ -5,10 +5,25 @@
 @import 'tailwindcss-better-gradient';
 @import './shiki.css' layer(components);
 @import './prose.css' layer(utilities);
+@import './theming.css' layer(base);
+@import './utilities.css';
 
 @custom-variant hocus (&:is(:hover, :focus-visible));
+@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant radio (&:where(.radio, .radio *));
+@custom-variant terminal (&:where(.terminal, .terminal *));
+@custom-variant light (&:where(.light, .light *));
 
 @theme inline {
+  --font-sans: var(--font-public-sans);
+  --font-mono: var(--font-roboto-mono);
+
+  --default-font-family: var(--font-sans);
+  --default-font-family-mono: var(--font-mono);
+
+  --spacing-mobile-header: var(--mobile-header-height);
+  --spacing-content-sides: var(--content-sides);
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -46,6 +61,8 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --color-code: var(--code);
   --color-code-foreground: var(--code-foreground);
+  --color-preview: var(--preview);
+  --color-preview-foreground: var(--preview-foreground);
   --color-code-highlight: var(--code-highlight);
   --color-code-number: var(--code-number);
 
@@ -56,193 +73,176 @@
 
   /* Spacing */
   --spacing-heading-height: 64px;
+  --spacing-aside-width: var(--aside-width);
+  --spacing-sidebar-width: var(--sidebar-width);
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --code: var(--card);
-  --code-foreground: var(--card-foreground);
-  --code-highlight: oklch(0.96 0 0);
-  --code-number: oklch(0.56 0 0 / 0.5);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --aside-width: 4rem;
+  --sidebar-width: 268px;
+  --mobile-header-height: 3rem;
+  --content-sides: 1rem; /* px-4 */
+
+  /* Z-index system for consistent layering */
+  --z-content: 1;
+  --z-sticky: 10;
+  --z-toc-popover: 30;
+  --z-header: 40;
+  --z-overlay: 50;
+  --z-mobile-nav: 60;
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --code: var(--card);
-  --code-foreground: var(--card-foreground);
-  --code-highlight: oklch(0.27 0 0);
-  --code-number: oklch(0.72 0 0 / 0.5);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+html.terminal img,
+html.terminal video {
+  filter: sepia(100%) saturate(200%) brightness(70%) hue-rotate(48deg);
 }
 
-@layer base {
-  /* No base styles */
+/* Mobile: collapse sidebar width variables so inline style calc evaluates to 0 */
+@media (max-width: 767px) {
+  :root {
+    --aside-width: 0px;
+    --sidebar-width: 0px;
+  }
+}
+
+/* Content sides padding - responsive */
+@media (min-width: 768px) {
+  :root {
+    --content-sides: 1.5rem; /* md:px-6 */
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --content-sides: 2rem; /* xl:px-8 */
+  }
+}
+
+/* Custom scrollbar styling
+ * Note: On macOS, "Show scroll bars: Always" in System Settings
+ * is required for full CSS control over scrollbar appearance.
+ * The transparent border trick helps force custom rendering.
+ */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) transparent;
+}
+
+*::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  background-color: transparent;
+}
+
+*::-webkit-scrollbar-track {
+  -webkit-appearance: none;
+  background-color: transparent;
+  border-radius: 0;
+}
+
+*::-webkit-scrollbar-thumb {
+  -webkit-appearance: none;
+  background-color: var(--accent);
+  border-radius: 0;
+  /* Transparent border trick - helps force custom scrollbar on macOS */
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in oklab, var(--accent) 80%, var(--foreground));
+}
+
+*::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
+/* Code block specific scrollbar - no border trick for cleaner look */
+pre::-webkit-scrollbar,
+code::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+  background: transparent;
+}
+
+pre::-webkit-scrollbar-track,
+code::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+pre::-webkit-scrollbar-thumb,
+code::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 0 !important;
+  border: none;
+}
+
+pre::-webkit-scrollbar-thumb:hover,
+code::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in oklab, var(--accent) 80%, var(--foreground));
 }
 
 @layer components {
-  /* Fancy scrollbar styles */
-  .fancy-scroll {
-    scrollbar-width: thin;
-    scrollbar-color: color-mix(
-        in oklab,
-        var(--muted-foreground) 40%,
-        transparent
-      )
-      transparent;
+  /* CCTV striped backdrop effect */
+  .cctv-backdrop {
+    background-image: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.5),
+      rgba(0, 0, 0, 0.5) 3px,
+      rgba(0, 0, 0, 0.9) 3px,
+      rgba(0, 0, 0, 0.9) 6px
+    );
+    background-size: 100% 6px;
   }
+}
 
-  .fancy-scroll::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-  }
+@utility scrollbar-none {
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+  isolation: isolate;
 
-  .fancy-scroll::-webkit-scrollbar-track {
-    background: transparent;
-    border-radius: 10px;
-  }
-
-  .fancy-scroll::-webkit-scrollbar-thumb {
-    background: color-mix(in oklab, var(--muted-foreground) 30%, transparent);
-    border-radius: 10px;
-    border: 2px solid transparent;
-    background-clip: padding-box;
-    transition: background 0.2s ease;
-  }
-
-  .fancy-scroll::-webkit-scrollbar-thumb:hover {
-    background: color-mix(in oklab, var(--muted-foreground) 50%, transparent);
-    background-clip: padding-box;
-  }
-
-  .fancy-scroll::-webkit-scrollbar-corner {
-    background: transparent;
-  }
-
-  /* Enhanced pre element styling */
-  .fancy-scroll > pre {
-    scrollbar-width: thin;
-    scrollbar-color: color-mix(
-        in oklab,
-        var(--muted-foreground) 40%,
-        transparent
-      )
-      transparent;
-  }
-
-  .fancy-scroll > pre::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-  }
-
-  .fancy-scroll > pre::-webkit-scrollbar-track {
-    background: transparent;
-    border-radius: 10px;
-  }
-
-  .fancy-scroll > pre::-webkit-scrollbar-thumb {
-    background: color-mix(in oklab, var(--muted-foreground) 30%, transparent);
-    border-radius: 10px;
-    border: 2px solid transparent;
-    background-clip: padding-box;
-    transition: background 0.2s ease;
-  }
-
-  .fancy-scroll > pre::-webkit-scrollbar-thumb:hover {
-    background: color-mix(in oklab, var(--muted-foreground) 50%, transparent);
-    background-clip: padding-box;
-  }
-
-  .scrollbar-none {
-    scrollbar-width: none;
-  }
-
-  .scrollbar-none::-webkit-scrollbar {
+  &::-webkit-scrollbar {
     display: none;
   }
 
-  .scrollbar-none::-webkit-scrollbar-track {
+  &::-webkit-scrollbar-track {
     display: none;
   }
 
-  .scrollbar-none::-webkit-scrollbar-thumb {
+  &::-webkit-scrollbar-thumb {
     display: none;
   }
 
-  .scrollbar-none::-webkit-scrollbar-thumb:hover {
+  &::-webkit-scrollbar-thumb:hover {
     display: none;
   }
 
-  .scrollbar-none::-webkit-scrollbar-corner {
+  &::-webkit-scrollbar-corner {
     display: none;
   }
 }
 
-html.dark .shiki,
-html.dark .shiki span {
-  color: var(--shiki-dark) !important;
-  background-color: var(--card) !important;
-  /* Optional, if you also want font styles */
-  font-style: var(--shiki-dark-font-style) !important;
-  font-weight: var(--shiki-dark-font-weight) !important;
-  text-decoration: var(--shiki-dark-text-decoration) !important;
+html {
+  overscroll-behavior: none;
+  --fd-layout-width: 97rem;
+}
+
+html.layout-full {
+  --fd-layout-width: 100%;
+}
+
+body {
+  @apply bg-background;
+}
+
+/* Mobile layout adjustments for custom MobileNav */
+@media (max-width: 767px) {
+  /* Account for our custom MobileNav header height (h-14 = 56px) */
+  #nd-docs-layout {
+    --fd-header-height: var(--mobile-header-height) !important;
+    --fd-sidebar-width: 0px !important;
+    --fd-toc-width: 0px !important;
+  }
 }

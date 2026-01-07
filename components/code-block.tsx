@@ -30,7 +30,9 @@ export function CodeBlock({
           <span>{title}</span>
         </figcaption>
       )}
-      {rawCode && <CopyButton forceVisible={!!title} value={rawCode} />}
+      {rawCode && (
+        <CopyButton forceVisible={!!title} value={rawCode} className="size-9" />
+      )}
 
       <div
         style={
@@ -38,9 +40,7 @@ export function CodeBlock({
             '--pre-max-height': maxHeight ? `${maxHeight}px` : 'unset',
           } as React.CSSProperties
         }
-        className={cn(
-          '[&>pre]:max-h-(--pre-max-height)'
-        )}
+        className={cn('[&>pre]:max-h-(--pre-max-height)')}
         dangerouslySetInnerHTML={{ __html: highlightedCode }}
       />
     </figure>

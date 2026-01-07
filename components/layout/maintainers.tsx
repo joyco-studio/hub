@@ -1,23 +1,30 @@
 import { CircleDotDashed } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
-export function Maintainers({ maintainers }: { maintainers: string[] }) {
+type MaintainersProps = {
+  maintainers: string[]
+  lastModified?: Date
+}
+
+export function Maintainers({ maintainers }: MaintainersProps) {
   if (maintainers.length === 0) return null
 
   return (
-    <div className="flex flex-col">
-      <h3 className="text-fd-muted-foreground inline-flex items-center gap-1.5 text-sm">
-        <CircleDotDashed className="size-4" />
-        Maintainers
-      </h3>
-      <div className="flex flex-wrap gap-2 py-3">
+    <div className="bg-muted flex flex-col gap-4 py-6 pb-4">
+      <div className="text-foreground flex items-center gap-2 px-6">
+        <CircleDotDashed className="size-3" />
+        <span className="font-mono text-xs font-medium tracking-wide uppercase">
+          Maintainers
+        </span>
+      </div>
+      <div className="flex flex-col">
         {maintainers.map((maintainer) => (
           <a
             key={maintainer}
             href={`https://github.com/${maintainer}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-fd-card text-fd-foreground hover:bg-fd-accent inline-flex items-center gap-2 rounded-full border py-1 pr-2 pl-1 text-sm transition-colors"
+            className="text-muted-foreground hover:text-foreground hover:bg-accent flex items-center gap-2 px-5.5 py-1.5 font-mono text-sm uppercase transition-colors"
           >
             <Avatar className="size-5">
               <AvatarImage

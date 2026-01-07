@@ -28,7 +28,7 @@ export function ComponentPreview({
     return (
       <p className="text-muted-foreground mt-6 text-sm">
         Component{' '}
-        <code className="bg-muted relative rounded px-[0.3rem] py-[0.2rem] font-mono text-sm">
+        <code className="bg-muted relative px-[0.3rem] py-[0.2rem] font-mono text-sm">
           {name}
         </code>{' '}
         not found in registry.
@@ -39,29 +39,29 @@ export function ComponentPreview({
   return (
     <div
       className={cn(
-        'group not-prose border-border relative overflow-clip rounded-lg border',
-        '*:data-[slot="code-block"]:mt-0 *:data-[slot="code-block"]:rounded-none',
+        'group not-prose border-border divide-border relative grid overflow-clip',
+        '*:data-[slot="code-block"]:mt-0',
         '**:data-[slot="copy-button"]:right-6',
         className
       )}
       {...props}
     >
-      <div className={cn('preview bg-card relative flex')}>
-        <div
-          title={undefined}
-          className="bg-card border-border my-0 w-full overflow-hidden rounded-none border-b"
-        >
-          {resizable ? (
+      <div className="relative my-0 flex w-full overflow-hidden rounded-none">
+        {resizable ? (
+          <div className='w-full'>
             <ResizableIframe
               src={`/view/${name}`}
               defaultWidth={defaultWidth}
               minWidth={280}
               height={height}
             />
-          ) : (
+          </div>
+        ) : (
+          /* For demos, we want to override project theme to default shadcn themes to favor a consistent appearance for the cloning user */
+          <div className="dark:override-shadcn-default-dark radio:override-shadcn-default-light light:override-shadcn-default-light terminal:override-shadcn-default-radio bg-preview h-full w-full">
             <LazyComponent name={name} />
-          )}
-        </div>
+          </div>
+        )}
       </div>
       <ComponentSource name={codeExampleName ?? name} language="tsx" />
     </div>

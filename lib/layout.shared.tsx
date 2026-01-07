@@ -1,5 +1,5 @@
 import { Logo } from '@/components/logos'
-import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared'
+import type { BaseLayoutProps } from '@/components/layout/shared'
 
 export function baseOptions(): BaseLayoutProps {
   return {

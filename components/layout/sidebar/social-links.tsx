@@ -1,0 +1,37 @@
+'use client'
+
+import XIcon from '@/components/icons/x'
+import LinkedInIcon from '@/components/icons/linkedin'
+import InstagramIcon from '@/components/icons/instagram'
+import { AsideButton } from '../nav-aside'
+
+const socialLinks = [
+  { name: 'X', href: 'https://x.com/joycostudio', icon: XIcon },
+  {
+    name: 'LinkedIn',
+    href: 'https://www.linkedin.com/company/joyco-studio',
+    icon: LinkedInIcon,
+  },
+  {
+    name: 'Instagram',
+    href: 'https://instagram.com/joyco.studio',
+    icon: InstagramIcon,
+  },
+]
+
+export function SocialLinks() {
+  return (
+    <div className="flex gap-1">
+      {socialLinks.map((link) => (
+        <AsideButton key={link.name} icon={link.icon} label={link.name} asChild>
+          <a
+            href={link.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1"
+          />
+        </AsideButton>
+      ))}
+    </div>
+  )
+}

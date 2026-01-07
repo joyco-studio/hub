@@ -1,28 +1,43 @@
 /* Shiki code block styles */
+.dark .shiki,
+.dark .shiki span {
+  color: var(--shiki-dark) !important;
+}
+
+.shiki,
+.shiki span {
+  background-color: transparent !important;
+}
+
+/* Terminal theme: monochrome code - just use foreground color */
+.terminal .shiki,
+.terminal .shiki span,
+.terminal [data-line] span,
+.terminal [data-rehype-pretty-code-figure] span {
+  color: var(--foreground) !important;
+  --shiki-light: var(--foreground) !important;
+  --shiki-dark: var(--foreground) !important;
+}
+
+/* MDX-rendered code blocks (via rehype-pretty-code) */
 [data-rehype-pretty-code-figure] {
   background-color: var(--color-code);
   color: var(--color-code-foreground);
-  border-radius: var(--radius-lg);
-  border-width: 0px;
-  border-color: var(--border);
   overflow: hidden;
   font-size: var(--text-sm);
   outline: none;
   position: relative;
 
-  &:has([data-rehype-pretty-code-title]) [data-slot='copy-button'] {
-    top: calc(var(--spacing) * 2) !important;
+  pre {
+    color: var(--color-code-foreground);
+    overscroll-behavior-x: none;
+    overscroll-behavior-y: none;
   }
 
-  &:has([data-slot='command-block']) {
-    border-width: 1px;
-  }
+  @apply divide-y divide-background;
 }
 
 [data-rehype-pretty-code-title] {
-  border-bottom: color-mix(in oklab, var(--border) 30%, transparent);
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
   padding-block: calc(var(--spacing) * 2.5);
   padding-inline-start: calc(var(--spacing) * 4);
   padding-inline-end: calc(var(--spacing) * 40);
@@ -35,11 +50,11 @@
   white-space: nowrap;
 }
 
+/* Internal line/syntax styles */
 [data-line-numbers] {
   display: grid;
   min-width: 100%;
   white-space: pre;
-  border: 0;
   background: transparent;
   padding: 0;
   counter-reset: line;
@@ -128,7 +143,6 @@
 }
 
 [data-highlighted-chars] {
-  border-radius: var(--radius-sm);
   padding-inline: 0.3rem;
   padding-block: 0.1rem;
   font-family: var(--font-mono);

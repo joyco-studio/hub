@@ -1,10 +1,3 @@
-import {
-  DocsBody,
-  DocsDescription,
-  DocsPage,
-  DocsTitle,
-  PageLastUpdate,
-} from 'fumadocs-ui/page'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { createRelativeLink } from 'fumadocs-ui/mdx'
@@ -14,13 +7,52 @@ import { getDownloadStats } from '@/lib/stats'
 import { getMDXComponents } from '@/mdx-components'
 import { Maintainers } from '@/components/layout/maintainers'
 import { WeeklyDownloads } from '@/components/layout/weekly-downloads'
+import { TOC } from '@/components/layout/toc'
 import { InferPageType } from 'fumadocs-core/source'
-import { DocsLinks } from '@/components/layout/doc-links'
+import { DocLinks } from '@/components/layout/doc-links'
 import { PageActions } from '@/components/layout/page-actions'
+import { TOCProvider } from '@/components/toc'
+import {
+  PageTOCPopover,
+  PageTOCPopoverTrigger,
+  PageTOCPopoverContent,
+  PageFooter,
+} from '@/components/layout/docs/page/client'
+import { TOCScrollArea } from '@/components/toc'
+import { TOCItems } from '@/components/toc/clerk'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
+import { cn } from '@/lib/cn'
 
 const getComponentSlug = (page: InferPageType<typeof source>) => {
   if (page.slugs[0] !== 'components') return undefined
   return page.slugs[page.slugs.length - 1]
+}
+
+const escapeRegExp = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+const getCategoryLabel = (slugs: string[]) => {
+  const category = slugs[0]
+  const labels: Record<string, string> = {
+    components: 'Component',
+    toolbox: 'Toolbox',
+    logs: 'Log',
+  }
+  return labels[category] || category
+}
+
+const getLogNumber = (slugs: string[]) => {
+  if (slugs[0] !== 'logs') return null
+  const last = slugs[slugs.length - 1] ?? ''
+  const match = last.match(/^(\d+)(?:[-_]|$)/)
+  return match?.[1] ?? null
+}
+
+const stripLogPrefixFromTitle = (title: string, logNumber: string | null) => {
+  if (!logNumber) return title
+  const pattern = new RegExp(`^${escapeRegExp(logNumber)}\\s*[-–—]\\s+`, 'u')
+  return title.replace(pattern, '')
 }
 
 export default async function Page(props: PageProps<'/[[...slug]]'>) {
@@ -30,58 +62,122 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
 
   const MDX = page.data.body
 
+  const isLog = page.slugs[0] === 'logs'
+  const isHome = page.slugs.length === 0
+
+  const logNumber = getLogNumber(page.slugs)
+  const displayTitle = isLog
+    ? stripLogPrefixFromTitle(page.data.title, logNumber)
+    : page.data.title
+  const categoryLabel = getCategoryLabel(page.slugs)
+  const badgeLabel = (() => {
+    if (isHome) return 'Registry'
+    if (isLog && logNumber) return `${categoryLabel} ${logNumber}`
+    return categoryLabel
+  })()
+
   const componentSlug = getComponentSlug(page)
   const downloadStats = componentSlug
     ? await getDownloadStats(componentSlug)
     : null
   const docLinks = page.data.docLinks
   const llmText = await getLLMText(page)
-  const llmUrl = `/${page.slugs.join('/')}.md`
+  const llmUrl = page.slugs.length === 0 ? null : `/${page.slugs.join('/')}.md`
+
+  const toc = page.data.toc
+  const hasToc = toc.length > 0
 
   return (
-    <DocsPage
-      toc={page.data.toc}
-      full={page.data.full}
-      tableOfContent={{
-        style: 'clerk',
-        footer: (
-          <div className="flex flex-col gap-4 py-2">
-            <Maintainers maintainers={page.data.maintainers} />
-            {downloadStats && <WeeklyDownloads data={downloadStats} />}
-            {page.data.lastModified && (
-              <PageLastUpdate
-                className="opacity-50"
-                date={new Date(page.data.lastModified)}
+    <TOCProvider toc={toc}>
+      {/* Mobile TOC Popover */}
+      {hasToc && (
+        <PageTOCPopover>
+          <PageTOCPopoverTrigger />
+          <PageTOCPopoverContent>
+            <TOCScrollArea>
+              <TOCItems />
+            </TOCScrollArea>
+          </PageTOCPopoverContent>
+        </PageTOCPopover>
+      )}
+
+      {/* Main article content */}
+      <article
+        id="nd-page"
+        className={cn(
+          'px-content-sides mx-auto flex w-full max-w-[900px] flex-col gap-4 py-6 [grid-area:main] md:pt-8 xl:pt-14',
+          'xl:layout:[--fd-toc-width:268px]'
+        )}
+      >
+        <div className="mx-auto w-full max-w-2xl 2xl:max-w-3xl">
+          {/* Category badge */}
+          <Badge variant="accent" className="mb-4">
+            {badgeLabel}
+          </Badge>
+
+          <div className="p-3">
+            {/* Title and actions row */}
+            <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
+              <h1 className="text-[1.75em] leading-tight font-semibold">
+                {displayTitle}
+              </h1>
+              <PageActions
+                className="max-sm:hidden"
+                content={llmText}
+                llmUrl={llmUrl}
               />
+            </div>
+
+            {/* Description */}
+            {page.data.description && (
+              <p className="text-fd-muted-foreground mb-2 text-lg">
+                {page.data.description}
+              </p>
             )}
           </div>
-        ),
-      }}
-    >
-      <div className="flex items-center justify-between gap-4">
-        <DocsTitle className="leading-tight">{page.data.title}</DocsTitle>
-        <PageActions
-          className="max-sm:hidden"
-          content={llmText}
-          llmUrl={llmUrl}
+          {/* Separator */}
+          <Separator brackets align="bottom" className="mb-4" />
+
+          {/* Doc links */}
+          <div className="mb-6 hidden items-center justify-between gap-8 has-data-[slot=doc-links]:flex max-sm:flex md:mb-10">
+            <DocLinks links={docLinks} />
+            <PageActions
+              className="sm:hidden"
+              content={llmText}
+              llmUrl={llmUrl}
+            />
+          </div>
+
+          <div className="prose flex-1">
+            <MDX
+              components={getMDXComponents({
+                a: createRelativeLink(source, page),
+              })}
+            />
+          </div>
+        </div>
+        <PageFooter />
+      </article>
+
+      {/* Desktop TOC */}
+      {hasToc && (
+        <TOC
+          footer={
+            <>
+              <Maintainers
+                maintainers={page.data.maintainers}
+                lastModified={
+                  page.data.lastModified
+                    ? new Date(page.data.lastModified)
+                    : undefined
+                }
+              />
+              {downloadStats && <WeeklyDownloads data={downloadStats} />}
+            </>
+          }
         />
-      </div>
-      <DocsDescription className="mb-1">
-        {page.data.description}
-      </DocsDescription>
-      <div className="mb-4 hidden items-center justify-between gap-8 has-data-[slot=doc-links]:flex max-sm:flex">
-        <DocsLinks links={docLinks} />
-        <PageActions className="sm:hidden" content={llmText} llmUrl={llmUrl} />
-      </div>
-      <DocsBody>
-        <MDX
-          components={getMDXComponents({
-            // this allows you to link to other pages with relative file paths
-            a: createRelativeLink(source, page),
-          })}
-        />
-      </DocsBody>
-    </DocsPage>
+      )}
+    </TOCProvider>
   )
 }
 
@@ -96,8 +192,14 @@ export async function generateMetadata(
   const page = source.getPage(params.slug)
   if (!page) notFound()
 
+  const isLog = page.slugs[0] === 'logs'
+  const logNumber = getLogNumber(page.slugs)
+  const displayTitle = isLog
+    ? stripLogPrefixFromTitle(page.data.title, logNumber)
+    : page.data.title
+
   return {
-    title: page.data.title,
+    title: displayTitle,
     description: page.data.description,
     openGraph: {
       images: getPageImage(page).url,

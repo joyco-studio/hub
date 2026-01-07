@@ -83,7 +83,7 @@ function ScrollAreaDemo() {
         topShadowGradient="bg-linear-to-b from-card to-transparent"
         bottomShadowGradient="bg-linear-to-t from-card to-transparent"
       >
-        <ScrollAreaContent ref={scrollRef} className="fancy-scroll space-y-2">
+        <ScrollAreaContent ref={scrollRef} className="space-y-2">
           {items.length === 0 ? (
             <div className="flex h-48 flex-col items-center justify-center text-center">
               <div className="bg-muted mb-3 rounded-full p-3">

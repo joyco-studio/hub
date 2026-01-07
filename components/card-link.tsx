@@ -23,7 +23,7 @@ export function CardLink({
 }) {
   return (
     <Card
-      className="group/card-title hocus:bg-accent/50 hocus:border-primary/20 transition-colors"
+      className="group/card-title hocus:bg-accent/50 hocus:border-accent transition-colors"
       asChild
     >
       <Link className="not-prose contents" href={href}>
