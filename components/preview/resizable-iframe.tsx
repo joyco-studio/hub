@@ -3,7 +3,9 @@
 import * as React from 'react'
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { cn } from '@/lib/utils'
-import { GripVertical, Tablet, Smartphone } from 'lucide-react'
+import { GripVertical } from 'lucide-react'
+import PhoneIcon from '@/components/icons/phone'
+import TabletIcon from '@/components/icons/tablet'
 import { PatternOverlay } from './pattern-overlay'
 import {
   Tooltip,
@@ -197,12 +199,12 @@ export function ResizableIframe({
             {
               device: 'mobile',
               label: 'Mobile View',
-              icon: Smartphone,
+              icon: PhoneIcon,
             },
             {
               device: 'tablet',
               label: 'Tablet View',
-              icon: Tablet,
+              icon: TabletIcon,
             },
           ].map(({ device, label, icon: Icon }) => (
             <Tooltip key={device}>
