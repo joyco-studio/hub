@@ -116,10 +116,10 @@ export function PageTOCPopoverTrigger({
     >
       {/* Inner container matching page content max-width */}
       <div className="mx-auto flex w-full max-w-2xl items-center gap-2.5 2xl:max-w-3xl">
-        <ProgressSquare
+        <ProgressHexagon
           value={(selected + 1) / Math.max(1, items.length)}
           max={1}
-          className={cn('shrink-0', open && 'text-primary')}
+          className={cn('shrink-0', open && 'text-foreground')}
         />
         <span className="grid flex-1 *:col-start-1 *:row-start-1 *:my-auto">
           <span
@@ -151,7 +151,7 @@ export function PageTOCPopoverTrigger({
   )
 }
 
-interface ProgressSquareProps extends Omit<
+interface ProgressHexagonProps extends Omit<
   React.ComponentProps<'svg'>,
   'strokeWidth'
 > {
@@ -168,20 +168,41 @@ function clamp(input: number, min: number, max: number): number {
   return input
 }
 
-function ProgressSquare({
+function ProgressHexagon({
   value,
   strokeWidth = 2,
   size = 16,
   min = 0,
   max = 100,
   ...restSvgProps
-}: ProgressSquareProps) {
+}: ProgressHexagonProps) {
   const normalizedValue = clamp(value, min, max)
-  // Square perimeter = 4 * side, but we draw from inside so side = size - strokeWidth
-  const innerSize = size - strokeWidth
-  const perimeter = 4 * innerSize
+
+  // Circumradius: distance from center to vertex, accounting for stroke width
+  const radius = (size - strokeWidth) / 2
+  const centerX = size / 2
+  const centerY = size / 2
+
+  // Calculate the 6 vertices for a flat-top hexagon
+  // Start from top vertex (90°) and go clockwise so progress fills to the right
+  const points: [number, number][] = []
+  for (let i = 0; i < 6; i++) {
+    const angle = (90 - i * 60) * (Math.PI / 180)
+    const x = centerX + radius * Math.cos(angle)
+    const y = centerY - radius * Math.sin(angle)
+    points.push([x, y])
+  }
+
+  // For a regular hexagon, side length = circumradius, perimeter = 6 * radius
+  // Add extra segment to ensure visual closure at 100%
+  const perimeter = 7 * radius
   const progress = (normalizedValue / max) * perimeter
-  const offset = strokeWidth / 2
+
+  // Build path: 6 points + repeat first 2 points to extend past start for complete closure
+  const extendedPoints = [...points, points[0], points[1]]
+  const pathD = extendedPoints
+    .map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0]},${p[1]}`)
+    .join(' ')
 
   return (
     <svg
@@ -192,25 +213,21 @@ function ProgressSquare({
       aria-valuemax={max}
       {...restSvgProps}
     >
-      {/* Background square */}
-      <rect
-        x={offset}
-        y={offset}
-        width={innerSize}
-        height={innerSize}
+      {/* Background hexagon */}
+      <path
+        d={pathD}
         fill="none"
         strokeWidth={strokeWidth}
+        strokeLinejoin="round"
         className="stroke-current/25"
       />
-      {/* Progress square */}
-      <rect
-        x={offset}
-        y={offset}
-        width={innerSize}
-        height={innerSize}
+      {/* Progress hexagon */}
+      <path
+        d={pathD}
         fill="none"
         stroke="currentColor"
         strokeWidth={strokeWidth}
+        strokeLinejoin="round"
         strokeDasharray={perimeter}
         strokeDashoffset={perimeter - progress}
         className="transition-all"
@@ -366,14 +383,14 @@ export function PageBreadcrumb({
     <div
       {...props}
       className={cn(
-        'text-fd-muted-foreground flex items-center gap-1.5 text-sm',
+        'text-muted-foreground flex items-center gap-1.5 text-sm',
         props.className
       )}
     >
       {items.map((item, i) => {
         const className = cn(
           'truncate',
-          i === items.length - 1 && 'text-fd-primary font-medium'
+          i === items.length - 1 && 'text-primary font-medium'
         )
 
         return (
