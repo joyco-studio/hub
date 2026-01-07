@@ -92,7 +92,8 @@
   --z-mobile-nav: 60;
 }
 
-html.terminal img {
+html.terminal img,
+html.terminal video {
   filter: sepia(100%) saturate(200%) brightness(70%) hue-rotate(48deg);
 }
 
