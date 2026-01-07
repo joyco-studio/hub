@@ -14,7 +14,7 @@ type ThemeConfig = {
   label: string
 }
 
-const themes: ThemeConfig[] = [
+export const themes: ThemeConfig[] = [
   { name: 'light', label: 'Light' },
   { name: 'dark', label: 'Dark' },
   { name: 'radio', label: 'Radio' },

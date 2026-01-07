@@ -63,13 +63,18 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
   const MDX = page.data.body
 
   const isLog = page.slugs[0] === 'logs'
+  const isHome = page.slugs.length === 0
+
   const logNumber = getLogNumber(page.slugs)
   const displayTitle = isLog
     ? stripLogPrefixFromTitle(page.data.title, logNumber)
     : page.data.title
   const categoryLabel = getCategoryLabel(page.slugs)
-  const badgeLabel =
-    isLog && logNumber ? `${categoryLabel} ${logNumber}` : categoryLabel
+  const badgeLabel = (() => {
+    if (isHome) return 'Registry'
+    if (isLog && logNumber) return `${categoryLabel} ${logNumber}`
+    return categoryLabel
+  })()
 
   const componentSlug = getComponentSlug(page)
   const downloadStats = componentSlug
@@ -77,7 +82,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
     : null
   const docLinks = page.data.docLinks
   const llmText = await getLLMText(page)
-  const llmUrl = `/${page.slugs.join('/')}.md`
+  const llmUrl = page.slugs.length === 0 ? null : `/${page.slugs.join('/')}.md`
 
   const toc = page.data.toc
   const hasToc = toc.length > 0

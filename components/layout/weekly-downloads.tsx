@@ -53,7 +53,7 @@ export function WeeklyDownloads({ data }: { data: DownloadStats | null }) {
 
   return (
     <div className="bg-muted flex flex-col px-6 py-4">
-      <div className="text-fd-foreground flex items-center gap-2 py-2">
+      <div className="text-foreground flex items-center gap-2 py-2">
         <DownloadIcon className="size-3" />
         <span className="font-mono text-xs font-medium tracking-wide uppercase">
           Downloads
@@ -63,19 +63,19 @@ export function WeeklyDownloads({ data }: { data: DownloadStats | null }) {
         <div className="flex items-baseline gap-2">
           {hoveredData ? (
             <>
-              <span className="text-fd-foreground font-mono text-lg font-semibold tabular-nums">
+              <span className="text-foreground font-mono text-lg font-semibold tabular-nums">
                 {formatNumber(hoveredData.downloads)}
               </span>
-              <span className="text-fd-muted-foreground font-mono text-xs">
+              <span className="text-muted-foreground font-mono text-xs">
                 {hoveredData.day}
               </span>
             </>
           ) : (
             <>
-              <span className="text-fd-foreground font-mono text-lg font-semibold tabular-nums">
+              <span className="text-foreground font-mono text-lg font-semibold tabular-nums">
                 {formatNumber(totalDownloads)}
               </span>
-              <span className="text-fd-muted-foreground font-mono text-xs">
+              <span className="text-muted-foreground font-mono text-xs">
                 Total
               </span>
             </>
@@ -118,7 +118,7 @@ export function WeeklyDownloads({ data }: { data: DownloadStats | null }) {
             />
           </AreaChart>
         </ChartContainer>
-        <span className="text-fd-muted-foreground font-mono text-xs opacity-50">
+        <span className="text-muted-foreground font-mono text-xs opacity-50">
           {lastDayDownloads} downloads today
         </span>
       </div>

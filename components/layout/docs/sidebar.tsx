@@ -8,16 +8,16 @@ import { createLinkItemRenderer } from '../sidebar/link-item'
 import { mergeRefs } from '../../../lib/merge-refs'
 
 const itemVariants = cva(
-  'relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground wrap-anywhere [&_svg]:size-4 [&_svg]:shrink-0',
+  'relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-muted-foreground wrap-anywhere [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
-        link: 'transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary data-[active=true]:hover:transition-colors',
+        link: 'transition-colors hover:bg-accent/50 hover:text-accent-foreground/80 hover:transition-none data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:hover:transition-colors',
         button:
-          'transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none',
+          'transition-colors hover:bg-accent/50 hover:text-accent-foreground/80 hover:transition-none',
       },
       highlight: {
-        true: "data-[active=true]:before:content-[''] data-[active=true]:before:bg-fd-primary data-[active=true]:before:absolute data-[active=true]:before:w-px data-[active=true]:before:inset-y-2.5 data-[active=true]:before:start-2.5",
+        true: "data-[active=true]:before:content-[''] data-[active=true]:before:bg-primary data-[active=true]:before:absolute data-[active=true]:before:w-px data-[active=true]:before:inset-y-2.5 data-[active=true]:before:start-2.5",
       },
     },
   }
@@ -185,7 +185,7 @@ export function SidebarFolderContent({
       className={cn(
         'relative',
         depth === 1 &&
-          "before:bg-fd-border before:absolute before:inset-y-1 before:start-2.5 before:w-px before:content-['']",
+          "before:bg-border before:absolute before:inset-y-1 before:start-2.5 before:w-px before:content-['']",
         className
       )}
       {...props}

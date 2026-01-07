@@ -1,16 +1,16 @@
-'use client';
-import { Check, ChevronsUpDown } from 'lucide-react';
-import { type ComponentProps, type ReactNode, useMemo, useState } from 'react';
-import Link from 'fumadocs-core/link';
-import { usePathname } from 'fumadocs-core/framework';
-import { cn } from '../../../../lib/cn';
-import { isActive, normalize } from '../../../../lib/urls';
-import { useSidebar } from '../base';
-import { Popover, PopoverContent, PopoverTrigger } from '../../../ui/popover';
-import type { SidebarTab } from './index';
+'use client'
+import { Check, ChevronsUpDown } from 'lucide-react'
+import { type ComponentProps, type ReactNode, useMemo, useState } from 'react'
+import Link from 'fumadocs-core/link'
+import { usePathname } from 'fumadocs-core/framework'
+import { cn } from '../../../../lib/cn'
+import { isActive, normalize } from '../../../../lib/urls'
+import { useSidebar } from '../base'
+import { Popover, PopoverContent, PopoverTrigger } from '../../../ui/popover'
+import type { SidebarTab } from './index'
 
 export interface SidebarTabWithProps extends SidebarTab {
-  props?: ComponentProps<'a'>;
+  props?: ComponentProps<'a'>
 }
 
 export function SidebarTabsDropdown({
@@ -18,35 +18,37 @@ export function SidebarTabsDropdown({
   placeholder,
   ...props
 }: {
-  placeholder?: ReactNode;
-  options: SidebarTabWithProps[];
+  placeholder?: ReactNode
+  options: SidebarTabWithProps[]
 } & ComponentProps<'button'>) {
-  const [open, setOpen] = useState(false);
-  const { closeOnRedirect } = useSidebar();
-  const pathname = usePathname();
+  const [open, setOpen] = useState(false)
+  const { closeOnRedirect } = useSidebar()
+  const pathname = usePathname()
 
   const selected = useMemo(() => {
-    return options.findLast((item) => isTabActive(item, pathname));
-  }, [options, pathname]);
+    return options.findLast((item) => isTabActive(item, pathname))
+  }, [options, pathname])
 
   const onClick = () => {
-    closeOnRedirect.current = false;
-    setOpen(false);
-  };
+    closeOnRedirect.current = false
+    setOpen(false)
+  }
 
   const item = selected ? (
     <>
-      <div className="size-9 shrink-0 empty:hidden md:size-5">{selected.icon}</div>
+      <div className="size-9 shrink-0 empty:hidden md:size-5">
+        {selected.icon}
+      </div>
       <div>
         <p className="text-sm font-medium">{selected.title}</p>
-        <p className="text-sm text-fd-muted-foreground empty:hidden md:hidden">
+        <p className="text-muted-foreground text-sm empty:hidden md:hidden">
           {selected.description}
         </p>
       </div>
     </>
   ) : (
     placeholder
-  );
+  )
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -54,18 +56,18 @@ export function SidebarTabsDropdown({
         <PopoverTrigger
           {...props}
           className={cn(
-            'flex items-center gap-2 rounded-lg p-2 border bg-fd-secondary/50 text-start text-fd-secondary-foreground transition-colors hover:bg-fd-accent data-[state=open]:bg-fd-accent data-[state=open]:text-fd-accent-foreground',
-            props.className,
+            'bg-secondary/50 text-secondary-foreground hover:bg-accent data-[state=open]:bg-accent data-[state=open]:text-accent-foreground flex items-center gap-2 rounded-lg border p-2 text-start transition-colors',
+            props.className
           )}
         >
           {item}
-          <ChevronsUpDown className="shrink-0 ms-auto size-4 text-fd-muted-foreground" />
+          <ChevronsUpDown className="text-muted-foreground ms-auto size-4 shrink-0" />
         </PopoverTrigger>
       )}
-      <PopoverContent className="flex flex-col gap-1 w-(--radix-popover-trigger-width) p-1 fd-scroll-container">
+      <PopoverContent className="fd-scroll-container flex w-(--radix-popover-trigger-width) flex-col gap-1 p-1">
         {options.map((item) => {
-          const isActive = selected && item.url === selected.url;
-          if (!isActive && item.unlisted) return;
+          const isActive = selected && item.url === selected.url
+          if (!isActive && item.unlisted) return
 
           return (
             <Link
@@ -74,34 +76,36 @@ export function SidebarTabsDropdown({
               onClick={onClick}
               {...item.props}
               className={cn(
-                'flex items-center gap-2 rounded-lg p-1.5 hover:bg-fd-accent hover:text-fd-accent-foreground',
-                item.props?.className,
+                'hover:bg-accent hover:text-accent-foreground flex items-center gap-2 rounded-lg p-1.5',
+                item.props?.className
               )}
             >
-              <div className="shrink-0 size-9 md:mb-auto md:size-5 empty:hidden">{item.icon}</div>
+              <div className="size-9 shrink-0 empty:hidden md:mb-auto md:size-5">
+                {item.icon}
+              </div>
               <div>
-                <p className="text-sm font-medium leading-none">{item.title}</p>
-                <p className="text-[0.8125rem] text-fd-muted-foreground mt-1 empty:hidden">
+                <p className="text-sm leading-none font-medium">{item.title}</p>
+                <p className="text-muted-foreground mt-1 text-[0.8125rem] empty:hidden">
                   {item.description}
                 </p>
               </div>
 
               <Check
                 className={cn(
-                  'shrink-0 ms-auto size-3.5 text-fd-primary',
-                  !isActive && 'invisible',
+                  'text-primary ms-auto size-3.5 shrink-0',
+                  !isActive && 'invisible'
                 )}
               />
             </Link>
-          );
+          )
         })}
       </PopoverContent>
     </Popover>
-  );
+  )
 }
 
 export function isTabActive(tab: SidebarTab, pathname: string) {
-  if (tab.urls) return tab.urls.has(normalize(pathname));
+  if (tab.urls) return tab.urls.has(normalize(pathname))
 
-  return isActive(tab.url, pathname, true);
+  return isActive(tab.url, pathname, true)
 }

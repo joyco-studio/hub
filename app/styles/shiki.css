@@ -30,6 +30,8 @@
 
   pre {
     color: var(--color-code-foreground);
+    overscroll-behavior-x: none;
+    overscroll-behavior-y: none;
   }
 }
 

@@ -5,6 +5,14 @@
   isolation: isolate;
 }
 
+@utility overscroll-x-none {
+  overscroll-behavior-x: none;
+}
+
+@utility overscroll-y-none {
+  overscroll-behavior-y: none;
+}
+
 @utility override-shadcn-default-light {
   --radius: 0.625rem;
   --background: oklch(1 0 0);

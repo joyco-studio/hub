@@ -159,7 +159,7 @@ export function DocsPage({
             {tocOptions.header}
             <h3
               id="toc-title"
-              className="text-fd-muted-foreground inline-flex items-center gap-1.5 text-sm"
+              className="text-muted-foreground inline-flex items-center gap-1.5 text-sm"
             >
               <Text className="size-4" />
               <I18nLabel label="toc" />
@@ -229,7 +229,7 @@ export function DocsDescription({
   return (
     <p
       {...props}
-      className={cn('text-fd-muted-foreground mb-8 text-lg', className)}
+      className={cn('text-muted-foreground mb-8 text-lg', className)}
     >
       {children}
     </p>

@@ -152,7 +152,7 @@ export function DocsLayout({
                     buttonVariants({
                       variant: 'ghost',
                       size: 'icon-sm',
-                      className: 'text-fd-muted-foreground mb-auto',
+                      className: 'text-muted-foreground mb-auto',
                     })
                   )}
                 >
@@ -175,7 +175,7 @@ export function DocsLayout({
             themeSwitch?.enabled !== false ||
             footer) && (
             <div className="flex flex-col border-t p-4 pt-2 empty:hidden">
-              <div className="text-fd-muted-foreground flex items-center empty:hidden">
+              <div className="text-muted-foreground flex items-center empty:hidden">
                 {i18n && (
                   <LanguageToggle>
                     <Languages className="size-4.5" />
@@ -202,7 +202,7 @@ export function DocsLayout({
         </SidebarContent>
         <SidebarDrawer>
           <div className="flex flex-col gap-3 p-4 pb-2">
-            <div className="text-fd-muted-foreground flex items-center gap-1.5">
+            <div className="text-muted-foreground flex items-center gap-1.5">
               <div className="flex flex-1">
                 {iconLinks.map((item, i) => (
                   <LinkItem
@@ -262,7 +262,7 @@ export function DocsLayout({
               (nav.component ?? (
                 <LayoutHeader
                   id="nd-subnav"
-                  className="max-md:layout:[--fd-header-height:--spacing(14)] data-[transparent=false]:bg-fd-background/80 sticky top-(--fd-docs-row-1) z-(--z-header) flex h-(--fd-header-height) items-center border-b ps-4 pe-2.5 backdrop-blur-sm transition-colors [grid-area:header] md:hidden"
+                  className="max-md:layout:[--fd-header-height:--spacing(14)] data-[transparent=false]:bg-background/80 sticky top-(--fd-docs-row-1) z-(--z-header) flex h-(--fd-header-height) items-center border-b ps-4 pe-2.5 backdrop-blur-sm transition-colors [grid-area:header] md:hidden"
                 >
                   {renderTitleNav(nav, {
                     className: 'inline-flex items-center gap-2.5 font-semibold',

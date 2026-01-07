@@ -108,7 +108,7 @@ export function PageTOCPopoverTrigger({
   return (
     <CollapsibleTrigger
       className={cn(
-        'px-content-sides text-fd-muted-foreground flex h-10 w-full items-center text-start text-xs tracking-wide uppercase focus-visible:outline-none [&_svg]:size-4',
+        'px-content-sides text-muted-foreground flex h-10 w-full items-center text-start text-xs tracking-wide uppercase focus-visible:outline-none [&_svg]:size-4',
         className
       )}
       data-toc-popover-trigger=""
@@ -267,7 +267,7 @@ export function PageLastUpdate({
   return (
     <p
       {...props}
-      className={cn('text-fd-muted-foreground text-sm', props.className)}
+      className={cn('text-muted-foreground text-sm', props.className)}
     >
       {text.lastUpdate} {date}
     </p>

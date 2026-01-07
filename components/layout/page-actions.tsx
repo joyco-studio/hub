@@ -12,7 +12,7 @@ export function PageActions({
   className,
 }: {
   content: string
-  llmUrl: string
+  llmUrl: string | null
   className?: string
 }) {
   return (
@@ -35,17 +35,19 @@ export function PageActions({
           </>
         )}
       </CopyButton>
-      <Button
-        asChild
-        variant="accent"
-        size="sm"
-        className="font-mono tracking-wide uppercase"
-      >
-        <Link href={llmUrl} target="_blank" rel="noopener noreferrer">
-          Open Markdown
-          <ArrowUpRight className="size-3" />
-        </Link>
-      </Button>
+      {llmUrl && (
+        <Button
+          asChild
+          variant="accent"
+          size="sm"
+          className="font-mono tracking-wide uppercase"
+        >
+          <Link href={llmUrl} target="_blank" rel="noopener noreferrer">
+            Open Markdown
+            <ArrowUpRight className="size-3" />
+          </Link>
+        </Button>
+      )}
     </div>
   )
 }
