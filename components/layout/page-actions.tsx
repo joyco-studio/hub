@@ -37,7 +37,7 @@ export function PageActions({
         className="font-mono tracking-wide uppercase"
       >
         <Link href={llmUrl} target="_blank" rel="noopener noreferrer">
-          Open in Cursor
+          Open Markdown
           <ArrowUpRight className="size-3" />
         </Link>
       </Button>
