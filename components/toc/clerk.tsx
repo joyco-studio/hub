@@ -81,7 +81,7 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
             maskImage: `url("data:image/svg+xml,${
               // Inline SVG
               encodeURIComponent(
-                `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svg.width} ${svg.height}"><path d="${svg.path}" stroke="black" stroke-width="1" fill="none" /></svg>`
+                `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svg.width} ${svg.height}"><path d="${svg.path}" stroke="black" stroke-width="2" fill="none" /></svg>`
               )
             }")`,
           }}
@@ -159,7 +159,7 @@ function TOCItem({
       )}
       <div
         className={cn(
-          'bg-foreground/10 absolute inset-y-0 w-px',
+          'bg-foreground/10 absolute inset-y-0 w-0.5',
           offset !== upperOffset && 'top-1.5',
           offset !== lowerOffset && 'bottom-1.5'
         )}

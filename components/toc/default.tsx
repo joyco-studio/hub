@@ -26,7 +26,10 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
       />
       <div
         ref={mergeRefs(ref, containerRef)}
-        className={cn('border-foreground/10 flex flex-col border-s', className)}
+        className={cn(
+          'border-foreground/10 flex flex-col border-s-2',
+          className
+        )}
         {...props}
       >
         {items.map((item) => (
