@@ -39,19 +39,19 @@ export function ComponentPreview({
   return (
     <div
       className={cn(
-        'group not-prose border-border/50 divide-border/50 relative grid divide-y-2 overflow-clip border-2 dark:divide-y-0 dark:border-0',
+        'group not-prose border-border divide-border relative grid divide-y-2 overflow-clip border-2',
         '*:data-[slot="code-block"]:mt-0',
         '**:data-[slot="copy-button"]:right-6',
         className
       )}
       {...props}
     >
-      <div className={cn('preview bg-preview relative flex')}>
+      <div className="relative flex">
         <div
           title={undefined}
           /* For demos, we want to override project theme to default shadcn themes to favor a consistent appearance for the cloning user */
           className={cn(
-            'my-0 w-full overflow-hidden rounded-none',
+            'bg-preview my-0 w-full overflow-hidden rounded-none',
             'dark:override-shadcn-default-dark radio:override-shadcn-default-light light:override-shadcn-default-light terminal:override-shadcn-default-radio'
           )}
         >
