@@ -29,6 +29,9 @@ const getComponentSlug = (page: InferPageType<typeof source>) => {
   return page.slugs[page.slugs.length - 1]
 }
 
+const escapeRegExp = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
 const getCategoryLabel = (slugs: string[]) => {
   const category = slugs[0]
   const labels: Record<string, string> = {
@@ -39,12 +42,34 @@ const getCategoryLabel = (slugs: string[]) => {
   return labels[category] || category
 }
 
+const getLogNumber = (slugs: string[]) => {
+  if (slugs[0] !== 'logs') return null
+  const last = slugs[slugs.length - 1] ?? ''
+  const match = last.match(/^(\d+)(?:[-_]|$)/)
+  return match?.[1] ?? null
+}
+
+const stripLogPrefixFromTitle = (title: string, logNumber: string | null) => {
+  if (!logNumber) return title
+  const pattern = new RegExp(`^${escapeRegExp(logNumber)}\\s*[-–—]\\s+`, 'u')
+  return title.replace(pattern, '')
+}
+
 export default async function Page(props: PageProps<'/[[...slug]]'>) {
   const params = await props.params
   const page = source.getPage(params.slug)
   if (!page) notFound()
 
   const MDX = page.data.body
+
+  const isLog = page.slugs[0] === 'logs'
+  const logNumber = getLogNumber(page.slugs)
+  const displayTitle = isLog
+    ? stripLogPrefixFromTitle(page.data.title, logNumber)
+    : page.data.title
+  const categoryLabel = getCategoryLabel(page.slugs)
+  const badgeLabel =
+    isLog && logNumber ? `${categoryLabel} ${logNumber}` : categoryLabel
 
   const componentSlug = getComponentSlug(page)
   const downloadStats = componentSlug
@@ -82,14 +107,14 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
         <div className="mx-auto w-full max-w-2xl 2xl:max-w-3xl">
           {/* Category badge */}
           <Badge variant="accent" className="mb-4">
-            {getCategoryLabel(page.slugs)}
+            {badgeLabel}
           </Badge>
 
           <div className="p-3">
             {/* Title and actions row */}
             <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
               <h1 className="text-[1.75em] leading-tight font-semibold">
-                {page.data.title}
+                {displayTitle}
               </h1>
               <PageActions
                 className="max-sm:hidden"
@@ -162,8 +187,14 @@ export async function generateMetadata(
   const page = source.getPage(params.slug)
   if (!page) notFound()
 
+  const isLog = page.slugs[0] === 'logs'
+  const logNumber = getLogNumber(page.slugs)
+  const displayTitle = isLog
+    ? stripLogPrefixFromTitle(page.data.title, logNumber)
+    : page.data.title
+
   return {
-    title: page.data.title,
+    title: displayTitle,
     description: page.data.description,
     openGraph: {
       images: getPageImage(page).url,
