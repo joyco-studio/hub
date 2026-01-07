@@ -31,5 +31,9 @@
     "name": "PNG Compressor",
     "link": "https://tinypng.com/"
   },
+  {
+    "name": "Image Upscaler",
+    "link": "https://image-upscaling.net/upscaling/en.html"
+  },
   { "name": "OKLCH Picker", "link": "https://oklch.com/" }
 ]

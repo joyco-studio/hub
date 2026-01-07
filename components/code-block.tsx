@@ -9,26 +9,24 @@ export function CodeBlock({
   title,
   rawCode,
   maxHeight,
+  wrap,
 }: {
   highlightedCode: string
   language: string
-  title: string | undefined
+  title?: string
   rawCode?: string
   maxHeight?: number
+  wrap?: boolean
 }) {
   return (
     <figure
-      className={cn(
-        'not-prose group/code relative mt-6 overflow-hidden text-sm outline-none',
-        title && '*:data-[slot=copy-button]:top-2'
-      )}
+      data-rehype-pretty-code-figure=""
+      data-wrap={wrap}
+      className="not-prose group/code"
       data-slot="code-block"
     >
       {title && (
-        <figcaption
-          className="text-muted-foreground/50 overflow-hidden px-4 py-2.5 pr-40 font-mono text-sm leading-relaxed text-ellipsis whitespace-nowrap"
-          data-language={language}
-        >
+        <figcaption data-rehype-pretty-code-title="" data-language={language}>
           <span>{title}</span>
         </figcaption>
       )}
@@ -42,7 +40,7 @@ export function CodeBlock({
             '--pre-max-height': maxHeight ? `${maxHeight}px` : 'unset',
           } as React.CSSProperties
         }
-        className="bg-muted [&>pre]:text-code-foreground [&>pre]:max-h-(--pre-max-height) [&>pre]:overflow-x-auto [&>pre]:text-sm"
+        className={cn('[&>pre]:max-h-(--pre-max-height)')}
         dangerouslySetInnerHTML={{ __html: highlightedCode }}
       />
     </figure>

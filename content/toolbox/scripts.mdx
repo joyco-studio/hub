@@ -1,6 +1,6 @@
 ---
 title: Scripts
-description: A collection of utility scripts organized by usage pattern..
+description: Utility scripts bundled as a pnpx CLI.
 maintainers: ['matiasperz']
 docLinks:
   [
@@ -11,52 +11,61 @@ docLinks:
   ]
 ---
 
-## Installation
+## Repository Structure
+
+| Folder                                                                  | Description                  | Usage                      |
+| ----------------------------------------------------------------------- | ---------------------------- | -------------------------- |
+| [`/cli`](https://github.com/joyco-studio/scripts/tree/main/cli)         | pnpx CLI wrapper for scripts | Run via pnpx               |
+| [`/raycast`](https://github.com/joyco-studio/scripts/tree/main/raycast) | macOS workflow automation    | Import into Raycast        |
+| [`/blender`](https://github.com/joyco-studio/scripts/tree/main/blender) | 3D export plugins            | Install as Blender add-ons |
+
+## What's inside?
+
+### pnpx CLI
+
+```bash
+pnpx @joycostudio/scripts --help
+```
+
+Example usage:
+
+```bash
+pnpx @joycostudio/scripts compress ./images ./output --quality 80
+pnpx @joycostudio/scripts resize ./images ./output --width 1920 --height 1080
+pnpx @joycostudio/scripts sequence -z 4 ./frames ./output/frame_%n.png
+```
+
+→ [View CLI documentation](https://github.com/joyco-studio/scripts/tree/main/cli)
+
+---
+
+### Raycast Scripts
+
+Import scripts for [Raycast](https://raycast.com/) workflow integration.
+
+- **`get-ip.sh`** 🌍 — Copy local IP to clipboard
+- **`killport.sh`** 💀 — Kill process on a port
+- **`pull-quicklinks.sh`** 🔗 — Download the latest [quicklinks collection](/toolbox/quick-links).
+- **`video-first-frame.sh`** 🎞️ — Extract the first frame of a video (requires `ffmpeg`).
+
+### Installation
+
+Clone the repository:
 
 ```bash
 git clone https://github.com/joyco-studio/scripts.git
 ```
 
-## 📁 Repository Structure
+And follow the [instalation process](https://github.com/joyco-studio/scripts/tree/main/raycast#installation) to add the scripts to your raycast scripts directory.
 
-| Folder                                                                  | Description               | Usage                      |
-| ----------------------------------------------------------------------- | ------------------------- | -------------------------- |
-| [`/public`](https://github.com/joyco-studio/scripts/tree/main/public)   | Image processing scripts  | Curl & run via HTTP        |
-| [`/raycast`](https://github.com/joyco-studio/scripts/tree/main/raycast) | macOS workflow automation | Copy-paste into Raycast    |
-| [`/blender`](https://github.com/joyco-studio/scripts/tree/main/blender) | 3D export plugins         | Install as Blender add-ons |
-
-## What's inside?
-
-### [`/public`](https://github.com/joyco-studio/scripts/tree/main/public) — HTTP-Linkable Scripts
-
-Scripts fetched and executed directly via HTTP. Add to `package.json` without cluttering your project.
-
-- **`compress.py`** — Batch compress images to WebP
-- **`rename.py`** — Sequential file renaming for image sequences
-- **`resize.py`** — Batch resize by dimensions or scale
-
-→ [View documentation](https://github.com/joyco-studio/scripts/tree/main/public)
+→ [Raycast scripts folder](https://github.com/joyco-studio/scripts/tree/main/raycast)
 
 ---
 
-### [`/raycast`](https://github.com/joyco-studio/scripts/tree/main/raycast) — Raycast Scripts
-
-Copy-paste scripts for [Raycast](https://raycast.com/) workflow integration.
-
-- **`get-ip.sh`** 🌍 — Copy local IP to clipboard
-- **`killport.sh`** 💀 — Kill process on a port
-- **`quicklinks.sh`** 🔗 — Pull new links from the [quicklinks collection](/toolbox/quick-links).
-
-Make sure to follow the [instalation process](https://github.com/joyco-studio/scripts/tree/main/raycast#installation) to add the scripts to your raycast scripts directory.
-
-→ [View documentation](https://github.com/joyco-studio/scripts/tree/main/raycast)
-
----
-
-### [`/blender`](https://github.com/joyco-studio/scripts/tree/main/blender) — Blender Add-ons
+### Blender Add-ons
 
 Custom plugins for exporting Blender data to web-friendly formats.
 
 - **`bezier-exporter`** — Export Bezier curves to JSON for Three.js
 
-→ [View documentation](https://github.com/joyco-studio/scripts/tree/main/blender)
+→ [Blender add-ons folder](https://github.com/joyco-studio/scripts/tree/main/blender)

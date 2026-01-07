@@ -79,13 +79,19 @@ export const transformers = [
           node.properties['__pnpm__'] = raw.replace('npm run', 'pnpm')
           node.properties['__bun__'] = raw.replace('npm run', 'bun')
         }
+
+        if (raw.includes('@joycostudio/scripts') && raw.includes('agents -s')) {
+          node.properties['__cursor__'] = raw.replace(/agents -s \w+/, 'agents -s cursor')
+          node.properties['__codex__'] = raw.replace(/agents -s \w+/, 'agents -s codex')
+          node.properties['__claude__'] = raw.replace(/agents -s \w+/, 'agents -s claude')
+        }
       }
-    },
+    }
   },
 ] as ShikiTransformer[]
 
 export const codeClasses = {
-  pre: "not-fumadocs-codeblock group/code relative w-full overflow-auto p-3 has-[[data-slot='command-block']]:p-0 has-[[data-line-numbers]]:px-0 bg-muted",
+  pre: "not-fumadocs-codeblock group/code relative w-full overflow-auto p-3 has-[[data-slot='command-block']]:p-0 has-[[data-line-numbers]]:px-0",
 }
 
 export async function highlightCode(code: string, language: string = 'tsx') {
@@ -97,20 +103,20 @@ export async function highlightCode(code: string, language: string = 'tsx') {
     },
     transformers: [
       {
+        code(node) {
+          node.properties['data-line-numbers'] = ''
+        },
         pre(node) {
           node.properties['class'] = cn(
             codeClasses.pre,
             node.properties['class']?.toString()
           )
         },
-        code(node) {
-          node.properties['data-line-numbers'] = ''
-        },
         line(node) {
           node.properties['data-line'] = ''
-        },
-      },
-    ],
+        }
+      }
+    ]
   })
 
   return html

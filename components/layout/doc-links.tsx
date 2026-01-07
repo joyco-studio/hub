@@ -28,6 +28,7 @@ export function DocLinks({
 
   return (
     <div
+      data-slot="doc-links"
       className={cn('not-prose my-0 flex flex-wrap gap-x-2 gap-y-1', className)}
     >
       {links.map((link) => (

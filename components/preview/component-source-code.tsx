@@ -1,5 +1,4 @@
 import * as React from 'react'
-import { BundledLanguage } from 'shiki'
 import { getRegistryExampleComponentFile } from '@/lib/registry-examples'
 import { CodeBlock } from '../code-block'
 import { highlightCode } from '@/lib/shiki'
@@ -9,12 +8,10 @@ export async function ComponentSource({
   title,
   language = 'tsx',
   maxHeight = 400,
-}: React.ComponentProps<'div'> & {
+}: {
   name?: string
   maxHeight?: number
-  title?: string
-  language: BundledLanguage
-}) {
+} & Omit<React.ComponentProps<typeof CodeBlock>, 'rawCode' | 'highlightedCode'>) {
   if (!name) {
     return null
   }

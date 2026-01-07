@@ -3,12 +3,13 @@ import type { MDXComponents } from 'mdx/types'
 import { CodeTabs } from '@/components/code-tabs'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { cn } from './lib/utils'
-import { CodeBlockCommand } from './components/code-block-cmd'
 import { FileCodeblock } from './components/code-source'
 import { CopyButton } from './components/copy-button'
 import { codeClasses } from './lib/shiki'
 import Image from 'next/image'
 import { ImageCols } from '@/components/image-cols'
+import { PackageManagerCommand } from './components/package-manager-command'
+import { AgentsScriptCommand } from './components/agents-script-command'
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
@@ -77,6 +78,9 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
       __yarn__,
       __pnpm__,
       __bun__,
+      __cursor__,
+      __codex__,
+      __claude__,
       ...props
     }: React.ComponentProps<'code'> & {
       __raw__?: string
@@ -85,6 +89,9 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
       __yarn__?: string
       __pnpm__?: string
       __bun__?: string
+      __cursor__?: string
+      __codex__?: string
+      __claude__?: string
     }) => {
       // Inline Code.
       if (typeof props.children === 'string') {
@@ -99,15 +106,27 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
         )
       }
 
-      // npm command.
-      const isNpmCommand = __npm__ && __yarn__ && __pnpm__ && __bun__
-      if (isNpmCommand) {
+      // Agents script command.
+      const isAgentsCommand = __cursor__ && __codex__ && __claude__
+      if (isAgentsCommand) {
         return (
-          <CodeBlockCommand
-            __npm__={__npm__}
-            __yarn__={__yarn__}
-            __pnpm__={__pnpm__}
-            __bun__={__bun__}
+          <AgentsScriptCommand
+            cursor={__cursor__}
+            codex={__codex__}
+            claude={__claude__}
+          />
+        )
+      }
+
+      // Package manager command.
+      const isPackageManagerCommand = __npm__ && __yarn__ && __pnpm__ && __bun__
+      if (isPackageManagerCommand) {
+        return (
+          <PackageManagerCommand
+            npm={__npm__}
+            yarn={__yarn__}
+            pnpm={__pnpm__}
+            bun={__bun__}
           />
         )
       }
@@ -120,7 +139,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
       )
     },
     figure: ({ className, ...props }: React.ComponentProps<'figure'>) => {
-      return <figure className={cn('not-prose', className)} {...props} />
+      return <figure className={cn(className)} {...props} />
     },
     pre: ({ className, ...props }: React.ComponentProps<'pre'>) => {
       return <pre className={cn(codeClasses.pre, className)} {...props} />

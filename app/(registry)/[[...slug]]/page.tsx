@@ -107,7 +107,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
           <div className="bg-border mb-4 h-px w-full" />
 
           {/* Doc links */}
-          <div className="mb-6 flex items-center justify-between gap-8">
+          <div className="mb-4 hidden items-center justify-between gap-8 has-data-[slot=doc-links]:flex max-sm:flex">
             <DocLinks links={docLinks} />
             <PageActions
               className="sm:hidden"

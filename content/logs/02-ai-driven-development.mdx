@@ -2,35 +2,54 @@
 title: 02 - AI Driven Development
 ---
 
-## The main attention thread
+## The “main attention thread”
 
-This is where you put your main focus on, that you want to manually orchestrate or needs more granular agent intervention. While you focus on this, you could have long background agents taking care of more trivial stuff. I'm even waiting for [codex](https://openai.com/codex/) to finish an implementation of a new component for the registry as I write this, this is where the multiplier factor of agents kicks in.
+This is where you keep your primary focus: the work you want to manually orchestrate, or anything that needs more granular agent intervention.
+
+While you’re focused on this, you can have long-running background agents taking care of more trivial work. I’m even waiting for [Codex](https://openai.com/codex/) to finish implementing a new registry component as I write this, this is where the multiplier effect of agents kicks in.
 
 ## About Writing Code
 
 ### Shape the Feature
 
-Even if you are sure on how to implement, use the model to approach the problem, tell it how you'd do it, ask for alternatives, question it's position and _shape the solution_ in collaboration. You'll can get surprised on how much you could be ignoring about the requirement and even if you already thought about everything, you'd be creating valuable context.
+Even if you’re sure how to implement something, use the model to help you approach the problem: tell it how you’d do it, ask for alternatives, question its position, and _shape the solution_ in collaboration.
+
+You can be surprised by how much you might be missing in the requirements, and even if you already covered everything, you’ll still be generating valuable context.
 
 ### Ask the code
 
-If you are asked to write a feature into an unexplored codebase by yourself, use cursor in "Ask Mode" to make your questions, don't waste time exploring manually, this usually takes you into long sessions of context extensive research that us humans struggle with. AI does a fantastic job on pointing you the right places. You can even take your own notes to keep track of the important stuff.
+If you’re asked to implement a feature in an unexplored codebase, use Cursor in “Ask Mode” to ask questions. Don’t waste time exploring manually, this usually turns into long context-gathering sessions that humans struggle with.
+
+AI does a fantastic job pointing you to the right places. (And you can still take your own notes to keep track of what matters.)
 
 ## Long running agents
 
-This is a new field I dived into recently. I mainly use cursor for my daily workflow, most of my cursor sessions end up in &lt;1min, and I get angry when that doesn't happen. That's because I use cursor as my "main attention thread" tool. I don't want to stare at the chain of thought and tool callings for more than 1min, and cursor does a great job on keeping my intervention span low.
+This is a new field I’ve been digging into recently.
 
-On the opposite side, when cursor takes 3 / 4 mins to do something, and it's taking time from my main thread, I get really mad if it outputs slop. So for long running stuff like refactors or big new features, I prefer to defer that work to a non blocking place. I tested two tools I'd like to introduce you to.
+I mainly use Cursor for my daily workflow. Most of my sessions end up in &lt; 1 min, and I get annoyed when that doesn’t happen, because Cursor is my “main attention thread” tool. I don’t want to stare at chains of thought and tool calls for more than ~1 minute, and Cursor does a great job keeping my intervention span low.
+
+On the other hand, when Cursor takes 3–4 minutes and it’s pulling time away from my main thread, I get frustrated if it outputs slop. For long-running work like refactors or big new features, I prefer to defer that work to a non-blocking place.
+
+Here are two tools I’ve been using:
 
 ### Codex (GPT 5.1 - Codex)
 
-Codex CLI is pretty reliable when it comes to long running tasks, and this is it's default behavior, most of my codex sessions are about 3/4 minutes, and the results are surprisingly good. Before starting, [codex](https://openai.com/codex/) does an extensive research over the code to find how you do stuff, what are the files involved on the new task and grabs as most context as it can before proceeding. I use this along side my shorter cursor sessions for background local stuff.
+Codex CLI is pretty reliable for long-running task, and this is its default behavior. Most of my Codex sessions are about 3–4 minutes, and the results are surprisingly good.
+
+Before starting, [Codex](https://openai.com/codex/) does extensive research over the codebase: how you do things, which files are involved, and it grabs as much context as it can before proceeding. I use this alongside my shorter Cursor sessions for background local work.
 
 ![Codex CLI screenshot](/static/c/codex.webp)
 
 ### Cursor Cloud Agents
 
-When I want simpler trivial stuff like "Integrate Vercel Analytics" or "Add this new documentation entry" or a simple backlog ticket, I DEFENITELY want to defer this to somewhere else while I take care of more important stuff. "Cursor Cloud Agents" fit the needs pretty well, it doesn't run on your computer, you tell it what to do, it creates a new branch out from your current HEAD branch, and runs in a sandbox in the cloud. When it finishes, it appears as a new PR where you can review the changes and even ask further.
+When I want simpler, trivial work like “Integrate Vercel Analytics”, “Add this new documentation entry”, or a small backlog ticket, I definitely want to defer it somewhere else while I focus on more important things.
+
+Cursor Cloud Agents fit that need well:
+
+- **It doesn’t run on your computer**.
+- **It creates a new branch** off your current `HEAD`.
+- **It runs in a cloud sandbox**.
+- **It returns a PR** you can review (and you can ask follow-up questions).
 
 <ImageCols>
   <Image
@@ -49,9 +68,35 @@ When I want simpler trivial stuff like "Integrate Vercel Analytics" or "Add this
   />
 </ImageCols>
 
+Cursor has a [webapp for cloud agents](https://cursor.com/agents) where you can kick off new agents and supervise them. This is useful for small async tasks you want to defer completely.
+
+![Cursor Cloud Agents webapp](/static/c/cloud-agents-app.webp)
+
+## Global guidelines (AGENTS.md)
+
+We maintain a comprehensive set of global guidelines that shape how our agents behave. These guidelines are stored in a markdown file that gets loaded into the agent’s context. You can explore the full [AGENTS.md](/toolbox/agents) for more details.
+
+## Referencing documentation
+
+This is how I reference documentation when I’m talking to agents: **if a site offers a `.md` version of a page**, I link that instead of whatever URL I’m currently viewing in the browser.
+
+When it’s available, my standard is: **same path, add `.md`**.
+
+It works better for agent conversations because:
+
+- **It’s the actual content**: clean markdown, not a rendered page with layout/navigation.
+- **It’s consistent**: every docs link follows the same shape, so it’s easy to produce and scan.
+- **It’s unambiguous context**: dropping a `.md` link in a prompt clearly signals “use this as documentation source”.
+
+This page, for example, [supports this pattern](https://registry.joyco.studio/logs/02-ai-driven-development.md). The Next.js docs support it too.
+
 ## About reviews
 
-As a studio we agree on a set of [guidelines](https://registry.joyco.studio/toolbox/pr-guidelines) to maintain code quality. These are not stuff that a linter could catch, these involve logic, data management, and even file-naming. In the past, I used to review these myself, occupying my "**main attention thread**", but now we have better tools like [Greptile](https://www.greptile.com/), we load a set of guidelines that the model can load to find specific violations on the PR diff. This applies to both human code and agent code, like new PR from the "Cursor Cloud Agent". We collaborate as a team on augmenting these guidelines to refine what we ship while delegating most of these to specialized agents.
+As a studio we agree on a set of [PR Guidelines](/toolbox/pr-guidelines) to maintain code quality. These aren’t things a linter can catch, this is about logic, data management, and other architectural concerns.
+
+In the past, I’d review these myself (occupying my “**main attention thread**”). Now we have better tools like [Greptile](https://www.greptile.com/): we load a set of guidelines so the model can find specific violations in a PR diff.
+
+This applies to both human code and agent code (like a new PR from a Cursor Cloud Agent). We collaborate as a team on improving these guidelines to refine what we ship, while delegating most review work to specialized agents.
 
 ![Greptile review](/static/c/greptile-review.webp)
 

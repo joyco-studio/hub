@@ -1,8 +1,28 @@
 /* Shiki code block styles */
+.dark .shiki,
+.dark .shiki span {
+  color: var(--shiki-dark) !important;
+}
+
+.shiki,
+.shiki span {
+  background-color: transparent !important;
+}
+
+/* Terminal theme: monochrome code - just use foreground color */
+.terminal .shiki,
+.terminal .shiki span,
+.terminal [data-line] span,
+.terminal [data-rehype-pretty-code-figure] span {
+  color: var(--foreground) !important;
+  --shiki-light: var(--foreground) !important;
+  --shiki-dark: var(--foreground) !important;
+}
 
 /* MDX-rendered code blocks (via rehype-pretty-code) */
 [data-rehype-pretty-code-figure] {
-  margin-top: calc(var(--spacing) * 6);
+  background-color: var(--color-code);
+  color: var(--color-code-foreground);
   overflow: hidden;
   font-size: var(--text-sm);
   outline: none;
@@ -37,6 +57,29 @@
   box-decoration-break: clone;
 }
 
+[data-rehype-pretty-code-figure][data-wrap='true'] pre,
+[data-rehype-pretty-code-figure][data-wrap='true'] code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+[data-rehype-pretty-code-figure][data-wrap='true'] [data-line-numbers] {
+  white-space: pre-wrap;
+}
+
+[data-rehype-pretty-code-figure][data-wrap='true'] [data-line] {
+  position: relative;
+  padding-left: calc(var(--spacing) * 16);
+  min-height: var(--code-line-height);
+}
+
+[data-rehype-pretty-code-figure][data-wrap='true'] [data-line]::before {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
 [data-line-numbers] [data-line]::before {
   font-size: var(--text-sm);
   counter-increment: line;
@@ -46,7 +89,7 @@
   padding-right: calc(var(--spacing) * 6);
   text-align: right;
   color: var(--color-code-number);
-  background-color: var(--muted);
+  background-color: var(--color-code);
   position: sticky;
   left: 0;
 }
@@ -56,9 +99,12 @@
 }
 
 [data-line] {
+  --line-height: 1.9;
+  --code-line-height: calc(1em * var(--line-height));
+
   width: 100%;
   display: inline-block;
-  line-height: 1.9;
+  line-height: var(--line-height);
   padding-right: calc(var(--spacing) * 4);
 }
 
