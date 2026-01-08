@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import { getLanguageFromExtension, stripFrontmatter } from '@/lib/shiki'
+import { fixImport } from '@/lib/registry-examples'
 
 /**
  * Validates that a path is within the project directory to prevent path traversal attacks
@@ -54,7 +55,10 @@ export function processMdxForLLMs(content: string): string {
         return match
       }
 
-      const source = fs.readFileSync(demoPath, 'utf8')
+      let source = fs.readFileSync(demoPath, 'utf8')
+
+      // Fix import paths for display (e.g., @/registry/joyco/blocks/ → @/components/)
+      source = fixImport(source)
 
       return `\`\`\`tsx
 ${source}

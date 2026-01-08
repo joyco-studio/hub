@@ -99,10 +99,19 @@ async function getFileContent(filePath: string) {
   // code = code.replaceAll('export default', 'export')
   code = code.replaceAll('/* eslint-disable react/no-children-prop */\n', '')
 
+  // Fix import paths for display (e.g., @/registry/joyco/blocks/ → @/components/)
+  code = fixImport(code)
+
   return code
 }
 
 export function fixImport(content: string) {
+  let result = content
+
+  // Replace @/registry/joyco/blocks/ → @/components/
+  result = result.replaceAll('@/registry/joyco/blocks/', '@/components/')
+
+  // Handle other registry paths: @/path/(components|ui|hooks|lib)/name → @/(components|ui|hooks|lib)/name
   const regex = /@\/(.+?)\/((?:.*?\/)?(?:components|ui|hooks|lib))\/([\w-]+)/g
 
   const replacement = (
@@ -124,5 +133,5 @@ export function fixImport(content: string) {
     return match
   }
 
-  return content.replace(regex, replacement)
+  return result.replace(regex, replacement)
 }
