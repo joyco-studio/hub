@@ -10,6 +10,7 @@ import { Button } from '../ui/button'
 import { ThemeToggle } from './theme-toggle'
 import { LayoutToggle } from './layout-toggle'
 import { Slot } from '@radix-ui/react-slot'
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 
 export const NavAside = () => {
   const pathname = usePathname()
@@ -22,17 +23,21 @@ export const NavAside = () => {
       >
         <Logo />
       </Link>
-      {sitemap.map((item) => (
-        <AsideButton
-          key={item.href}
-          icon={item.icon}
-          label={item.label}
-          active={pathname.startsWith(item.href)}
-          asChild
-        >
-          <Link href={item.href} />
-        </AsideButton>
-      ))}
+      {sitemap.map((item) => {
+        const isActive = pathname.startsWith(item.href)
+        return (
+          <AsideButton
+            key={item.href}
+            icon={item.icon}
+            label={item.label}
+            tooltip={isActive ? undefined : item.label}
+            active={isActive}
+            asChild
+          >
+            <Link href={item.href} />
+          </AsideButton>
+        )
+      })}
       <div className="bg-muted flex-1" />
       <LayoutToggle />
       <ThemeToggle />
@@ -47,12 +52,14 @@ export type AsideButtonProps = Omit<
   icon?: React.ComponentType<SVGProps<SVGSVGElement>>
   label?: string
   active?: boolean
+  tooltip?: string
 }
 
 export const AsideButton = ({
   icon: Icon,
   label,
   active = false,
+  tooltip,
   className,
   children,
   asChild,
@@ -72,15 +79,15 @@ export const AsideButton = ({
     )
 
   const buttonClassName = cn(
-    'bg-muted text-muted-foreground w-aside-width flex hover:text-foreground items-center justify-center gap-2 font-mono font-medium tracking-wide uppercase transition-colors',
+    'bg-muted text-muted-foreground w-aside-width flex items-center justify-center gap-2 font-mono font-medium tracking-wide uppercase transition-colors',
     active
       ? 'bg-accent hover:bg-accent text-accent-foreground h-auto rotate-180 px-6 [writing-mode:vertical-rl]'
-      : 'h-aside-width size-aside-width hover:bg-accent/50',
+      : 'h-aside-width size-aside-width hover:bg-accent/50 hover:text-foreground',
     className
   )
 
   if (asChild && React.isValidElement(children)) {
-    return (
+    const el = (
       <Slot className={buttonClassName} {...props}>
         {React.cloneElement(
           children as React.ReactElement<{ children?: React.ReactNode }>,
@@ -88,11 +95,33 @@ export const AsideButton = ({
         )}
       </Slot>
     )
+
+    if (!tooltip) return el
+
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>{el}</TooltipTrigger>
+        <TooltipContent size="lg" side="right" sideOffset={8}>
+          {tooltip}
+        </TooltipContent>
+      </Tooltip>
+    )
   }
 
-  return (
+  const el = (
     <Button variant="muted" size="icon" className={buttonClassName} {...props}>
       {content}
     </Button>
+  )
+
+  if (!tooltip) return el
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{el}</TooltipTrigger>
+      <TooltipContent side="right" size="lg" sideOffset={8}>
+        {tooltip}
+      </TooltipContent>
+    </Tooltip>
   )
 }
