@@ -90,9 +90,9 @@ export function CodeBlockCommand({
             <TabsContent
               key={tab.label}
               value={tab.label}
-              className="bg-accent/80 mt-0"
+              className="mt-0"
             >
-              <pre className="m-0 w-max min-w-full px-4 py-3">
+              <pre className="bg-accent/80 m-0 w-max min-w-full px-4 py-3">
                 <code
                   className="text-code-foreground block font-mono text-sm"
                   data-language="bash"
