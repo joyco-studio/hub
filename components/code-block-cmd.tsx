@@ -47,7 +47,8 @@ export function CodeBlockCommand({
     <div
       data-slot="command-block"
       className={cn(
-        'not-prose bg-background relative flex flex-col overflow-hidden',
+        // Avoid clipping nested horizontal scroll on mobile (esp. iOS Safari).
+        'not-prose bg-background relative flex min-w-0 flex-col',
         className
       )}
     >
@@ -84,16 +85,16 @@ export function CodeBlockCommand({
         </div>
 
         {/* Command content */}
-        <div className="bg-code !scrollbar-none relative overflow-x-auto overscroll-x-none overscroll-y-none">
+        <div className="bg-code relative w-full min-w-0 overflow-x-auto overscroll-x-none overscroll-y-none scrollbar-none">
           {tabs.map((tab) => (
             <TabsContent
               key={tab.label}
               value={tab.label}
-              className="no-scrollbar bg-accent/80 mt-0"
+              className="bg-accent/80 mt-0"
             >
-              <pre className="m-0">
+              <pre className="m-0 w-max min-w-full px-4 py-3">
                 <code
-                  className="text-code-foreground no-scrollbar block w-fit px-4 py-3 font-mono text-sm"
+                  className="text-code-foreground block font-mono text-sm"
                   data-language="bash"
                 >
                   {tab.content}
