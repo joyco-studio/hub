@@ -98,40 +98,7 @@ async function getFileContent(filePath: string) {
   let code = raw
   // code = code.replaceAll('export default', 'export')
   code = code.replaceAll('/* eslint-disable react/no-children-prop */\n', '')
-
-  // Fix import paths for display (e.g., @/registry/joyco/blocks/ → @/components/)
-  code = fixImport(code)
+  code = code.replaceAll('@/registry/joyco/blocks/', '@/components/')
 
   return code
-}
-
-export function fixImport(content: string) {
-  let result = content
-
-  // Replace @/registry/joyco/blocks/ → @/components/
-  result = result.replaceAll('@/registry/joyco/blocks/', '@/components/')
-
-  // Handle other registry paths: @/path/(components|ui|hooks|lib)/name → @/(components|ui|hooks|lib)/name
-  const regex = /@\/(.+?)\/((?:.*?\/)?(?:components|ui|hooks|lib))\/([\w-]+)/g
-
-  const replacement = (
-    match: string,
-    path: string,
-    type: string,
-    component: string
-  ) => {
-    if (type.endsWith('components')) {
-      return `@/components/${component}`
-    } else if (type.endsWith('ui')) {
-      return `@/components/ui/${component}`
-    } else if (type.endsWith('hooks')) {
-      return `@/hooks/${component}`
-    } else if (type.endsWith('lib')) {
-      return `@/lib/${component}`
-    }
-
-    return match
-  }
-
-  return result.replace(regex, replacement)
 }
