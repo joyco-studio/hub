@@ -54,7 +54,8 @@ export function processMdxForLLMs(content: string): string {
         return match
       }
 
-      const source = fs.readFileSync(demoPath, 'utf8')
+      let source = fs.readFileSync(demoPath, 'utf8')
+      source = source.replaceAll('@/registry/joyco/blocks/', '@/components/')
 
       return `\`\`\`tsx
 ${source}
