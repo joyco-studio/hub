@@ -52,14 +52,14 @@ export function WeeklyDownloads({ data }: { data: DownloadStats | null }) {
   const lastDayDownloads = chartData[chartData.length - 1]?.downloads ?? 0
 
   return (
-    <div className="bg-muted flex flex-col px-6 py-4">
-      <div className="text-foreground flex items-center gap-2 py-2">
+    <div className="bg-muted flex flex-col gap-y-3 px-6 py-4">
+      <div className="text-foreground flex items-center gap-2">
         <DownloadIcon className="size-3" />
         <span className="font-mono text-xs font-medium tracking-wide uppercase">
           Downloads
         </span>
       </div>
-      <div className="flex flex-col gap-1 px-0 py-2">
+      <div className="flex flex-col gap-1 px-0">
         <div className="flex items-baseline gap-2">
           {hoveredData ? (
             <>

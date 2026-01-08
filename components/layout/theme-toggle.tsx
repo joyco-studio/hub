@@ -104,10 +104,12 @@ function ThemeOptions({ onSelect }: { onSelect: () => void }) {
       {availableThemes.map((t) => (
         <AsideButton
           key={t.name}
+          tooltip={t.label}
           onClick={() => {
             setTheme(t.name)
             onSelect()
           }}
+          aria-label={t.label}
         >
           <ThemePreview themeClass={t.name} />
           <span className="sr-only">{t.label}</span>

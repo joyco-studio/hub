@@ -24,6 +24,18 @@
   --spacing-mobile-header: var(--mobile-header-height);
   --spacing-content-sides: var(--content-sides);
 
+  --text-base--letter-spacing: -0.015em;
+  --text-lg--letter-spacing: -0.02em;
+  --text-xl--letter-spacing: -0.025em;
+  --text-2xl--letter-spacing: -0.03em;
+  --text-3xl--letter-spacing: -0.03em;
+  --text-4xl--letter-spacing: -0.03em;
+  --text-5xl--letter-spacing: -0.03em;
+  --text-6xl--letter-spacing: -0.03em;
+  --text-7xl--letter-spacing: -0.03em;
+  --text-8xl--letter-spacing: -0.03em;
+  --text-9xl--letter-spacing: -0.03em;
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

@@ -10,7 +10,7 @@ export function Maintainers({ maintainers }: MaintainersProps) {
   if (maintainers.length === 0) return null
 
   return (
-    <div className="bg-muted flex flex-col gap-4 py-6 pb-4">
+    <div className="bg-muted flex flex-col gap-4 py-4">
       <div className="text-foreground flex items-center gap-2 px-6">
         <CircleDotDashed className="size-3" />
         <span className="font-mono text-xs font-medium tracking-wide uppercase">

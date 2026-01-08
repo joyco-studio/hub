@@ -1,16 +1,16 @@
 'use client'
 
+import GithubIcon from '@/components/icons/github'
 import XIcon from '@/components/icons/x'
-import LinkedInIcon from '@/components/icons/linkedin'
 import InstagramIcon from '@/components/icons/instagram'
 import { AsideButton } from '../nav-aside'
 
 const socialLinks = [
-  { name: 'X', href: 'https://x.com/joycostudio', icon: XIcon },
+  { name: 'X', href: 'https://x.com/joyco-studio', icon: XIcon },
   {
-    name: 'LinkedIn',
-    href: 'https://www.linkedin.com/company/joyco-studio',
-    icon: LinkedInIcon,
+    name: 'Github',
+    href: 'https://github.com/joyco-studio',
+    icon: GithubIcon,
   },
   {
     name: 'Instagram',

@@ -34,7 +34,7 @@
     overscroll-behavior-y: none;
   }
 
-  @apply divide-y divide-background;
+  @apply divide-y-4 divide-background;
 }
 
 [data-rehype-pretty-code-title] {
