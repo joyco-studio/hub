@@ -18,6 +18,7 @@ export const docs = defineDocs({
   dir: 'content',
   docs: {
     schema: frontmatterSchema.extend({
+      author: z.string().optional(),
       maintainers: z.array(z.string()).default([]),
       docLinks: z
         .array(

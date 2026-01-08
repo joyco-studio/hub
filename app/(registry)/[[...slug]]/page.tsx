@@ -5,6 +5,7 @@ import { createRelativeLink } from 'fumadocs-ui/mdx'
 import { getPageImage, getLLMText, source } from '@/lib/source'
 import { getDownloadStats } from '@/lib/stats'
 import { getMDXComponents } from '@/mdx-components'
+import { Author } from '@/components/layout/author'
 import { Maintainers } from '@/components/layout/maintainers'
 import { WeeklyDownloads } from '@/components/layout/weekly-downloads'
 import { TOC } from '@/components/layout/toc'
@@ -164,6 +165,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
         <TOC
           footer={
             <>
+              {isLog && <Author author={page.data.author} />}
               <Maintainers
                 maintainers={page.data.maintainers}
                 lastModified={
