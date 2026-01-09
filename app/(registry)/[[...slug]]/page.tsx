@@ -139,7 +139,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
         <Separator brackets align="bottom" className="mb-4" />
 
         {/* Doc links */}
-        <div className="mb-6 hidden items-center justify-between gap-8 has-data-[slot=doc-links]:flex max-sm:flex md:mb-10">
+        <div className="hidden items-center justify-between gap-8 has-data-[slot=doc-links]:flex max-sm:flex">
           <DocLinks links={docLinks} />
           <PageActions
             className="sm:hidden"
@@ -149,7 +149,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
           />
         </div>
 
-        <div className="prose flex-1">
+        <div className="prose mt-10 flex-1">
           <MDX
             components={getMDXComponents({
               a: createRelativeLink(source, page),
@@ -199,11 +199,15 @@ export async function generateMetadata(
     ? stripLogPrefixFromTitle(page.data.title, logNumber)
     : page.data.title
 
+  const genImg = getPageImage(page).url
+
+  console.log({ genImg })
+
   return {
     title: displayTitle,
     description: page.data.description,
     openGraph: {
-      images: getPageImage(page).url,
+      images: '/opengraph-image.png',
     },
   }
 }

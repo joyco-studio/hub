@@ -6,8 +6,6 @@ import {
   stripFrontmatter,
 } from '@/lib/shiki'
 import { CodeBlock } from '@/components/code-block'
-import { DownloadFileButton } from './download-button'
-import { Separator } from './ui/separator'
 
 export async function FileCodeblock({
   filePath,
