@@ -228,12 +228,20 @@ export function ResizableIframe({
 
         <div
           ref={containerRef}
+          style={
+            {
+              '--handle-width': 'calc(var(--spacing) * 5)',
+            } as React.CSSProperties
+          }
           className="relative flex w-full justify-center overflow-hidden"
         >
           {/* Resizable content area - centered */}
           <div
             className="relative z-10 border-l"
-            style={{ width: `${width}px`, maxWidth: '100%' }}
+            style={{
+              width: `calc(${width}px + var(--handle-width) + 1px)`,
+              maxWidth: '100%',
+            }}
           >
             <iframe
               ref={iframeRef}
@@ -241,7 +249,7 @@ export function ResizableIframe({
               srcDoc={srcDoc}
               className={cn('border-0', iframeClassName)}
               style={{
-                width: 'calc(100% - 20px)', // Account for resize handle width
+                width: `calc(100% - var(--handle-width))`, // Account for resize handle width
                 height: `calc(${heightStyle} - 80px)`,
                 pointerEvents: isDragging ? 'none' : 'auto',
               }}
@@ -253,7 +261,7 @@ export function ResizableIframe({
               onMouseDown={handleMouseDown}
               onTouchStart={handleTouchStart}
               className={cn(
-                'absolute top-0 right-0 flex h-full w-5 cursor-ew-resize items-center justify-center',
+                'absolute top-0 right-0 flex h-full w-(--handle-width) cursor-ew-resize items-center justify-center',
                 'bg-border hover:bg-border/80 transition-colors',
                 isDragging && 'bg-border'
               )}
