@@ -106,57 +106,55 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
       <article
         id="nd-page"
         className={cn(
-          'px-content-sides mx-auto flex w-full max-w-[900px] flex-col gap-4 py-6 [grid-area:main] md:pt-8 xl:pt-14',
+          'px-content-sides mx-auto w-full max-w-[900px] py-6 [grid-area:main] md:pt-8 xl:pt-14',
           'xl:layout:[--fd-toc-width:268px]'
         )}
       >
-        <div className="mx-auto w-full max-w-2xl 2xl:max-w-3xl">
-          {/* Category badge */}
-          <Badge variant="accent" className="mb-4">
-            {badgeLabel}
-          </Badge>
+        {/* Category badge */}
+        <Badge variant="accent" className="mb-4">
+          {badgeLabel}
+        </Badge>
 
-          <div className="p-3">
-            {/* Title and actions row */}
-            <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
-              <h1 className="text-3xl leading-tight font-semibold">
-                {displayTitle}
-              </h1>
-              <PageActions
-                className="max-sm:hidden"
-                content={llmText}
-                llmUrl={llmUrl}
-              />
-            </div>
-
-            {/* Description */}
-            {page.data.description && (
-              <p className="text-fd-muted-foreground mb-2 text-lg">
-                {page.data.description}
-              </p>
-            )}
-          </div>
-          {/* Separator */}
-          <Separator brackets align="bottom" className="mb-4" />
-
-          {/* Doc links */}
-          <div className="mb-6 hidden items-center justify-between gap-8 has-data-[slot=doc-links]:flex max-sm:flex md:mb-10">
-            <DocLinks links={docLinks} />
+        <div className="p-3">
+          {/* Title and actions row */}
+          <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
+            <h1 className="text-3xl leading-tight font-semibold">
+              {displayTitle}
+            </h1>
             <PageActions
-              className="sm:hidden"
+              className="max-sm:hidden"
               content={llmText}
               llmUrl={llmUrl}
-              showShortcuts={false}
             />
           </div>
 
-          <div className="prose flex-1">
-            <MDX
-              components={getMDXComponents({
-                a: createRelativeLink(source, page),
-              })}
-            />
-          </div>
+          {/* Description */}
+          {page.data.description && (
+            <p className="text-fd-muted-foreground mb-2 text-lg">
+              {page.data.description}
+            </p>
+          )}
+        </div>
+        {/* Separator */}
+        <Separator brackets align="bottom" className="mb-4" />
+
+        {/* Doc links */}
+        <div className="mb-6 hidden items-center justify-between gap-8 has-data-[slot=doc-links]:flex max-sm:flex md:mb-10">
+          <DocLinks links={docLinks} />
+          <PageActions
+            className="sm:hidden"
+            content={llmText}
+            llmUrl={llmUrl}
+            showShortcuts={false}
+          />
+        </div>
+
+        <div className="prose flex-1">
+          <MDX
+            components={getMDXComponents({
+              a: createRelativeLink(source, page),
+            })}
+          />
         </div>
         <PageFooter />
       </article>

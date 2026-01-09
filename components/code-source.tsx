@@ -45,19 +45,12 @@ export async function FileCodeblock({
   const displayTitle = title ?? fileName
 
   return (
-    <div className="relative">
-      <div className="absolute top-2 right-12 z-10 flex items-center gap-2">
-        <DownloadFileButton value={content} fileName={displayTitle} />
-        <Separator className="h-5!" orientation="vertical" />
-      </div>
-
-      <CodeBlock
-        rawCode={content}
-        language={lang}
-        highlightedCode={highlightedCode}
-        title={displayTitle}
-        {...rest}
-      />
-    </div>
+    <CodeBlock
+      rawCode={content}
+      language={lang}
+      highlightedCode={highlightedCode}
+      title={displayTitle}
+      {...rest}
+    />
   )
 }
