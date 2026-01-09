@@ -5,12 +5,17 @@
   { "name": "GSAP Easings", "link": "https://gsap.com/docs/v3/Eases/" },
   { "name": "Claude", "link": "https://claude.ai/new" },
   { "name": "ChatGPT", "link": "https://chatgpt.com/" },
+  { "name": "Cursor Cloud Agents", "link": "https://cursor.com/agents" },
   { "name": "Linear", "link": "linear.app" },
   { "name": "Shadcn", "link": "https://ui.shadcn.com/docs/components" },
   { "name": "Dice UI", "link": "https://www.diceui.com/docs/introduction" },
   {
     "name": "Registry",
     "link": "https://registry.joyco.studio/"
+  },
+  {
+    "name": "Joyco HUB",
+    "link": "https://hub.joyco.studio/"
   },
   {
     "name": "Tailwind Config",

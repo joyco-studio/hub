@@ -2,6 +2,7 @@
 
 import { CopyButton } from '@/components/copy-button'
 import { cn } from '@/lib/utils'
+import { DownloadFileButton } from './download-button'
 
 export function CodeBlock({
   highlightedCode,
@@ -22,27 +23,28 @@ export function CodeBlock({
     <figure
       data-rehype-pretty-code-figure=""
       data-wrap={wrap}
-      className="not-prose group/code"
+      className="not-prose"
       data-slot="code-block"
     >
       {title && (
         <figcaption data-rehype-pretty-code-title="" data-language={language}>
           <span>{title}</span>
+          {rawCode && <DownloadFileButton value={rawCode} fileName={title} />}
         </figcaption>
       )}
-      {rawCode && (
-        <CopyButton forceVisible={!!title} value={rawCode} className="size-9" />
-      )}
 
-      <div
-        style={
-          {
-            '--pre-max-height': maxHeight ? `${maxHeight}px` : 'unset',
-          } as React.CSSProperties
-        }
-        className={cn('[&>pre]:max-h-(--pre-max-height)')}
-        dangerouslySetInnerHTML={{ __html: highlightedCode }}
-      />
+      <div className="group/code relative">
+        {rawCode && <CopyButton value={rawCode} />}
+        <div
+          style={
+            {
+              '--pre-max-height': maxHeight ? `${maxHeight}px` : 'unset',
+            } as React.CSSProperties
+          }
+          className={cn('[&>pre]:max-h-(--pre-max-height)')}
+          dangerouslySetInnerHTML={{ __html: highlightedCode }}
+        />
+      </div>
     </figure>
   )
 }

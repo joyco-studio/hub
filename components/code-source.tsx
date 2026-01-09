@@ -6,8 +6,6 @@ import {
   stripFrontmatter,
 } from '@/lib/shiki'
 import { CodeBlock } from '@/components/code-block'
-import { DownloadFileButton } from './download-button'
-import { Separator } from './ui/separator'
 
 export async function FileCodeblock({
   filePath,
@@ -45,19 +43,12 @@ export async function FileCodeblock({
   const displayTitle = title ?? fileName
 
   return (
-    <div className="relative">
-      <div className="absolute top-2 right-12 z-10 flex items-center gap-2">
-        <DownloadFileButton value={content} fileName={displayTitle} />
-        <Separator className="h-5!" orientation="vertical" />
-      </div>
-
-      <CodeBlock
-        rawCode={content}
-        language={lang}
-        highlightedCode={highlightedCode}
-        title={displayTitle}
-        {...rest}
-      />
-    </div>
+    <CodeBlock
+      rawCode={content}
+      language={lang}
+      highlightedCode={highlightedCode}
+      title={displayTitle}
+      {...rest}
+    />
   )
 }

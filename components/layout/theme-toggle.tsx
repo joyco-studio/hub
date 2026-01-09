@@ -33,6 +33,7 @@ type ThemePreviewProps = {
 
 export const ThemePreview = ({ themeClass, className }: ThemePreviewProps) => (
   <div
+    data-slot="theme-preview"
     className={cn(
       'bg-border grid rotate-45 grid-cols-2 gap-px p-px',
       className
@@ -96,12 +97,9 @@ export const ThemeToggle = () => {
 function ThemeOptions({ onSelect }: { onSelect: () => void }) {
   const { theme, setTheme } = useTheme()
 
-  // Filter out current theme - menu only opens after hydration (user click)
-  const availableThemes = themes.filter((t) => t.name !== theme)
-
   return (
     <div className="flex flex-col gap-1">
-      {availableThemes.map((t) => (
+      {themes.map((t) => (
         <AsideButton
           key={t.name}
           tooltip={t.label}
@@ -110,6 +108,7 @@ function ThemeOptions({ onSelect }: { onSelect: () => void }) {
             onSelect()
           }}
           aria-label={t.label}
+          className={cn({ 'bg-accent **:data-[slot=theme-preview]:bg-foreground/60': theme === t.name })}
         >
           <ThemePreview themeClass={t.name} />
           <span className="sr-only">{t.label}</span>

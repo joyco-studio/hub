@@ -35,7 +35,7 @@ export function DocLinks({
         <Button
           key={link.href}
           asChild
-          variant="accent"
+          variant="secondary"
           size="sm"
           className="font-mono tracking-wide uppercase"
         >

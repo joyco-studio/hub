@@ -1,0 +1,57 @@
+---
+title: Action Hint
+description: A particle emitter for showing ephemeral action feedback hints that fade out.
+maintainers: ['matiasperz']
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+<ComponentPreview name="action-hint-demo" />
+
+## Installation
+
+```bash
+npx shadcn@latest add https://r.joyco.studio/action-hint.json
+```
+
+## Usage
+
+```tsx
+import { ActionHintEmitter, useActionHint } from '@/components/action-hint'
+
+function MyComponent() {
+  return (
+    <ActionHintEmitter>
+      <ActionButton />
+    </ActionHintEmitter>
+  )
+}
+
+function ActionButton() {
+  const { emit } = useActionHint()
+
+  return (
+    <button onClick={() => emit(<span>Action completed!</span>)}>
+      Click me
+    </button>
+  )
+}
+```
+
+## Props
+
+### ActionHintEmitter
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `align` | `'start' \| 'center' \| 'end'` | `'center'` | Horizontal alignment of the hint relative to the emitter |
+| `margin` | `number` | `4` | Vertical gap between the hint and the emitter in pixels |
+| `duration` | `number` | `1500` | Duration of the fade animation in milliseconds |
+
+## API
+
+### useActionHint
+
+Returns an object with:
+
+- `emit(content: ReactNode)` - Emits a hint particle with the given content. Calling emit again will abort any existing hints and show only the new one.

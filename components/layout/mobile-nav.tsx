@@ -347,12 +347,10 @@ function MobileThemeToggle() {
 
   return (
     <div className="bg-accent/50 pt-10">
-      <div className="bg-background">
-        <div className="py-4">
-          <p className="text-muted-foreground/80 px-4 font-mono text-xs font-medium tracking-wide uppercase">
-            Theme
-          </p>
-        </div>
+      <div className="bg-background grid gap-y-4 pt-4">
+        <p className="text-muted-foreground/80 px-4 font-mono text-xs font-medium tracking-wide uppercase">
+          Theme
+        </p>
         <div className="flex gap-1">
           <div className="bg-accent/70 w-3 self-stretch" />
 
@@ -361,16 +359,16 @@ function MobileThemeToggle() {
               key={t.name}
               onClick={() => setTheme(t.name)}
               className={cn(
-                'flex size-16 items-center justify-center',
+                'flex size-16 flex-1 items-center justify-center',
                 theme === t.name
-                  ? 'bg-accent text-foreground'
+                  ? 'bg-accent **:data-[slot=theme-preview]:bg-foreground/60'
                   : 'bg-muted text-muted-foreground hover:bg-accent hover:text-foreground'
               )}
             >
               <ThemePreview themeClass={t.name} />
             </button>
           ))}
-          <div className="bg-muted flex-1" />
+          {/* <div className="bg-muted flex-1" /> */}
         </div>
       </div>
     </div>

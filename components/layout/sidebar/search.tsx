@@ -3,6 +3,7 @@
 import * as React from 'react'
 import SearchIcon from '@/components/icons/search'
 import { Badge } from '@/components/ui/badge'
+import { Kbd } from '@/components/ui/kbd'
 
 type SidebarSearchProps = {
   query: string
@@ -38,21 +39,7 @@ export function SidebarSearch({ query, setQuery }: SidebarSearchProps) {
         placeholder="Search"
         className="text-foreground placeholder:text-muted-foreground h-full min-w-0 flex-1 bg-transparent font-mono text-sm tracking-wide uppercase outline-none"
       />
-      {!query && (
-        <Badge variant="key" asChild>
-          <button
-            onClick={() => {
-              inputRef.current?.focus()
-            }}
-            className="text-sm leading-none"
-          >
-            <kbd className='inline-flex gap-0.5 items-center'>
-              <span className='text-[1.2em]'>⌘</span>
-              <span>K</span>
-            </kbd>
-          </button>
-        </Badge>
-      )}
+      {!query && <Kbd className='h-[2em] px-2'>⌘K</Kbd>}
     </div>
   )
 }

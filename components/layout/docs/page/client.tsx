@@ -307,7 +307,7 @@ export function PageFooter({ items, ...props }: FooterProps) {
     <div
       {...props}
       className={cn(
-        '@container mx-auto grid w-full max-w-2xl gap-4 2xl:max-w-3xl',
+        'mt-10 grid w-full gap-4',
         previous && next ? 'grid-cols-2' : 'grid-cols-1',
         props.className
       )}
@@ -323,13 +323,13 @@ function FooterItem({ item, index }: { item: Item; index: 0 | 1 }) {
   const Icon = index === 0 ? CaretLeftIcon : CaretRightIcon
 
   const arrowPanel = (
-    <div className="bg-muted flex items-center justify-center px-6">
+    <div className="bg-accent flex items-center justify-center px-6">
       <Icon className="size-5 shrink-0 rtl:rotate-180" />
     </div>
   )
 
   const contentPanel = (
-    <div className="bg-accent flex flex-1 flex-col justify-center gap-1 p-4">
+    <div className="bg-muted flex flex-1 flex-col justify-center gap-1 p-4">
       <p className="font-mono text-sm font-medium tracking-wide uppercase">
         {item.name}
       </p>
@@ -342,7 +342,7 @@ function FooterItem({ item, index }: { item: Item; index: 0 | 1 }) {
   return (
     <Link
       href={item.url}
-      className="group mt-10 flex min-h-24 gap-1 transition-opacity hover:opacity-90 @max-lg:col-span-full"
+      className="group flex min-h-24 gap-1 transition-opacity hover:opacity-90 @max-lg:col-span-full"
     >
       {index === 0 ? (
         <>

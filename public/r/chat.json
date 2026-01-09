@@ -1,6 +1,7 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "chat",
+  "type": "registry:component",
   "title": "Chat",
   "description": "A composable chat component",
   "dependencies": [
@@ -22,6 +23,5 @@
       "content": "import * as React from 'react'\n\n/**\n * Hook to manage user interruption state with a timeout-based cooldown.\n * When `interrupt` is called, sets a flag for a duration that can be checked via `isInterruptedRef`.\n */\nexport const useUserInterruption = (duration: number = 200) => {\n  const interruptedRef = React.useRef(false)\n  const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)\n\n  const interrupt = React.useCallback(() => {\n    interruptedRef.current = true\n\n    if (timeoutRef.current) {\n      clearTimeout(timeoutRef.current)\n    }\n\n    timeoutRef.current = setTimeout(() => {\n      interruptedRef.current = false\n      timeoutRef.current = null\n    }, duration)\n  }, [duration])\n\n  React.useEffect(() => {\n    return () => {\n      if (timeoutRef.current) {\n        clearTimeout(timeoutRef.current)\n      }\n    }\n  }, [])\n\n  return { interruptedRef, interrupt }\n}\n",
       "type": "registry:hook"
     }
-  ],
-  "type": "registry:component"
+  ]
 }
