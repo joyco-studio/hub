@@ -71,7 +71,7 @@ export function PageActions({
     <div className={cn('not-prose flex items-center gap-1', className)}>
       {/* Copy Markdown - standalone button */}
       <Button
-        variant="accent"
+        variant="secondary"
         size="sm"
         className="gap-x-2 font-mono tracking-wide uppercase"
         onClick={() => copy(content)}
@@ -94,7 +94,7 @@ export function PageActions({
       {/* Dropdown for Open Markdown and Open in Cursor */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="accent" size="icon-sm" aria-label="More actions">
+          <Button variant="secondary" size="icon-sm" aria-label="More actions">
             <ChevronDown className="size-4" />
           </Button>
         </DropdownMenuTrigger>
