@@ -146,6 +146,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
               className="sm:hidden"
               content={llmText}
               llmUrl={llmUrl}
+              showShortcuts={false}
             />
           </div>
 

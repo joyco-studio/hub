@@ -1,87 +1,125 @@
 'use client'
 
+import { useCallback, useEffect } from 'react'
 import Link from 'next/link'
-import { CopyButton } from '@/components/copy-button'
-import { ArrowUpRight, EllipsisVertical } from 'lucide-react'
-import CopyIcon from '@/components/icons/copy'
+import { useCopyToClipboard } from '@/components/copy-button'
+import { ChevronDown, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Button } from '../ui/button'
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu'
+} from '@/components/ui/dropdown-menu'
+import { Kbd } from '@/components/ui/kbd'
+import CursorIcon from '@/components/icons/cursor'
+import MarkdownIcon from '@/components/icons/markdown'
+import CopyIcon from '@/components/icons/copy'
 
 export function PageActions({
   content,
   llmUrl,
   className,
+  showShortcuts = true,
 }: {
   content: string
   llmUrl: string | null
   className?: string
+  showShortcuts?: boolean
 }) {
+  const { hasCopied, copy } = useCopyToClipboard()
+
+  const cursorUrl = `https://cursor.com/link/prompt?text=${encodeURIComponent(content)}`
+
+  const openInCursor = useCallback(() => {
+    window.open(cursorUrl, '_blank')
+  }, [cursorUrl])
+
+  useEffect(() => {
+    if (!showShortcuts) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const modifier = e.metaKey || e.ctrlKey
+
+      // CMD/Ctrl + U: Copy Markdown
+      if (modifier && e.key === 'u') {
+        e.preventDefault()
+        copy(content)
+        return
+      }
+
+      // CMD/Ctrl + I: Open in Cursor
+      if (modifier && e.key === 'i') {
+        e.preventDefault()
+        openInCursor()
+        return
+      }
+
+      // CMD/Ctrl + O: Open Markdown
+      if (modifier && e.key === 'o' && llmUrl) {
+        e.preventDefault()
+        window.open(llmUrl, '_blank')
+        return
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [content, copy, openInCursor, showShortcuts])
+
   return (
     <div className={cn('not-prose flex items-center gap-1', className)}>
-      {/* Copy Markdown - always visible */}
-      <CopyButton
-        value={content}
+      {/* Copy Markdown - standalone button */}
+      <Button
         variant="accent"
         size="sm"
-        className="font-mono tracking-wide uppercase"
+        className="gap-x-2 font-mono tracking-wide uppercase"
+        onClick={() => copy(content)}
       >
-        {(hasCopied) => (
+        <CopyIcon />
+        {hasCopied ? (
           <>
-            {hasCopied ? (
-              'Copied!'
-            ) : (
-              <>
-                Copy Markdown <CopyIcon className="size-3" />
-              </>
-            )}
+            Copied! <Check className="size-3" />
+          </>
+        ) : (
+          <>
+            Copy Page
+            <Kbd className={cn('font-normal', { hidden: !showShortcuts })}>
+              ⌘U
+            </Kbd>
           </>
         )}
-      </CopyButton>
+      </Button>
 
-      {/* Desktop: Show Open Markdown inline */}
-      {llmUrl && (
-        <Button
-          asChild
-          variant="accent"
-          size="sm"
-          className="font-mono tracking-wide uppercase max-sm:hidden"
+      {/* Dropdown for Open Markdown and Open in Cursor */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="accent" size="icon-sm" aria-label="More actions">
+            <ChevronDown className="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          className="text-medium font-mono uppercase"
+          align="end"
         >
-          <Link href={llmUrl} target="_blank" rel="noopener noreferrer">
-            Open Markdown
-            <ArrowUpRight className="size-3" />
-          </Link>
-        </Button>
-      )}
-
-      {/* Mobile: Show overflow options in dropdown */}
-      {llmUrl && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="accent"
-              size="icon-sm"
-              className="sm:hidden"
-              aria-label="More actions"
-            >
-              <EllipsisVertical className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
+          {llmUrl && (
+            <DropdownMenuItem className="text-xs" asChild>
               <Link href={llmUrl} target="_blank" rel="noopener noreferrer">
-                <ArrowUpRight className="size-4" />
+                <MarkdownIcon />
                 Open Markdown
+                <Kbd className={cn('ml-auto', { hidden: !showShortcuts })}>
+                  ⌘O
+                </Kbd>
               </Link>
             </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
+          )}
+          <DropdownMenuItem className="text-xs" onSelect={openInCursor}>
+            <CursorIcon />
+            Open in Cursor
+            <Kbd className={cn('ml-auto', { hidden: !showShortcuts })}>⌘I</Kbd>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   )
 }
