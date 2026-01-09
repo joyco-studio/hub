@@ -323,13 +323,13 @@ function FooterItem({ item, index }: { item: Item; index: 0 | 1 }) {
   const Icon = index === 0 ? CaretLeftIcon : CaretRightIcon
 
   const arrowPanel = (
-    <div className="bg-muted flex items-center justify-center px-6">
+    <div className="bg-accent flex items-center justify-center px-6">
       <Icon className="size-5 shrink-0 rtl:rotate-180" />
     </div>
   )
 
   const contentPanel = (
-    <div className="bg-accent flex flex-1 flex-col justify-center gap-1 p-4">
+    <div className="bg-muted flex flex-1 flex-col justify-center gap-1 p-4">
       <p className="font-mono text-sm font-medium tracking-wide uppercase">
         {item.name}
       </p>
