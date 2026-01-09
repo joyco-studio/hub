@@ -24,6 +24,7 @@ import { TOCItems } from '@/components/toc/clerk'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/cn'
+import { getGitHubBlobUrl } from '@/lib/github'
 
 const getComponentSlug = (page: InferPageType<typeof source>) => {
   if (page.slugs[0] !== 'components') return undefined
@@ -81,7 +82,13 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
   const downloadStats = componentSlug
     ? await getDownloadStats(componentSlug)
     : null
-  const docLinks = page.data.docLinks
+  const githubUrl = getGitHubBlobUrl(`content/${page.path}`)
+  const docLinks = [
+    ...(page.data.docLinks.some((link) => link.href === githubUrl)
+      ? []
+      : [{ label: 'See on GitHub', href: githubUrl }]),
+    ...page.data.docLinks,
+  ]
   const llmText = await getLLMText(page)
   const llmUrl = page.slugs.length === 0 ? null : `/${page.slugs.join('/')}.md`
 
