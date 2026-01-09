@@ -26,7 +26,9 @@
           "type": "registry:component"
         }
       ],
-      "dependencies": ["@joycostudio/marquee"]
+      "dependencies": [
+        "@joycostudio/marquee"
+      ]
     },
     {
       "name": "file-button",
@@ -43,7 +45,9 @@
           "type": "registry:hook"
         }
       ],
-      "registryDependencies": ["button"]
+      "registryDependencies": [
+        "button"
+      ]
     },
     {
       "name": "file-dropzone",
@@ -60,7 +64,9 @@
           "type": "registry:hook"
         }
       ],
-      "registryDependencies": ["button"]
+      "registryDependencies": [
+        "button"
+      ]
     },
     {
       "name": "mobile-menu",
@@ -90,7 +96,9 @@
           "type": "registry:component"
         }
       ],
-      "dependencies": ["@radix-ui/react-presence"]
+      "dependencies": [
+        "@radix-ui/react-presence"
+      ]
     },
     {
       "name": "chat",
@@ -107,8 +115,14 @@
           "type": "registry:hook"
         }
       ],
-      "dependencies": ["debounce", "react-use-measure"],
-      "registryDependencies": ["input-group", "avatar"]
+      "dependencies": [
+        "debounce",
+        "react-use-measure"
+      ],
+      "registryDependencies": [
+        "input-group",
+        "avatar"
+      ]
     },
     {
       "name": "hls-video-player",
@@ -125,7 +139,9 @@
           "type": "registry:lib"
         }
       ],
-      "dependencies": ["hls.js"]
+      "dependencies": [
+        "hls.js"
+      ]
     },
     {
       "name": "action-hint",
