@@ -4,6 +4,7 @@
   { "name": "Easings", "link": "https://www.easing.dev/" },
   { "name": "GSAP Easings", "link": "https://gsap.com/docs/v3/Eases/" },
   { "name": "Claude", "link": "https://claude.ai/new" },
+  { "name": "Claude Cloud Agent", "link": "https://claude.ai/code" },
   { "name": "ChatGPT", "link": "https://chatgpt.com/" },
   { "name": "Cursor Cloud Agents", "link": "https://cursor.com/agents" },
   { "name": "Linear", "link": "linear.app" },
