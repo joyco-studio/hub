@@ -343,6 +343,13 @@ export function CanvasSequence({
   const animationFrameRef = React.useRef<number | null>(null)
   const lastTimeRef = React.useRef<number | null>(null)
   const wasPlayingRef = React.useRef<boolean>(isPlaying)
+  const onFrameChangeRef = React.useRef(onFrameChange)
+  const timeTransformRef = React.useRef(timeTransform)
+
+  React.useEffect(() => {
+    onFrameChangeRef.current = onFrameChange
+    timeTransformRef.current = timeTransform
+  })
 
   const totalDuration = frameCount * frameDuration
 
@@ -420,12 +427,12 @@ export function CanvasSequence({
 
       if (currentFrameRef.current !== frameIndex) {
         currentFrameRef.current = frameIndex
-        onFrameChange?.(frameIndex)
+        onFrameChangeRef.current?.(frameIndex)
       }
 
       return true
     },
-    [getFrame, width, height, objectFit, onFrameChange]
+    [getFrame, width, height, objectFit]
   )
 
   // Find the closest available frame (for when exact frame isn't loaded yet)
@@ -472,8 +479,8 @@ export function CanvasSequence({
       lastTimeRef.current = timestamp
 
       // Apply time transform if provided
-      if (timeTransform) {
-        deltaTime = timeTransform(deltaTime)
+      if (timeTransformRef.current) {
+        deltaTime = timeTransformRef.current(deltaTime)
       }
 
       timePassedRef.current += deltaTime
@@ -516,7 +523,6 @@ export function CanvasSequence({
     getFrameIndexByProgress,
     findClosestLoadedFrame,
     paintFrame,
-    timeTransform,
   ])
 
   // Reset animation when sequence config changes
