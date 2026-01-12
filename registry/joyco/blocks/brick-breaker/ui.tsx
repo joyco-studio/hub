@@ -18,12 +18,15 @@ interface BrickBreakerUIContextValue {
   nextLevel: () => void
 }
 
-const BrickBreakerUIContext = React.createContext<BrickBreakerUIContextValue | null>(null)
+const BrickBreakerUIContext =
+  React.createContext<BrickBreakerUIContextValue | null>(null)
 
 export function useBrickBreakerUI() {
   const context = React.useContext(BrickBreakerUIContext)
   if (!context) {
-    throw new Error('BrickBreaker UI components must be used within BrickBreakerRoot')
+    throw new Error(
+      'BrickBreaker UI components must be used within BrickBreakerRoot'
+    )
   }
   return context
 }
@@ -108,7 +111,8 @@ export function BrickBreakerLevel({
       className={cn('text-muted-foreground tabular-nums', className)}
       {...props}
     >
-      {label} {snapshot.level}{showTotal && `/${snapshot.totalLevels}`}
+      {label} {snapshot.level}
+      {showTotal && `/${snapshot.totalLevels}`}
     </div>
   )
 }
@@ -126,10 +130,7 @@ export function BrickBreakerLives({
   const { snapshot } = useBrickBreakerUI()
 
   const defaultRenderLife = (index: number) => (
-    <span
-      key={index}
-      className="bg-foreground/80 size-2 rounded-sm"
-    />
+    <span key={index} className="bg-foreground/80 size-2 rounded-sm" />
   )
 
   return (
@@ -200,7 +201,11 @@ interface OverlayProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode
 }
 
-export function BrickBreakerOverlay({ children, className, ...props }: OverlayProps) {
+export function BrickBreakerOverlay({
+  children,
+  className,
+  ...props
+}: OverlayProps) {
   const { snapshot } = useBrickBreakerUI()
 
   if (snapshot.state === 'playing') return null
@@ -226,7 +231,11 @@ interface TitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
   children?: React.ReactNode
 }
 
-export function BrickBreakerTitle({ children, className, ...props }: TitleProps) {
+export function BrickBreakerTitle({
+  children,
+  className,
+  ...props
+}: TitleProps) {
   const { snapshot } = useBrickBreakerUI()
 
   const defaultTitles: Record<GameState, string> = {
@@ -241,7 +250,10 @@ export function BrickBreakerTitle({ children, className, ...props }: TitleProps)
   return (
     <h2
       data-slot="brick-breaker-title"
-      className={cn('text-foreground text-2xl font-bold tracking-tight', className)}
+      className={cn(
+        'text-foreground text-2xl font-bold tracking-tight',
+        className
+      )}
       {...props}
     >
       {children ?? defaultTitles[snapshot.state]}
@@ -253,7 +265,11 @@ interface MessageProps extends React.HTMLAttributes<HTMLParagraphElement> {
   children?: React.ReactNode
 }
 
-export function BrickBreakerMessage({ children, className, ...props }: MessageProps) {
+export function BrickBreakerMessage({
+  children,
+  className,
+  ...props
+}: MessageProps) {
   const { snapshot } = useBrickBreakerUI()
 
   const defaultMessages: Partial<Record<GameState, string>> = {
@@ -309,7 +325,11 @@ interface ScoreDisplayProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode
 }
 
-export function BrickBreakerScoreDisplay({ children, className, ...props }: ScoreDisplayProps) {
+export function BrickBreakerScoreDisplay({
+  children,
+  className,
+  ...props
+}: ScoreDisplayProps) {
   const { snapshot } = useBrickBreakerUI()
 
   if (snapshot.state === 'idle' || snapshot.state === 'playing') return null
@@ -339,11 +359,12 @@ export function BrickBreakerActionButton({
   onClick,
   ...props
 }: ActionButtonProps) {
-  const { snapshot, startGame, resumeGame, resetGame, nextLevel } = useBrickBreakerUI()
+  const { snapshot, startGame, resumeGame, resetGame, nextLevel } =
+    useBrickBreakerUI()
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     onClick?.(e)
-    
+
     switch (snapshot.state) {
       case 'idle':
         startGame()
@@ -400,9 +421,9 @@ export function BrickBreakerDefaultUI() {
         <BrickBreakerLevel />
         <BrickBreakerHighScore />
       </BrickBreakerHUD>
-      
+
       <BrickBreakerLives className="absolute bottom-4 left-4" />
-      
+
       <BrickBreakerOverlay>
         <BrickBreakerTitle />
         <BrickBreakerMessage />
@@ -411,4 +432,3 @@ export function BrickBreakerDefaultUI() {
     </>
   )
 }
-
