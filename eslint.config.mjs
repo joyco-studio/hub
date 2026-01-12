@@ -1,10 +1,10 @@
 import { defineConfig, globalIgnores } from 'eslint/config'
-import nextVitals from 'eslint-config-next/core-web-vitals'
+import next from "eslint-config-next"
 import nextTs from 'eslint-config-next/typescript'
 import prettier from 'eslint-config-prettier/flat'
 
 const eslintConfig = defineConfig([
-  ...nextVitals,
+  ...next,
   ...nextTs,
   prettier,
   globalIgnores([

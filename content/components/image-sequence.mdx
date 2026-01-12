@@ -1,0 +1,84 @@
+---
+title: Image Sequence
+description: A canvas-based image sequence player with binary progressive loading for smooth playback.
+maintainers: ['matiasperz']
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+<ComponentPreview name="image-sequence-demo" />
+
+## Installation
+
+```bash
+npx shadcn@latest add https://r.joyco.studio/image-sequence.json
+```
+
+## Usage
+
+```tsx
+import { CanvasSequence } from '@/components/image-sequence'
+
+<CanvasSequence
+  frameCount={71}
+  frameDuration={33}
+  getImagePath={(idx) => `/frames/frame_${String(idx).padStart(2, '0')}.webp`}
+  width={400}
+  height={400}
+/>
+```
+
+## Props
+
+### CanvasSequence
+
+| Prop               | Type                            | Default     | Description                                      |
+| ------------------ | ------------------------------- | ----------- | ------------------------------------------------ |
+| `frameCount`       | `number`                        | -           | Total number of frames in the sequence           |
+| `frameDuration`    | `number`                        | -           | Duration of each frame in milliseconds           |
+| `getImagePath`     | `(frameIndex: number) => string`| -           | Function to generate the image URL for each frame|
+| `width`            | `number`                        | -           | Canvas width in pixels                           |
+| `height`           | `number`                        | -           | Canvas height in pixels                          |
+| `isPlaying`        | `boolean`                       | `true`      | Whether the animation is playing                 |
+| `isVisible`        | `boolean`                       | `true`      | Whether the canvas is visible                    |
+| `loop`             | `boolean`                       | `true`      | Whether to loop the animation                    |
+| `preload`          | `boolean`                       | `true`      | Whether to preload images on mount               |
+| `objectFit`        | `'contain' \| 'cover' \| 'fill'`| `'contain'` | How the image fits in the canvas                 |
+| `onFrameChange`    | `(frameIndex: number) => void`  | -           | Callback when frame changes                      |
+| `onAllFramesLoaded`| `() => void`                    | -           | Callback when all frames are loaded              |
+| `timeTransform`    | `(deltaTime: number) => number` | -           | Transform delta time for speed control           |
+| `devicePixelRatio` | `number`                        | `window.devicePixelRatio` | Pixel ratio for high-DPI displays |
+| `resetOnPlay`      | `boolean`                       | `false`     | Reset animation to frame 0 when playback starts  |
+
+## useSequence Hook
+
+For more control, use the `useSequence` hook directly:
+
+```tsx
+import { useSequence } from '@/components/image-sequence'
+
+function MyComponent() {
+  const { state, getFrame, getFrameByProgress } = useSequence({
+    frameCount: 71,
+    getImagePath: (idx) => `/frames/frame_${idx}.webp`,
+    preload: true,
+    onAllFramesLoaded: () => console.log('Ready!'),
+  })
+
+  // state.initialFramesLoaded - first and last frames are ready
+  // state.loadedCount - number of frames loaded
+  // getFrame(index) - get image for specific frame
+  // getFrameByProgress(0.5) - get image at 50% progress
+}
+```
+
+## Binary Loading Strategy
+
+The hook uses a binary loading strategy for progressive playback:
+
+1. First and last frames load first
+2. Then the middle frame
+3. Then middles of each half
+4. Continues recursively until all frames load
+
+This ensures the full animation range is visible early at low framerate, progressively smoothing out as more frames load.
