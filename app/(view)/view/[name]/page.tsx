@@ -6,9 +6,6 @@ import {
   getRegistryExampleItems,
 } from '@/lib/registry-examples'
 import { Suspense } from 'react'
-export const revalidate = false
-export const dynamic = 'force-static'
-export const dynamicParams = false
 
 export async function generateMetadata({
   params,

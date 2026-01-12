@@ -4,7 +4,7 @@ import { createRelativeLink } from 'fumadocs-ui/mdx'
 import { readFile } from 'fs/promises'
 import path from 'path'
 
-import { getPageImage, getLLMText, source } from '@/lib/source'
+import { getPageImage, getLLMText, getRelatedPages, source } from '@/lib/source'
 import { getDownloadStats } from '@/lib/stats'
 import { getMDXComponents } from '@/mdx-components'
 import { Author } from '@/components/layout/author'
@@ -19,8 +19,8 @@ import {
   PageTOCPopover,
   PageTOCPopoverTrigger,
   PageTOCPopoverContent,
-  PageFooter,
 } from '@/components/layout/docs/page/client'
+import { RelatedItems } from '@/components/preview/related-items'
 import { TOCScrollArea } from '@/components/toc'
 import { TOCItems } from '@/components/toc/clerk'
 import { Badge } from '@/components/ui/badge'
@@ -112,6 +112,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
   ]
   const llmText = await getLLMText(page)
   const llmUrl = page.slugs.length === 0 ? null : `/${page.slugs.join('/')}.md`
+  const relatedItems = getRelatedPages(page, 3)
 
   const toc = page.data.toc
   const hasToc = toc.length > 0
@@ -186,7 +187,13 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
             })}
           />
         </div>
-        <PageFooter />
+        {relatedItems.length > 0 && (
+          <RelatedItems
+            title={`Related ${categoryLabel}s`}
+            items={relatedItems}
+            className="mt-16"
+          />
+        )}
       </article>
 
       {/* Desktop TOC */}
