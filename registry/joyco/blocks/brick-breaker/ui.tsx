@@ -146,6 +146,30 @@ export function BrickBreakerLives({
 }
 
 // ============================================================================
+// Canvas Slot - marks where the canvas should render
+// ============================================================================
+
+export interface BrickBreakerCanvasProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** Additional class names for the canvas wrapper */
+  className?: string
+}
+
+/**
+ * Slot component that marks where the game canvas should be rendered.
+ * Use this to control canvas placement within your layout.
+ * Props are passed to the canvas wrapper div.
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function BrickBreakerCanvas(props: BrickBreakerCanvasProps) {
+  // This is a marker component - actual canvas is rendered by BrickBreaker
+  // The props are read by BrickBreaker and applied to the canvas wrapper
+  return null
+}
+
+// Internal marker to identify canvas slot
+BrickBreakerCanvas.displayName = 'BrickBreakerCanvas'
+
+// ============================================================================
 // HUD Container
 // ============================================================================
 
@@ -158,7 +182,7 @@ export function BrickBreakerHUD({ children, className, ...props }: HUDProps) {
     <div
       data-slot="brick-breaker-hud"
       className={cn(
-        'pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-4 text-sm',
+        'flex shrink-0 items-center justify-between p-4 text-sm',
         className
       )}
       {...props}
@@ -195,6 +219,8 @@ export function BrickBreakerOverlay({ children, className, ...props }: OverlayPr
     </div>
   )
 }
+
+BrickBreakerOverlay.displayName = 'BrickBreakerOverlay'
 
 interface TitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
   children?: React.ReactNode

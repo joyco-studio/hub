@@ -19,7 +19,7 @@ import {
 import { DEFAULT_LEVELS } from './levels'
 import { useBrickBreaker } from './use-brick-breaker'
 import { mergeConfig, resolveCssColor } from './utils'
-import { BrickBreakerUIProvider, BrickBreakerDefaultUI } from './ui'
+import { BrickBreakerUIProvider, BrickBreakerDefaultUI, BrickBreakerCanvas } from './ui'
 
 /**
  * Draw rounded rectangle
@@ -251,6 +251,7 @@ export function BrickBreaker({
   children,
 }: BrickBreakerProps & { children?: React.ReactNode }) {
   const containerRef = React.useRef<HTMLDivElement>(null)
+  const canvasWrapperRef = React.useRef<HTMLDivElement>(null)
   const canvasRef = React.useRef<HTMLCanvasElement>(null)
   const [dimensions, setDimensions] = React.useState<CanvasDimensions>({
     width: 400,
@@ -299,30 +300,30 @@ export function BrickBreaker({
 
   // Responsive sizing - follows container width, maintains aspect ratio
   React.useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
+    const wrapper = canvasWrapperRef.current
+    if (!wrapper) return
 
     const updateSize = () => {
-      const rect = container.getBoundingClientRect()
-      const containerWidth = Math.max(rect.width, 1)
-      const containerHeight = Math.max(rect.height, 1)
+      const rect = wrapper.getBoundingClientRect()
+      const wrapperWidth = Math.max(rect.width, 1)
+      const wrapperHeight = Math.max(rect.height, 1)
       const dpr = window.devicePixelRatio || 1
 
-      // Calculate dimensions that fit within container while maintaining aspect ratio
-      const heightFromWidth = containerWidth / GAME_CONSTANTS.ASPECT_RATIO
-      const widthFromHeight = containerHeight * GAME_CONSTANTS.ASPECT_RATIO
+      // Calculate dimensions that fit within wrapper while maintaining aspect ratio
+      const heightFromWidth = wrapperWidth / GAME_CONSTANTS.ASPECT_RATIO
+      const widthFromHeight = wrapperHeight * GAME_CONSTANTS.ASPECT_RATIO
 
       let width: number
       let height: number
 
-      if (heightFromWidth <= containerHeight) {
+      if (heightFromWidth <= wrapperHeight) {
         // Width is the constraint - use full width
-        width = containerWidth
+        width = wrapperWidth
         height = heightFromWidth
       } else {
         // Height is the constraint - use full height
         width = widthFromHeight
-        height = containerHeight
+        height = wrapperHeight
       }
 
       setDimensions({ width, height, dpr })
@@ -330,7 +331,7 @@ export function BrickBreaker({
 
     updateSize()
     const resizeObserver = new ResizeObserver(updateSize)
-    resizeObserver.observe(container)
+    resizeObserver.observe(wrapper)
 
     return () => resizeObserver.disconnect()
   }, [])
@@ -614,34 +615,100 @@ export function BrickBreaker({
     [snapshot, startGame, pauseGame, resumeGame, resetGame, nextLevel]
   )
 
+  // Canvas element to render
+  const canvasElement = (
+    <canvas
+      ref={canvasRef}
+      data-slot="brick-breaker-canvas"
+      className={cn(
+        'block outline-none',
+        showFocusRing && 'focus-visible:ring-ring/50 focus-visible:ring-[3px]'
+      )}
+      style={{
+        width: dimensions.width,
+        height: dimensions.height,
+        imageRendering: 'crisp-edges',
+      }}
+      tabIndex={0}
+      role="img"
+      aria-label={`Brick Breaker - Level ${snapshot.level}, Score: ${snapshot.score}, Lives: ${snapshot.lives}`}
+    />
+  )
+
+  // Check if children contain a BrickBreakerCanvas slot
+  const childArray = React.Children.toArray(children)
+  const hasCanvasSlot = childArray.some(
+    (child) =>
+      React.isValidElement(child) &&
+      (child.type as React.ComponentType)?.displayName === 'BrickBreakerCanvas'
+  )
+
+  // Find overlay components
+  const overlays = childArray.filter(
+    (child) =>
+      React.isValidElement(child) &&
+      (child.type as React.ComponentType)?.displayName === 'BrickBreakerOverlay'
+  )
+
+  // Process children - replace canvas slot with actual canvas
+  const processedChildren = hasCanvasSlot
+    ? childArray.map((child) => {
+        if (
+          React.isValidElement(child) &&
+          (child.type as React.ComponentType)?.displayName === 'BrickBreakerCanvas'
+        ) {
+          // Replace slot with canvas wrapper that takes flex-1
+          return (
+            <div
+              key="canvas-wrapper"
+              ref={canvasWrapperRef}
+              className={cn('relative flex min-h-0 flex-1 items-center justify-center', child.props.className)}
+            >
+              {canvasElement}
+              {/* Overlay goes inside canvas wrapper for proper positioning */}
+              {overlays}
+            </div>
+          )
+        }
+        // Filter out overlays since they're rendered inside canvas wrapper
+        if (
+          React.isValidElement(child) &&
+          (child.type as React.ComponentType)?.displayName === 'BrickBreakerOverlay'
+        ) {
+          return null
+        }
+        return child
+      })
+    : null
+
   return (
     <BrickBreakerUIProvider value={uiContextValue}>
       <div
         ref={containerRef}
         data-slot="brick-breaker"
         data-state={snapshot.state}
-        className={cn('relative flex items-center justify-center', className)}
+        className={cn('relative flex flex-col', className)}
       >
-        <canvas
-          ref={canvasRef}
-          data-slot="brick-breaker-canvas"
-          className={cn(
-            'block outline-none',
-            showFocusRing &&
-              'focus-visible:ring-ring/50 focus-visible:ring-[3px]'
-          )}
-          style={{
-            width: dimensions.width,
-            height: dimensions.height,
-            imageRendering: 'crisp-edges',
-          }}
-          tabIndex={0}
-          role="img"
-          aria-label={`Brick Breaker - Level ${snapshot.level}, Score: ${snapshot.score}, Lives: ${snapshot.lives}`}
-        />
-
-        {/* UI Components - customizable via children or uses default */}
-        {children ?? <BrickBreakerDefaultUI />}
+        {hasCanvasSlot ? (
+          // User specified layout with canvas slot
+          processedChildren
+        ) : children ? (
+          // User provided children but no canvas slot - canvas first, then children overlay
+          <>
+            <div ref={canvasWrapperRef} className="relative flex min-h-0 flex-1 items-center justify-center">
+              {canvasElement}
+              {children}
+            </div>
+          </>
+        ) : (
+          // No children - use default UI
+          <>
+            <div ref={canvasWrapperRef} className="relative flex min-h-0 flex-1 items-center justify-center">
+              {canvasElement}
+              <BrickBreakerDefaultUI />
+            </div>
+          </>
+        )}
 
         <div className="sr-only" aria-live="polite" aria-atomic="true">
           {snapshot.state === 'won' &&

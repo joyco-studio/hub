@@ -8,6 +8,7 @@ export { useBrickBreaker } from './use-brick-breaker'
 export {
   useBrickBreakerUI,
   BrickBreakerUIProvider,
+  BrickBreakerCanvas,
   BrickBreakerScore,
   BrickBreakerHighScore,
   BrickBreakerLevel,

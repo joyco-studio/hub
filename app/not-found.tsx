@@ -4,6 +4,7 @@ import * as React from 'react'
 import Link from 'next/link'
 import {
   BrickBreaker,
+  BrickBreakerCanvas,
   BrickBreakerHUD,
   BrickBreakerScore,
   BrickBreakerHighScore,
@@ -48,63 +49,62 @@ export default function NotFound() {
         } as React.CSSProperties
       }
     >
-      {/* Full-screen game - takes remaining space, centered */}
-      <div className="relative min-h-0 flex-1">
-        <BrickBreaker
-          className="h-full w-full"
-          levels={[LEVEL_404]}
-          showFocusRing={false}
-          config={{
-            colors: {
-              background: 'var(--muted)',
-              paddle: 'var(--foreground)',
-              ball: 'var(--primary)',
-              ballTrail: 'var(--primary)',
-              text: 'var(--foreground)',
-              textMuted: 'var(--muted-foreground)',
-              bricks: {
-                normal: 'var(--foreground)',
-                strong: 'var(--foreground)',
-                metal: 'var(--foreground)',
-                indestructible: 'var(--muted-foreground)',
-              },
+      {/* Game fills remaining space */}
+      <BrickBreaker
+        className="min-h-0 flex-1"
+        levels={[LEVEL_404]}
+        showFocusRing={false}
+        config={{
+          colors: {
+            background: 'var(--muted)',
+            paddle: 'var(--foreground)',
+            ball: 'var(--primary)',
+            ballTrail: 'var(--primary)',
+            text: 'var(--foreground)',
+            textMuted: 'var(--muted-foreground)',
+            bricks: {
+              normal: 'var(--foreground)',
+              strong: 'var(--foreground)',
+              metal: 'var(--foreground)',
+              indestructible: 'var(--muted-foreground)',
             },
-            layout: {
-              brickGap: 2,
-              brickBorderRadius: 0,
-              paddleBorderRadius: 0,
-              ballStyle: 'round',
-              topPadding: 0.08,
-            },
-            effects: {
-              showTrail: false,
-            },
-            gameplay: {
-              startingLives: 5,
-            },
-          }}
-        >
-          {/* Minimal HUD - lives inline with score */}
-          <BrickBreakerHUD className="p-2 font-mono text-[10px] sm:p-4 sm:text-xs">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <BrickBreakerScore
-                showCombo={false}
-                className="text-muted-foreground"
-              />
-              <BrickBreakerLives className="*:bg-foreground/60 *:size-1 sm:*:size-1.5" />
-            </div>
-            <BrickBreakerHighScore
-              label="HI"
+          },
+          layout: {
+            brickGap: 2,
+            brickBorderRadius: 0,
+            paddleBorderRadius: 0,
+            ballStyle: 'round',
+            topPadding: 0.08,
+          },
+          effects: {
+            showTrail: false,
+          },
+          gameplay: {
+            startingLives: 5,
+          },
+        }}
+      >
+        {/* HUD first - shrink-0 keeps it above canvas */}
+        <BrickBreakerHUD className="p-2 font-mono text-[10px] sm:p-4 sm:text-xs">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <BrickBreakerScore
+              showCombo={false}
               className="text-muted-foreground"
             />
-          </BrickBreakerHUD>
+            <BrickBreakerLives className="*:bg-foreground/60 *:size-1 sm:*:size-1.5" />
+          </div>
+          <BrickBreakerHighScore label="HI" className="text-muted-foreground" />
+        </BrickBreakerHUD>
 
-          <BrickBreakerOverlay className="bg-muted/50">
-            <BrickBreakerTitle className="text-foreground font-mono text-lg font-bold tracking-widest uppercase" />
-            <BrickBreakerMessage className="text-muted-foreground font-mono text-xs" />
-          </BrickBreakerOverlay>
-        </BrickBreaker>
-      </div>
+        {/* Canvas slot - takes remaining space */}
+        <BrickBreakerCanvas />
+
+        {/* Overlay renders inside canvas area */}
+        <BrickBreakerOverlay className="bg-muted/50">
+          <BrickBreakerTitle className="text-foreground font-mono text-lg font-bold tracking-widest uppercase" />
+          <BrickBreakerMessage className="text-muted-foreground font-mono text-xs" />
+        </BrickBreakerOverlay>
+      </BrickBreaker>
 
       {/* Full-width CTA at bottom */}
       <div className="relative shrink-0">
