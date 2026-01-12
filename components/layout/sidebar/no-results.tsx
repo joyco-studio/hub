@@ -1,6 +1,6 @@
 'use client'
 
-import { SnakeGame } from './snake-game'
+import { SnakeGame } from '@/registry/joyco/blocks/snake-game'
 
 type NoResultsProps = {
   query: string
