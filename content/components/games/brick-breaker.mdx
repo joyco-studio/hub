@@ -1,0 +1,126 @@
+---
+title: Brick Breaker
+description: A fully-featured brick breaker game with multiple levels, brick types, and proper collision physics.
+maintainers: ['matiasperz', 'JOYBOY-0']
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+<ComponentPreview name="brick-breaker-demo" />
+
+## Installation
+
+```bash
+npx shadcn@latest add https://r.joyco.studio/brick-breaker.json
+```
+
+## Usage
+
+```tsx
+import { BrickBreaker } from '@/components/brick-breaker'
+
+<BrickBreaker className="mx-auto max-w-lg" />
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `config` | `DeepPartial<BrickBreakerConfig>` | `{}` | Configuration overrides |
+| `levels` | `Level[]` | Built-in | Custom level definitions |
+| `startLevel` | `number` | `1` | Starting level |
+| `showFocusRing` | `boolean` | `true` | Show focus ring styling |
+| `onGameEnd` | `(result) => void` | - | Called when game ends |
+| `className` | `string` | - | Container className |
+
+## Custom Levels
+
+```tsx
+import { BrickBreaker, createLevelFromPattern } from '@/components/brick-breaker'
+
+const myLevel = createLevelFromPattern(1, 'My Level', `
+  N N N N N N N N
+  . S S S S S S .
+  . S M M M M S .
+`)
+
+<BrickBreaker levels={[myLevel]} />
+```
+
+**Brick Types:** `N` Normal (1 hit), `S` Strong (2), `M` Metal (3), `X` Indestructible, `.` Empty
+
+## Configuration
+
+```tsx
+<BrickBreaker
+  config={{
+    physics: {
+      baseSpeed: 5,
+      maxSpeed: 12,
+      paddleSpeed: 10,
+    },
+    gameplay: {
+      startingLives: 3,
+    },
+    effects: {
+      showTrail: true,
+    },
+    colors: {
+      ball: 'var(--primary)',
+      paddle: 'var(--foreground)',
+    },
+    layout: {
+      ballStyle: 'round', // 'round' | 'square' | 'custom'
+      renderBall: (ctx, x, y, radius, color) => { /* custom render */ },
+    },
+  }}
+/>
+```
+
+## Controls
+
+| Input | Action |
+|-------|--------|
+| ← / A, → / D | Move paddle |
+| Space | Start / Launch / Pause |
+| R | Restart (game over) |
+| Mouse/Touch | Move paddle |
+
+## UI Components
+
+Customize the UI with composable components:
+
+```tsx
+import {
+  BrickBreaker,
+  BrickBreakerHUD,
+  BrickBreakerScore,
+  BrickBreakerLives,
+  BrickBreakerOverlay,
+  BrickBreakerTitle,
+} from '@/components/brick-breaker'
+
+<BrickBreaker>
+  <BrickBreakerHUD>
+    <BrickBreakerScore />
+    <BrickBreakerLives />
+  </BrickBreakerHUD>
+  <BrickBreakerOverlay>
+    <BrickBreakerTitle />
+  </BrickBreakerOverlay>
+</BrickBreaker>
+```
+
+## Hook
+
+For complete control:
+
+```tsx
+import { useBrickBreaker, DEFAULT_CONFIG, DEFAULT_LEVELS } from '@/components/brick-breaker'
+
+const { snapshot, startGame, pauseGame, movePaddle } = useBrickBreaker({
+  config: DEFAULT_CONFIG,
+  levels: DEFAULT_LEVELS,
+  canvasDimensions: { width: 400, height: 300, dpr: 2 },
+})
+```

@@ -1,0 +1,88 @@
+---
+title: Snake Game
+description: A minimal, themeable snake game with configurable grid, speed, and high score tracking.
+maintainers: ['matiasperz', 'JOYBOY-0']
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+<ComponentPreview name="snake-game-demo" />
+
+## Installation
+
+```bash
+npx shadcn@latest add https://r.joyco.studio/snake-game.json
+```
+
+## Usage
+
+```tsx
+import { SnakeGame } from '@/components/snake-game'
+
+<SnakeGame className="w-full max-w-xs" />
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `config` | `DeepPartial<SnakeGameConfig>` | `{}` | Configuration overrides |
+| `showControls` | `boolean` | `true` | Show UI controls bar |
+| `showHighscores` | `boolean` | `true` | Show high scores list |
+| `onGameEnd` | `(result) => void` | - | Called when game ends |
+| `className` | `string` | - | Container className |
+
+## Configuration
+
+```tsx
+<SnakeGame
+  config={{
+    grid: { size: 15 },
+    physics: {
+      initialSpeed: 150,  // ms per move
+      speedIncrement: 2,  // decrease per food
+      minSpeed: 50,
+    },
+    scoring: { pointsPerFood: 10 },
+    colors: {
+      snake: 'var(--foreground)',
+      food: 'var(--primary)',
+      background: 'var(--muted)',
+    },
+  }}
+/>
+```
+
+## Controls
+
+| Key | Action |
+|-----|--------|
+| ↑↓←→ / WASD | Move |
+| Space | Start |
+| Escape / P | Pause |
+| Swipe | Touch control |
+
+## Headless Mode
+
+Hide built-in UI for custom implementations:
+
+```tsx
+<SnakeGame
+  showControls={false}
+  showHighscores={false}
+  onScoreChange={(score) => setScore(score)}
+/>
+```
+
+## Hook
+
+For complete control:
+
+```tsx
+import { useSnakeGame, DEFAULT_CONFIG } from '@/components/snake-game'
+
+const { snapshot, startGame, pauseGame, setDirection } = useSnakeGame({
+  config: DEFAULT_CONFIG,
+  onGameEnd: (result) => console.log(result),
+})
+```

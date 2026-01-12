@@ -1,0 +1,17 @@
+{
+  "title": "UI",
+  "pages": [
+    "action-hint",
+    "chat",
+    "file-button",
+    "file-dropzone",
+    "hls-video-player",
+    "infinite-list",
+    "marquee",
+    "media-player",
+    "mention",
+    "mobile-menu",
+    "scroll-area"
+  ]
+}
+

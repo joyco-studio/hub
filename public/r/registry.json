@@ -26,9 +26,7 @@
           "type": "registry:component"
         }
       ],
-      "dependencies": [
-        "@joycostudio/marquee"
-      ]
+      "dependencies": ["@joycostudio/marquee"]
     },
     {
       "name": "file-button",
@@ -45,9 +43,7 @@
           "type": "registry:hook"
         }
       ],
-      "registryDependencies": [
-        "button"
-      ]
+      "registryDependencies": ["button"]
     },
     {
       "name": "file-dropzone",
@@ -64,9 +60,7 @@
           "type": "registry:hook"
         }
       ],
-      "registryDependencies": [
-        "button"
-      ]
+      "registryDependencies": ["button"]
     },
     {
       "name": "mobile-menu",
@@ -96,9 +90,7 @@
           "type": "registry:component"
         }
       ],
-      "dependencies": [
-        "@radix-ui/react-presence"
-      ]
+      "dependencies": ["@radix-ui/react-presence"]
     },
     {
       "name": "chat",
@@ -115,14 +107,8 @@
           "type": "registry:hook"
         }
       ],
-      "dependencies": [
-        "debounce",
-        "react-use-measure"
-      ],
-      "registryDependencies": [
-        "input-group",
-        "avatar"
-      ]
+      "dependencies": ["debounce", "react-use-measure"],
+      "registryDependencies": ["input-group", "avatar"]
     },
     {
       "name": "hls-video-player",
@@ -139,9 +125,7 @@
           "type": "registry:lib"
         }
       ],
-      "dependencies": [
-        "hls.js"
-      ]
+      "dependencies": ["hls.js"]
     },
     {
       "name": "action-hint",
@@ -154,6 +138,87 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "brick-breaker",
+      "type": "registry:component",
+      "title": "Brick Breaker",
+      "description": "A fully-featured brick breaker game with multiple levels, brick types, and proper collision physics.",
+      "files": [
+        {
+          "path": "registry/joyco/blocks/brick-breaker/index.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/joyco/blocks/brick-breaker/brick-breaker.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/joyco/blocks/brick-breaker/ui.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/joyco/blocks/brick-breaker/types.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/joyco/blocks/brick-breaker/config.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/joyco/blocks/brick-breaker/levels.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/joyco/blocks/brick-breaker/utils.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/joyco/blocks/brick-breaker/use-brick-breaker.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "hooks/use-local-storage.ts",
+          "type": "registry:hook"
+        }
+      ]
+    },
+    {
+      "name": "snake-game",
+      "type": "registry:component",
+      "title": "Snake Game",
+      "description": "A minimal, themeable snake game component with highscore persistence.",
+      "files": [
+        {
+          "path": "registry/joyco/blocks/snake-game/index.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/joyco/blocks/snake-game/snake-game.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/joyco/blocks/snake-game/types.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/joyco/blocks/snake-game/config.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/joyco/blocks/snake-game/utils.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/joyco/blocks/snake-game/use-snake-game.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "hooks/use-local-storage.ts",
+          "type": "registry:hook"
+        }
+      ],
+      "registryDependencies": ["button", "kbd"]
     }
   ]
 }
