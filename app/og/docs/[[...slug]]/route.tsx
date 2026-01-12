@@ -15,12 +15,13 @@ export async function GET(
   const { slug } = await params
 
   const pageSlug = slug ?? []
+  const type = pageSlug[0]
   const page = source.getPage(pageSlug)
 
   if (!page) notFound()
 
   // Return static opengraph image for home page
-  if (pageSlug.length === 0 || !isTypeLogo(pageSlug[0])) {
+  if (pageSlug.length === 0 || !isTypeLogo(type)) {
     const imagePath = join(process.cwd(), 'public', 'opengraph-image.png')
     const imageBuffer = await readFile(imagePath)
     return new Response(imageBuffer, {
@@ -31,12 +32,16 @@ export async function GET(
     })
   }
 
+  // Mantainer \ Author
+  const maintainers = page.data.maintainers ?? []
+  const mainMaintainer = maintainers[0]
+
   return new ImageResponse(
     DocsOgImage({
       title: page.data.title,
       description: page.data.description,
-      type: pageSlug[0],
-      author: page.data.maintainers[0],
+      type,
+      author: mainMaintainer,
       date: page.data.lastModified?.toISOString(),
     }),
     {
