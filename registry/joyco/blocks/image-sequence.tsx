@@ -112,9 +112,13 @@ export function useSequence({
   const loadingRef = React.useRef<Set<number>>(new Set())
   const hasStartedLoadingRef = React.useRef(false)
   const getImagePathRef = React.useRef(getImagePath)
+  const onFrameLoadRef = React.useRef(onFrameLoad)
+  const onAllFramesLoadedRef = React.useRef(onAllFramesLoaded)
 
   React.useEffect(() => {
     getImagePathRef.current = getImagePath
+    onFrameLoadRef.current = onFrameLoad
+    onAllFramesLoadedRef.current = onAllFramesLoaded
   })
 
   const [state, setState] = React.useState<SequenceState>({
@@ -183,7 +187,7 @@ export function useSequence({
           }
         })
 
-        onFrameLoad?.(frameIndex, image)
+        onFrameLoadRef.current?.(frameIndex, image)
 
         return image
       } catch (error) {
@@ -192,7 +196,7 @@ export function useSequence({
         return null
       }
     },
-    [frameCount, onFrameLoad]
+    [frameCount]
   )
 
   // Load all frames in binary order
@@ -207,8 +211,8 @@ export function useSequence({
       await Promise.all(batch.map((frameIndex) => loadImage(frameIndex)))
     }
 
-    onAllFramesLoaded?.()
-  }, [loadOrder, loadImage, onAllFramesLoaded])
+    onAllFramesLoadedRef.current?.()
+  }, [loadOrder, loadImage])
 
   // Start preloading on mount if enabled
   React.useEffect(() => {
