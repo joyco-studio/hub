@@ -296,5 +296,7 @@ export const getFonts = async () => {
 const formatDate = (date: string) => {
   // new Date(date) -> 2026.01.01
   const d = new Date(date)
-  return `${d.getFullYear()}.${d.getMonth() + 1}.${d.getDate()}`
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${d.getFullYear()}.${month}.${day}`
 }
