@@ -18,6 +18,13 @@
   --font-sans: var(--font-public-sans);
   --font-mono: var(--font-roboto-mono);
 
+  --animate-caret-blink: caret-blink 1s steps(1) infinite;
+
+  @keyframes caret-blink {
+    0%, 50% { opacity: 1; }
+    50.01%, 100% { opacity: 0; }
+  }
+
   --default-font-family: var(--font-sans);
   --default-font-family-mono: var(--font-mono);
 

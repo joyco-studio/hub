@@ -25,6 +25,7 @@ import { Typewriter } from '@/components/typewriter'
     texts={['faster', 'safer', 'smarter']}
     msPerChar={60}        // typing speed
     pauseMs={900}         // hold time (fully typed)
+    startHoldMs={1200}    // initial hold for the first word (only first cycle)
     deleteMsPerChar={45}  // delete speed
     gapMs={150}           // delay before next word
   />
@@ -38,6 +39,7 @@ import { Typewriter } from '@/components/typewriter'
 - **index / defaultIndex / onIndexChange**: Control the active phrase (controlled/uncontrolled).
 - **msPerChar**: `number` — Typing speed per character.
 - **pauseMs**: `number` — Pause after typing completes before advancing.
+- **startHoldMs**: `number` — Initial hold for the first word (index 0) before deleting starts (only used on the first cycle).
 - **deleteMsPerChar**: `number` — Delete speed per character (defaults to `msPerChar`).
 - **gapMs**: `number` — Pause after deleting completes before starting the next word.
 - **loop**: `boolean` — Loop back to the first phrase after the last.
