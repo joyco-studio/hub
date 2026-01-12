@@ -154,6 +154,18 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "image-sequence",
+      "type": "registry:component",
+      "title": "Image Sequence",
+      "description": "A canvas-based image sequence player with binary progressive loading for smooth playback.",
+      "files": [
+        {
+          "path": "registry/joyco/blocks/image-sequence.tsx",
+          "type": "registry:component"
+        }
+      ]
     }
   ]
 }
