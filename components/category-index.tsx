@@ -30,7 +30,7 @@ export function CategoryIndex({
         All {label}{' '}
         <CategoryIndexBadge
           variant="secondary"
-          className="text-base"
+          className="h-7 py-0 text-base"
           category={category}
         />
       </h3>
