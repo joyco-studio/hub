@@ -78,6 +78,16 @@ export function getRelatedPages(
     (page) => page.url === currentPage.url
   )
 
+  // If page not found, return first `limit` pages
+  if (currentPageIndex === -1) {
+    return sameCategoryPages.slice(0, limit).map((page) => ({
+      name: page.slugs[page.slugs.length - 1],
+      title: page.data.title,
+      type: itemType,
+      href: page.url,
+    }))
+  }
+
   const before = sameCategoryPages.slice(
     Math.max(0, currentPageIndex - 1),
     currentPageIndex
