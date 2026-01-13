@@ -77,9 +77,13 @@ export function getRelatedPages(
       page.slugs.length > 1
   )
 
-  // Shuffle and take limit
-  const shuffled = sameCategoryPages.sort(() => Math.random() - 0.5)
-  const selected = shuffled.slice(0, limit)
+  const currentPageIndex = sameCategoryPages.findIndex(
+    (page) => page.url === currentPage.url
+  )
+  const selected = sameCategoryPages.slice(
+    currentPageIndex - 1,
+    currentPageIndex + limit - 1
+  )
 
   return selected.map((page) => ({
     name: page.slugs[page.slugs.length - 1],

@@ -11,73 +11,6 @@ const SCREENSHOT_HEIGHT = 600
 const MAX_RETRIES = 5
 const INITIAL_BACKOFF_MS = 2000
 
-// Request queue to serialize Cloudflare API calls
-const requestQueue: Array<{
-  resolve: (value: string) => void
-  reject: (error: Error) => void
-  targetUrl: string
-  width: number
-  height: number
-}> = []
-let isProcessing = false
-
-// In-flight request deduplication
-const inFlightRequests = new Map<string, Promise<string>>()
-
-function getRequestKey(targetUrl: string, width: number, height: number) {
-  return `${targetUrl}:${width}x${height}`
-}
-
-async function processQueue() {
-  if (isProcessing || requestQueue.length === 0) return
-  isProcessing = true
-
-  while (requestQueue.length > 0) {
-    const request = requestQueue.shift()!
-    try {
-      const result = await fetchScreenshotFromCloudflare(
-        request.targetUrl,
-        request.width,
-        request.height
-      )
-      request.resolve(result)
-    } catch (error) {
-      request.reject(error as Error)
-    }
-    // Small delay between requests to avoid rate limits
-    if (requestQueue.length > 0) {
-      await new Promise((resolve) => setTimeout(resolve, 500))
-    }
-  }
-
-  isProcessing = false
-}
-
-function queueScreenshotRequest(
-  targetUrl: string,
-  width: number,
-  height: number
-): Promise<string> {
-  const key = getRequestKey(targetUrl, width, height)
-
-  // Return existing in-flight request if one exists
-  const existing = inFlightRequests.get(key)
-  if (existing) {
-    console.log(`Reusing in-flight request for ${key}`)
-    return existing
-  }
-
-  const promise = new Promise<string>((resolve, reject) => {
-    requestQueue.push({ resolve, reject, targetUrl, width, height })
-    processQueue()
-  }).finally(() => {
-    inFlightRequests.delete(key)
-  })
-
-  inFlightRequests.set(key, promise)
-  return promise
-}
-
 async function fetchScreenshotFromCloudflare(
   targetUrl: string,
   width: number,
@@ -164,13 +97,10 @@ async function fetchScreenshotFromCloudflare(
 const getCachedScreenshot = unstable_cache(
   async (name: string, width: number, height: number) => {
     const targetUrl = `${APP_BASE_URL}/view/${name}-demo`
-    return queueScreenshotRequest(targetUrl, width, height)
+    return fetchScreenshotFromCloudflare(targetUrl, width, height)
   },
   ['screenshot'],
-  {
-    revalidate: 86400, // 24 hours
-    tags: ['screenshot'],
-  }
+  { revalidate: false }
 )
 
 export async function GET(request: NextRequest) {
@@ -202,7 +132,7 @@ export async function GET(request: NextRequest) {
     return new NextResponse(imageBuffer, {
       headers: {
         'Content-Type': 'image/png',
-        'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+        'Cache-Control': 'public, s-maxage=31536000',
       },
     })
   } catch (error) {

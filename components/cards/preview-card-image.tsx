@@ -59,7 +59,6 @@ export function PreviewCardImage({
           height={400}
           sizes="(max-width: 768px) 100vw, 600px"
           style={{ width: '100%', height: '100%' }}
-          priority
           unoptimized
           className={cn(
             'h-full w-full object-cover transition-opacity duration-300',
