@@ -1,27 +1,16 @@
 'use client'
 
 import { cn } from '@/lib/utils'
+import { ItemType, itemTypeConfig } from '@/lib/item-types'
 import Link from 'next/link'
 import { ComponentPreviewImage } from './component-preview-image'
-import FileIcon from '@/components/icons/file'
-import CubeIcon from '@/components/icons/3d-cube'
-
-type ItemType = 'component' | 'toolbox' | 'log'
+import { Badge } from '../ui/badge'
 
 interface RelatedItemCardProps extends React.ComponentProps<'a'> {
   name: string
   title: string
   type: ItemType
   href: string
-}
-
-const typeConfig: Record<
-  ItemType,
-  { label: string; Icon: React.ComponentType<React.SVGProps<SVGSVGElement>> }
-> = {
-  component: { label: 'COMPONENT', Icon: CubeIcon },
-  toolbox: { label: 'TOOLBOX', Icon: CubeIcon },
-  log: { label: 'LOG', Icon: FileIcon },
 }
 
 export function RelatedItemCard({
@@ -32,14 +21,14 @@ export function RelatedItemCard({
   className,
   ...props
 }: RelatedItemCardProps) {
-  const { label, Icon } = typeConfig[type]
+  const { label, Icon } = itemTypeConfig[type]
   const isComponent = type === 'component'
 
   return (
     <Link
       href={href}
       className={cn(
-        'group relative flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-colors hover:bg-accent/50',
+        'group border-border bg-card hover:bg-accent/50 relative flex flex-col overflow-hidden rounded-lg border transition-colors',
         className
       )}
       {...props}
@@ -47,27 +36,31 @@ export function RelatedItemCard({
       {/* Preview Area */}
       <div className="relative h-[200px] w-full overflow-hidden">
         {/* Type Badge */}
-        <span className="absolute left-3 top-3 z-10 rounded bg-foreground/90 px-2 py-1 font-mono text-xs font-medium tracking-wide text-background">
+        <Badge
+          variant="key"
+          className="absolute top-3 left-3 z-10 border-none shadow-none"
+        >
           {label}
-        </span>
+        </Badge>
 
         {isComponent ? (
           <ComponentPreviewImage
+            type={type}
             name={name}
             width={300}
             height={200}
-            className="h-full w-full border-0 rounded-none"
+            className="h-full w-full rounded-none border-0"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-blue-600">
-            <Icon className="h-12 w-12 text-white" />
+            <Icon className="size-8 text-white" />
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between border-t border-border bg-muted/50 px-4 py-3">
-        <span className="font-mono text-sm font-medium uppercase tracking-wide">
+      <div className="border-border bg-muted/50 flex items-center justify-between border-t px-4 py-3">
+        <span className="font-mono text-sm font-medium tracking-wide uppercase">
           {title}
         </span>
         <svg
