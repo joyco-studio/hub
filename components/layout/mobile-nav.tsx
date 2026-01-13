@@ -2,7 +2,8 @@
 
 import * as React from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { Command } from 'cmdk'
 import type * as PageTree from 'fumadocs-core/page-tree'
 import { Minus, Plus } from 'lucide-react'
 import CaretDownIcon from '@/components/icons/caret-down'
@@ -45,6 +46,7 @@ const sectionIcons: Record<
 
 export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
   const pathname = usePathname()
+  const router = useRouter()
   const inputRef = React.useRef<HTMLInputElement>(null)
   const [state, setState] = React.useState<MobileNavState>('closed')
   const { query, setQuery, results, hasResults, isEmpty } = useSearch()
@@ -96,6 +98,14 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
     setState('closed')
     setQuery('')
   }
+
+  const handleSelect = React.useCallback(
+    (url: string) => {
+      router.push(url)
+      handleClose()
+    },
+    [router]
+  )
 
   return (
     <div className="contents md:hidden">
@@ -185,10 +195,12 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
       {state === 'search' && (
         <MobileSearchContent
           query={query}
+          setQuery={setQuery}
           results={results}
           hasResults={hasResults}
           isEmpty={isEmpty}
           onClose={handleClose}
+          onSelect={handleSelect}
           onSuggestedSearch={setQuery}
         />
       )}
@@ -381,19 +393,23 @@ function MobileThemeToggle() {
 
 type MobileSearchContentProps = {
   query: string
+  setQuery: (query: string) => void
   results: SearchResult[]
   hasResults: boolean
   isEmpty: boolean
   onClose: () => void
+  onSelect: (url: string) => void
   onSuggestedSearch?: (query: string) => void
 }
 
 function MobileSearchContent({
   query,
+  setQuery,
   results,
   hasResults,
   isEmpty,
   onClose,
+  onSelect,
   onSuggestedSearch,
 }: MobileSearchContentProps) {
   const suggestedSearches = [
@@ -414,8 +430,16 @@ function MobileSearchContent({
       />
 
       {/* Search content */}
-      <div className="bg-background relative">
-        {hasResults && <SearchResults results={results} query={query} />}
+      <Command shouldFilter={false} loop className="bg-background relative">
+        {/* Hidden input that syncs with the actual input in the header */}
+        <Command.Input
+          value={query}
+          onValueChange={setQuery}
+          className="sr-only"
+        />
+        {hasResults && (
+          <SearchResults results={results} query={query} onSelect={onSelect} />
+        )}
         {isEmpty && <NoResults query={query} />}
         {!hasResults && !isEmpty && (
           <div className="bg-background flex min-h-[50vh] flex-col p-6">
@@ -435,7 +459,7 @@ function MobileSearchContent({
             </div>
           </div>
         )}
-      </div>
+      </Command>
     </div>
   )
 }

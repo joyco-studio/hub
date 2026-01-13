@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import { Command } from 'cmdk'
 import { cn } from '@/lib/utils'
 import CubeIcon from '@/components/icons/3d-cube'
 import TerminalWithCursorIcon from '@/components/icons/terminal-w-cursor'
@@ -16,6 +16,7 @@ export type SearchResult = {
 type SearchResultsProps = {
   results: SearchResult[]
   query: string
+  onSelect: (url: string) => void
 }
 
 const sectionIcons: Record<
@@ -65,7 +66,7 @@ function HighlightedText({ text, query }: { text: string; query: string }) {
  * SearchResults
  * -------------------------------------------------------------------------------------------------*/
 
-export function SearchResults({ results, query }: SearchResultsProps) {
+export function SearchResults({ results, query, onSelect }: SearchResultsProps) {
   if (results.length === 0) return null
 
   // Group results by section (first part of URL path)
@@ -88,26 +89,24 @@ export function SearchResults({ results, query }: SearchResultsProps) {
   )
 
   return (
-    <nav className="bg-accent/70 flex flex-col overflow-y-auto">
+    <Command.List className="bg-accent/70 flex max-h-none flex-col overflow-y-auto">
       {Object.entries(groupedBySection).map(([section, pages]) => {
         const Icon = sectionIcons[section] ?? CubeIcon
         const label = sectionLabels[section] ?? section
 
         return (
-          <div key={section} className="flex flex-col">
-            {/* Section header */}
-            <div
-              className={cn(
-                'flex items-center gap-2 px-4 py-2.5 text-left',
-                'text-foreground'
-              )}
-            >
-              <Icon className="size-3.5" />
-              <span className="font-mono text-xs font-medium tracking-wide uppercase">
-                {label}
-              </span>
-            </div>
-
+          <Command.Group
+            key={section}
+            heading={
+              <div className="flex items-center gap-2 px-4 py-2.5 text-left text-foreground">
+                <Icon className="size-3.5" />
+                <span className="font-mono text-xs font-medium tracking-wide uppercase">
+                  {label}
+                </span>
+              </div>
+            }
+            className="flex flex-col [&_[cmdk-group-heading]]:p-0"
+          >
             {/* Nested results */}
             <div className="border-border ml-4 flex flex-col border-l">
               {Object.entries(pages).map(([pageUrl, pageResults]) => {
@@ -121,12 +120,14 @@ export function SearchResults({ results, query }: SearchResultsProps) {
                   .trim()
 
                 return (
-                  <Link
+                  <Command.Item
                     key={pageUrl}
-                    href={pageUrl}
+                    value={pageUrl}
+                    onSelect={() => onSelect(pageUrl)}
                     className={cn(
-                      'flex flex-col gap-0.5 py-1.5 pr-4 pl-4 transition-colors',
-                      'text-muted-foreground hover:text-foreground hover:bg-accent'
+                      'flex cursor-pointer flex-col gap-0.5 py-1.5 pr-4 pl-4 transition-colors',
+                      'text-muted-foreground',
+                      'data-[selected=true]:text-foreground data-[selected=true]:bg-accent'
                     )}
                   >
                     <span className="font-mono text-sm tracking-wide uppercase">
@@ -137,13 +138,13 @@ export function SearchResults({ results, query }: SearchResultsProps) {
                         <HighlightedText text={contentPreview} query={query} />
                       </span>
                     )}
-                  </Link>
+                  </Command.Item>
                 )
               })}
             </div>
-          </div>
+          </Command.Group>
         )
       })}
-    </nav>
+    </Command.List>
   )
 }

@@ -1,7 +1,8 @@
 'use client'
 
 import * as React from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { Command } from 'cmdk'
 import type * as PageTree from 'fumadocs-core/page-tree'
 
 import { SidebarSearch } from './search'
@@ -23,6 +24,7 @@ type RegistrySidebarProps = {
 
 export function RegistrySidebar({ tree, itemMeta = {} }: RegistrySidebarProps) {
   const pathname = usePathname()
+  const router = useRouter()
   const { layout } = useLayout()
   const { query, setQuery, results, hasResults, isEmpty } = useSearch()
 
@@ -40,11 +42,26 @@ export function RegistrySidebar({ tree, itemMeta = {} }: RegistrySidebarProps) {
     return pathname.startsWith(`/${sectionId}`)
   })
 
+  // Handle navigation when an item is selected
+  const handleSelect = React.useCallback(
+    (url: string) => {
+      router.push(url)
+      setQuery('')
+    },
+    [router, setQuery]
+  )
+
   // Render content based on search state
   const renderContent = () => {
     // Show results when we have them
     if (hasResults) {
-      return <SearchResults results={results} query={query} />
+      return (
+        <SearchResults
+          results={results}
+          query={query}
+          onSelect={handleSelect}
+        />
+      )
     }
 
     // Show no results only when confirmed empty
@@ -73,12 +90,16 @@ export function RegistrySidebar({ tree, itemMeta = {} }: RegistrySidebarProps) {
       />
       <NavAside />
 
-      <aside className="w-sidebar-width flex flex-col gap-1 text-sm">
+      <Command
+        shouldFilter={false}
+        loop
+        className="w-sidebar-width flex flex-col gap-1 text-sm"
+      >
         <SidebarSearch query={query} setQuery={setQuery} />
         {renderContent()}
         <div className="bg-muted flex-1" />
         <SocialLinks />
-      </aside>
+      </Command>
     </div>
   )
 }
