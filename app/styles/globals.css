@@ -105,7 +105,8 @@
 }
 
 html.terminal img,
-html.terminal video {
+html.terminal video,
+html.terminal canvas {
   filter: sepia(100%) saturate(200%) brightness(70%) hue-rotate(48deg);
 }
 

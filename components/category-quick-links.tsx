@@ -61,7 +61,7 @@ export function CategoryQuickLinks() {
             objectFit="contain"
             isPlaying={activeIndex === 0}
             resetOnPlay
-            className="scale-[1.3] translate-y-[-3%]"
+            className="scale-[1.3] translate-y-[-3%] pointer-events-none"
           />
         </CategoryCardLinkSplash>
       </CategoryCardLink>
@@ -87,7 +87,7 @@ export function CategoryQuickLinks() {
             objectFit="contain"
             isPlaying={activeIndex === 1}
             resetOnPlay
-            className="scale-[1.3]"
+            className="scale-[1.3] pointer-events-none"
           />
         </CategoryCardLinkSplash>
       </CategoryCardLink>
@@ -113,7 +113,7 @@ export function CategoryQuickLinks() {
             objectFit="contain"
             isPlaying={activeIndex === 2}
             resetOnPlay
-            className="scale-[1.3] translate-y-[-5%]"
+            className="scale-[1.3] translate-y-[-5%] pointer-events-none"
           />
         </CategoryCardLinkSplash>
       </CategoryCardLink>
