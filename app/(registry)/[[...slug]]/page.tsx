@@ -4,7 +4,7 @@ import { createRelativeLink } from 'fumadocs-ui/mdx'
 import { readFile } from 'fs/promises'
 import path from 'path'
 
-import { getPageImage, getLLMText, source } from '@/lib/source'
+import { getPageImage, getLLMText, getRelatedPages, source } from '@/lib/source'
 import { getDownloadStats } from '@/lib/stats'
 import { getMDXComponents } from '@/mdx-components'
 import { Author } from '@/components/layout/author'
@@ -19,8 +19,8 @@ import {
   PageTOCPopover,
   PageTOCPopoverTrigger,
   PageTOCPopoverContent,
-  PageFooter,
 } from '@/components/layout/docs/page/client'
+import { RelatedItems } from '@/components/preview/related-items'
 import { TOCScrollArea } from '@/components/toc'
 import { TOCItems } from '@/components/toc/clerk'
 import { Badge } from '@/components/ui/badge'
@@ -106,7 +106,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
   if (!page) notFound()
 
   const MDX = page.data.body
-
+  const isTopCategoryPage = page.slugs.length === 1
   const isLog = page.slugs[0] === 'logs'
   const isHome = page.slugs.length === 0
 
@@ -129,6 +129,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
   const docLinks = [...page.data.docLinks]
   const llmText = await getLLMText(page)
   const llmUrl = page.slugs.length === 0 ? null : `/${page.slugs.join('/')}.md`
+  const relatedItems = getRelatedPages(page, 3)
 
   const toc = page.data.toc
   const hasToc = toc.length > 0
@@ -172,7 +173,12 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
               <h1 className="min-w-0 text-3xl leading-tight font-semibold">
                 {displayTitle}
               </h1>
-              <div className="flex items-center gap-2 max-sm:hidden">
+              <div
+                className={cn(
+                  'flex items-center gap-2 max-sm:hidden',
+                  isTopCategoryPage && 'hidden'
+                )}
+              >
                 <PageGithubLinkButton
                   className="max-lg:hidden"
                   path={page.path}
@@ -220,7 +226,13 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
               })}
             />
           </div>
-          <PageFooter />
+          {!isTopCategoryPage && relatedItems.length > 0 && (
+            <RelatedItems
+              title={`Related ${categoryLabel}s`}
+              items={relatedItems}
+              className="mt-16"
+            />
+          )}
         </article>
 
         {/* Desktop TOC */}

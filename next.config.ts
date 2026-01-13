@@ -5,7 +5,6 @@ import { getExternalComponentRedirects } from './lib/external-registries'
 const withMDX = createMDX()
 
 const nextConfig: NextConfig = {
-  /* config options here */
   images: {
     remotePatterns: [
       {

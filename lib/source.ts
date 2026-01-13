@@ -80,6 +80,19 @@ export function getRelatedPages(
   )
   const selected = [...before, ...after]
 
+  // If we don't have enough items, wrap around to the beginning
+  if (selected.length < limit) {
+    const remaining = limit - selected.length
+    const selectedUrls = new Set([
+      ...selected.map((p) => p.url),
+      currentPage.url,
+    ])
+    const fromStart = sameCategoryPages
+      .filter((page) => !selectedUrls.has(page.url))
+      .slice(0, remaining)
+    selected.push(...fromStart)
+  }
+
   return selected.map((page) => ({
     name: page.slugs[page.slugs.length - 1],
     title: page.data.title,
