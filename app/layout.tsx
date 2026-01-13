@@ -1,5 +1,5 @@
 import './styles/globals.css'
-import { Metadata } from 'next'
+import { Metadata, Viewport } from 'next'
 import { Public_Sans, Roboto_Mono } from 'next/font/google'
 import { RootProvider } from 'fumadocs-ui/provider/next'
 import { Analytics } from '@vercel/analytics/next'
@@ -43,9 +43,10 @@ export const metadata: Metadata = {
       },
     ],
   },
-  viewport: {
-    maximumScale: 1, // handle zoom on mobile
-  },
+}
+
+export const viewport: Viewport = {
+  maximumScale: 1, // handle zoom on mobile
 }
 
 export default function Layout({ children }: LayoutProps<'/'>) {

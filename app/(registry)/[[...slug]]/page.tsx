@@ -259,15 +259,13 @@ export async function generateMetadata(
     ? stripLogPrefixFromTitle(page.data.title, logNumber)
     : page.data.title
 
-  const genImg = getPageImage(page).url
-
-  console.log({ genImg })
+  const ogImage = getPageImage(page).url
 
   return {
     title: displayTitle,
     description: page.data.description,
     openGraph: {
-      images: '/opengraph-image.png',
+      images: ogImage,
     },
   }
 }

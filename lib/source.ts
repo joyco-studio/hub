@@ -11,11 +11,11 @@ export const source = loader({
 })
 
 export function getPageImage(page: InferPageType<typeof source>) {
-  const segments = [...page.slugs, 'image.png']
+  const segments = [...page.slugs]
 
   return {
     segments,
-    url: `/og/${segments.join('/')}`,
+    url: `/og/docs/${segments.join('/')}`,
   }
 }
 
