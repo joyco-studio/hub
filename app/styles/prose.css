@@ -1,3 +1,7 @@
+.prose {
+  --tw-prose-body: color-mix(in oklab, var(--foreground) 70%, transparent);
+}
+
 .prose
   :where(figure[data-rehype-pretty-code-figure]):not(
     :where(.not-prose, .not-prose *)

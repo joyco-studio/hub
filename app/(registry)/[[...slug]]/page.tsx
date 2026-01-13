@@ -173,7 +173,10 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
                 {displayTitle}
               </h1>
               <div className="flex items-center gap-2 max-sm:hidden">
-                <PageGithubLinkButton className='max-lg:hidden' path={page.path} />
+                <PageGithubLinkButton
+                  className="max-lg:hidden"
+                  path={page.path}
+                />
                 <PageActions
                   content={llmText}
                   llmUrl={llmUrl}
@@ -184,7 +187,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
 
             {/* Description */}
             {page.data.description && (
-              <p className="text-fd-muted-foreground mb-2 text-lg">
+              <p className="text-foreground/70 mb-2 text-lg">
                 {page.data.description}
               </p>
             )}
@@ -193,7 +196,11 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
           <Separator brackets align="bottom" className="mb-4" />
 
           {/* Doc links */}
-          <div className="hidden items-start justify-between gap-8 has-data-[slot=doc-links]:flex max-sm:flex">
+          <div
+            className={cn('flex items-start justify-between gap-8', {
+              'lg:hidden': docLinks.length === 0,
+            })}
+          >
             <DocLinks links={docLinks}>
               <PageGithubLinkButton className="lg:hidden" path={page.path} />
             </DocLinks>
