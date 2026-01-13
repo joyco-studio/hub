@@ -173,7 +173,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
                 {displayTitle}
               </h1>
               <div className="flex items-center gap-2 max-sm:hidden">
-                <PageGithubLinkButton path={page.path} />
+                <PageGithubLinkButton className='max-lg:hidden' path={page.path} />
                 <PageActions
                   content={llmText}
                   llmUrl={llmUrl}
