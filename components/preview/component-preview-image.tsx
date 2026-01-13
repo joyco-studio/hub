@@ -26,7 +26,7 @@ export function ComponentPreviewImage({
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
 
-  const screenshotUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/screenshot?name=${encodeURIComponent(name)}&width=1200&height=600`
+  const screenshotUrl = `/api/screenshot?name=${encodeURIComponent(name)}&width=1200&height=600`
 
   const Icon = (() => {
     switch (type) {
