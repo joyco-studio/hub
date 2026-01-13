@@ -154,7 +154,7 @@ async function fetchScreenshotFromCloudflare(
 
 const getCachedScreenshot = unstable_cache(
   async (name: string, width: number, height: number) => {
-    const targetUrl = `${APP_BASE_URL}/view/${name}-demo`
+    const targetUrl = `${APP_BASE_URL}/view/${name}-demo?x-vercel-protection-bypass=${process.env.VERCEL_AUTOMATION_BYPASS_SECRET}`
     return queueScreenshotRequest(targetUrl, width, height)
   },
   ['screenshot'],
