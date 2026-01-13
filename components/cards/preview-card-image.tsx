@@ -14,7 +14,10 @@ interface PreviewCardImageProps extends React.ComponentProps<'div'> {
   alt?: string
 }
 
-const typeIcons: Record<ItemType, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
+const typeIcons: Record<
+  ItemType,
+  React.ComponentType<React.SVGProps<SVGSVGElement>>
+> = {
   component: CubeIcon,
   toolbox: TerminalWithCursorIcon,
   log: FileIcon,

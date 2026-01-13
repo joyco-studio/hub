@@ -94,6 +94,7 @@ async function fetchScreenshotFromCloudflare(
   throw lastError || new Error('Max retries exceeded')
 }
 
+// Demo pages must follow the `{name}-demo` naming convention (e.g., `demos/chat-demo.tsx`)
 const getCachedScreenshot = unstable_cache(
   async (name: string, width: number, height: number) => {
     const targetUrl = `${APP_BASE_URL}/view/${name}-demo`
