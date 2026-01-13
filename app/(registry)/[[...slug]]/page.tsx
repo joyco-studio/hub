@@ -106,7 +106,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
   if (!page) notFound()
 
   const MDX = page.data.body
-
+  const isTopCategoryPage = page.slugs.length === 1
   const isLog = page.slugs[0] === 'logs'
   const isHome = page.slugs.length === 0
 
@@ -127,12 +127,15 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
     : null
   const componentSource = await getComponentSource(componentSlug)
   const githubUrl = getGitHubBlobUrl(`content/${page.path}`)
-  const docLinks = [
-    ...(page.data.docLinks.some((link) => link.href === githubUrl)
-      ? []
-      : [{ label: 'See on GitHub', href: githubUrl }]),
-    ...page.data.docLinks,
-  ]
+  const docLinks = (() => {
+    if (isTopCategoryPage) return []
+    const links = []
+    if (!page.data.docLinks.some((link) => link.href === githubUrl)) {
+      links.push({ label: 'See on GitHub', href: githubUrl })
+    }
+    links.push(...page.data.docLinks)
+    return links
+  })()
   const llmText = await getLLMText(page)
   const llmUrl = page.slugs.length === 0 ? null : `/${page.slugs.join('/')}.md`
   const relatedItems = getRelatedPages(page, 3)
@@ -180,7 +183,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
                 {displayTitle}
               </h1>
               <PageActions
-                className="max-sm:hidden"
+                className={cn('max-sm:hidden', isTopCategoryPage && 'hidden')}
                 content={llmText}
                 llmUrl={llmUrl}
                 componentSource={componentSource}
@@ -216,7 +219,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
               })}
             />
           </div>
-          {relatedItems.length > 0 && (
+          {!isTopCategoryPage && relatedItems.length > 0 && (
             <RelatedItems
               title={`Related ${categoryLabel}s`}
               items={relatedItems}

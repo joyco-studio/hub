@@ -1,8 +1,7 @@
 import { cn } from '@/lib/utils'
-import { RelatedItemCard } from './related-item-card'
+import { PreviewCard } from '@/components/cards'
 import { Separator } from '../ui/separator'
-
-type ItemType = 'component' | 'toolbox' | 'log'
+import { ItemType } from '@/lib/item-types'
 
 interface RelatedItem {
   name: string
@@ -35,7 +34,7 @@ export function RelatedItems({
       />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((item) => (
-          <RelatedItemCard
+          <PreviewCard
             key={item.name}
             name={item.name}
             title={item.title}

@@ -33,6 +33,10 @@ export function getTopLevelPathsRedirects(source: ReturnType<typeof loader>) {
   source.pageTree.children.forEach((child) => {
     if (child.type === 'folder' && child.$id) {
       const segment = child.$id.split(':')[1]
+      // if has index page, don't add it to the redirects
+      if (child.index) {
+        return
+      }
       const firstEntry = child.children.find((child) => child.type === 'page')
       if (segment && firstEntry) {
         topLevelPaths.push([`/${segment}`, firstEntry.url])

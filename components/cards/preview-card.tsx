@@ -3,26 +3,26 @@
 import { cn } from '@/lib/utils'
 import { ItemType, itemTypeConfig } from '@/lib/item-types'
 import Link from 'next/link'
-import { ComponentPreviewImage } from './component-preview-image'
+import { PreviewCardImage } from './preview-card-image'
 import { Badge } from '../ui/badge'
 
-interface RelatedItemCardProps extends React.ComponentProps<'a'> {
+interface PreviewCardProps extends React.ComponentProps<'a'> {
   name: string
   title: string
   type: ItemType
   href: string
 }
 
-export function RelatedItemCard({
+export function PreviewCard({
   name,
   title,
   type,
   href,
   className,
   ...props
-}: RelatedItemCardProps) {
+}: PreviewCardProps) {
   const { label, Icon } = itemTypeConfig[type]
-  const isComponent = type === 'component'
+  const hasPreview = type === 'component'
 
   return (
     <Link
@@ -43,12 +43,10 @@ export function RelatedItemCard({
           {label}
         </Badge>
 
-        {isComponent ? (
-          <ComponentPreviewImage
+        {hasPreview ? (
+          <PreviewCardImage
             type={type}
             name={name}
-            width={300}
-            height={200}
             className="h-full w-full rounded-none border-0"
           />
         ) : (

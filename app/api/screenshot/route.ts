@@ -110,9 +110,18 @@ async function fetchScreenshotFromCloudflare(
                     display: flex;
                     align-items: center;
                     justify-content: center;
+                    overflow: hidden;
                   }
                   body > * {
                     flex-shrink: 0;
+                  }
+                  /* Hide scrollbars */
+                  ::-webkit-scrollbar {
+                    display: none;
+                  }
+                  * {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
                   }
                 `,
               },
