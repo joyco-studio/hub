@@ -20,17 +20,20 @@ export interface DocLink {
 export function DocLinks({
   links,
   className,
+  children,
 }: {
   links: DocLink[]
   className?: string
+  children?: React.ReactNode
 }) {
-  if (links.length === 0) return null
+  if (links.length === 0 && !children) return null
 
   return (
     <div
       data-slot="doc-links"
       className={cn('not-prose my-0 flex flex-wrap gap-x-2 gap-y-1', className)}
     >
+      {children}
       {links.map((link) => (
         <Button
           key={link.href}

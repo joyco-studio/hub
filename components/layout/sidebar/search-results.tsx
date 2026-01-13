@@ -89,7 +89,7 @@ export function SearchResults({ results, query, onSelect }: SearchResultsProps) 
   )
 
   return (
-    <Command.List className="bg-accent/70 flex max-h-none flex-col overflow-y-auto">
+    <Command.List className="bg-accent/70 flex max-h-none flex-col overflow-y-auto outline-none">
       {Object.entries(groupedBySection).map(([section, pages]) => {
         const Icon = sectionIcons[section] ?? CubeIcon
         const label = sectionLabels[section] ?? section
