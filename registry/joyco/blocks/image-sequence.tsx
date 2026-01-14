@@ -292,8 +292,6 @@ interface CanvasSequenceProps extends Omit<
   getImagePath: (frameIndex: number) => string
   /** Whether the animation is currently playing */
   isPlaying?: boolean
-  /** Whether the canvas should be visible */
-  isVisible?: boolean
   /** Whether to loop the animation */
   loop?: boolean
   /** Whether to preload images */
@@ -327,7 +325,6 @@ export function CanvasSequence({
   frameDuration,
   getImagePath,
   isPlaying = true,
-  isVisible = true,
   loop = true,
   preload = true,
   objectFit = 'contain',
@@ -365,12 +362,20 @@ export function CanvasSequence({
   const totalDuration = frameCount * frameDuration
 
   // Use the sequence hook
-  const { state, getFrame, getFrameIndexByProgress } = useSequence({
-    frameCount,
-    getImagePath,
-    preload,
-    onAllFramesLoaded,
-  })
+  const { state, getFrame, getFrameIndexByProgress, loadAllFrames } =
+    useSequence({
+      frameCount,
+      getImagePath,
+      preload,
+      onAllFramesLoaded,
+    })
+
+  // If playing but nothing has been preloaded, trigger loading
+  React.useEffect(() => {
+    if (isPlaying && !state.initialFramesLoaded && state.loadedCount === 0) {
+      loadAllFrames()
+    }
+  }, [isPlaying, state.initialFramesLoaded, state.loadedCount, loadAllFrames])
 
   // Get actual pixel ratio
   const dpr =
@@ -495,7 +500,7 @@ export function CanvasSequence({
 
   // Animation loop
   React.useEffect(() => {
-    if (!isPlaying || !isVisible) {
+    if (!isPlaying) {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current)
         animationFrameRef.current = null
@@ -555,7 +560,6 @@ export function CanvasSequence({
     }
   }, [
     isPlaying,
-    isVisible,
     loop,
     state.initialFramesLoaded,
     totalDuration,
@@ -604,10 +608,7 @@ export function CanvasSequence({
       <canvas
         ref={canvasRef}
         data-slot="canvas"
-        className={cn(
-          'absolute inset-0 block size-full',
-          !isVisible && 'opacity-0'
-        )}
+        className="absolute inset-0 block size-full"
         {...props}
       />
     </div>

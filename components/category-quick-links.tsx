@@ -12,6 +12,8 @@ import { useRegistryMeta } from '@/components/registry-meta'
 import CubeIcon from './icons/3d-cube'
 import TerminalWithCursorIcon from './icons/terminal-w-cursor'
 import FileIcon from './icons/file'
+import { useMediaQuery } from 'fumadocs-core/utils/use-media-query'
+import Image from 'next/image'
 
 const sequences = [
   {
@@ -37,9 +39,10 @@ const sequences = [
 export function CategoryQuickLinks() {
   const { counts } = useRegistryMeta()
   const [activeIndex, setActiveIndex] = useState<number>(-1)
+  const isMd = useMediaQuery('(min-width: 768px)')
 
   return (
-    <div className="not-prose grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="not-prose grid grid-cols-2 gap-2 sm:grid-cols-2 md:gap-4 lg:grid-cols-3">
       <CategoryCardLink
         href="/components"
         onMouseEnter={() => setActiveIndex(0)}
@@ -53,7 +56,7 @@ export function CategoryQuickLinks() {
           icon={<CubeIcon />}
           count={counts.components}
         />
-        <CategoryCardLinkSplash className="overflow-visible">
+        <CategoryCardLinkSplash className="relative overflow-visible">
           <CanvasSequence
             frameCount={sequences[1].frameCount}
             frameDuration={33}
@@ -61,7 +64,16 @@ export function CategoryQuickLinks() {
             objectFit="contain"
             isPlaying={activeIndex === 0}
             resetOnPlay
-            className="scale-[1.3] translate-y-[-3%] pointer-events-none"
+            /* Only start loading the sequence on md */
+            preload={isMd ?? false}
+            className="pointer-events-none translate-y-[-3%] scale-[1.3] max-md:hidden"
+          />
+          <Image
+            className="object-contain md:hidden"
+            src={sequences[1].getImagePath(18)}
+            alt={sequences[1].name}
+            sizes="50vw"
+            fill
           />
         </CategoryCardLinkSplash>
       </CategoryCardLink>
@@ -79,7 +91,7 @@ export function CategoryQuickLinks() {
           icon={<TerminalWithCursorIcon />}
           count={counts.toolbox}
         />
-        <CategoryCardLinkSplash className="overflow-visible">
+        <CategoryCardLinkSplash className="relative overflow-visible">
           <CanvasSequence
             frameCount={sequences[2].frameCount}
             frameDuration={33}
@@ -87,7 +99,16 @@ export function CategoryQuickLinks() {
             objectFit="contain"
             isPlaying={activeIndex === 1}
             resetOnPlay
-            className="scale-[1.3] pointer-events-none"
+            /* Only start loading the sequence on md */
+            preload={isMd ?? false}
+            className="pointer-events-none scale-[1.3] max-md:hidden"
+          />
+          <Image
+            className="object-contain md:hidden"
+            src={sequences[2].getImagePath(18)}
+            alt={sequences[2].name}
+            sizes="50vw"
+            fill
           />
         </CategoryCardLinkSplash>
       </CategoryCardLink>
@@ -105,7 +126,7 @@ export function CategoryQuickLinks() {
           icon={<FileIcon />}
           count={counts.logs}
         />
-        <CategoryCardLinkSplash className="overflow-visible">
+        <CategoryCardLinkSplash className="relative overflow-visible">
           <CanvasSequence
             frameCount={sequences[0].frameCount}
             frameDuration={33}
@@ -113,7 +134,16 @@ export function CategoryQuickLinks() {
             objectFit="contain"
             isPlaying={activeIndex === 2}
             resetOnPlay
-            className="scale-[1.3] translate-y-[-5%] pointer-events-none"
+            /* Only start loading the sequence on md */
+            preload={isMd ?? false}
+            className="pointer-events-none translate-y-[-5%] scale-[1.3] max-md:hidden"
+          />
+          <Image
+            className="object-contain md:hidden"
+            src={sequences[0].getImagePath(18)}
+            alt={sequences[0].name}
+            sizes="50vw"
+            fill
           />
         </CategoryCardLinkSplash>
       </CategoryCardLink>
