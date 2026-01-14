@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { cn } from '@/lib/utils'
+import { useTypewriter } from '@/hooks/use-typewriter'
 
 export interface TypewriterProps extends React.ComponentPropsWithRef<'span'> {
   texts: readonly string[]
@@ -25,69 +26,43 @@ export function Typewriter({
   ref,
   ...props
 }: TypewriterProps) {
-  const [index, setIndex] = React.useState(0)
-  const text = texts[index] ?? ''
-  const [count, setCount] = React.useState(text.length)
-  const [phase, setPhase] = React.useState<'hold' | 'delete' | 'gap' | 'type' | 'pause'>('hold')
+  const { visible, longestText } = useTypewriter({
+    texts,
+    msPerChar,
+    pauseMs,
+    deleteMsPerChar,
+    gapMs,
+    loop,
+  })
 
-  React.useEffect(() => {
-    if (phase === 'hold') {
-      const id = setTimeout(() => setPhase('delete'), pauseMs)
-      return () => clearTimeout(id)
-    }
-
-    if (phase === 'delete') {
-      if (count === 0) {
-        const isLast = index + 1 >= texts.length
-        if (isLast && !loop) return // Stop if no loop
-        setIndex(isLast ? 0 : index + 1)
-        setPhase('gap')
-        return
-      }
-      const id = setTimeout(() => setCount((c) => c - 1), deleteMsPerChar)
-      return () => clearTimeout(id)
-    }
-
-    if (phase === 'gap') {
-      const id = setTimeout(() => setPhase('type'), gapMs)
-      return () => clearTimeout(id)
-    }
-
-    if (phase === 'type') {
-      if (count < text.length) {
-        const id = setTimeout(() => setCount((c) => c + 1), msPerChar)
-        return () => clearTimeout(id)
-      }
-      setPhase('pause')
-    }
-
-    if (phase === 'pause') {
-      const id = setTimeout(() => setPhase('delete'), pauseMs)
-      return () => clearTimeout(id)
-    }
-  }, [count, phase, text.length, index, texts.length, loop, msPerChar, deleteMsPerChar, pauseMs, gapMs])
-
-  const visible = text.slice(0, count)
+  if (texts.length === 0) return null
 
   return (
     <span
       ref={ref}
       className={cn('relative inline-block', className)}
+      aria-live="polite"
+      aria-atomic="true"
       {...props}
     >
-      {/* Size holder */}
-      <span className="invisible inline-grid *:col-start-1 *:row-start-1 *:whitespace-pre">
-        {texts.map((t, i) => (
-          <span key={i}>{t}</span>
-        ))}
+      {/* Size holder - only renders longest text */}
+      <span
+        data-slot="size-holder"
+        className="invisible whitespace-pre"
+        aria-hidden="true"
+      >
+        {longestText}
       </span>
-      {/* Text */}
-      <span className="absolute inset-0 whitespace-pre">
+
+      {/* Visible text */}
+      <span data-slot="text" className="absolute inset-0 whitespace-pre">
         {visible}
         {caret && (
           <span
+            data-slot="caret"
             className="animate-caret-blink inline-block w-px bg-current"
             style={{ height: '1em' }}
+            aria-hidden="true"
           />
         )}
       </span>

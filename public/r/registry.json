@@ -160,6 +160,10 @@
         {
           "path": "registry/joyco/blocks/typewriter.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "hooks/use-typewriter.ts",
+          "type": "registry:hook"
         }
       ]
     }
