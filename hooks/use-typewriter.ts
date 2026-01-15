@@ -20,6 +20,26 @@ export interface UseTypewriterReturn {
   phase: 'type' | 'pause' | 'delete' | 'gap'
   /** Whether the typewriter is actively animating */
   isAnimating: boolean
+  /** Whether reduced motion is preferred */
+  prefersReducedMotion: boolean
+}
+
+function usePrefersReducedMotion(): boolean {
+  const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false)
+
+  React.useEffect(() => {
+    const mql = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setPrefersReducedMotion(mql.matches)
+
+    const handler = (event: MediaQueryListEvent) => {
+      setPrefersReducedMotion(event.matches)
+    }
+
+    mql.addEventListener('change', handler)
+    return () => mql.removeEventListener('change', handler)
+  }, [])
+
+  return prefersReducedMotion
 }
 
 export function useTypewriter({
@@ -30,6 +50,7 @@ export function useTypewriter({
   gapMs = 150,
   loop = true,
 }: UseTypewriterOptions): UseTypewriterReturn {
+  const prefersReducedMotion = usePrefersReducedMotion()
   const [index, setIndex] = React.useState(0)
   const [count, setCount] = React.useState(0)
   const [phase, setPhase] = React.useState<'type' | 'pause' | 'delete' | 'gap'>(
@@ -55,6 +76,14 @@ export function useTypewriter({
   React.useEffect(() => {
     if (texts.length === 0) {
       isAnimatingRef.current = false
+      return
+    }
+
+    // Skip animation when user prefers reduced motion
+    if (prefersReducedMotion) {
+      isAnimatingRef.current = false
+      setCount(graphemes.length)
+      setPhase('pause')
       return
     }
 
@@ -152,6 +181,7 @@ export function useTypewriter({
     deleteMsPerChar,
     pauseMs,
     gapMs,
+    prefersReducedMotion,
   ])
 
   const longestText = React.useMemo(
@@ -169,6 +199,7 @@ export function useTypewriter({
     longestText,
     phase,
     isAnimating: isAnimatingRef.current,
+    prefersReducedMotion,
   }
 }
 

@@ -26,7 +26,7 @@ export function Typewriter({
   ref,
   ...props
 }: TypewriterProps) {
-  const { visible, longestText } = useTypewriter({
+  const { visible, longestText, prefersReducedMotion } = useTypewriter({
     texts,
     msPerChar,
     pauseMs,
@@ -60,7 +60,10 @@ export function Typewriter({
         {caret && (
           <span
             data-slot="caret"
-            className="animate-caret-blink inline-block w-px bg-current"
+            className={cn(
+              'inline-block w-px bg-current',
+              !prefersReducedMotion && 'animate-caret-blink'
+            )}
             style={{ height: '1em' }}
             aria-hidden="true"
           />

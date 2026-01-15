@@ -111,6 +111,7 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
     switch (state) {
       case 'search':
         handleClose()
+        break
       case 'menu':
         setState('closed')
         break
