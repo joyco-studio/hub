@@ -137,7 +137,7 @@ export function SidebarSection({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'flex items-center gap-2 px-4 py-5 text-left transition-colors',
+          'flex items-center gap-2 px-4 py-5 text-left transition-colors min-h-aside-width',
           'hover:bg-accent',
           isActive && 'text-foreground/70'
         )}
