@@ -99,6 +99,11 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
     setQuery('')
   }
 
+  const handleClickLogo = () => {
+    handleClose()
+    router.push('/')
+  }
+
   const handleSelect = React.useCallback(
     (url: string) => {
       router.push(url)
@@ -107,18 +112,6 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
     [router]
   )
 
-  const handleClickMenu = () => {
-    switch (state) {
-      case 'search':
-        handleClose()
-      case 'menu':
-        setState('closed')
-        break
-      default:
-        setState('menu')
-    }
-  }
-
   return (
     <div className="contents md:hidden">
       {/* Mobile Header */}
@@ -126,7 +119,7 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
         {/* Logo / Search icon button */}
         <button
           data-state={state}
-          onClick={handleClickMenu}
+          onClick={handleClickLogo}
           className={cn(
             'flex aspect-square h-full shrink-0 items-center justify-center',
             state === 'search'
@@ -134,13 +127,7 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
               : 'bg-primary text-primary-foreground'
           )}
         >
-          {state === 'search' ? (
-            <SearchIcon className="size-5" />
-          ) : state === 'closed' ? (
-            <Logo />
-          ) : (
-            <CaretDownIcon className="size-5" />
-          )}
+          <Logo />
         </button>
 
         {/* Main content area - either dropdown or search input */}

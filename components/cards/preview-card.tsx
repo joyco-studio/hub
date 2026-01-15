@@ -61,7 +61,7 @@ export function PreviewCard({
       </div>
 
       {/* Footer */}
-      <div className="bg-card group-hover:bg-accent/50 flex items-center justify-between px-4 py-3 transition-colors">
+      <div className="bg-card group-hover:bg-accent/50 flex flex-1 items-center justify-between px-4 py-3 transition-colors">
         <span className="font-mono text-sm font-medium tracking-wide uppercase">
           {title}
         </span>
