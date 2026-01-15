@@ -1,0 +1,16 @@
+---
+title: 03 - Agentic Thinking
+author: 'matiasperz'
+---
+
+## Create powerful tools, not *MORE* tools
+
+Make querying tools capable of more, instead of diff querying tools. For example, allow the `getTransactions` to filter by date rage, by id, by text content and amount, instead of multiple tools for each. Agents are good at managing tool args, but not that good at managing multiple tools. They fail at choosing the right one or not use it at all.
+
+## Enforce tool usage
+
+Set explicit and consise tool usage cryteria by describing every param accurately. Don't over explain but provide enough context to the agent to make the right decision.
+
+## Sugest tool usage for taken action verification
+
+Provide the tools to let the agent verify previously taken actions. For example, if the agent has created a new transaction, or has editted an existing one, propose to use the `getTransactions` tool to verify the action and get fresh data. This creates a feedback loop that helps the agent identify errors and correct themself.
