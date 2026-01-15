@@ -107,6 +107,7 @@ export function PageTOCPopoverTrigger({
 
   return (
     <CollapsibleTrigger
+      suppressHydrationWarning
       className={cn(
         'px-content-sides text-muted-foreground flex h-10 w-full items-center text-start text-xs tracking-wide uppercase focus-visible:outline-none [&_svg]:size-4',
         className

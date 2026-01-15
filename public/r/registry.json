@@ -26,9 +26,7 @@
           "type": "registry:component"
         }
       ],
-      "dependencies": [
-        "@joycostudio/marquee"
-      ]
+      "dependencies": ["@joycostudio/marquee"]
     },
     {
       "name": "file-button",
@@ -45,9 +43,7 @@
           "type": "registry:hook"
         }
       ],
-      "registryDependencies": [
-        "button"
-      ]
+      "registryDependencies": ["button"]
     },
     {
       "name": "file-dropzone",
@@ -64,9 +60,7 @@
           "type": "registry:hook"
         }
       ],
-      "registryDependencies": [
-        "button"
-      ]
+      "registryDependencies": ["button"]
     },
     {
       "name": "mobile-menu",
@@ -96,9 +90,7 @@
           "type": "registry:component"
         }
       ],
-      "dependencies": [
-        "@radix-ui/react-presence"
-      ]
+      "dependencies": ["@radix-ui/react-presence"]
     },
     {
       "name": "chat",
@@ -115,14 +107,8 @@
           "type": "registry:hook"
         }
       ],
-      "dependencies": [
-        "debounce",
-        "react-use-measure"
-      ],
-      "registryDependencies": [
-        "input-group",
-        "avatar"
-      ]
+      "dependencies": ["debounce", "react-use-measure"],
+      "registryDependencies": ["input-group", "avatar"]
     },
     {
       "name": "hls-video-player",
@@ -139,9 +125,7 @@
           "type": "registry:lib"
         }
       ],
-      "dependencies": [
-        "hls.js"
-      ]
+      "dependencies": ["hls.js"]
     },
     {
       "name": "action-hint",
@@ -164,6 +148,22 @@
         {
           "path": "registry/joyco/blocks/image-sequence.tsx",
           "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "typewriter",
+      "type": "registry:component",
+      "title": "Typewriter",
+      "description": "A lightweight typewriter text component that cycles through phrases with minimal JavaScript.",
+      "files": [
+        {
+          "path": "registry/joyco/blocks/typewriter.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "hooks/use-typewriter.ts",
+          "type": "registry:hook"
         }
       ]
     }
