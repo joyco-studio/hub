@@ -19,6 +19,7 @@ import { NoResults } from './sidebar/no-results'
 import { useSearch, type SearchResult } from '@/hooks/use-search'
 import { ThemePreview, themes } from './theme-toggle'
 import { useTheme } from 'next-themes'
+import { useCallback } from 'react'
 
 /* -------------------------------------------------------------------------------------------------
  * Types
@@ -94,40 +95,28 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
       : String(currentFolder.name)
     : 'Registry'
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setState('closed')
     setQuery('')
-  }
+  }, [setState, setQuery])
 
   const handleSelect = React.useCallback(
     (url: string) => {
       router.push(url)
       handleClose()
     },
-    [router]
+    [handleClose, router]
   )
-
-  const handleClickMenu = () => {
-    switch (state) {
-      case 'search':
-        handleClose()
-        break
-      case 'menu':
-        setState('closed')
-        break
-      default:
-        setState('menu')
-    }
-  }
 
   return (
     <div className="contents md:hidden">
       {/* Mobile Header */}
       <header className="bg-background h-mobile-header sticky top-0 z-(--z-mobile-nav) flex w-full items-center gap-1 overflow-hidden">
         {/* Logo / Search icon button */}
-        <button
+        <Link
+          href="/"
           data-state={state}
-          onClick={handleClickMenu}
+          onClick={handleClose}
           className={cn(
             'flex aspect-square h-full shrink-0 items-center justify-center',
             state === 'search'
@@ -135,14 +124,8 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
               : 'bg-primary text-primary-foreground'
           )}
         >
-          {state === 'search' ? (
-            <SearchIcon className="size-5" />
-          ) : state === 'closed' ? (
-            <Logo />
-          ) : (
-            <CaretDownIcon className="size-5" />
-          )}
-        </button>
+          <Logo />
+        </Link>
 
         {/* Main content area - either dropdown or search input */}
         {state === 'search' ? (

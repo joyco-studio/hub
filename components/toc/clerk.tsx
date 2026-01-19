@@ -148,12 +148,12 @@ function TOCItem({
           className="absolute start-0 -top-1.5 size-4 rtl:-scale-x-100"
         >
           <line
-            x1={upperOffset}
+            x1={upperOffset + 1}
             y1="0"
-            x2={offset}
+            x2={offset + 1}
             y2="12"
             className="stroke-foreground/10"
-            strokeWidth="1"
+            strokeWidth="2"
           />
         </svg>
       )}

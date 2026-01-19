@@ -45,15 +45,15 @@ export async function GET(
   }
 
   // Mantainer \ Author
-  const maintainers = page.data.maintainers ?? []
-  const mainMaintainer = maintainers[0]
+  const [mainMaintainer] = page.data.maintainers
+  const ogProfile = mainMaintainer ?? page.data.author
 
   return new ImageResponse(
     DocsOgImage({
       title: page.data.title,
       description: page.data.description,
       type,
-      author: mainMaintainer,
+      author: ogProfile,
       date: page.data.lastModified?.toISOString(),
     }),
     {
