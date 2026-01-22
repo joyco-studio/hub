@@ -28,6 +28,7 @@ export function RegistrySidebar({ tree, itemMeta = {}, gameSlugs = [] }: Registr
   const router = useRouter()
   const { layout } = useLayout()
   const { query, setQuery, results, hasResults, isEmpty } = useSearch()
+  const [isSearchMode, setIsSearchMode] = React.useState(false)
 
   // Get all folders from the tree
   const folders = tree.children.filter(
@@ -52,6 +53,18 @@ export function RegistrySidebar({ tree, itemMeta = {}, gameSlugs = [] }: Registr
     [router, setQuery]
   )
 
+  const suggestedSearches = [
+    'Chat',
+    'Scroll Area',
+    'File Upload',
+    'Marquee',
+    'Video Player',
+  ]
+
+  const handleSuggestedSearch = (suggestion: string) => {
+    setQuery(suggestion)
+  }
+
   // Render content based on search state
   const renderContent = () => {
     // Show results when we have them
@@ -68,6 +81,29 @@ export function RegistrySidebar({ tree, itemMeta = {}, gameSlugs = [] }: Registr
     // Show no results only when confirmed empty
     if (isEmpty) {
       return <NoResults query={query} />
+    }
+
+    // Show recommended searches when in search mode but no query yet
+    if (isSearchMode && !query) {
+      return (
+        <Command.List className="bg-accent/70 flex flex-col p-4">
+          <p className="text-muted-foreground mb-3 font-mono text-xs tracking-wide uppercase">
+            Suggested Searches
+          </p>
+          <Command.Group className="flex flex-col gap-1">
+            {suggestedSearches.map((suggestion) => (
+              <Command.Item
+                key={suggestion}
+                value={suggestion}
+                onSelect={() => handleSuggestedSearch(suggestion)}
+                className="bg-muted data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground text-foreground cursor-pointer px-3 py-2 text-left font-mono text-xs tracking-wide uppercase transition-colors"
+              >
+                {suggestion}
+              </Command.Item>
+            ))}
+          </Command.Group>
+        </Command.List>
+      )
     }
 
     // Default: show sidebar navigation (idle or loading states)
@@ -96,7 +132,12 @@ export function RegistrySidebar({ tree, itemMeta = {}, gameSlugs = [] }: Registr
         loop
         className="w-sidebar-width flex flex-col gap-1 text-sm"
       >
-        <SidebarSearch query={query} setQuery={setQuery} />
+        <SidebarSearch
+          query={query}
+          setQuery={setQuery}
+          isSearchMode={isSearchMode}
+          setIsSearchMode={setIsSearchMode}
+        />
         {renderContent()}
         <div className="bg-muted flex-1" />
         <SocialLinks />

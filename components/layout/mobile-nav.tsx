@@ -425,7 +425,12 @@ function MobileSearchContent({
       />
 
       {/* Search content */}
-      <Command shouldFilter={false} loop className="bg-background relative">
+      <Command
+        shouldFilter={false}
+        loop
+        className="bg-background relative"
+        label="Joyco Search"
+      >
         {/* Hidden input that syncs with the actual input in the header */}
         <Command.Input
           value={query}
