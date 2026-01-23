@@ -229,11 +229,11 @@ code::-webkit-scrollbar-thumb:hover {
     background-image: repeating-linear-gradient(
       0deg,
       rgba(0, 0, 0, 0.5),
-      rgba(0, 0, 0, 0.5) 3px,
-      rgba(0, 0, 0, 0.9) 3px,
-      rgba(0, 0, 0, 0.9) 6px
+      rgba(0, 0, 0, 0.5) 1px,
+      rgba(0, 0, 0, 0.9) 1px,
+      rgba(0, 0, 0, 0.9) 2px
     );
-    background-size: 100% 6px;
+    background-size: 100% 2px;
   }
 }
 
