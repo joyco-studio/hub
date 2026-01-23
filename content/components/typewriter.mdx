@@ -45,6 +45,17 @@ import { Typewriter } from '@/components/typewriter'
 - **caret**: `boolean` — Show/hide the blinking caret.
 - **ariaLive**: `"off" | "polite" | "assertive"` — Screen reader announcement mode (defaults to `"off"`).
 
+## Caret Styling
+
+The caret is static by default. Use the `data-slot="caret"` selector to style it:
+
+```tsx
+<Typewriter
+  texts={['hello', 'world']}
+  className='**:data-[slot="caret"]:animate-pulse'
+/>
+```
+
 ## Accessibility
 
 - **ARIA live region**: Controlled via `ariaLive`. Default is `"off"` to avoid noisy announcements while cycling.

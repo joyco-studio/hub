@@ -13,7 +13,7 @@ export default function TypewriterDemo() {
           deleteMsPerChar={40}
           gapMs={180}
           texts={['joyco/mobile-menu', 'joyco/typewriter', 'joyco/chat']}
-          className='**:data-[slot="caret"]:animate-caret-blink'
+          className='**:data-[slot="caret"]:[animation:pulse_0.75s_ease-in-out_infinite] **:data-[slot="caret"]:opacity-0'
         />
       </span>
     </div>

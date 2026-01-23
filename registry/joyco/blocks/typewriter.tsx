@@ -60,10 +60,7 @@ export function Typewriter({
         {caret && (
           <span
             data-slot="caret"
-            className={cn(
-              'inline-block w-px bg-current',
-              !prefersReducedMotion && 'animate-pulse opacity-0'
-            )}
+            className="inline-block w-px bg-current"
             style={{ height: '1em' }}
             aria-hidden="true"
           />
