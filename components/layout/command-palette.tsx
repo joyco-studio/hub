@@ -138,10 +138,17 @@ export function CommandPalette() {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-(--z-dialog) flex items-start justify-center pt-[15vh]">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Search"
+      className="fixed inset-0 z-(--z-dialog) flex items-start justify-center pt-[15vh]"
+    >
+      <span className="sr-only">Press Escape to close</span>
       {/* CCTV striped backdrop */}
       <div
         onClick={handleClose}
+        aria-hidden="true"
         className="cctv-backdrop absolute inset-0 cursor-pointer"
       />
 
