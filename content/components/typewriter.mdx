@@ -11,23 +11,22 @@ import { ComponentPreview } from '@/components/preview/component-preview'
 ## Installation
 
 ```bash
-npx shadcn@latest add https://r.joyco.studio/typewriter.json
+npx shadcn@latest add @joyco/typewriter
 ```
 
 ## Usage
 
 ```tsx
 import { Typewriter } from '@/components/typewriter'
-
-<p>
+;<p>
   Build{' '}
   <Typewriter
     texts={['faster', 'safer', 'smarter']}
-    msPerChar={60}        // typing speed
-    pauseMs={900}         // hold time (fully typed)
-    startHoldMs={1200}    // initial hold for the first word (only first cycle)
-    deleteMsPerChar={45}  // delete speed
-    gapMs={150}           // delay before next word
+    msPerChar={60} // typing speed
+    pauseMs={900} // hold time (fully typed)
+    startHoldMs={1200} // initial hold for the first word (only first cycle)
+    deleteMsPerChar={45} // delete speed
+    gapMs={150} // delay before next word
   />
 </p>
 ```
@@ -46,8 +45,18 @@ import { Typewriter } from '@/components/typewriter'
 - **caret**: `boolean` — Show/hide the blinking caret.
 - **ariaLive**: `"off" | "polite" | "assertive"` — Screen reader announcement mode (defaults to `"off"`).
 
+## Caret Styling
+
+The caret is static by default. Use the `data-slot="caret"` selector to style it:
+
+```tsx
+<Typewriter
+  texts={['hello', 'world']}
+  className='**:data-[slot="caret"]:animate-pulse'
+/>
+```
+
 ## Accessibility
 
 - **ARIA live region**: Controlled via `ariaLive`. Default is `"off"` to avoid noisy announcements while cycling.
 - **Reduced motion**: When `prefers-reduced-motion` is enabled, the full text is shown immediately, the caret is hidden, and autoplay is disabled.
-
