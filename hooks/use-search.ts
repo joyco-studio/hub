@@ -53,6 +53,9 @@ export function useSearch() {
   const hasLoadedResults = resultsForQuery.length >= MIN_QUERY_LENGTH
   const resultsMatch = resultsForQuery === query
 
+  // isLoading: when we're searching but results don't match current query yet
+  const isLoading = isSearching && !resultsMatch
+
   // hasResults: show results if we have any loaded (even if for previous query while loading)
   // But only if we're still in search mode (query >= 2)
   const hasResults = isSearching && hasLoadedResults && results.length > 0
@@ -66,5 +69,6 @@ export function useSearch() {
     results,
     hasResults,
     isEmpty,
+    isLoading,
   }
 }

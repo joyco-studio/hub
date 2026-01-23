@@ -2,6 +2,7 @@
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import * as React from 'react'
 
 type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT'
@@ -35,7 +36,11 @@ function generateFood(currentSnake: Position[]) {
   return newFood
 }
 
-export function SnakeGame() {
+type SnakeGameProps = {
+  className?: string
+}
+
+export function SnakeGame({ className }: SnakeGameProps) {
   const containerRef = React.useRef<HTMLDivElement>(null)
   const canvasRef = React.useRef<HTMLCanvasElement>(null)
   const [canvasSize, setCanvasSize] = React.useState(180)
@@ -117,15 +122,18 @@ export function SnakeGame() {
   const cellSize = canvasSize / GRID_SIZE
 
   // Responsive sizing - ensure canvas is multiple of GRID_SIZE for clean pixels
+  // Uses min(width, height) to fit within container while staying square
   React.useEffect(() => {
     const container = containerRef.current
     if (!container) return
 
     const observer = new ResizeObserver((entries) => {
-      const { width } = entries[0].contentRect
+      const { width, height } = entries[0].contentRect
+      // Use the smaller dimension to ensure the square canvas fits
+      const minDimension = Math.min(width, height)
       // Round down to nearest multiple of GRID_SIZE to avoid sub-pixel artifacts
-      const size = Math.floor(width / GRID_SIZE) * GRID_SIZE
-      setCanvasSize(size || GRID_SIZE * 15) // fallback to 180
+      const size = Math.floor(minDimension / GRID_SIZE) * GRID_SIZE
+      setCanvasSize(size || GRID_SIZE * 9) // fallback to 180
     })
 
     observer.observe(container)
@@ -327,12 +335,22 @@ export function SnakeGame() {
   }, [snake, food, canvasSize, cellSize, theme])
 
   return (
-    <div className="bg-background flex w-full flex-col items-center">
-      <div ref={containerRef} className="bg-muted aspect-square w-full">
+    <div
+      data-slot="snake-game"
+      className={cn(
+        'bg-background flex w-full flex-col items-center',
+        className
+      )}
+    >
+      <div
+        ref={containerRef}
+        className="bg-muted flex min-h-0 w-full flex-1 items-center justify-center"
+      >
         <canvas
+          data-slot="snake-game-canvas"
           ref={canvasRef}
           style={{ width: canvasSize, height: canvasSize }}
-          className="bg-muted size-full"
+          className="bg-muted"
         />
       </div>
       <div className="text-muted-foreground border-background flex w-full items-center justify-center border-t-4 font-mono text-xs">
@@ -379,7 +397,10 @@ export function SnakeGame() {
         )}
       </div>
       {highscores.length > 0 && (
-        <div className="border-background bg-accent/10 flex w-full flex-col border-t-4 px-3 py-2">
+        <div
+          className="border-background bg-accent/10 flex w-full flex-col border-t-4 px-3 py-2"
+          data-slot="snake-game-highscores"
+        >
           <span className="text-muted-foreground/60 mb-1 text-[10px] uppercase">
             Highscores
           </span>

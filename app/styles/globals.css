@@ -19,11 +19,7 @@
   --font-mono: var(--font-roboto-mono);
 
   --animate-caret-blink: caret-blink 1s steps(1) infinite;
-
-  @keyframes caret-blink {
-    0%, 50% { opacity: 1; }
-    50.01%, 100% { opacity: 0; }
-  }
+  --animate-loading-bar: loading-bar 0.75s ease-in-out infinite;
 
   --default-font-family: var(--font-sans);
   --default-font-family-mono: var(--font-mono);
@@ -94,6 +90,29 @@
   --spacing-heading-height: 64px;
   --spacing-aside-width: var(--aside-width);
   --spacing-sidebar-width: var(--sidebar-width);
+
+  @keyframes caret-blink {
+    0%,
+    50% {
+      opacity: 1;
+    }
+    50.01%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes loading-bar {
+    0% {
+      transform: translateX(-100%);
+    }
+    50% {
+      transform: translateX(0%);
+    }
+    100% {
+      transform: translateX(400%);
+    }
+  }
 }
 
 :root {
@@ -109,6 +128,7 @@
   --z-header: 40;
   --z-overlay: 50;
   --z-mobile-nav: 60;
+  --z-dialog: 100;
 }
 
 html.terminal img,

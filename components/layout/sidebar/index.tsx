@@ -26,7 +26,8 @@ export function RegistrySidebar({ tree, itemMeta = {} }: RegistrySidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const { layout } = useLayout()
-  const { query, setQuery, results, hasResults, isEmpty } = useSearch()
+  const { query, setQuery, results, hasResults, isEmpty, isLoading } =
+    useSearch()
 
   // Get all folders from the tree
   const folders = tree.children.filter(
@@ -95,7 +96,7 @@ export function RegistrySidebar({ tree, itemMeta = {} }: RegistrySidebarProps) {
         loop
         className="w-sidebar-width flex flex-col gap-1 text-sm"
       >
-        <SidebarSearch query={query} setQuery={setQuery} />
+        <SidebarSearch query={query} setQuery={setQuery} isLoading={isLoading} />
         {renderContent()}
         <div className="bg-muted flex-1" />
         <SocialLinks />
