@@ -11,15 +11,14 @@ import { ComponentPreview } from '@/components/preview/component-preview'
 ## Installation
 
 ```bash
-npx shadcn@latest add https://r.joyco.studio/image-sequence.json
+npx shadcn@latest add @joyco/image-sequence
 ```
 
 ## Usage
 
 ```tsx
 import { CanvasSequence } from '@/components/image-sequence'
-
-<div className="h-[400px] w-[400px]">
+;<div className="h-[400px] w-[400px]">
   <CanvasSequence
     frameCount={71}
     frameDuration={33}
@@ -33,23 +32,23 @@ import { CanvasSequence } from '@/components/image-sequence'
 
 ### CanvasSequence
 
-| Prop               | Type                            | Default     | Description                                      |
-| ------------------ | ------------------------------- | ----------- | ------------------------------------------------ |
-| `frameCount`       | `number`                        | -           | Total number of frames in the sequence           |
-| `frameDuration`    | `number`                        | -           | Duration of each frame in milliseconds           |
-| `getImagePath`     | `(frameIndex: number) => string`| -           | Function to generate the image URL for each frame|
-| `width`            | `number`                        | -           | Optional wrapper width in CSS pixels             |
-| `height`           | `number`                        | -           | Optional wrapper height in CSS pixels            |
-| `isPlaying`        | `boolean`                       | `true`      | Whether the animation is playing                 |
-| `isVisible`        | `boolean`                       | `true`      | Whether the canvas is visible                    |
-| `loop`             | `boolean`                       | `true`      | Whether to loop the animation                    |
-| `preload`          | `boolean`                       | `true`      | Whether to preload images on mount               |
-| `objectFit`        | `'contain' \| 'cover' \| 'fill'`| `'contain'` | How the image fits in the canvas                 |
-| `onFrameChange`    | `(frameIndex: number) => void`  | -           | Callback when frame changes                      |
-| `onAllFramesLoaded`| `() => void`                    | -           | Callback when all frames are loaded              |
-| `timeTransform`    | `(deltaTime: number) => number` | -           | Transform delta time for speed control           |
-| `devicePixelRatio` | `number`                        | `window.devicePixelRatio` | Pixel ratio for high-DPI displays |
-| `resetOnPlay`      | `boolean`                       | `false`     | Reset animation to frame 0 when playback starts  |
+| Prop                | Type                             | Default                   | Description                                       |
+| ------------------- | -------------------------------- | ------------------------- | ------------------------------------------------- |
+| `frameCount`        | `number`                         | -                         | Total number of frames in the sequence            |
+| `frameDuration`     | `number`                         | -                         | Duration of each frame in milliseconds            |
+| `getImagePath`      | `(frameIndex: number) => string` | -                         | Function to generate the image URL for each frame |
+| `width`             | `number`                         | -                         | Optional wrapper width in CSS pixels              |
+| `height`            | `number`                         | -                         | Optional wrapper height in CSS pixels             |
+| `isPlaying`         | `boolean`                        | `true`                    | Whether the animation is playing                  |
+| `isVisible`         | `boolean`                        | `true`                    | Whether the canvas is visible                     |
+| `loop`              | `boolean`                        | `true`                    | Whether to loop the animation                     |
+| `preload`           | `boolean`                        | `true`                    | Whether to preload images on mount                |
+| `objectFit`         | `'contain' \| 'cover' \| 'fill'` | `'contain'`               | How the image fits in the canvas                  |
+| `onFrameChange`     | `(frameIndex: number) => void`   | -                         | Callback when frame changes                       |
+| `onAllFramesLoaded` | `() => void`                     | -                         | Callback when all frames are loaded               |
+| `timeTransform`     | `(deltaTime: number) => number`  | -                         | Transform delta time for speed control            |
+| `devicePixelRatio`  | `number`                         | `window.devicePixelRatio` | Pixel ratio for high-DPI displays                 |
+| `resetOnPlay`       | `boolean`                        | `false`                   | Reset animation to frame 0 when playback starts   |
 
 ## useSequence Hook
 

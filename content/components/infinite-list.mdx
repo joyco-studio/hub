@@ -14,15 +14,14 @@ import { ComponentPreview } from '@/components/preview/component-preview'
 ## Installation
 
 ```bash
-npx shadcn@latest add https://r.joyco.studio/infinite-list.json
+npx shadcn@latest add @joyco/infinite-list
 ```
 
 ## Usage
 
 ```tsx
 import { useInfiniteList, MaskedList } from '@/components/infinite-list'
-
-<MaskedList {...list}>
+;<MaskedList {...list}>
   {items.map((item) => (
     <Item key={item.id} {...item} />
   ))}
