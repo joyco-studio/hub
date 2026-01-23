@@ -17,7 +17,10 @@ type SearchResultsProps = {
   results: SearchResult[]
   query: string
   onSelect: (url: string) => void
-}
+} & Omit<
+  React.ComponentProps<typeof Command.List>,
+  'data-slot' | 'results' | 'onSelect'
+>
 
 const sectionIcons: Record<
   string,
@@ -66,7 +69,12 @@ function HighlightedText({ text, query }: { text: string; query: string }) {
  * SearchResults
  * -------------------------------------------------------------------------------------------------*/
 
-export function SearchResults({ results, query, onSelect }: SearchResultsProps) {
+export function SearchResults({
+  results,
+  query,
+  onSelect,
+  className,
+}: SearchResultsProps) {
   if (results.length === 0) return null
 
   // Group results by section (first part of URL path)
@@ -89,7 +97,12 @@ export function SearchResults({ results, query, onSelect }: SearchResultsProps) 
   )
 
   return (
-    <Command.List className="bg-accent/70 flex max-h-none flex-col overflow-y-auto outline-none">
+    <Command.List
+      className={cn(
+        'bg-accent/70 flex max-h-none flex-col overflow-y-auto outline-none',
+        className
+      )}
+    >
       {Object.entries(groupedBySection).map(([section, pages]) => {
         const Icon = sectionIcons[section] ?? CubeIcon
         const label = sectionLabels[section] ?? section
@@ -97,8 +110,9 @@ export function SearchResults({ results, query, onSelect }: SearchResultsProps) 
         return (
           <Command.Group
             key={section}
+            data-slot="command-group"
             heading={
-              <div className="flex items-center gap-2 px-4 py-2.5 text-left text-foreground">
+              <div className="text-foreground flex items-center gap-2 px-4 py-2.5 text-left">
                 <Icon className="size-3.5" />
                 <span className="font-mono text-xs font-medium tracking-wide uppercase">
                   {label}
@@ -108,7 +122,10 @@ export function SearchResults({ results, query, onSelect }: SearchResultsProps) 
             className="flex flex-col [&_[cmdk-group-heading]]:p-0"
           >
             {/* Nested results */}
-            <div className="border-border ml-4 flex flex-col border-l">
+            <div
+              className="border-border ml-4 flex flex-col border-l"
+              data-slot="command-group-wrapper"
+            >
               {Object.entries(pages).map(([pageUrl, pageResults]) => {
                 const pageResult = pageResults.find((r) => r.type === 'page')
                 const title =
@@ -129,12 +146,19 @@ export function SearchResults({ results, query, onSelect }: SearchResultsProps) 
                       'text-muted-foreground',
                       'data-[selected=true]:text-foreground data-[selected=true]:bg-accent'
                     )}
+                    data-slot="command-item"
                   >
-                    <span className="font-mono text-sm tracking-wide uppercase">
+                    <span
+                      className="font-mono text-sm tracking-wide uppercase"
+                      data-slot="command-item-title"
+                    >
                       <HighlightedText text={title} query={query} />
                     </span>
                     {contentPreview && (
-                      <span className="text-muted-foreground/70 line-clamp-2 text-xs normal-case">
+                      <span
+                        data-slot="command-item-description"
+                        className="text-muted-foreground/70 line-clamp-2 text-xs normal-case"
+                      >
                         <HighlightedText text={contentPreview} query={query} />
                       </span>
                     )}

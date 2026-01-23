@@ -53,12 +53,26 @@ export function useSearch() {
   const hasLoadedResults = resultsForQuery.length >= MIN_QUERY_LENGTH
   const resultsMatch = resultsForQuery === query
 
+  // isLoading: when we're searching but results don't match current query yet
+  const isLoading = isSearching && !resultsMatch
+
   // hasResults: show results if we have any loaded (even if for previous query while loading)
   // But only if we're still in search mode (query >= 2)
   const hasResults = isSearching && hasLoadedResults && results.length > 0
 
   // isEmpty: only when we've confirmed no results for the CURRENT query specifically
-  const isEmpty = isSearching && resultsMatch && results.length === 0
+  const isEmptyRaw = isSearching && resultsMatch && results.length === 0
+
+  // Debounce isEmpty to prevent flicker
+  const [isEmpty, setIsEmpty] = React.useState(false)
+  React.useEffect(() => {
+    if (isEmptyRaw) {
+      const timeout = setTimeout(() => setIsEmpty(true), 150)
+      return () => clearTimeout(timeout)
+    } else {
+      setIsEmpty(false)
+    }
+  }, [isEmptyRaw])
 
   return {
     query,
@@ -66,5 +80,6 @@ export function useSearch() {
     results,
     hasResults,
     isEmpty,
+    isLoading,
   }
 }
