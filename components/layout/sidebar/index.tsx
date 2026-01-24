@@ -96,6 +96,7 @@ export function RegistrySidebar({ tree, itemMeta = {}, gameSlugs = [] }: Registr
         shouldFilter={false}
         loop
         className="w-sidebar-width flex flex-col gap-1 text-sm"
+        suppressHydrationWarning
       >
         <SidebarSearch query={query} setQuery={setQuery} isLoading={isLoading} />
         {renderContent()}

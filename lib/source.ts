@@ -2,6 +2,7 @@ import { docs } from 'fumadocs-mdx:collections/server'
 import { type InferPageType, loader } from 'fumadocs-core/source'
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons'
 import { processMdxForLLMs } from './llm'
+import { getLogNumber, stripLogPrefixFromTitle } from './log-utils'
 
 // See https://fumadocs.dev/docs/headless/source-api for more info
 export const source = loader({
@@ -33,6 +34,7 @@ export type RelatedItem = {
   title: string
   type: 'component' | 'toolbox' | 'log'
   href: string
+  logNumber?: string | null
 }
 
 /**
@@ -72,12 +74,20 @@ export function getRelatedPages(
 
   // If page not found, return first `limit` pages
   if (currentPageIndex === -1) {
-    return sameCategoryPages.slice(0, limit).map((page) => ({
-      name: page.slugs[page.slugs.length - 1],
-      title: page.data.title,
-      type: itemType,
-      href: page.url,
-    }))
+    return sameCategoryPages.slice(0, limit).map((page) => {
+      const logNumber = itemType === 'log' ? getLogNumber(page.slugs) : null
+      const displayTitle = itemType === 'log' && logNumber
+        ? stripLogPrefixFromTitle(page.data.title, logNumber)
+        : page.data.title
+
+      return {
+        name: page.slugs[page.slugs.length - 1],
+        title: displayTitle,
+        type: itemType,
+        href: page.url,
+        logNumber,
+      }
+    })
   }
 
   const before = sameCategoryPages.slice(
@@ -103,10 +113,18 @@ export function getRelatedPages(
     selected.push(...fromStart)
   }
 
-  return selected.map((page) => ({
-    name: page.slugs[page.slugs.length - 1],
-    title: page.data.title,
-    type: itemType,
-    href: page.url,
-  }))
+  return selected.map((page) => {
+    const logNumber = itemType === 'log' ? getLogNumber(page.slugs) : null
+    const displayTitle = itemType === 'log' && logNumber
+      ? stripLogPrefixFromTitle(page.data.title, logNumber)
+      : page.data.title
+
+    return {
+      name: page.slugs[page.slugs.length - 1],
+      title: displayTitle,
+      type: itemType,
+      href: page.url,
+      logNumber,
+    }
+  })
 }

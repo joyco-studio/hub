@@ -5,6 +5,7 @@ import { readFile } from 'fs/promises'
 import path from 'path'
 
 import { getPageImage, getLLMText, getRelatedPages, source } from '@/lib/source'
+import { getLogNumber, stripLogPrefixFromTitle } from '@/lib/log-utils'
 import { getDownloadStats } from '@/lib/stats'
 import { getMDXComponents } from '@/mdx-components'
 import { Author } from '@/components/layout/author'
@@ -34,9 +35,6 @@ const getComponentSlug = (page: InferPageType<typeof source>) => {
   return page.slugs[page.slugs.length - 1]
 }
 
-const escapeRegExp = (value: string) =>
-  value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-
 const getCategoryLabel = (slugs: string[]) => {
   const category = slugs[0]
   const labels: Record<string, string> = {
@@ -45,19 +43,6 @@ const getCategoryLabel = (slugs: string[]) => {
     logs: 'Log',
   }
   return labels[category] || category
-}
-
-const getLogNumber = (slugs: string[]) => {
-  if (slugs[0] !== 'logs') return null
-  const last = slugs[slugs.length - 1] ?? ''
-  const match = last.match(/^(\d+)(?:[-_]|$)/)
-  return match?.[1] ?? null
-}
-
-const stripLogPrefixFromTitle = (title: string, logNumber: string | null) => {
-  if (!logNumber) return title
-  const pattern = new RegExp(`^${escapeRegExp(logNumber)}\\s*[-–—]\\s+`, 'u')
-  return title.replace(pattern, '')
 }
 
 type PageTreeNode = {

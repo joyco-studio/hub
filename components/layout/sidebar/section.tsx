@@ -10,10 +10,21 @@ import TerminalWithCursorIcon from '@/components/icons/terminal-w-cursor'
 import FileIcon from '@/components/icons/file'
 import GamepadIcon from '@/components/icons/gamepad'
 import { Minus, Plus } from 'lucide-react'
+import { getLogNumber, stripLogPrefixFromTitle } from '@/lib/log-utils'
 
 export type SidebarItemMeta = {
   badge?: 'new' | 'updated'
   dot?: 'red' | 'blue' | 'green' | 'yellow'
+}
+
+// Helper function to get display name for sidebar items
+const getDisplayName = (page: PageTree.Item, sectionId: string) => {
+  if (sectionId === 'logs') {
+    const slugs = page.url.split('/').filter(Boolean)
+    const logNumber = getLogNumber(slugs)
+    return stripLogPrefixFromTitle(page.name, logNumber)
+  }
+  return page.name
 }
 
 const sectionIcons: Record<
@@ -59,6 +70,7 @@ export function SidebarItems({ folder, meta = {} }: SidebarItemsProps) {
           if (child.type === 'page') {
             const itemMeta = meta[child.url] ?? {}
             const isItemActive = pathname === child.url
+            const displayName = getDisplayName(child, sectionId)
 
             return (
               <Link
@@ -82,7 +94,7 @@ export function SidebarItems({ folder, meta = {} }: SidebarItemsProps) {
                     )}
                   />
                 )}
-                <span className="truncate">{child.name}</span>
+                <span className="truncate">{displayName}</span>
                 {itemMeta.badge && (
                   <span
                     className={cn(
@@ -112,6 +124,7 @@ type CollapsibleSubSectionProps = {
   pages: PageTree.Item[]
   meta: Record<string, SidebarItemMeta>
   defaultOpen?: boolean
+  sectionId?: string
 }
 
 function CollapsibleSubSection({
@@ -120,6 +133,7 @@ function CollapsibleSubSection({
   pages,
   meta,
   defaultOpen = true,
+  sectionId = '',
 }: CollapsibleSubSectionProps) {
   const [isOpen, setIsOpen] = React.useState(defaultOpen)
   const pathname = usePathname()
@@ -156,6 +170,7 @@ function CollapsibleSubSection({
             {pages.map((page) => {
               const itemMeta = meta[page.url] ?? {}
               const isItemActive = pathname === page.url
+              const displayName = getDisplayName(page, sectionId)
 
               return (
                 <Link
@@ -179,7 +194,7 @@ function CollapsibleSubSection({
                       )}
                     />
                   )}
-                  <span className="truncate">{page.name}</span>
+                  <span className="truncate">{displayName}</span>
                   {itemMeta.badge && (
                     <span
                       className={cn(
@@ -299,6 +314,7 @@ export function SidebarSection({
               if (child.type === 'page') {
                 const itemMeta = meta[child.url] ?? {}
                 const isItemActive = pathname === child.url
+                const displayName = getDisplayName(child, sectionId)
 
                 return (
                   <Link
@@ -322,7 +338,7 @@ export function SidebarSection({
                         )}
                       />
                     )}
-                    <span className="truncate">{child.name}</span>
+                    <span className="truncate">{displayName}</span>
                     {itemMeta.badge && (
                       <span
                         className={cn(
