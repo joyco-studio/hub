@@ -1,0 +1,474 @@
+---
+title: 04 - Context Is All You Need
+author: 'matiasperz'
+---
+
+## Why Use Context At All?
+
+Most developers default to **prop drilling** - passing data through component props at every level. This works for simple cases, but breaks down quickly.
+
+### The Prop Drilling Problem
+
+```typescript
+// Prop drilling: every component in the chain needs the props
+function ProfilePage({ profile, currentUserId }) {
+  const isOwner = profile.id === currentUserId
+  const isAdmin = profile.role === "admin"
+  
+  return (
+    <ProfileLayout profile={profile} isOwner={isOwner} isAdmin={isAdmin}>
+      <ProfileHeader profile={profile} isOwner={isOwner} isAdmin={isAdmin} />
+      <ProfileContent profile={profile} isOwner={isOwner}>
+        <ProfileBio profile={profile} />
+        <ProfileActions isOwner={isOwner} isAdmin={isAdmin} profileId={profile.id} />
+      </ProfileContent>
+    </ProfileLayout>
+  )
+}
+
+// Problems:
+// 1. Every intermediate component must accept and forward props
+// 2. Adding a new derived value means updating every component signature
+// 3. Derived values (isOwner, isAdmin) recomputed or passed everywhere
+// 4. Refactoring is painful - change one prop, update 10 files
+```
+
+### Context Solves This
+
+```typescript
+// With context: components grab what they need
+function ProfilePage({ profile, currentUserId }) {
+  return (
+    <ProfileProvider profile={profile} currentUserId={currentUserId}>
+      <ProfileLayout>
+        <ProfileHeader />
+        <ProfileContent>
+          <ProfileBio />
+          <ProfileActions />
+        </ProfileContent>
+      </ProfileLayout>
+    </ProfileProvider>
+  )
+}
+
+// Each component takes only what it needs
+function ProfileActions() {
+  const { isOwner, isAdmin, profile } = useProfileContext()
+  // ...
+}
+```
+
+---
+
+## Now, What If We Want to Edit the Profile?
+
+The `ProfileContext` above works great for viewing. But what happens when the user wants to **update their profile**?
+
+We need:
+- Form state (tracking what the user is typing)
+- Change detection (has anything changed?)
+- Validation (is the input valid?)
+- Save/Reset actions
+- Navigation guards (don't lose unsaved changes)
+
+Should we add all this to `ProfileContext`? **No.** That would bloat our read-only context with concerns that only matter during editing.
+
+Instead, we create a **separate context** for mutations:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│   ProfileContext           +        EditProfileContext      │
+│   (Read-Only)                       (Form + Mutations)      │
+│   ──────────────                    ──────────────────      │
+│   • Data from API                   • Form state            │
+│   • Computed/derived values         • Change tracking       │
+│   • Permissions (isOwner, etc)      • Validation            │
+│   • Used on ALL profile pages       • Save/Reset/Delete     │
+│                                     • Used only when editing│
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+This separation keeps each context focused on its responsibility.
+
+---
+
+## Example: User Profile
+
+### The Data
+
+```typescript
+// API response type
+type UserProfile = {
+  id: string
+  name: string
+  email: string
+  bio: string
+  avatarUrl: string
+  role: "admin" | "member" | "guest"
+  createdAt: string
+}
+```
+
+---
+
+### Context #1: ProfileContext (Read-Only)
+
+```typescript
+// profile-context.tsx
+import { createContext, useContext, useMemo } from "react"
+
+type ProfileContextType = {
+  // Data
+  profile: UserProfile
+  
+  // Derived values (computed once)
+  isAdmin: boolean
+  isOwner: boolean
+  displayName: string
+  memberSince: string
+}
+
+const ProfileContext = createContext<ProfileContextType | null>(null)
+
+export function useProfileContext() {
+  const ctx = useContext(ProfileContext)
+  if (!ctx) throw new Error("Must be used within ProfileProvider")
+  return ctx
+}
+
+// Optional version for components that may/may not be in provider
+export function useProfileContextOptional() {
+  return useContext(ProfileContext)
+}
+
+interface ProfileProviderProps {
+  profile: UserProfile
+  currentUserId: string
+  children: React.ReactNode
+}
+
+export function ProfileProvider({ 
+  profile, 
+  currentUserId, 
+  children 
+}: ProfileProviderProps) {
+  
+  const value = useMemo(() => ({
+    profile,
+    
+    // Computed once, used everywhere
+    isAdmin: profile.role === "admin",
+    isOwner: profile.id === currentUserId,
+    displayName: profile.name || profile.email.split("@")[0],
+    memberSince: new Date(profile.createdAt).toLocaleDateString(),
+    
+  }), [profile, currentUserId])
+
+  return (
+    <ProfileContext.Provider value={value}>
+      {children}
+    </ProfileContext.Provider>
+  )
+}
+```
+
+**Usage in viewing components:**
+
+```typescript
+function ProfileHeader() {
+  const { displayName, isAdmin, memberSince } = useProfileContext()
+  
+  return (
+    <div>
+      <h1>{displayName}</h1>
+      {isAdmin && <Badge>Admin</Badge>}
+      <p>Member since {memberSince}</p>
+    </div>
+  )
+}
+
+function ProfileActions() {
+  const { isOwner } = useProfileContext()
+  
+  return (
+    <div>
+      <ShareButton />
+      {isOwner && <Link href="/profile/edit">Edit Profile</Link>}
+    </div>
+  )
+}
+```
+
+---
+
+### Context #2: EditProfileContext (Form + Mutations)
+
+```typescript
+// edit-profile-context.tsx
+import { createContext, useContext, useMemo, useCallback, useRef } from "react"
+import { useForm, UseFormReturn, FormProvider } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+
+const profileSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  bio: z.string().max(500, "Bio too long"),
+  avatarUrl: z.string().url().optional(),
+})
+
+type ProfileFormState = z.infer<typeof profileSchema>
+
+type EditProfileContextType = {
+  // Form state
+  methods: UseFormReturn<ProfileFormState>
+  hasChanges: boolean
+  isSaving: boolean
+  
+  // Actions
+  onSave: () => void
+  onReset: () => void
+  onDiscard: () => void
+}
+
+const EditProfileContext = createContext<EditProfileContextType | null>(null)
+
+export function useEditProfileContext() {
+  const ctx = useContext(EditProfileContext)
+  if (!ctx) throw new Error("Must be used within EditProfileProvider")
+  return ctx
+}
+
+interface EditProfileProviderProps {
+  initialData: { name: string; bio: string; avatarUrl?: string }
+  onSubmit: (data: ProfileFormState) => Promise<void>
+  children: React.ReactNode
+}
+
+export function EditProfileProvider({ 
+  initialData, 
+  onSubmit,
+  children 
+}: EditProfileProviderProps) {
+  const [isSaving, setIsSaving] = useState(false)
+  const isDiscardedRef = useRef(false)
+
+  const methods = useForm<ProfileFormState>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: initialData,
+  })
+
+  // Track changes by comparing current values to initial
+  const watchedValues = methods.watch()
+  const hasChanges = useMemo(() => {
+    return JSON.stringify(watchedValues) !== JSON.stringify(initialData)
+  }, [watchedValues, initialData])
+
+  const handleSubmit = useCallback(async (data: ProfileFormState) => {
+    setIsSaving(true)
+    try {
+      await onSubmit(data)
+    } finally {
+      setIsSaving(false)
+    }
+  }, [onSubmit])
+
+  const onSave = useCallback(() => {
+    methods.handleSubmit(handleSubmit)()
+  }, [methods, handleSubmit])
+
+  const onReset = useCallback(() => {
+    methods.reset(initialData)
+  }, [methods, initialData])
+
+  const onDiscard = useCallback(() => {
+    isDiscardedRef.current = true
+    methods.reset(initialData)
+  }, [methods, initialData])
+
+  // Navigation guard
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasChanges && !isSaving && !isDiscardedRef.current) {
+        e.preventDefault()
+        e.returnValue = ""
+      }
+    }
+    window.addEventListener("beforeunload", handleBeforeUnload)
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload)
+  }, [hasChanges, isSaving])
+
+  const value = useMemo(() => ({
+    methods,
+    hasChanges,
+    isSaving,
+    onSave,
+    onReset,
+    onDiscard,
+  }), [methods, hasChanges, isSaving, onSave, onReset, onDiscard])
+
+  return (
+    <EditProfileContext.Provider value={value}>
+      <FormProvider {...methods}>
+        {children}
+      </FormProvider>
+    </EditProfileContext.Provider>
+  )
+}
+```
+
+**Usage in editing components:**
+
+```typescript
+function EditProfileForm() {
+  const { methods } = useEditProfileContext()
+  const { register, formState: { errors } } = methods
+
+  return (
+    <form>
+      <input {...register("name")} />
+      {errors.name && <span>{errors.name.message}</span>}
+      
+      <textarea {...register("bio")} />
+      {errors.bio && <span>{errors.bio.message}</span>}
+    </form>
+  )
+}
+
+function EditProfileActions() {
+  const { hasChanges, isSaving, onSave, onReset } = useEditProfileContext()
+
+  return (
+    <div>
+      <button onClick={onReset} disabled={!hasChanges || isSaving}>
+        Reset
+      </button>
+      <button onClick={onSave} disabled={!hasChanges || isSaving}>
+        {isSaving ? "Saving..." : "Save"}
+      </button>
+    </div>
+  )
+}
+```
+
+---
+
+## Page Structure
+
+```typescript
+// View page
+function ProfilePage({ profile, currentUserId }) {
+  return (
+    <ProfileProvider profile={profile} currentUserId={currentUserId}>
+      <ProfileHeader />
+      <ProfileBio />
+      <ProfileActions />
+    </ProfileProvider>
+  )
+}
+
+// Edit page
+function EditProfilePage({ profile, currentUserId }) {
+  const router = useRouter()
+  
+  const handleSubmit = async (data) => {
+    await updateProfile(profile.id, data)
+    router.push(`/profile/${profile.id}`)
+  }
+
+  return (
+    <ProfileProvider profile={profile} currentUserId={currentUserId}>
+      <EditProfileProvider 
+        initialData={{ name: profile.name, bio: profile.bio }}
+        onSubmit={handleSubmit}
+      >
+        <EditProfileForm />
+        <EditProfileActions />
+      </EditProfileProvider>
+    </ProfileProvider>
+  )
+}
+```
+
+---
+
+## The Pattern in 4 Steps
+
+### Step 1: Define your ViewContext
+
+```typescript
+type ViewContextType = {
+  data: YourDataType
+  // Computed values
+  derivedValue1: boolean
+  derivedValue2: string
+}
+```
+
+### Step 2: Define your UpsertContext
+
+```typescript
+type UpsertContextType = {
+  methods: UseFormReturn<FormState>
+  hasChanges: boolean
+  isSaving: boolean
+  onSave: () => void
+  onReset: () => void
+}
+```
+
+### Step 3: Use ViewContext for all pages
+
+```typescript
+<ViewProvider data={data}>
+  <ViewComponents />
+</ViewProvider>
+```
+
+### Step 4: Wrap with UpsertContext for editing
+
+```typescript
+<ViewProvider data={data}>
+  <UpsertProvider initialData={formData}>
+    <EditComponents />
+  </UpsertProvider>
+</ViewProvider>
+```
+
+---
+
+## Summary of Benefits
+
+### Context vs Prop Drilling
+
+| Benefit | How |
+|---------|-----|
+| **No prop threading** | Components grab what they need directly |
+| **Derived values computed once** | Provider calculates, all consumers share |
+| **Easy refactoring** | Add values to provider, use anywhere |
+| **Consistent data** | Single source of truth for all components |
+
+### Read-Only vs Upsert Separation
+
+| Benefit | How |
+|---------|-----|
+| **Clear boundaries** | Reading vs writing clearly separated into two contexts |
+| **Testability** | Each context can be tested independently |
+| **Flexibility** | Components can use optional hooks to work in both viewing and editing |
+| **Data protection** | Navigation guards and change tracking only where needed |
+
+---
+
+## When to Use This Pattern
+
+**Use it when:**
+- You have shared data/permissions needed by multiple components
+- You want to avoid prop drilling through intermediate components
+- You need computed/derived values used by multiple components
+- You want clear separation between viewing and editing concerns
+
+**Skip it when:**
+- Very shallow component tree (2-3 levels)
+- Data only used by a single component
+- Simple CRUD with no viewing page (just list → edit)
