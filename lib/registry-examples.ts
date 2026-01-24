@@ -1,7 +1,9 @@
-import { readdir, readFile } from 'fs/promises'
+import { readdir, readFile, stat } from 'fs/promises'
 import path from 'path'
 import { lazy } from 'react'
-const allBlocks = [...(await readdir(path.join(process.cwd(), 'demos')))]
+
+const demosDir = path.join(process.cwd(), 'demos')
+const allEntries = await readdir(demosDir)
 
 type Block = {
   name: string
@@ -13,18 +15,67 @@ type Block = {
   }[]
 }
 
+async function getBlockFiles(entry: string): Promise<{ path: string }[]> {
+  const entryPath = path.join(demosDir, entry)
+  const entryStat = await stat(entryPath)
+
+  if (entryStat.isDirectory()) {
+    // Read all files in the directory
+    const dirFiles = await readdir(entryPath)
+    const tsFiles = dirFiles
+      .filter((f) => f.endsWith('.ts') || f.endsWith('.tsx'))
+      .sort((a, b) => {
+        // index files come first
+        if (a.startsWith('index.')) return -1
+        if (b.startsWith('index.')) return 1
+        return a.localeCompare(b)
+      })
+      .map((f) => ({ path: `@/demos/${entry}/${f}` }))
+    return tsFiles
+  }
+
+  // Single file
+  return [{ path: `@/demos/${entry}` }]
+}
+
+async function getBlockName(entry: string): Promise<string> {
+  const entryPath = path.join(demosDir, entry)
+  const entryStat = await stat(entryPath)
+
+  if (entryStat.isDirectory()) {
+    return entry
+  }
+
+  return entry.replace('.tsx', '').replace('.ts', '')
+}
+
+async function isDirectory(entry: string): Promise<boolean> {
+  const entryPath = path.join(demosDir, entry)
+  const entryStat = await stat(entryPath)
+  return entryStat.isDirectory()
+}
+
 const blocks: Block[] = (
   await Promise.all(
-    allBlocks.map(async (block) => {
-      const blockName = block.replace('.tsx', '').replace('.ts', '')
-      // get the name of file without the -test...
+    allEntries.map(async (entry) => {
+      const blockName = await getBlockName(entry)
+      const isDir = await isDirectory(entry)
+      const files = await getBlockFiles(entry)
+
+      // Skip if no valid files found (e.g., empty directory)
+      if (files.length === 0) return null
+
       return {
         name: blockName,
         component: lazy(async () => {
-          const mod = await import(`@/demos/${blockName}`)
+          // For directories, import from index.tsx; for files, import directly
+          // Using template literals for bundler dynamic import support
+          const mod = isDir
+            ? await import(`@/demos/${entry}/index`)
+            : await import(`@/demos/${blockName}`)
           return { default: mod.default }
         }),
-        files: [{ path: `@/demos/${blockName}.tsx` }],
+        files,
       }
     })
   )

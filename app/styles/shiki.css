@@ -19,6 +19,12 @@
   --shiki-dark: var(--foreground) !important;
 }
 
+[data-slot='code-block-tabs'] [data-rehype-pretty-code-title] {
+  border-bottom: none;
+  height: auto;
+  padding:0;
+}
+
 /* MDX-rendered code blocks (via rehype-pretty-code) */
 [data-rehype-pretty-code-figure] {
   background-color: var(--color-code);
