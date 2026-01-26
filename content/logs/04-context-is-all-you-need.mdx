@@ -1,15 +1,15 @@
 ---
-title: 04 - Context Is All You Need
+title: 04 - Context is all you need
 author: 'matiasperz'
 ---
 
 import { ComponentPreview } from '@/components/preview/component-preview'
 
-## Why Use Context At All?
+## Why use context at all?
 
 Most developers default to **prop drilling**, aka passing data through component props at every level. This works for simple cases, but breaks down quickly.
 
-### The Prop Drilling Problem
+### The prop drilling problem
 
 ```tsx
 // Prop drilling: every component in the chain needs the props
@@ -70,7 +70,7 @@ Edit the form fields to see change tracking, validation, and the save/reset flow
 <ComponentPreview name="edit-profile-context-demo" />
 
 
-## The Upsert Insight: Edit and Create Are the Same
+## The upsert insight: edit and create are the same
 
 Cool, now we can edit profiles, but we won't have any profile to edit if we don't create one first.
 
@@ -107,7 +107,7 @@ Toggle between "Create New" and "Edit Existing" to see the same form and context
 
 <ComponentPreview name="upsert-profile-context-demo" />
 
-## The Pattern in 4 Steps
+## The pattern in 4 steps
 
 ### Step 1: Define your ViewContext (read-only data + derived values)
 
@@ -188,7 +188,7 @@ function UpsertProfileProvider({ initialData, onSubmit, children }) {
 </ProfileProvider>
 ```
 
-## Context vs Prop Drilling
+## Context vs prop drilling
 
 | Benefit | How |
 |---------|-----|
@@ -197,7 +197,7 @@ function UpsertProfileProvider({ initialData, onSubmit, children }) {
 | **Easy refactoring** | Add values to provider, use anywhere |
 | **Consistent data** | Single source of truth for all components |
 
-## Read-Only vs Upsert Separation
+## Read-only vs upsert separation
 
 | Benefit | How |
 |---------|-----|
@@ -205,7 +205,7 @@ function UpsertProfileProvider({ initialData, onSubmit, children }) {
 | **Clear boundaries** | Reading vs writing clearly separated into two contexts |
 | **Flexibility** | Components work in both create and edit modes automatically |
 
-## When to Use This Pattern
+## When to use this pattern
 
 **Use it when:**
 - You have shared data/permissions needed by multiple components
