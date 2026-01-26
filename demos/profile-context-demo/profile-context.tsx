@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useMemo } from 'react'
-import type { UserProfile } from './types'
+import type { CurrentUser, UserProfile } from './types'
 
 type ProfileContextType = {
   profile: UserProfile
@@ -21,25 +21,25 @@ export function useProfileContext() {
 
 export function ProfileProvider({
   profile,
-  currentUserId,
+  currentUser,
   children,
 }: {
   profile: UserProfile
-  currentUserId: string
+  currentUser: CurrentUser
   children: React.ReactNode
 }) {
   const value = useMemo(
     () => ({
       profile,
-      isAdmin: profile.role === 'admin',
-      isOwner: profile.id === currentUserId,
+      isAdmin: currentUser.role === 'admin',
+      isOwner: profile.id === currentUser.id,
       displayName: profile.name || profile.email.split('@')[0],
       memberSince: new Date(profile.createdAt).toLocaleDateString('en-US', {
         month: 'short',
         year: 'numeric',
       }),
     }),
-    [profile, currentUserId]
+    [profile, currentUser]
   )
 
   return (

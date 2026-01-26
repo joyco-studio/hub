@@ -27,13 +27,13 @@ function ProfilePage({ profile, currentUserId }) {
     </ProfileLayout>
   )
 }
-
-// Problems:
-// 1. Every intermediate component must accept and forward props
-// 2. Adding a new derived value means updating every component signature
-// 3. Derived values (isOwner, isAdmin) recomputed or passed everywhere
-// 4. Refactoring is painful - change one prop, update 10 files
 ```
+
+**What's wrong with this?**
+1. Every intermediate component must accept and forward props
+2. Adding a new derived value means updating every component signature
+3. Derived values (isOwner, isAdmin) recomputed or passed everywhere
+4. Refactoring is painful - change one prop, update 10 files
 
 ### Context Solves This
 
@@ -66,7 +66,7 @@ function ProfileActions() {
 
 The `ProfileContext` above works great for viewing. But what happens when the user wants to **update their profile**?
 
-We need:
+**We need**:
 - Form state (tracking what the user is typing)
 - Change detection (has anything changed?)
 - Validation (is the input valid?)

@@ -1,6 +1,5 @@
 'use client'
 
-import * as React from 'react'
 import { useState } from 'react'
 import { cn } from '@/lib/cn'
 import {
@@ -74,12 +73,12 @@ function EditProfileActions() {
   const { hasChanges, isSaving, onSave, onReset } = useEditProfileContext()
 
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-end gap-2">
       <button
         onClick={onReset}
         disabled={!hasChanges || isSaving}
         className={cn(
-          'text-muted-foreground text-sm transition-colors',
+          'text-muted-foreground bg-muted rounded-md px-4 py-2 text-sm transition-colors',
           hasChanges && !isSaving
             ? 'hover:text-foreground cursor-pointer'
             : 'cursor-not-allowed opacity-50'
@@ -103,44 +102,6 @@ function EditProfileActions() {
   )
 }
 
-function ChangeIndicator() {
-  const { hasChanges, formState, initialData } = useEditProfileContext()
-
-  return (
-    <div
-      className={cn(
-        'rounded-lg p-3 transition-colors',
-        hasChanges ? 'bg-amber-500/10' : 'bg-muted/30'
-      )}
-    >
-      <div className="flex items-center gap-2">
-        <div
-          className={cn(
-            'size-2 rounded-full transition-colors',
-            hasChanges ? 'bg-amber-500' : 'bg-muted-foreground/30'
-          )}
-        />
-        <p className="text-xs font-medium">
-          {hasChanges ? 'Unsaved changes' : 'No changes'}
-        </p>
-      </div>
-      {hasChanges && (
-        <div className="text-muted-foreground mt-2 space-y-1 font-mono text-xs">
-          {formState.name !== initialData.name && (
-            <p>
-              name: &quot;{initialData.name}&quot; → &quot;{formState.name}
-              &quot;
-            </p>
-          )}
-          {formState.bio !== initialData.bio && (
-            <p>bio: changed ({formState.bio.length} chars)</p>
-          )}
-        </div>
-      )}
-    </div>
-  )
-}
-
 // --- Demo ---
 const initialProfile: ProfileFormState = {
   name: 'Jane Cooper',
@@ -160,10 +121,10 @@ export function EditProfileContextDemo() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-md space-y-4 p-6">
+    <div className="relative mx-auto w-full max-w-md space-y-4 p-6">
       {/* Success toast */}
       {showSuccess && (
-        <div className="animate-in slide-in-from-top-2 fixed left-1/2 top-4 z-50 -translate-x-1/2 rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-2">
+        <div className="animate-in slide-in-from-top-2 absolute left-1/2 top-4 z-50 -translate-x-1/2 rounded-lg border border-green-500/30 backdrop-blur-lg bg-green-500/20 px-4 py-2">
           <p className="text-sm font-medium text-green-600">Profile saved!</p>
         </div>
       )}
@@ -185,20 +146,7 @@ export function EditProfileContextDemo() {
           <EditProfileForm />
           <EditProfileActions />
         </div>
-
-        <ChangeIndicator />
       </EditProfileProvider>
-
-      {/* Tips */}
-      <div className="text-muted-foreground space-y-1 text-xs">
-        <p>Try:</p>
-        <ul className="list-inside list-disc space-y-0.5 pl-2">
-          <li>Edit fields to see change tracking</li>
-          <li>Clear the name field to see validation</li>
-          <li>Type more than 200 characters in bio</li>
-          <li>Click Reset to restore original values</li>
-        </ul>
-      </div>
     </div>
   )
 }
