@@ -25,6 +25,11 @@
   padding: 0;
 }
 
+/* Hide copy button from pre wrapper when there's a command block inside */
+.group\/code:has([data-slot='command-block']) > [data-slot='copy-button'] {
+  display: none;
+}
+
 /* MDX-rendered code blocks (via rehype-pretty-code) */
 [data-rehype-pretty-code-figure] {
   background-color: var(--color-code);

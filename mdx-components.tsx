@@ -1,3 +1,4 @@
+import * as React from 'react'
 import defaultMdxComponents from 'fumadocs-ui/mdx'
 import type { MDXComponents } from 'mdx/types'
 import { CodeTabs } from '@/components/code-tabs'
