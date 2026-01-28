@@ -1,3 +1,10 @@
+---
+name: joyco-engineering-guidelines
+description: Engineering guidelines for your daily agents.
+model: sonnet
+color: yellow
+---
+
 ## React Context
 
 - Use react context to share state and callbacks across deeply nested components instead of passing props through multiple layers
