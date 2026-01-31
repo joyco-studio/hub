@@ -1,0 +1,194 @@
+---
+title: 05 - Group-has-[.magic]
+author: 'matiasperz'
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+## The problem: styling distant elements based on state
+
+Sometimes you need to style an element based on the state of another element that's far away in the DOM tree. Traditional CSS makes this difficult since selectors flow downward, not sideways or upward.
+
+Consider this scenario: you have a card with a checkbox deep inside, and you want the card's border to change when the checkbox is checked.
+
+```tsx
+// The checkbox is buried deep, but we want to style the outer card
+<div className="card">
+  <div className="card-header">
+    <h3>Settings</h3>
+  </div>
+  <div className="card-content">
+    <div className="form-group">
+      <label>
+        <input type="checkbox" /> Enable feature
+      </label>
+    </div>
+  </div>
+</div>
+```
+
+**Traditional solutions:**
+1. Lift state up and pass `isChecked` prop down (React overhead)
+2. Use JavaScript to toggle classes manually (defeats CSS-only approach)
+3. Restructure your HTML (often not possible)
+
+## Until "has" kicks in
+
+Tailwind's `has-[*]` modifier lets you query for the existence of a state or class anywhere inside a group container, then style any element within that group based on it.
+
+```tsx
+<div className="group rounded-lg border border-gray-200 has-[:checked]:border-blue-500">
+  <div className="p-4">
+    <h3>Settings</h3>
+  </div>
+  <div className="p-4">
+    <label className="flex items-center gap-2">
+      <input type="checkbox" className="peer" />
+      <span>Enable feature</span>
+    </label>
+  </div>
+</div>
+```
+
+But `has-[:checked]` only styles the container itself. What if you want to style a **sibling** element based on the checkbox state?
+
+## Styling distant siblings with `group-has`
+
+This is where it gets powerful. Mark the parent as a `group`, then use `group-has-*` to style any descendant:
+
+```tsx
+<div className="group">
+  {/* This header changes when checkbox below is checked */}
+  <div className="p-4 bg-gray-100 group-has-[:checked]:bg-blue-100">
+    <h3 className="text-gray-900 group-has-[:checked]:text-blue-900">
+      Settings
+    </h3>
+    <p className="text-gray-500 group-has-[:checked]:text-blue-600">
+      Feature is disabled
+    </p>
+    <p className="hidden group-has-[:checked]:block text-blue-600">
+      Feature is enabled!
+    </p>
+  </div>
+
+  {/* The checkbox that controls everything above */}
+  <div className="p-4 border-t">
+    <label className="flex items-center gap-2 cursor-pointer">
+      <input type="checkbox" />
+      <span>Enable feature</span>
+    </label>
+  </div>
+</div>
+```
+
+**What's happening here:**
+1. The outer `div` is marked as `group`
+2. The checkbox is a descendant of this group
+3. `group-has-[:checked]` on the header elements queries "does this group contain a checked element?"
+4. When the checkbox is checked, all `group-has-[:checked]:*` styles activate
+
+## Querying by class existence
+
+You're not limited to pseudo-classes like `:checked`. You can query for any CSS selector, including classes:
+
+```tsx
+<div className="group">
+  {/* Style changes when .active class exists anywhere in the group */}
+  <nav className="opacity-50 group-has-[.active]:opacity-100">
+    <a href="#" className="active">Home</a>
+    <a href="#">About</a>
+  </nav>
+
+  {/* Indicator appears when active link exists */}
+  <div className="hidden group-has-[.active]:block">
+    You're on an active page
+  </div>
+</div>
+```
+
+## Real-world example: form validation feedback
+
+Style a form header based on whether any input inside has an error:
+
+```tsx
+<form className="group">
+  {/* Header reacts to validation state anywhere in form */}
+  <div className="p-4 border-b group-has-[.field-error]:border-red-300 group-has-[.field-error]:bg-red-50">
+    <h2 className="group-has-[.field-error]:text-red-900">
+      Contact Form
+    </h2>
+    <p className="text-sm text-gray-500 group-has-[.field-error]:text-red-600">
+      Please fill out all required fields
+    </p>
+  </div>
+
+  {/* Fields somewhere deep in the form */}
+  <div className="p-4 space-y-4">
+    <div>
+      <input
+        type="email"
+        className="field-error border-red-500"
+        placeholder="Email"
+      />
+      <span className="text-red-500 text-sm">Invalid email</span>
+    </div>
+    <div>
+      <input type="text" placeholder="Name" />
+    </div>
+  </div>
+</form>
+```
+
+Try the interactive demo below. Enter invalid values in the form fields to see how the header reacts to validation errors using `group-has-[.field-error]`:
+
+<ComponentPreview name="form-validation-group-has-demo" />
+
+## Nested groups with `group/{name}`
+
+When you have nested groups, use named groups to be specific about which ancestor you're querying:
+
+```tsx
+<div className="group/card">
+  <div className="group/header">
+    {/* Queries the card group, not the header group */}
+    <h3 className="group-has-[:checked]/card:text-blue-600">
+      Card Title
+    </h3>
+  </div>
+
+  <div className="group/content">
+    <input type="checkbox" />
+  </div>
+</div>
+```
+
+## The mental model
+
+Think of `group-has` as asking a question:
+
+> "Does this `group` container have any descendant matching this selector?"
+
+If yes, apply the styles. The power is that you can style **any element** inside the group based on **any other element's** state inside that same group.
+
+## When to use `group-has`
+
+**Use it when:**
+- You need CSS-only state propagation
+- The controlling element and styled element are in different branches of the DOM
+- You want to avoid JavaScript state management for purely visual changes
+- Building components where internal state affects external appearance
+
+**Consider alternatives when:**
+- State needs to be shared with JavaScript logic (use React state)
+- The relationship is simple parent-child (use regular `has-*` or `peer-*`)
+- You need to track complex state (context/state management is clearer)
+
+## Quick reference
+
+| Pattern | Use case |
+|---------|----------|
+| `has-[:checked]` | Style self based on descendant state |
+| `group-has-[:checked]` | Style any group descendant based on other descendant's state |
+| `group-has-[.classname]` | Query by class existence |
+| `group-has-[:focus]` | React to focus anywhere in group |
+| `group/name` + `group-has-[...]/name` | Named groups for nested scenarios |
