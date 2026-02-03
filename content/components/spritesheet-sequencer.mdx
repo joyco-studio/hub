@@ -108,11 +108,6 @@ For crisp pixel art, disable image smoothing:
 
 ## How It Works
 
-The component uses the **Web Animations API (WAAPI)** with `steps(1)` easing to create discrete frame jumps. This provides:
-
-- Native browser animation performance
-- Dynamic `frameDuration` changes without resetting playback position
-- Smooth play/pause transitions
-- Reduced motion preference support (shows static first frame)
+The component uses the **Web Animations API (WAAPI)** with `steps(1)` easing to create discrete frame jumps.
 
 The spritesheet is displayed via CSS `background-image` with calculated `background-position` keyframes for each frame in the grid.
