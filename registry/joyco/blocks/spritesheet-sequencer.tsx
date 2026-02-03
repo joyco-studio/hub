@@ -41,21 +41,22 @@ function buildKeyframes(frameCount: number, gridSize: number): Keyframe[] {
     const col = i % gridSize
     const row = Math.floor(i / gridSize)
 
-    keyframes.push({
-      backgroundPositionX: `${-col * 100}%`,
-      backgroundPositionY: `${-row * 100}%`,
-      offset: i / frameCount,
-    })
-  }
+    // CSS background-position % is relative to (container - image) size
+    // 0% = left/top edge aligned, 100% = right/bottom edge aligned
+    // For gridSize columns, we need to map col 0 to 0%, col (gridSize-1) to 100%
+    const posX = gridSize > 1 ? (col / (gridSize - 1)) * 100 : 0
+    const posY = gridSize > 1 ? (row / (gridSize - 1)) * 100 : 0
 
-  // Hold the last frame until the end
-  const lastFrame = keyframes[keyframes.length - 1]
-  if (lastFrame) {
-    keyframes.push({
-      backgroundPositionX: lastFrame.backgroundPositionX,
-      backgroundPositionY: lastFrame.backgroundPositionY,
-      offset: 1,
-    })
+    const keyframe = {
+      backgroundPositionX: `${posX}%`,
+      backgroundPositionY: `${posY}%`,
+      offset: i / frameCount,
+      easing: 'step-end',
+    }
+
+    console.log(`[buildKeyframes] frame ${i}: col=${col}, row=${row}, offset=${keyframe.offset}, posX=${keyframe.backgroundPositionX}, posY=${keyframe.backgroundPositionY}`)
+
+    keyframes.push(keyframe)
   }
 
   return keyframes
@@ -105,6 +106,7 @@ export function SpritesheetSequencer({
     const img = new Image()
 
     const handleLoad = () => {
+      console.log('[preload] Image loaded:', src)
       setIsLoaded(true)
       onLoadRef.current?.()
     }
@@ -130,15 +132,28 @@ export function SpritesheetSequencer({
     if (!isLoaded || !containerRef.current) return
     if (frameCount <= 0) return
 
+    console.log('[animation] Creating animation:', {
+      frameCount,
+      gridSize,
+      frameDuration,
+      totalDuration: frameDuration * frameCount,
+      loop,
+      direction,
+      isPlaying,
+    })
+
     const keyframes = buildKeyframes(frameCount, gridSize)
+
+    console.log('[animation] Keyframes created:', keyframes.length)
 
     const animation = containerRef.current.animate(keyframes, {
       duration: frameDuration * frameCount,
       iterations: loop ? Infinity : 1,
       direction,
       fill: 'forwards',
-      easing: 'steps(1)',
     })
+
+    console.log('[animation] Animation created:', animation)
 
     // Start paused if not playing
     if (!isPlaying) {
@@ -213,6 +228,13 @@ export function SpritesheetSequencer({
       const frame = Math.floor(currentTime / frameDuration) % frameCount
 
       if (frame !== currentFrameRef.current) {
+        console.log('[tick] Frame change:', {
+          frame,
+          currentTime,
+          frameDuration,
+          totalDuration,
+          progress: currentTime / totalDuration,
+        })
         currentFrameRef.current = frame
         onFrameChangeRef.current?.(frame)
       }
@@ -226,6 +248,8 @@ export function SpritesheetSequencer({
       cancelAnimationFrame(rafId)
     }
   }, [isPlaying, frameDuration, frameCount])
+
+  console.log('[render] backgroundSize:', `${gridSize * 100}% ${gridSize * 100}%`, 'gridSize:', gridSize, 'frameCount:', frameCount)
 
   return (
     <div
