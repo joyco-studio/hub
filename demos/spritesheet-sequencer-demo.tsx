@@ -66,7 +66,7 @@ export default function SpritesheetSequencerDemo() {
       </div>
 
       {/* Controls */}
-      <div className="flex flex-wrap items-center justify-center gap-4">
+      <div className="flex flex-wrap items-center justify-center gap-2">
         <Button
           variant="muted"
           size="icon-sm"
