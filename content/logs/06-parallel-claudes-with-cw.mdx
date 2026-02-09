@@ -11,7 +11,7 @@ They conflict. One overwrites the other. You end up with broken state and wasted
 
 Git has a built-in feature called [worktrees](https://git-scm.com/docs/git-worktree) that lets you check out multiple branches of the same repo simultaneously, each in its own directory. They share the same `.git` history but have completely isolated working trees.
 
-This is the foundation of [**cw**](https://github.com/joyco-studio/cw) (Claude Worktree) — a tiny Bash CLI we built that manages isolated git worktrees specifically for running parallel Claude Code sessions.
+This is the foundation of [**cw**](https://github.com/joyco-studio/cw) (Claude Worktree)  - a tiny Bash CLI we built that manages isolated git worktrees specifically for running parallel Claude Code sessions.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/joyco-studio/cw/main/install.sh | bash
@@ -34,7 +34,7 @@ This does a few things:
 3. Detects your package manager and installs dependencies
 4. Opens Claude Code in the isolated directory with your prompt
 
-The key detail: Claude is now working in a **completely separate copy** of your project. It can modify files, run builds, break things — none of it touches your main working directory.
+The key detail: Claude is now working in a **completely separate copy** of your project. It can modify files, run builds, break things  - none of it touches your main working directory.
 
 ### Run multiple sessions at once
 
@@ -107,7 +107,7 @@ cw cd invites
 claude
 ```
 
-You're working interactively with Claude on the invite flow — designing the schema, iterating on the email template, reviewing each step. This is your **main attention thread**.
+You're working interactively with Claude on the invite flow  - designing the schema, iterating on the email template, reviewing each step. This is your **main attention thread**.
 
 Meanwhile, the analytics migration is well-scoped. The new schema is documented, and it's mostly mechanical find-and-replace across query files. You kick that off in the background:
 
@@ -116,7 +116,7 @@ cw new analytics --open "migrate all analytics queries from v1 to v2 schema. \
   refer to docs/analytics-v2-migration.md for the field mapping"
 ```
 
-The timezone fix is also straightforward — there's even a failing test for it:
+The timezone fix is also straightforward  - there's even a failing test for it:
 
 ```bash
 cw new tz-fix --open "fix the timezone bug in the activity feed. \
@@ -150,7 +150,7 @@ Looks good. Ship it:
 cw merge tz-fix
 ```
 
-The analytics migration has 12 commits — Claude went through every query file. You review the diff, it's clean. Ship that too:
+The analytics migration has 12 commits  - Claude went through every query file. You review the diff, it's clean. Ship that too:
 
 ```bash
 cw merge analytics
