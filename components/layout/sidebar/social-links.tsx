@@ -6,7 +6,7 @@ import InstagramIcon from '@/components/icons/instagram'
 import { AsideButton } from '../nav-aside'
 
 const socialLinks = [
-  { name: 'X', href: 'https://x.com/joyco_studio', icon: XIcon },
+  { name: 'X', href: 'https://x.com/matiasperz', icon: XIcon },
   {
     name: 'Github',
     href: 'https://github.com/joyco-studio',
