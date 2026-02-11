@@ -1,0 +1,59 @@
+---
+title: Scramble Button
+description: A button that scrambles its text on hover using the scramble GSAP effect. Automatically installs the scramble effect as a dependency.
+maintainers: ['joyco-studio']
+docLinks:
+  - label: 'Scramble Effect'
+    href: '/components/scramble'
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+<ComponentPreview name="scramble-button-demo" />
+
+## Installation
+
+```bash
+npx shadcn@latest add @joyco/scramble-button
+```
+
+This automatically installs the [Scramble](/components/scramble) effect.
+
+## Usage
+
+```tsx
+import { ScrambleButton } from '@/components/scramble-button'
+
+;<ScrambleButton
+  text="GET STARTED"
+  className="bg-primary text-primary-foreground rounded-md px-4 py-2 font-mono text-sm"
+/>
+```
+
+## Custom Characters
+
+```tsx
+<ScrambleButton text="BINARY" scrambleChars="01" />
+<ScrambleButton text="CLEAN" scrambleChars="ABCDEFGHIJKLMNOPQRSTUVWXYZ" />
+```
+
+## Programmatic Control
+
+Use the `scramble` prop for touch devices or custom triggers:
+
+```tsx
+const [active, setActive] = React.useState(false)
+
+<ScrambleButton text="TOGGLE ME" scramble={active} />
+```
+
+## Props
+
+| Prop                  | Type      | Default | Description                                                            |
+| --------------------- | --------- | ------- | ---------------------------------------------------------------------- |
+| `text`                | `string`  | —       | The text to display and scramble on hover                              |
+| `scrambleChars`       | `string`  | —       | Custom character set for the scramble animation                        |
+| `scrambleDuration`    | `number`  | `0`     | Duration in seconds. `0` = auto-scale with text length                 |
+| `scrambleRevealDelay` | `number`  | `0`     | Seconds of full scramble before characters start resolving             |
+| `scrambleFrames`      | `number`  | —       | Scramble frames per character before resolving (higher = more chaotic) |
+| `scramble`            | `boolean` | —       | Programmatically trigger the scramble (useful for touch devices)       |

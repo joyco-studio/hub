@@ -1,0 +1,76 @@
+---
+title: Scramble
+description: A GSAP registered effect that decodes text with staggered character-by-character reveal animation. Weighted character sets and per-character jittered timing for an organic feel.
+maintainers: ['joyco-studio']
+type: effect
+docLinks:
+  - label: 'GSAP registerEffect'
+    href: 'https://gsap.com/docs/v3/GSAP/gsap.registerEffect()/'
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+<ComponentPreview name="scramble-button-demo" />
+
+## Installation
+
+```bash
+npx shadcn@latest add @joyco/scramble
+```
+
+## Usage
+
+Import the effect file to register it, then use `gsap.effects.scramble()` on any element:
+
+```tsx
+import gsap from 'gsap'
+import '@/lib/gsap/effects/scramble'
+
+// Scramble an element's text
+gsap.effects.scramble('.heading', {
+  text: 'DECODED TEXT',
+  duration: 0.8,
+})
+```
+
+## On a timeline
+
+The effect has `extendTimeline: true`, so you can chain it:
+
+```tsx
+const tl = gsap.timeline()
+tl.scramble('.line-1', { text: 'SYSTEM ONLINE' }).scramble(
+  '.line-2',
+  { text: 'ALL MODULES LOADED' },
+  '+=0.2'
+)
+```
+
+## Custom character sets
+
+Repeated characters increase their probability, creating visual breathing room:
+
+```tsx
+// Hacker terminal (default) — underscores add visual pauses
+gsap.effects.scramble(el, { chars: '!<>-_\\/[]{}—=+*^?#________' })
+
+// Clean uppercase
+gsap.effects.scramble(el, { chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' })
+
+// Binary
+gsap.effects.scramble(el, { chars: '01' })
+
+// Block drawing
+gsap.effects.scramble(el, { chars: '░▒▓█▀▄■□▪▫●○◆◇◈' })
+```
+
+## Config
+
+| Prop             | Type     | Default                       | Description                                                              |
+| ---------------- | -------- | ----------------------------- | ------------------------------------------------------------------------ |
+| `text`           | `string` | Element's `textContent`       | The final text to reveal                                                 |
+| `chars`          | `string` | `!<>-_\\/[]{}—=+*^?#________` | Character set used for scrambling                                        |
+| `duration`       | `number` | Auto (~50ms/char)             | Duration in seconds. `0` = auto-scale with text length                   |
+| `ease`           | `string` | `'none'`                      | GSAP ease string                                                         |
+| `revealDelay`    | `number` | `0`                           | Seconds of full scramble before characters start resolving               |
+| `scrambleFrames` | `number` | `3`                           | Scramble frames per character before it resolves (higher = more chaotic) |
