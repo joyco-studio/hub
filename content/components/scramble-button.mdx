@@ -1,0 +1,80 @@
+---
+title: Scramble Button
+description: A button component that scrambles its text on hover using a GSAP registered effect, with left-to-right character decode animation.
+maintainers: ['joyco-studio']
+docLinks:
+  - label: 'GSAP registerEffect'
+    href: 'https://gsap.com/docs/v3/GSAP/gsap.registerEffect()/'
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+<ComponentPreview name="scramble-button-demo" />
+
+## Installation
+
+```bash
+npx shadcn@latest add @joyco/scramble-button
+```
+
+## Usage
+
+```tsx
+import { ScrambleButton } from '@/components/scramble-button'
+
+;<ScrambleButton
+  text="Get Started"
+  className="bg-primary text-primary-foreground rounded-md px-4 py-2 text-sm font-medium"
+/>
+```
+
+## GSAP Effect
+
+The component uses a registered GSAP effect (`scramble`) that can also be used standalone:
+
+```tsx
+import gsap from 'gsap'
+import '@/lib/gsap/effects/scramble'
+
+// Use anywhere after importing the effect
+gsap.effects.scramble('.my-element', {
+  text: 'Decoded text',
+  duration: 0.8,
+  chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+})
+```
+
+## Custom Characters
+
+```tsx
+<ScrambleButton text="Binary Mode" scrambleChars="01" scrambleDuration={1} />
+```
+
+## Programmatic Control
+
+Use the `scramble` prop to trigger the animation programmatically (useful for touch devices):
+
+```tsx
+const [active, setActive] = React.useState(false)
+
+<ScrambleButton text="Click Me" scramble={active} />
+<button onClick={() => setActive((s) => !s)}>Toggle</button>
+```
+
+## Props
+
+| Prop               | Type      | Default | Description                                                      |
+| ------------------ | --------- | ------- | ---------------------------------------------------------------- |
+| `text`             | `string`  | —       | The text to display and scramble on hover                        |
+| `scrambleChars`    | `string`  | —       | Custom character set used for scramble animation                 |
+| `scrambleDuration` | `number`  | `0.6`   | Duration of the scramble animation in seconds                    |
+| `scramble`         | `boolean` | —       | Programmatically trigger the scramble (useful for touch devices) |
+
+## Scramble Effect Config
+
+| Prop       | Type     | Default                                                  | Description                          |
+| ---------- | -------- | -------------------------------------------------------- | ------------------------------------ |
+| `text`     | `string` | Element's `textContent`                                  | The final text to reveal             |
+| `chars`    | `string` | `ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!<>-_\\/[]{}=+*^?#` | Character set used for scrambling    |
+| `duration` | `number` | `0.6`                                                    | Duration of the animation in seconds |
+| `ease`     | `string` | `'none'`                                                 | GSAP ease string                     |

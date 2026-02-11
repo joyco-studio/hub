@@ -178,6 +178,23 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "scramble-button",
+      "type": "registry:component",
+      "title": "Scramble Button",
+      "description": "A button that scrambles its text on hover using a GSAP registered effect with left-to-right character decode animation.",
+      "files": [
+        {
+          "path": "registry/joyco/blocks/scramble-button.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "lib/gsap/effects/scramble.ts",
+          "type": "registry:lib"
+        }
+      ],
+      "dependencies": ["gsap"]
     }
   ]
 }
