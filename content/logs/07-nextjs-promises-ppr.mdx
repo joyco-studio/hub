@@ -29,7 +29,7 @@ export default async function RootLayout({ children }) {
 
 **The problem**: you're `await`-ing at the root. Nothing renders until those fetches resolve. Your entire page is held hostage by the slowest provider.
 
-```
+```txt
 Request arrives
       │
       ▼
@@ -76,7 +76,7 @@ export default function RootLayout({ children }) {
 
 The layout returns immediately. The promises are in-flight. Client components resolve them when they're ready, wrapped in `<Suspense>`.
 
-```
+```txt
 Request arrives
       │
       ├──── getCart()  started ──────────┐
@@ -351,7 +351,7 @@ With **Partial Prerendering** (PPR), enabled via `cacheComponents: true` in Next
 1. A **static shell** prerendered at build time (the HTML around your Suspense fallbacks)
 2. **Dynamic holes** that stream at request time (the actual content inside those boundaries)
 
-```
+```txt
 ┌──────────────────────────────────────────────────┐
 │                  Static Shell                     │
 │  ┌────────────────────────────────────────────┐  │
@@ -380,7 +380,7 @@ With **Partial Prerendering** (PPR), enabled via `cacheComponents: true` in Next
 
 When a request comes in, the static shell is **instantly** served. Then the dynamic parts stream in:
 
-```
+```txt
 Static shell served instantly (0ms)
       │
       ├──── getFlags() resolves (80ms) ─────┐
@@ -407,7 +407,7 @@ Compare this to the traditional approach where nothing renders for 350ms.
 
 ### Without promise forwarding (traditional)
 
-```
+```txt
 Server                          Client
 ──────                          ──────
 
@@ -422,7 +422,7 @@ Time: ████████████████████░░░░  
 
 ### With promise forwarding + PPR
 
-```
+```txt
 Server                          Client
 ──────                          ──────
 
@@ -473,7 +473,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 Here's what the rendering timeline looks like:
 
-```
+```txt
  0ms    50ms   100ms  150ms  200ms  250ms  300ms
   │      │      │      │      │      │      │
   ├──────────────────────────────────────────────
@@ -495,7 +495,7 @@ Here's what the rendering timeline looks like:
 
 Here's the complete picture of how a request flows through the system with promise forwarding and PPR:
 
-```
+```txt
 ┌─────────────────────────────────────────────────────────────┐
 │                        BUILD TIME                           │
 │                                                             │
