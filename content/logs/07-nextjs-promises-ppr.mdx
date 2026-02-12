@@ -365,8 +365,9 @@ When a request comes in, the static shell is **instantly** served. Then the dyna
 
 ```mermaid
 flowchart TD
-    A(["Static shell served — 0ms"]) --> B["getFlags resolves — 80ms"]
-    A --> C["getCart resolves — 120ms"]
+    A(["Static shell served — 0ms"]) --> S["UI renders with Suspense fallbacks instantly"]
+    S --> B["getFlags resolves — 80ms"]
+    S --> C["getCart resolves — 120ms"]
 
     B --> D["CheckoutButton renders<br/>Checkout with Express Pay"]
     C --> E["CartCount: 3<br/>CartTotal: $149.97"]
@@ -375,6 +376,7 @@ flowchart TD
     E --> F
 
     style A fill:#bfdbfe,stroke:#2563eb,color:#000
+    style S fill:#fef9c3,stroke:#ca8a04,color:#000
     style B fill:#bbf7d0,stroke:#16a34a,color:#000
     style C fill:#bbf7d0,stroke:#16a34a,color:#000
     style D fill:#e9d5ff,stroke:#7c3aed,color:#000
