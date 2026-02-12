@@ -483,15 +483,6 @@ flowchart TD
 - Data is static and can be fetched at build time (use `use cache` instead)
 - The component tree is shallow enough that prop drilling is clearer
 
-## Next.js 15 vs 16
+## Enabling PPR in Next.js 16
 
-| Feature | Next.js 15 | Next.js 16 |
-|---------|------------|------------|
-| Promise forwarding to client | ✓ Works | ✓ Works |
-| `use()` hook | ✓ React 19 | ✓ React 19 |
-| PPR | `experimental: { ppr: 'incremental' }` | `cacheComponents: true` |
-| Per-route opt-in | `export const experimental_ppr = true` | Not needed (automatic) |
-| Cache directive | `unstable_cache` / fetch options | `'use cache'` + `cacheLife` |
-| Static shell | Requires explicit opt-in per route | Default behavior |
-
-The promise forwarding pattern works the same in both versions. The difference is how PPR is enabled and how much of the static shell optimization you get out of the box.
+In Next.js 16, PPR is enabled by setting `cacheComponents: true` in your `next.config.ts`. No per-route opt-in is needed — the static shell is the default behavior. Combined with the `'use cache'` directive and `cacheLife`, you get the full static shell + streaming combo out of the box.
