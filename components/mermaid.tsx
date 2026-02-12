@@ -42,7 +42,10 @@ export function Mermaid({ chart }: { chart: string }) {
       .then(({ svg }) => {
         el.innerHTML = svg
       })
-      .catch(console.error)
+      .catch((err) => {
+        console.error('[Mermaid] Failed to render chart:', err)
+        console.error('[Mermaid] Chart source:', chart)
+      })
   }, [chart, resolvedTheme, mounted])
 
   if (!mounted) {
