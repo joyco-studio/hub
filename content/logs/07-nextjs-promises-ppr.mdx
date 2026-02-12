@@ -487,20 +487,23 @@ flowchart TD
 
 In Next.js 16, PPR is enabled by setting `cacheComponents: true` in your `next.config.ts`. No per-route opt-in is needed — the static shell is the default behavior.
 
-The dynamic holes inside your Suspense boundaries still execute at request time, but you can cache the functions powering them with the `'use cache'` directive and `cacheLife`:
+The dynamic holes inside your Suspense boundaries still execute at request time, but you can cache the functions powering them with the [`'use cache'` directive and `cacheLife`](https://nextjs.org/docs/app/getting-started/cache-components). One important constraint: runtime data like `cookies()` can't be used inside a `'use cache'` scope. You extract the value outside and pass it in as an argument — that argument then becomes part of the cache key:
 
 ```ts showLineNumbers
 // lib/flags.ts
 import { cacheLife } from 'next/cache'
 
-export async function getFlags() {
+async function fetchFlags(userId: string) {
   'use cache'
   cacheLife('minutes')
 
-  const userId = (await cookies()).get('userId')?.value
   const res = await fetch(`https://flags.example.com/api/flags?user=${userId}`)
   return res.json()
 }
+
+// in your component (inside a Suspense boundary)
+const userId = (await cookies()).get('userId')?.value
+const flags = await fetchFlags(userId)
 ```
 
 This gives you three layers working together:
