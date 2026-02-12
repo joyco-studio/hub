@@ -58,7 +58,7 @@ sequenceDiagram
 
 Between the time your rAF reads `scrollY` and the compositor draws the next frame, the compositor may have already advanced the scroll position by several more pixels. Your canvas transform is based on **stale data**.
 
-## Why `position: absolute` makes it worse
+## Why [position: absolute] makes it worse
 
 A `position: absolute` element inside the page flow participates in compositor scrolling. When the compositor scrolls the page, it physically moves all elements in the scroll container -- including your absolute-positioned canvas wrapper. But here's the conflict: you're *also* applying a transform to that element via JavaScript to position it.
 
@@ -296,7 +296,7 @@ Without lerp, every jump in `scrollY` translates 1:1 to a jump in transform posi
 
 ## Other approaches and their tradeoffs
 
-### `position: fixed` + scroll hijack
+### [position: fixed] + scroll hijack
 
 Many libraries (Locomotive Scroll, Lenis, GSAP ScrollSmoother) disable native scrolling entirely:
 
@@ -339,7 +339,7 @@ The modern, compositor-native solution:
 
 Scroll-driven animations run **entirely on the compositor thread**. No JS, no rAF, no stale `scrollY`. The compositor applies the transform in the same pass that it applies the scroll offset, guaranteeing zero lag. This is the correct long-term solution but requires the effect to be expressible as a CSS animation, which doesn't work for WebGL camera sync.
 
-### `will-change: transform` on the container
+### [will-change: transform] on the container
 
 ```css
 .webgl-container {
