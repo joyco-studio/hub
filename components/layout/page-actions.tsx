@@ -24,7 +24,7 @@ import MarkdownIcon from '@/components/icons/markdown'
 import CopyIcon from '@/components/icons/copy'
 
 function getAIChatPrompt(pageUrl: string) {
-  return `Read the following page and answer my questions about it: ${pageUrl}`
+  return `Based on this post context: ${pageUrl}\n\nI have some questions:`
 }
 
 function getClaudeUrl(pageUrl: string) {
