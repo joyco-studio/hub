@@ -424,38 +424,6 @@ sequenceDiagram
     Note over S,C: Fast TTFB, progressive render
 ```
 
-## Combining both providers
-
-Here's how the root layout looks with both providers and PPR working together:
-
-```tsx showLineNumbers
-// app/layout.tsx
-import { CartProvider } from '@/providers/cart-provider'
-import { FlagsProvider } from '@/providers/flags-provider'
-import { getCart } from '@/lib/cart'
-import { getFlags } from '@/lib/flags'
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  // Both start immediately, resolve in parallel
-  const cartPromise = getCart()
-  const flagsPromise = getFlags()
-
-  return (
-    <html>
-      <body>
-        <FlagsProvider flagsPromise={flagsPromise}>
-          <CartProvider cartPromise={cartPromise}>
-            <Navbar />
-            <main>{children}</main>
-            <Footer />
-          </CartProvider>
-        </FlagsProvider>
-      </body>
-    </html>
-  )
-}
-```
-
 ## The full rendering flow
 
 Here's the complete picture of how a request flows through the system with promise forwarding and PPR:
