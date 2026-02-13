@@ -1,0 +1,66 @@
+---
+title: Skills
+description: Claude Code skills to extend your agent with superpowers.
+maintainers: ['matiasperz']
+docLinks:
+  [
+    {
+      label: 'GitHub Repository',
+      href: 'https://github.com/joyco-studio/skills',
+    },
+  ]
+---
+
+## What are skills?
+
+Skills are markdown-based instruction sets that plug into [Claude Code](https://docs.anthropic.com/en/docs/claude-code) and give it specialized, structured workflows. Instead of prompting from scratch every time, a skill teaches Claude how to do something well — with context, constraints, and step-by-step guidance baked in.
+
+Our skills live at [`joyco-studio/skills`](https://github.com/joyco-studio/skills) and can be installed with a single command.
+
+## Install
+
+```bash
+pnpx skills add joyco-studio/skills
+```
+
+This pulls all available skills into your project's `.claude/skills/` directory so Claude Code can use them automatically.
+
+## Available Skills
+
+### parallel-claudes
+
+Orchestrate multiple parallel Claude Code sessions using [`cw`](/toolbox/cw). The root Claude session acts as an orchestrator — it analyzes a task, splits it into independent subtasks, creates isolated git worktrees, and launches headless Claude subagents in parallel. Each subagent runs in its own worktree and the orchestrator monitors progress, then merges results back via GitHub PR or local squash-merge.
+
+Requires `cw`, `claude`, and `gh` CLIs.
+
+---
+
+### pr-description-writer
+
+Generate copy-paste-ready Pull Request descriptions in Markdown. Supports three PR types:
+
+| Type | When to use | Sections |
+| --- | --- | --- |
+| **issue** | Bugs, fixes, regressions, performance problems | Problem, Root Cause, Solution, Result |
+| **feature** | Normal features, improvements, small UX additions | Problem, Root Cause (optional), Result |
+| **big-feature** | New systems, architectural changes, major refactors | Summary, Key Changes, Architecture Overview |
+
+Detects the PR type from context (or asks), asks about related issue links, and generates a title + description.
+
+---
+
+### markdown-content
+
+A guide for building markdown content pages (blogs, legal pages, changelogs) in Next.js using `fumadocs-mdx`, `rehype-pretty-code`, and `shiki`. Covers content collections with Zod-validated frontmatter, source loading with catch-all routes, dual-theme syntax highlighting, MDX component mappings, and the full styling architecture from theming to prose to code blocks.
+
+---
+
+### trace-audit
+
+Analyze a Chrome DevTools Performance trace JSON file for performance anomalies. Usage:
+
+```
+/trace-audit <path-to-trace.json>
+```
+
+Runs 13 detection categories in parallel — Long Tasks, Layout Thrashing, Forced Reflows, rAF Ticker Loops, Style Recalc Storms, Paint Storms, GC Pressure, CLS, INP, Network Errors, Redundant Fetches, Script Eval, and Long Animation Frames — then produces a structured audit report with severity classifications and timeline hotspots.
