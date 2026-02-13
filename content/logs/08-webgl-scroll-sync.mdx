@@ -5,7 +5,7 @@ author: 'matiasperz'
 
 ## The problem
 
-You have a full-page WebGL canvas rendering content that needs to stay aligned with DOM elements as the user scrolls. Images, text blocks, sections — all positioned by CSS, all mirrored as textured quads on the canvas.
+You have a full-page WebGL canvas rendering content that needs to stay aligned with DOM elements as the user scrolls. Images, text blocks, sections, all positioned by CSS, all mirrored as textured quads on the canvas.
 
 During fast scrolls, the canvas content visibly drifts from the DOM. Images separate from their placeholders, snap back, separate again. It looks like jelly.
 
@@ -18,7 +18,7 @@ Modern browsers split rendering into two threads:
 - **Main thread**: runs JavaScript, computes styles, performs layout, paints display lists
 - **Compositor thread** (Chromium calls it the "impl thread"): composites rasterized layers, handles scroll input, runs GPU-side animations
 
-When the user scrolls, the input event goes to the **compositor first**. The compositor immediately shifts pre-rasterized pixel tiles on the GPU — no layout, no style recalc, no JS. That's why scrolling stays smooth even when the main thread is blocked.
+When the user scrolls, the input event goes to the **compositor first**. The compositor immediately shifts pre-rasterized pixel tiles on the GPU. No layout, no style recalc, no JS. That's why scrolling stays smooth even when the main thread is blocked.
 
 ```mermaid
 flowchart LR
@@ -31,7 +31,7 @@ flowchart LR
     style D fill:#fecaca,stroke:#dc2626,color:#000
 ```
 
-The compositor updates what the user sees **immediately**. The main thread gets the memo **later** — at minimum one full frame later.
+The compositor updates what the user sees **immediately**. The main thread gets the memo **later**, at minimum one full frame later.
 
 ### The rendering pipeline
 
@@ -89,7 +89,7 @@ flowchart LR
     style impl fill:#f0fdf4,stroke:#16a34a,color:#000
 ```
 
-The impl tree is a snapshot from the last commit. Between commits, the impl thread scrolls, animates, and draws frames without consulting the main thread. When your rAF fires and reads `window.scrollY`, it's reading the scroll offset from the *last time the impl thread synced* — not the impl thread's current position.
+The impl tree is a snapshot from the last commit. Between commits, the impl thread scrolls, animates, and draws frames without consulting the main thread. When your rAF fires and reads `window.scrollY`, it's reading the scroll offset from the *last time the impl thread synced*, not the impl thread's current position.
 
 ### The core tension
 
@@ -128,17 +128,17 @@ function animate() {
 }
 ```
 
-`scrollOffset` is the bridge between page space and canvas space. It's what makes a mesh at `pageY: 3200` appear at the right spot in your viewport-sized canvas. And it comes from `window.scrollY` — which is always at least one frame behind the compositor.
+`scrollOffset` is the bridge between page space and canvas space. It's what makes a mesh at `pageY: 3200` appear at the right spot in your viewport-sized canvas. And it comes from `window.scrollY`, which is always at least one frame behind the compositor.
 
 **This is the root of the drift.** Every frame, your meshes are positioned with a `scrollOffset` that's already outdated. The question becomes: how do you architect around that staleness?
 
 ## Approach 1: JS-driven scroll (Lenis)
 
-The approach used by [Lenis](https://lenis.darkroom.engineering/) and most WebGL-heavy sites. Unlike older libraries that used `position: fixed` with fake scrollbars, Lenis animates `scrollTop` directly — there's real native scroll, but the main thread drives it.
+The approach used by [Lenis](https://lenis.darkroom.engineering/) and most WebGL-heavy sites. Unlike older libraries that used `position: fixed` with fake scrollbars, Lenis animates `scrollTop` directly. There's real native scroll, but the main thread drives it.
 
 ### How it works
 
-The canvas is `position: fixed` — it lives in **window** space. Lenis takes over scroll by animating `scrollTop` on each frame via `requestAnimationFrame`. The browser sees real scroll events, so browser features (find-in-page, anchors, accessibility) still work. But because JS is setting `scrollTop`, the main thread controls the pace.
+The canvas is `position: fixed`. It lives in **window** space. Lenis takes over scroll by animating `scrollTop` on each frame via `requestAnimationFrame`. The browser sees real scroll events, so browser features (find-in-page, anchors, accessibility) still work. But because JS is setting `scrollTop`, the main thread controls the pace.
 
 ```mermaid
 flowchart LR
@@ -184,7 +184,7 @@ function animate(time: number) {
 
 ### Why it works
 
-JS drives `scrollTop` each frame, so the compositor and JS are always in agreement — there's no race. The DOM scrolls to exactly where JS told it to, and the canvas renders with the same value.
+JS drives `scrollTop` each frame, so the compositor and JS are always in agreement. There's no race. The DOM scrolls to exactly where JS told it to, and the canvas renders with the same value.
 
 ```mermaid
 sequenceDiagram
@@ -204,7 +204,7 @@ sequenceDiagram
 
 ### The tradeoffs
 
-Every scroll frame runs through the main thread. The compositor isn't driving scroll independently — JS is.
+Every scroll frame runs through the main thread. The compositor isn't driving scroll independently. JS is.
 
 - **Mobile performance**: On mobile, the main thread competes with touch handlers, GC pauses, and layout work. Under heavy load, scroll frames can drop and feel sluggish compared to compositor-driven native scroll.
 - **Scroll-linked APIs**: `scroll-snap`, CSS `scroll()` timeline, and other compositor-coupled features may behave differently since scroll timing is JS-controlled.
@@ -219,7 +219,7 @@ The approach used by [Lusion's webgl-scroll-sync](https://github.com/matiasperz/
 
 ### How it works
 
-The canvas is `position: absolute` — it lives in **page** space, inside the scrolling container. It moves with the DOM naturally on the compositor thread. Each frame, JS reads `scrollY` and applies a `transform` to slide the canvas back into the viewport.
+The canvas is `position: absolute`. It lives in **page** space, inside the scrolling container. It moves with the DOM naturally on the compositor thread. Each frame, JS reads `scrollY` and applies a `transform` to slide the canvas back into the viewport.
 
 ```mermaid
 flowchart LR
@@ -241,7 +241,7 @@ flowchart LR
     style CANVAS fill:#e9d5ff,stroke:#7c3aed,color:#000
 ```
 
-The canvas sits on the **P** side. The compositor moves the page — and the canvas with it — instantly. DOM elements and the canvas move together on the GPU. JS only needs to correct the canvas position and re-render the WebGL scene.
+The canvas sits on the **P** side. The compositor moves the page, and the canvas with it, instantly. DOM elements and the canvas move together on the GPU. JS only needs to correct the canvas position and re-render the WebGL scene.
 
 ```ts showLineNumbers
 // The absolute approach
@@ -270,7 +270,7 @@ function animate() {
 
 ### What drifts (and why it's ok)
 
-The canvas and DOM move together on the compositor — no content drift. The only stale thing is the `transform` correction that repositions the canvas over the viewport. Here's what a single scroll looks like:
+The canvas and DOM move together on the compositor, with no content drift. The only stale thing is the `transform` correction that repositions the canvas over the viewport. Here's what a single scroll looks like:
 
 ```mermaid
 sequenceDiagram
@@ -289,18 +289,18 @@ sequenceDiagram
     Note over P: Transform catches up<br/>Canvas covers viewport again
 ```
 
-The compositor scroll creates a delta between where the canvas sits (page space) and where JS last told it to sit (the transform). That delta is the edge drift — it only lasts until the next frame when JS catches up. The content inside the canvas never drifts from the DOM because they're on the same side of the compositor.
+The compositor scroll creates a delta between where the canvas sits (page space) and where JS last told it to sit (the transform). That delta is the edge drift. It only lasts until the next frame when JS catches up. The content inside the canvas never drifts from the DOM because they're on the same side of the compositor.
 
 | | JS-driven scroll (Lenis) | Absolute |
 |---|---|---|
 | **Canvas lives in** | Window (W) | Page (P) |
 | **What's stale** | Nothing (JS drives scrollTop) | The transform correction (W position) |
-| **What drifts** | Nothing — but scroll is main-thread bound | Canvas edges vs viewport bounds |
+| **What drifts** | Nothing, but scroll is main-thread bound | Canvas edges vs viewport bounds |
 | **Visible as** | Dropped frames under load | Slight edge clipping during fast scroll |
 
 ### Solving the edge clipping with padding
 
-Edge clipping during fast scroll is solved by rendering the canvas larger than the viewport. Add 25% vertical padding top and bottom (canvas = 150% viewport height). Adding this padding buffer lets the translate catch up when the impl layer syncs — even with a few frames of stale transform, the extra rendered area covers the viewport:
+Edge clipping during fast scroll is solved by rendering the canvas larger than the viewport. Add 25% vertical padding top and bottom (canvas = 150% viewport height). Adding this padding buffer lets the translate catch up when the impl layer syncs. Even with a few frames of stale transform, the extra rendered area covers the viewport:
 
 ```mermaid
 flowchart TD
@@ -322,9 +322,9 @@ flowchart TD
 
 ### The fixed-element problem
 
-This is the main tradeoff of the absolute approach. The canvas lives on the **P** side — that's the whole point, it moves with the page on the compositor. But what if you need to render a WebGL element that stays **fixed on screen**? A floating logo, a HUD, a persistent UI element — all rendered on the canvas, not in the DOM.
+This is the main tradeoff of the absolute approach. The canvas lives on the **P** side. That's the whole point, it moves with the page on the compositor. But what if you need to render a WebGL element that stays **fixed on screen**? A floating logo, a HUD, a persistent UI element, all rendered on the canvas, not in the DOM.
 
-To keep a WebGL element fixed on screen, you don't need to translate anything — it would just sit at its viewport position. The problem is that the canvas is on the page side. When the compositor scrolls, it takes the entire canvas with it, including your "fixed" element. That compositor scroll instantly displaces it. JS hasn't caught up yet, so for that frame the element slides with the page when it should have stayed put. That's the jelly — the element gets dragged by the compositor scroll until the next rAF where JS can correct it back.
+To keep a WebGL element fixed on screen, you don't need to translate anything. It would just sit at its viewport position. The problem is that the canvas is on the page side. When the compositor scrolls, it takes the entire canvas with it, including your "fixed" element. That compositor scroll instantly displaces it. JS hasn't caught up yet, so for that frame the element slides with the page when it should have stayed put. That's the jelly. The element gets dragged by the compositor scroll until the next rAF where JS can correct it back.
 
 ```mermaid
 sequenceDiagram
@@ -347,7 +347,7 @@ This means the absolute approach works best when **all your WebGL content scroll
 
 ### When to use it
 
-When all your WebGL content scrolls with the page — background effects, image treatments, scroll-driven transitions. Native scroll stays intact. Browser features work. The constraint: any WebGL element that needs to stay fixed on screen will drift, because you're back to reading a stale scroll delta from the other side.
+When all your WebGL content scrolls with the page: background effects, image treatments, scroll-driven transitions. Native scroll stays intact. Browser features work. The constraint: any WebGL element that needs to stay fixed on screen will drift, because you're back to reading a stale scroll delta from the other side.
 
 ## Summary
 
@@ -385,7 +385,7 @@ flowchart TD
 | **Viewport-fixed WebGL** | Works (canvas is already in window) | Drifts (stale delta from W side) |
 | **Mobile performance** | Can drop frames under load | Smooth (compositor scrolling) |
 
-The two approaches are mirror images of each other. The fixed canvas lives on the **window** side, so viewport-pinned WebGL elements work natively — but tracking DOM elements requires JS-driven scroll to keep them in sync. The absolute canvas lives on the **page** side, so DOM-tracked WebGL elements move with the page for free — but pinning anything to the viewport requires the same JS-driven scroll to fight the stale delta.
+The two approaches are mirror images of each other. The fixed canvas lives on the **window** side, so viewport-pinned WebGL elements work natively, but tracking DOM elements requires JS-driven scroll to keep them in sync. The absolute canvas lives on the **page** side, so DOM-tracked WebGL elements move with the page for free, but pinning anything to the viewport requires the same JS-driven scroll to fight the stale delta.
 
 They sit on opposite sides of the same problem, and reach for the same escape hatch to cover their blind spot.
 
