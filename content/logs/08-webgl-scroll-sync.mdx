@@ -97,6 +97,41 @@ There are three things in play: the **window** (W, the viewport), the **page** (
 
 The compositor owns the delta. JS reads it late. The question is: where does your canvas live?
 
+### Mapping DOM elements to WebGL
+
+Regardless of which approach you pick, the fundamental operation is the same: each WebGL mesh tracks a DOM element's position. In Three.js with an orthographic camera where 1 unit = 1 pixel:
+
+```ts showLineNumbers
+// Orthographic camera: origin at top-left, Y points down (like DOM)
+const camera = new THREE.OrthographicCamera(0, width, 0, -height, 0.1, 1000)
+camera.position.z = 1
+
+// On resize, store each element's absolute page position (doesn't change on scroll)
+const pageY = rect.top + window.scrollY
+
+// Every frame: convert page position → canvas position
+function animate() {
+  requestAnimationFrame(animate)
+
+  const scrollOffset = window.scrollY
+
+  // pageY is absolute (e.g. 3200px down the page)
+  // scrollOffset is what the viewport currently shows
+  // subtract to get the canvas-local position
+  mesh.position.set(
+    pageX + meshWidth / 2,
+    -(pageY - scrollOffset + meshHeight / 2),
+    0
+  )
+
+  renderer.render(scene, camera)
+}
+```
+
+`scrollOffset` is the bridge between page space and canvas space. It's what makes a mesh at `pageY: 3200` appear at the right spot in your viewport-sized canvas. And it comes from `window.scrollY` -- which is always at least one frame behind the compositor.
+
+**This is the root of the drift.** Both approaches need `scrollOffset` to position meshes, but they differ in what happens when it's stale.
+
 ## Approach 1: Fixed + scroll hijack
 
 The classic approach used by Locomotive Scroll, Lenis, GSAP ScrollSmoother, and most WebGL-heavy sites.
@@ -337,33 +372,6 @@ sequenceDiagram
 You chose the P side to get free compositor sync for page-bound content. But viewport-fixed content needs the delta from the W side -- and that delta is always stale. You can't have both: the compositor gives you one side for free, the other is always a frame behind.
 
 This means the absolute approach works best when **all your WebGL content scrolls with the page**. The moment you need a viewport-pinned WebGL element, you're fighting the same battle the fixed approach fights for everything.
-
-### The vertex shader: page coords to canvas coords
-
-In this approach, each WebGL mesh knows its **absolute page position** (read from `getBoundingClientRect()` + `scrollY` on resize). The vertex shader converts that to canvas-local pixel coordinates by subtracting the scroll offset:
-
-```glsl
-uniform vec2 u_resolution;    // Canvas size in pixels
-uniform vec2 u_scrollOffset;  // scrollY - padding offset
-uniform vec2 u_domXY;         // Absolute page position of DOM element
-uniform vec2 u_domWH;         // Width/height in pixels
-
-void main() {
-    // Absolute page coords → canvas-local pixel coords
-    vec2 pixelXY = u_domXY - u_scrollOffset + u_domWH * 0.5;
-
-    // Flip Y (DOM Y goes down, GL Y goes up)
-    pixelXY.y = u_resolution.y - pixelXY.y;
-
-    // Scale unit quad to DOM element size
-    pixelXY += position.xy * u_domWH;
-
-    // Pixel coords → NDC (-1 to +1)
-    gl_Position = vec4(pixelXY / u_resolution * 2.0 - 1.0, 0.0, 1.0);
-}
-```
-
-Because an identity `Camera()` is used (no projection/view matrix), the vertex shader output goes directly to clip space. This is a 2D orthographic projection done entirely in the shader.
 
 ### When to use it
 
