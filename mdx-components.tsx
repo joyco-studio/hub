@@ -10,10 +10,12 @@ import Image from 'next/image'
 import { ImageCols } from '@/components/image-cols'
 import { PackageManagerCommand } from './components/package-manager-command'
 import { AgentsScriptCommand } from './components/agents-script-command'
+import { Mermaid } from './components/mermaid'
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     ...defaultMdxComponents,
+    Mermaid,
     CodeTabs: CodeTabs,
     FileCodeblock: FileCodeblock,
     Image: ({
@@ -93,7 +95,6 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     ),
     code: ({
       className,
-      __raw__,
       __npm__,
       __yarn__,
       __pnpm__,
@@ -151,18 +152,32 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
         )
       }
 
-      return (
-        <>
-          <code className="not-prose" {...props} />
-          {__raw__ && <CopyButton value={__raw__} />}
-        </>
-      )
+      return <code className="not-prose" {...props} />
     },
     figure: ({ className, ...props }: React.ComponentProps<'figure'>) => {
       return <figure className={cn(className)} {...props} />
     },
-    pre: ({ className, ...props }: React.ComponentProps<'pre'>) => {
-      return <pre className={cn(codeClasses.pre, className)} {...props} />
+    pre: ({
+      className,
+      __raw__,
+      __iscommand__,
+      children,
+      ...props
+    }: React.ComponentProps<'pre'> & {
+      __raw__?: string
+      __iscommand__?: string
+      children: React.ReactNode
+    }) => {
+      /* Command component renders it's own pre inside tabs content */
+      if (__iscommand__ === "true") return children 
+      return (
+        <div className={cn('group/code relative', className)}>
+          {__raw__ && <CopyButton value={__raw__} />}
+          <pre className={codeClasses.pre} {...props}>
+            {children}
+          </pre>
+        </div>
+      )
     },
     ...components,
   }

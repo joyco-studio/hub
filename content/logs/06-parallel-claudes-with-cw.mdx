@@ -1,0 +1,188 @@
+---
+title: 06 - Parallel Claudes with cw
+author: 'matiasperz'
+---
+
+In [02 - AI Driven Development](/logs/02-ai-driven-development) I talked about long-running agents and how to keep them off your main attention thread. But there's a practical problem I didn't address: **what happens when two Claude Code sessions touch the same files?**
+
+They conflict. One overwrites the other. You end up with broken state and wasted tokens.
+
+## The worktree trick
+
+Git has a built-in feature called [worktrees](https://git-scm.com/docs/git-worktree) that lets you check out multiple branches of the same repo simultaneously, each in its own directory. They share the same `.git` history but have completely isolated working trees.
+
+This is the foundation of [**cw**](https://github.com/joyco-studio/cw) (Claude Worktree), a tiny Bash CLI we built that manages isolated git worktrees specifically for running parallel Claude Code sessions.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/joyco-studio/cw/main/install.sh | bash
+```
+
+It installs a single shell script to `~/.local/bin/cw` and sources it in your shell rc. No dependencies beyond Git and the Claude CLI.
+
+## How it works
+
+### Spin up a new session
+
+```bash
+cw new auth "implement OAuth2 with GitHub provider"
+```
+
+This does a few things:
+
+1. Creates a directory at `<repo>/.worktrees/auth`
+2. Checks out a new branch `cw/auth` from your base branch
+3. Detects your package manager and installs dependencies
+4. Opens Claude Code in the isolated directory with your prompt
+
+The key detail: Claude is now working in a **completely separate copy** of your project. It can modify files, run builds, break things, none of it touches your main working directory.
+
+### Run multiple sessions at once
+
+```bash
+cw new auth --open "implement OAuth2 with GitHub provider"
+cw new api --open "build REST endpoints for the dashboard"
+cw new tests --open "add integration tests for the billing module"
+```
+
+Three Claude sessions, three isolated worktrees, three branches. All running in parallel without conflicts.
+
+### Check what's running
+
+```bash
+cw ls
+```
+
+```bash
+Active worktrees:
+
+  * auth   (cw/auth, 3 ahead)
+    /Users/you/project/.worktrees/auth
+
+  * api    (cw/api, 7 ahead)
+    /Users/you/project/.worktrees/api
+
+  * tests  (cw/tests, 2 ahead)
+    /Users/you/project/.worktrees/tests
+```
+
+### Navigate between them
+
+```bash
+cw cd auth
+```
+
+### Ship the work
+
+When a session is done, you have two options:
+
+**Create a PR:**
+```bash
+cw merge auth
+```
+
+This pushes the `cw/auth` branch and opens a PR via the GitHub CLI.
+
+**Squash merge locally:**
+```bash
+cw merge auth --local
+```
+
+This squash-merges the branch into your base branch with a `feat: auth` commit message, then cleans up.
+
+## A fictional Tuesday
+
+Here's what a real session might look like. You're the lead on a SaaS dashboard. It's Tuesday morning, and there are three tickets on the board:
+
+- **DASH-41**: Add workspace invite flow
+- **DASH-42**: Migrate analytics queries to the new schema
+- **DASH-43**: Fix timezone bug in the activity feed
+
+You start with the invite flow since it needs the most oversight:
+
+```bash
+cw new invites --no-open
+cw cd invites
+claude
+```
+
+You're working interactively with Claude on the invite flow, designing the schema, iterating on the email template, reviewing each step. This is your **main attention thread**.
+
+Meanwhile, the analytics migration is well-scoped. The new schema is documented, and it's mostly mechanical find-and-replace across query files. You kick that off in the background:
+
+```bash
+cw new analytics --open "migrate all analytics queries from v1 to v2 schema. \
+  refer to docs/analytics-v2-migration.md for the field mapping"
+```
+
+The timezone fix is also straightforward, there's even a failing test for it:
+
+```bash
+cw new tz-fix --open "fix the timezone bug in the activity feed. \
+  there's a failing test in tests/activity-feed.test.ts that reproduces it"
+```
+
+You continue working on the invite flow. Twenty minutes later:
+
+```bash
+cw ls
+```
+
+```bash
+Active worktrees:
+
+  * invites    (cw/invites, 4 ahead)
+  * analytics  (cw/analytics, 12 ahead)
+  * tz-fix     (cw/tz-fix, 2 ahead)
+```
+
+The timezone fix has 2 commits. You check it:
+
+```bash
+cw cd tz-fix
+git log --oneline cw/tz-fix --not main
+```
+
+Looks good. Ship it:
+
+```bash
+cw merge tz-fix
+```
+
+The analytics migration has 12 commits, Claude went through every query file. You review the diff, it's clean. Ship that too:
+
+```bash
+cw merge analytics
+```
+
+Back to your main thread:
+
+```bash
+cw cd invites
+```
+
+You finish up the invite flow, review it, and merge:
+
+```bash
+cw merge invites
+```
+
+Three tickets closed. One required your full attention, two ran autonomously. No conflicts, no context switching, no broken state.
+
+## The full command reference
+
+| Command | Description |
+|---------|-------------|
+| `cw new <name> [prompt]` | Create a worktree and optionally start Claude |
+| `cw open <name> [prompt]` | Open Claude in an existing worktree |
+| `cw ls` | List all active worktrees |
+| `cw cd <name>` | Navigate to a worktree |
+| `cw merge <name>` | Push and create a PR |
+| `cw merge <name> --local` | Squash merge locally |
+| `cw rm <name>` | Remove a worktree |
+| `cw clean` | Remove all worktrees |
+| `cw upgrade` | Update cw to latest version |
+
+## Links
+
+- [GitHub Repository](https://github.com/joyco-studio/cw)
+- [Install instructions](https://github.com/joyco-studio/cw#install)

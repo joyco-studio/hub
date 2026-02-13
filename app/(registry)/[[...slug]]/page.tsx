@@ -148,43 +148,39 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
           )}
         >
           {/* Category badge */}
-          <Badge variant="accent" className="mb-4">
+          <Badge variant="accent" className="mb-6">
             {badgeLabel}
           </Badge>
 
-          <div className="p-3">
-            {/* Title and actions row */}
-            <div className="mb-4 flex items-start justify-between gap-4">
-              <h1 className="min-w-0 text-3xl leading-tight font-semibold">
-                {displayTitle}
-              </h1>
-              <div
-                className={cn(
-                  'flex items-center gap-2 max-sm:hidden',
-                  isTopCategoryPage && 'hidden'
-                )}
-              >
-                <PageGithubLinkButton
-                  className="max-lg:hidden"
-                  path={page.path}
-                />
-                <PageActions
-                  content={llmText}
-                  llmUrl={llmUrl}
-                  componentSource={componentSource}
-                />
-              </div>
+          {/* Title and actions row */}
+          <div className="mb-4 flex items-start justify-between gap-4">
+            <h1 className="min-w-0 text-3xl leading-tight font-semibold">
+              {displayTitle}
+            </h1>
+            <div
+              className={cn(
+                'flex items-center gap-2 max-sm:hidden',
+                isTopCategoryPage && 'hidden'
+              )}
+            >
+              <PageGithubLinkButton
+                className="max-lg:hidden"
+                path={page.path}
+              />
+              <PageActions
+                content={llmText}
+                llmUrl={llmUrl}
+                componentSource={componentSource}
+              />
             </div>
-
-            {/* Description */}
-            {page.data.description && (
-              <p className="text-foreground/70 mb-2 text-lg">
-                {page.data.description}
-              </p>
-            )}
           </div>
-          {/* Separator */}
-          <Separator brackets align="bottom" className="mb-4" />
+
+          {/* Description */}
+          {page.data.description && (
+            <p className="text-foreground/70 mb-4 text-lg">
+              {page.data.description}
+            </p>
+          )}
 
           {/* Doc links */}
           <div

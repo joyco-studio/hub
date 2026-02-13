@@ -25,14 +25,8 @@ export function RelatedItems({
 
   return (
     <section className={cn('not-prose', className)} {...props}>
-      <h2 className="text-2xl font-semibold tracking-tight">{title}</h2>
-      <Separator
-        brackets
-        align="top"
-        className="relative -mx-7 mt-2 mb-6 w-[calc(100%+--spacing(14))]"
-        title="Related Items"
-      />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <h2 className="text-2xl font-semibold mb-6 tracking-tight">{title}</h2>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((item) => (
           <PreviewCard
             key={item.name}

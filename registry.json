@@ -168,6 +168,18 @@
       ]
     },
     {
+      "name": "spritesheet-sequencer",
+      "type": "registry:component",
+      "title": "Spritesheet Sequencer",
+      "description": "A WAAPI-powered spritesheet animator for squared grid-based spritesheets with stepped frame animation.",
+      "files": [
+        {
+          "path": "registry/joyco/blocks/spritesheet-sequencer.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "svg-morph",
       "type": "registry:component",
       "title": "SVG Morph",

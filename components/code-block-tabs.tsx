@@ -56,7 +56,7 @@ export function CodeBlockTabs({
         </figcaption>
 
         {tabs.map((tab) => (
-          <TabsContent key={tab.filename} value={tab.filename} className="mt-0">
+          <TabsContent key={tab.filename} value={tab.filename} className="mt-0" asChild>
             <div className="group/code relative">
               {tab.rawCode && <CopyButton value={tab.rawCode} />}
               <div

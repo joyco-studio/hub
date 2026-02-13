@@ -1,0 +1,113 @@
+---
+title: Spritesheet Sequencer
+description: A WAAPI-powered spritesheet animator for squared grid-based spritesheets with stepped frame animation.
+maintainers: ['matiasperz']
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+<ComponentPreview name="spritesheet-sequencer-demo" />
+
+## Installation
+
+```bash
+npx shadcn@latest add @joyco/spritesheet-sequencer
+```
+
+## Usage
+
+```tsx
+import { SpritesheetSequencer } from '@/components/spritesheet-sequencer'
+
+<div className="size-16">
+  <SpritesheetSequencer
+    src="/sprites/coin.png"
+    frameCount={4}
+    frameDuration={100}
+    className="[image-rendering:pixelated]"
+  />
+</div>
+```
+
+## Spritesheet Format
+
+The component expects a **squared spritesheet image** with frames arranged in a grid:
+
+```text
+frameCount = 4, gridSize = ceil(sqrt(4)) = 2
+
++-----+-----+
+|  0  |  1  |
++-----+-----+
+|  2  |  3  |
++-----+-----+
+```
+
+Frames are read left-to-right, top-to-bottom. The grid size is automatically calculated as `ceil(sqrt(frameCount))`, so partial grids are supported (e.g., 14 frames in a 4×4 grid).
+
+## Props
+
+| Prop            | Type                                                       | Default    | Description                                         |
+| --------------- | ---------------------------------------------------------- | ---------- | --------------------------------------------------- |
+| `src`           | `string`                                                   | -          | URL to the squared spritesheet image                |
+| `frameCount`    | `number`                                                   | -          | Total number of frames in the spritesheet           |
+| `frameDuration` | `number`                                                   | `100`      | Duration per frame in milliseconds                  |
+| `isPlaying`     | `boolean`                                                  | `true`     | Whether the animation is playing                    |
+| `loop`          | `boolean`                                                  | `true`     | Whether to loop the animation                       |
+| `direction`     | `'normal' \| 'reverse' \| 'alternate' \| 'alternate-reverse'` | `'normal'` | Animation playback direction                        |
+| `resetOnPlay`   | `boolean`                                                  | `false`    | Reset to frame 0 when `isPlaying` changes to `true` |
+| `onFrameChange` | `(frame: number) => void`                                  | -          | Callback fired when the current frame changes       |
+| `onLoad`        | `() => void`                                               | -          | Callback fired when the spritesheet image loads     |
+| `onComplete`    | `() => void`                                               | -          | Callback fired when animation completes (non-loop)  |
+
+## Examples
+
+### Basic coin animation
+
+```tsx
+<SpritesheetSequencer
+  src="/sprites/coin.png"
+  frameCount={4}
+  frameDuration={100}
+/>
+```
+
+### Controlled playback
+
+```tsx
+const [isPlaying, setIsPlaying] = useState(true)
+const [speed, setSpeed] = useState(100)
+
+<SpritesheetSequencer
+  src="/sprites/explosion.png"
+  frameCount={16}
+  frameDuration={speed}
+  isPlaying={isPlaying}
+  loop={false}
+  resetOnPlay
+  onComplete={() => setIsPlaying(false)}
+/>
+
+<button onClick={() => setIsPlaying(p => !p)}>
+  {isPlaying ? 'Pause' : 'Play'}
+</button>
+```
+
+### Pixel art (8-bit style)
+
+For crisp pixel art, disable image smoothing:
+
+```tsx
+<SpritesheetSequencer
+  src="/sprites/character.png"
+  frameCount={8}
+  frameDuration={80}
+  className="[image-rendering:pixelated]"
+/>
+```
+
+## How It Works
+
+The component uses the **Web Animations API (WAAPI)** with `step-end` easing to create discrete frame jumps.
+
+The spritesheet is displayed via CSS `background-image` with calculated `background-position` keyframes for each frame in the grid.

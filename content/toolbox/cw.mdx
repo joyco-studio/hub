@@ -1,0 +1,51 @@
+---
+title: cw
+description: A CLI to manage git worktrees for parallel Claude Code sessions.
+maintainers: ['matiasperz']
+docLinks:
+  [
+    {
+      label: 'GitHub Repository',
+      href: 'https://github.com/joyco-studio/cw',
+    },
+  ]
+---
+
+## What is cw?
+
+`cw` (Claude Worktree) lets you spin up isolated git worktrees, run separate Claude Code sessions in each one, and merge results back, either via GitHub PRs or local squash merges. Think of it as a workflow multiplexer for running multiple Claude agents in parallel without conflicts.
+
+For a walkthrough of the motivation and a real session example, see [Parallel Claudes with cw](/logs/06-parallel-claudes-with-cw).
+
+## Install
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/joyco-studio/cw/main/install.sh | bash
+```
+
+Requires Git, Bash, [Claude Code](https://docs.anthropic.com/en/docs/claude-code) and [GitHub CLI](https://cli.github.com/).
+
+## Usage
+
+```bash
+cw new auth "implement OAuth2 login"   # Create worktree + prompt to launch Claude
+cw new api --open "build REST API"     # Create worktree + immediately launch Claude
+cw ls                                  # List all active worktrees
+cw open auth "continue auth work"      # Reopen Claude in an existing worktree
+cw merge auth                          # Push branch & create a GitHub PR
+cw merge api --local                   # Squash-merge locally, no PR
+cw rm api                              # Remove a worktree
+cw clean                               # Remove all cw worktrees
+```
+
+## Commands
+
+| Command | Description |
+| --- | --- |
+| `cw new <name> [flags] [prompt]` | Create a worktree at `.worktrees/<name>` on branch `cw/<name>`. Use `--open` / `--no-open` to control launching Claude. |
+| `cw open <name> [prompt]` | Open Claude Code in an existing worktree with an optional prompt. |
+| `cw merge <name>` | Push to remote and create a PR via GitHub CLI, then remove the local worktree. Add `--local` to squash-merge locally instead. |
+| `cw cd <name>` | Navigate into a worktree directory. |
+| `cw ls` | List all active cw worktrees. |
+| `cw rm <name>` | Remove a single worktree. |
+| `cw clean` | Remove all cw-managed worktrees. |

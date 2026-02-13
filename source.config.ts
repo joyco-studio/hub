@@ -8,6 +8,7 @@ import {
   frontmatterSchema,
   metaSchema,
 } from 'fumadocs-mdx/config'
+import { remarkMdxMermaid } from 'fumadocs-core/mdx-plugins'
 
 import { transformers } from './lib/shiki'
 import { cn } from './lib/utils'
@@ -52,6 +53,7 @@ export const docs = defineDocs({
 
 export default defineConfig({
   mdxOptions: {
+    remarkPlugins: [remarkMdxMermaid],
     rehypePlugins: (plugins) => {
       plugins.shift()
       plugins.push([
