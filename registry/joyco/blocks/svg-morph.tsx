@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { interpolate } from 'flubber'
 import { animate, motion, useMotionValue, useTransform } from 'motion/react'
 
@@ -20,8 +20,8 @@ function SvgMorphPath({
   const [pathIndex, setPathIndex] = useState(0)
   const progress = useMotionValue(pathIndex)
 
-  const loopedPaths = [...paths, paths[0]]
-  const indices = loopedPaths.map((_, i) => i)
+  const loopedPaths = useMemo(() => [...paths, paths[0]], [paths])
+  const indices = useMemo(() => loopedPaths.map((_, i) => i), [loopedPaths])
   const d = useTransform(progress, indices, loopedPaths, {
     mixer: (a, b) => interpolate(a, b, { maxSegmentLength: 20 }),
   })
@@ -42,7 +42,7 @@ function SvgMorphPath({
     })
 
     return () => animation.stop()
-  }, [pathIndex, duration, gap, paths.length, progress])
+  }, [pathIndex, duration, gap, loopedPaths, progress])
 
   return <motion.path fill={fill} d={d} />
 }
