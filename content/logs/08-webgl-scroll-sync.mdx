@@ -347,7 +347,7 @@ This means the absolute approach works best when **all your WebGL content scroll
 
 ### When to use it
 
-When all your WebGL content scrolls with the page -- background effects, image treatments, scroll-driven transitions. Native scroll stays intact. Browser features work. Accessibility works. The constraint: any WebGL element that needs to stay fixed on screen will drift, because you're back to reading a stale scroll delta from the other side.
+When all your WebGL content scrolls with the page -- background effects, image treatments, scroll-driven transitions. Native scroll stays intact. Browser features work. The constraint: any WebGL element that needs to stay fixed on screen will drift, because you're back to reading a stale scroll delta from the other side.
 
 ## Summary
 
@@ -365,7 +365,7 @@ flowchart TD
     FIX_HOW --> FIX_CON["Main-thread scrolling<br/>Can drop frames on mobile"]
 
     ABS --> ABS_HOW["Keep native scroll:<br/>Canvas moves with page<br/>Transform corrects position"]
-    ABS_HOW --> ABS_PRO["Native scroll preserved<br/>Content stays aligned<br/>Accessibility works"]
+    ABS_HOW --> ABS_PRO["Native scroll preserved<br/>Content stays aligned"]
     ABS_HOW --> ABS_CON["Edge clipping (fix with padding)<br/>Viewport-fixed WebGL elements drift"]
 
     style PROBLEM fill:#fef9c3,stroke:#ca8a04,color:#000
