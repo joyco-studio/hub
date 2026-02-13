@@ -200,7 +200,7 @@ function Inner({
       root.removeEventListener('mouseenter', handleEnter)
       root.removeEventListener('mouseleave', applyLeave)
     }
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps -- applyTick/applyLeave are effect events, rootRef is a stable ref
 
   const Comp = asChild ? Slot : 'div'
 
