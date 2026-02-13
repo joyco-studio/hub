@@ -1,0 +1,18 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "svg-morph",
+  "type": "registry:component",
+  "title": "SVG Morph",
+  "description": "Smooth SVG path morphing animations with flubber interpolation and auto-looping.",
+  "dependencies": [
+    "flubber",
+    "motion"
+  ],
+  "files": [
+    {
+      "path": "registry/joyco/blocks/svg-morph.tsx",
+      "content": "'use client'\n\nimport { useEffect, useState } from 'react'\nimport { interpolate } from 'flubber'\nimport { animate, motion, useMotionValue, useTransform } from 'motion/react'\n\ninterface SvgMorphPathProps {\n  paths: string[]\n  duration?: number\n  gap?: number\n  fill?: string\n}\n\nfunction SvgMorphPath({\n  paths,\n  duration = 0.4,\n  gap = 0.5,\n  fill = 'currentColor',\n}: SvgMorphPathProps) {\n  const [pathIndex, setPathIndex] = useState(0)\n  const progress = useMotionValue(pathIndex)\n\n  const loopedPaths = [...paths, paths[0]]\n  const indices = loopedPaths.map((_, i) => i)\n  const d = useTransform(progress, indices, loopedPaths, {\n    mixer: (a, b) => interpolate(a, b, { maxSegmentLength: 20 }),\n  })\n\n  useEffect(() => {\n    const animation = animate(progress, pathIndex, {\n      duration,\n      ease: 'easeInOut',\n      delay: gap,\n      onComplete: () => {\n        if (pathIndex === loopedPaths.length - 1) {\n          progress.set(0)\n          setPathIndex(1)\n        } else {\n          setPathIndex(pathIndex + 1)\n        }\n      },\n    })\n\n    return () => animation.stop()\n  }, [pathIndex, duration, gap, paths.length, progress])\n\n  return <motion.path fill={fill} d={d} />\n}\n\ninterface StaticPath {\n  d: string\n  fill?: string\n}\n\ninterface SvgMorphProps {\n  svgs: {\n    paths: string[]\n    fill?: string\n  }[]\n  staticPaths?: StaticPath[]\n  viewBox: string\n  transform?: string\n  duration?: number\n  gap?: number\n  className?: string\n  width?: number | string\n  height?: number | string\n}\n\nexport default function SvgMorph({\n  svgs,\n  staticPaths,\n  viewBox,\n  transform,\n  duration,\n  gap,\n  className,\n  width,\n  height,\n}: SvgMorphProps) {\n  const children = (\n    <>\n      {staticPaths?.map((sp, i) => (\n        <path key={`static-${i}`} d={sp.d} fill={sp.fill ?? 'currentColor'} />\n      ))}\n      {svgs.map((svg, i) => (\n        <SvgMorphPath\n          key={i}\n          paths={svg.paths}\n          fill={svg.fill}\n          duration={duration}\n          gap={gap}\n        />\n      ))}\n    </>\n  )\n\n  return (\n    <svg\n      viewBox={viewBox}\n      className={className}\n      width={width}\n      height={height}\n      xmlns=\"http://www.w3.org/2000/svg\"\n    >\n      {transform ? <g transform={transform}>{children}</g> : children}\n    </svg>\n  )\n}\n",
+      "type": "registry:component"
+    }
+  ]
+}

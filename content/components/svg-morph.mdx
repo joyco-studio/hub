@@ -1,0 +1,81 @@
+---
+title: SVG Morph
+description: Smooth SVG path morphing animations with auto-looping.
+maintainers: ['alejopequeno']
+docLinks:
+  - label: 'Flubber'
+    href: 'https://github.com/veltman/flubber'
+  - label: 'Motion'
+    href: 'https://motion.dev/'
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+<ComponentPreview name="svg-morph-demo" />
+
+## Installation
+
+```bash
+npx shadcn@latest add @joyco/svg-morph
+```
+
+## Usage
+
+```tsx
+import SvgMorph from '@/components/svg-morph'
+
+const eyeOpen = 'M5830 13965 c-607 -95 ...'
+const eyeArc = 'M6151 14709 c-531 -59 ...'
+const mouth = 'M5220 7725 c-267 -162 ...'
+
+<SvgMorph
+  viewBox="0 0 2048 2048"
+  width={256}
+  height={256}
+  transform="translate(0,2048) scale(0.1,-0.1)"
+  duration={0.6}
+  gap={1.5}
+  staticPaths={[
+    { d: faceOutline, fill: 'currentColor' },
+  ]}
+  svgs={[
+    {
+      paths: [eyeOpen, eyeArc],
+      fill: 'currentColor',
+    },
+    {
+      paths: [mouth],
+      fill: 'currentColor',
+    },
+  ]}
+/>
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `svgs` | `{ paths: string[]; fill?: string }[]` | Required | Array of morph slots. Each slot has a `paths` array with the SVG path `d` strings to cycle through, and an optional `fill` color. |
+| `staticPaths` | `{ d: string; fill?: string }[]` | `undefined` | Paths rendered without animation. Useful for compound paths, fixed outlines, or elements that should not morph. |
+| `viewBox` | `string` | Required | The SVG `viewBox` attribute (e.g. `"0 0 2048 2048"`). Defines the coordinate system for all paths. |
+| `transform` | `string` | `undefined` | An SVG transform string applied to a `<g>` wrapper around all children. Useful when paths come from a different coordinate system (e.g. PostScript with inverted Y-axis). |
+| `duration` | `number` | `0.4` | Duration of each morph transition in seconds. |
+| `gap` | `number` | `0.5` | Pause between transitions in seconds. |
+| `className` | `string` | `undefined` | CSS class applied to the root `<svg>` element. |
+| `width` | `number \| string` | `undefined` | Width of the `<svg>` element. |
+| `height` | `number \| string` | `undefined` | Height of the `<svg>` element. |
+
+## Auto-Looping
+
+You only need to provide the distinct states. The component internally appends the first path to create a seamless cycle:
+
+```
+paths = [A, B, C]
+internal sequence = A → B → C → A → B → C → ...
+```
+
+## Limitations
+
+- **Fill only** — Flubber operates on filled regions. Convert strokes to outlined paths first.
+- **No compound paths** — Paths with multiple sub-paths (holes, cutouts) break flubber. Place those in `staticPaths` instead.
+- **Synchronized timing** — All morph slots share the same `duration` and `gap`.

@@ -35,6 +35,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "debounce": "^3.0.0",
+    "flubber": "^0.4.2",
     "fumadocs-core": "16.2.3",
     "fumadocs-mdx": "14.0.4",
     "fumadocs-ui": "16.2.3",
@@ -60,6 +61,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.16",
+    "@types/flubber": "^0.4.0",
     "@types/hast": "^3.0.4",
     "@types/mdx": "^2.0.13",
     "@types/node": "^24.10.0",
