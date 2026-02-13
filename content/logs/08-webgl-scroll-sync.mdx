@@ -130,7 +130,7 @@ function animate() {
 
 `scrollOffset` is the bridge between page space and canvas space. It's what makes a mesh at `pageY: 3200` appear at the right spot in your viewport-sized canvas. And it comes from `window.scrollY` -- which is always at least one frame behind the compositor.
 
-**This is the root of the drift.** Both approaches need `scrollOffset` to position meshes, but they differ in what happens when it's stale.
+**This is the root of the drift.** Every frame, your meshes are positioned with a `scrollOffset` that's already outdated. The question becomes: how do you architect around that staleness?
 
 ## Approach 1: Fixed + scroll hijack
 
