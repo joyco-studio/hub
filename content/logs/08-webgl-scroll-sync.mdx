@@ -270,7 +270,7 @@ function animate() {
 
 ### What drifts (and why it's ok)
 
-The canvas and DOM move together on the compositor -- no content drift. The only stale thing is the `transform` correction that repositions the canvas over the viewport:
+The canvas and DOM move together on the compositor -- no content drift. The only stale thing is the `transform` correction that repositions the canvas over the viewport. Here's what a single scroll looks like:
 
 ```mermaid
 sequenceDiagram
@@ -278,45 +278,29 @@ sequenceDiagram
     participant P as Page (canvas + DOM)
     participant M as Main Thread
 
+    Note over P: Initial state:<br/>scrollY = 500<br/>transform: translateY(500px)<br/>Canvas perfectly covers viewport
+
     Note over C: User scrolls 40px
-    C->>P: Move page to scrollY=540<br/>(canvas moves WITH page, instant)
-    Note over P: Canvas and DOM move together<br/>(zero drift between them)
+    C->>P: Compositor moves page to scrollY=540<br/>(canvas + DOM shift together, instant)
+    Note over P: Canvas and DOM still aligned with each other<br/>but transform still says 500px<br/>→ 40px gap at the edge
     Note over M: rAF fires
     M->>M: Read scrollY = 540
-    M->>P: Apply transform to reposition canvas
-    Note over C: User scrolls another 8px
-    C->>P: Move page to scrollY=548<br/>(instant, before transform lands)
-    Note over P: Transform correction is 8px stale<br/>→ canvas edges slightly off viewport
-    Note over P: But content inside still matches DOM
+    M->>P: Update transform to translateY(540px)
+    Note over P: Transform catches up<br/>Canvas covers viewport again
 ```
 
-With the fixed approach, the **content** drifts (images separate from placeholders). With absolute, the **edges** drift (canvas doesn't perfectly cover the viewport). Content stays locked to the DOM.
+The compositor scroll creates a delta between where the canvas sits (page space) and where JS last told it to sit (the transform). That delta is the edge drift -- it only lasts until the next frame when JS catches up. The content inside the canvas never drifts from the DOM because they're on the same side of the compositor.
 
-```mermaid
-flowchart TD
-    S["User scrolls 40px"] --> F["Fixed: canvas stays put"]
-    S --> A["Absolute: canvas scrolls with page"]
-
-    F --> F1["JS repositions content with stale scrollY"]
-    F1 --> F2["❌ WebGL images separate from DOM"]
-
-    A --> A1["Content already aligned — JS only corrects viewport edges"]
-    A1 --> A2["✅ 8px edge drift, content stays locked"]
-
-    style F2 fill:#fecaca,stroke:#dc2626,color:#000
-    style A2 fill:#bbf7d0,stroke:#16a34a,color:#000
-```
-
-| | Fixed + hijack | Absolute |
+| | JS-driven scroll (Lenis) | Absolute |
 |---|---|---|
 | **Canvas lives in** | Window (W) | Page (P) |
-| **What's stale** | Nothing (JS is source of truth) | The transform correction (W position) |
-| **What drifts** | Nothing -- but native scroll is dead | Canvas edges vs viewport bounds |
-| **Visible as** | Laggy scroll on mobile | Slight edge clipping during fast scroll |
+| **What's stale** | Nothing (JS drives scrollTop) | The transform correction (W position) |
+| **What drifts** | Nothing -- but scroll is main-thread bound | Canvas edges vs viewport bounds |
+| **Visible as** | Dropped frames under load | Slight edge clipping during fast scroll |
 
 ### Solving the edge clipping with padding
 
-Edge clipping during fast scroll is solved by rendering the canvas larger than the viewport. Add 25% vertical padding top and bottom (canvas = 150% viewport height). Even with a few frames of stale transform, the extra rendered area covers the viewport:
+Edge clipping during fast scroll is solved by rendering the canvas larger than the viewport. Add 25% vertical padding top and bottom (canvas = 150% viewport height). Adding this padding buffer lets the translate catch up when the impl layer syncs -- even with a few frames of stale transform, the extra rendered area covers the viewport:
 
 ```mermaid
 flowchart TD
@@ -340,7 +324,7 @@ flowchart TD
 
 This is the main tradeoff of the absolute approach. The canvas lives on the **P** side -- that's the whole point, it moves with the page on the compositor. But what if you need to render a WebGL element that stays **fixed on screen**? A floating logo, a HUD, a persistent UI element -- all rendered on the canvas, not in the DOM.
 
-To pin a WebGL element to the viewport, you'd need to counter-translate it by the scroll delta: subtract `scrollY` from its position so it stays put while everything else scrolls. But that `scrollY` is stale -- the compositor has already moved the canvas further than what JS knows. You're back to the exact same 1-frame lag that the fixed approach suffers from, just for this one element.
+To keep a WebGL element fixed on screen, you don't need to translate anything -- it would just sit at its viewport position. The problem is that the canvas is on the page side. When the compositor scrolls, it takes the entire canvas with it, including your "fixed" element. That compositor scroll instantly displaces it. JS hasn't caught up yet, so for that frame the element slides with the page when it should have stayed put. That's the jelly -- the element gets dragged by the compositor scroll until the next rAF where JS can correct it back.
 
 ```mermaid
 sequenceDiagram
@@ -348,19 +332,18 @@ sequenceDiagram
     participant P as Page (canvas here)
     participant M as Main Thread
 
+    Note over P: "Fixed" element sitting at<br/>its viewport position on the canvas
     Note over C: User scrolls 40px
-    C->>P: Move page to scrollY=540<br/>(canvas moves with page)
-    Note over P: All page-side WebGL elements<br/>move with DOM ✓
+    C->>P: Compositor moves page to scrollY=540<br/>(entire canvas shifts, including the "fixed" element)
+    Note over P: Element dragged 40px with the page<br/>→ visibly displaced from where it should be
     Note over M: rAF fires: reads scrollY=540
-    M->>M: For the "fixed" element:<br/>subtract scrollY to pin it
-    Note over C: Compositor already at 548
-    Note over P: Fixed element is pinned<br/>to scrollY=540, not 548
-    Note over P: 8px drift — same jelly<br/>as the fixed approach
+    M->>M: Correct element position back<br/>to where it should be on screen
+    Note over P: Element snaps back into place<br/>but for that frame it was wrong → jelly
 ```
 
-You chose the P side to get free compositor sync for page-bound content. But viewport-fixed content needs the delta from the W side -- and that delta is always stale. You can't have both: the compositor gives you one side for free, the other is always a frame behind.
+You chose the P side to get free compositor sync for page-bound content. But viewport-fixed content gets dragged by the compositor scroll every frame, snapping back only when JS catches up. You can't have both: the compositor gives you one side for free, the other is always a frame behind.
 
-This means the absolute approach works best when **all your WebGL content scrolls with the page**. The moment you need a viewport-pinned WebGL element, you're fighting the same battle the fixed approach fights for everything.
+This means the absolute approach works best when **all your WebGL content scrolls with the page**. The moment you need a viewport-pinned WebGL element, you're fighting the same jelly effect.
 
 ### When to use it
 
