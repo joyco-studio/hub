@@ -1,22 +1,27 @@
+import { createHash } from 'node:crypto'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import type { Root, Element, ElementContent } from 'hast'
-import {
-  createMermaidRenderer,
-  type MermaidRenderer,
-} from 'mermaid-isomorphic'
 import { fromHtmlIsomorphic } from 'hast-util-from-html-isomorphic'
 import { toText } from 'hast-util-to-text'
 import { visitParents } from 'unist-util-visit-parents'
 import type { VFile } from 'vfile'
 
-let renderer: MermaidRenderer | undefined
+const GENERATED_DIR = join(process.cwd(), 'generated', 'mermaid')
+
+function hashDiagram(source: string): string {
+  return createHash('sha256').update(source.trim()).digest('hex').slice(0, 12)
+}
 
 /**
- * Rehype plugin that renders Mermaid diagrams at build time with dual-theme support.
- * Generates both light and dark SVGs and uses CSS class-based toggling
- * compatible with next-themes.
+ * Rehype plugin that inlines pre-rendered Mermaid SVGs at build time.
+ *
+ * Looks up SVGs in generated/mermaid/{hash}-{light,dark}.svg — these are
+ * created by `node scripts/render-mermaid.mjs` (which needs Playwright).
+ * The build itself needs no browser dependency.
  */
 export default function rehypeMermaidDualTheme() {
-  return async (tree: Root, file: VFile) => {
+  return (tree: Root, file: VFile) => {
     type DiagramInstance = {
       preElement: Element
       preParent: Element | Root
@@ -28,7 +33,6 @@ export default function rehypeMermaidDualTheme() {
     visitParents(tree, 'element', (node, ancestors) => {
       const element = node as Element
 
-      // Match <code class="language-mermaid"> inside <pre>
       if (element.tagName !== 'code') return
       const className = element.properties?.className
       if (!Array.isArray(className)) return
@@ -57,54 +61,30 @@ export default function rehypeMermaidDualTheme() {
 
     if (instances.length === 0) return
 
-    if (!renderer) {
-      renderer = createMermaidRenderer()
-    }
-
-    const diagrams = instances.map((i) => i.diagram)
-
-    // Render both light and dark versions in parallel
-    const [lightResults, darkResults] = await Promise.all([
-      renderer(diagrams, {
-        mermaidConfig: { theme: 'default' },
-        prefix: 'mermaid-light',
-      }),
-      renderer(diagrams, {
-        mermaidConfig: { theme: 'dark' },
-        prefix: 'mermaid-dark',
-      }),
-    ])
-
-    // Process in reverse order to preserve indices when replacing
     for (let i = instances.length - 1; i >= 0; i--) {
-      const { preElement, preParent } = instances[i]
-      const lightResult = lightResults[i]
-      const darkResult = darkResults[i]
+      const { preElement, preParent, diagram } = instances[i]
+      const hash = hashDiagram(diagram)
 
-      if (
-        lightResult.status !== 'fulfilled' ||
-        darkResult.status !== 'fulfilled'
-      ) {
-        const error =
-          lightResult.status === 'rejected'
-            ? lightResult.reason
-            : darkResult.status === 'rejected'
-              ? darkResult.reason
-              : new Error('Unknown render error')
-        file.message(`Failed to render mermaid diagram: ${error.message}`)
+      let lightSvgStr: string
+      let darkSvgStr: string
+      try {
+        lightSvgStr = readFileSync(join(GENERATED_DIR, `${hash}-light.svg`), 'utf-8')
+        darkSvgStr = readFileSync(join(GENERATED_DIR, `${hash}-dark.svg`), 'utf-8')
+      } catch {
+        file.message(
+          `Missing pre-rendered SVG for mermaid diagram (hash: ${hash}). ` +
+            'Run `node scripts/render-mermaid.mjs` to generate it.'
+        )
         continue
       }
 
-      const lightSvg = fromHtmlIsomorphic(lightResult.value.svg, {
+      const lightSvg = fromHtmlIsomorphic(lightSvgStr, {
         fragment: true,
       }).children[0] as ElementContent
-      const darkSvg = fromHtmlIsomorphic(darkResult.value.svg, {
+      const darkSvg = fromHtmlIsomorphic(darkSvgStr, {
         fragment: true,
       }).children[0] as ElementContent
 
-      // Wrap in themed containers:
-      // - [data-mermaid-theme="light"] is shown by default, hidden when .dark or .terminal
-      // - [data-mermaid-theme="dark"] is hidden by default, shown when .dark or .terminal
       const wrapper: Element = {
         type: 'element',
         tagName: 'div',
