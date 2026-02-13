@@ -43,3 +43,4 @@ next-env.d.ts
 # source
 .source
 .env*.local
+.worktrees/

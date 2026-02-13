@@ -14,6 +14,7 @@ import CubeIcon from '@/components/icons/3d-cube'
 import TerminalWithCursorIcon from '@/components/icons/terminal-w-cursor'
 import FileIcon from '@/components/icons/file'
 import type { SidebarItemMeta } from './sidebar/section'
+import { MetaBadge } from '@/components/layout/meta-badge'
 import { SearchResults } from './sidebar/search-results'
 import { NoResults } from './sidebar/no-results'
 import { useSearch, type SearchResult } from '@/hooks/use-search'
@@ -323,16 +324,7 @@ function MobileMenuSection({ folder, itemMeta = {} }: MobileMenuSectionProps) {
                   )}
                   <span className="truncate">{child.name}</span>
                   {meta.badge && (
-                    <span
-                      className={cn(
-                        'ml-auto shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase',
-                        meta.badge === 'new' && 'bg-blue-500/20 text-blue-400',
-                        meta.badge === 'updated' &&
-                          'bg-orange-500/20 text-orange-400'
-                      )}
-                    >
-                      {meta.badge}
-                    </span>
+                    <MetaBadge type={meta.badge} className="ml-auto" />
                   )}
                 </Link>
               )
