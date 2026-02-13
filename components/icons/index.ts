@@ -1,5 +1,7 @@
 export { default as CubeIcon } from './3d-cube'
 export { default as BlueskyIcon } from './bluesky'
+export { default as ChatGPTIcon } from './chatgpt'
+export { default as ClaudeIcon } from './claude'
 export { default as CaretDownIcon } from './caret-down'
 export { default as CaretLeftIcon } from './caret-left'
 export { default as CaretRightIcon } from './caret-right'

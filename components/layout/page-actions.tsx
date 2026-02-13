@@ -18,8 +18,24 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Kbd } from '@/components/ui/kbd'
 import CursorIcon from '@/components/icons/cursor'
+import ClaudeIcon from '@/components/icons/claude'
+import ChatGPTIcon from '@/components/icons/chatgpt'
 import MarkdownIcon from '@/components/icons/markdown'
 import CopyIcon from '@/components/icons/copy'
+
+function getAIChatPrompt(pageUrl: string) {
+  return `Based on this post context: ${pageUrl}\n\nI have some questions:`
+}
+
+function getClaudeUrl(pageUrl: string) {
+  const prompt = getAIChatPrompt(pageUrl)
+  return `https://claude.ai/new?q=${encodeURIComponent(prompt)}`
+}
+
+function getChatGPTUrl(pageUrl: string) {
+  const prompt = getAIChatPrompt(pageUrl)
+  return `https://chatgpt.com/?q=${encodeURIComponent(prompt)}`
+}
 
 export function PageActions({
   content,
@@ -137,6 +153,7 @@ function PageActionsDropdown({
 }) {
   const { emit } = useActionHint()
   const [open, setOpen] = useState(false)
+  const getLlmPageUrl = () => `${window.location.origin}${llmUrl}`
 
   useEffect(() => {
     if (!showShortcuts) return
@@ -242,6 +259,26 @@ function PageActionsDropdown({
           Open in Cursor
           <Kbd className={cn('ml-auto', { hidden: !showShortcuts })}>⌘I</Kbd>
         </DropdownMenuItem>
+        {llmUrl && (
+          <DropdownMenuItem
+            className="text-xs"
+            onSelect={() => window.open(getClaudeUrl(getLlmPageUrl()), '_blank')}
+          >
+            <ClaudeIcon />
+            Open in Claude
+          </DropdownMenuItem>
+        )}
+        {llmUrl && (
+          <DropdownMenuItem
+            className="text-xs"
+            onSelect={() =>
+              window.open(getChatGPTUrl(getLlmPageUrl()), '_blank')
+            }
+          >
+            <ChatGPTIcon />
+            Open in ChatGPT
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )
