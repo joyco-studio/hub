@@ -270,20 +270,17 @@ With the fixed approach, the **content** drifts (images separate from placeholde
 
 ```mermaid
 flowchart TD
-    subgraph fixed ["Fixed approach drift"]
-        direction TB
-        F1["Canvas stays in window"] --> F2["Content rendered with stale scrollY"]
-        F2 --> F3["WebGL images separate<br/>from DOM placeholders"]
-    end
+    S["User scrolls 40px"] --> F["Fixed: canvas stays put"]
+    S --> A["Absolute: canvas scrolls with page"]
 
-    subgraph absolute ["Absolute approach drift"]
-        direction TB
-        A1["Canvas moves with page"] --> A2["Content stays aligned with DOM"]
-        A2 --> A3["Canvas edges slightly miss<br/>viewport bounds"]
-    end
+    F --> F1["JS repositions content with stale scrollY"]
+    F1 --> F2["❌ WebGL images separate from DOM"]
 
-    style fixed fill:#fecaca,stroke:#dc2626,color:#000
-    style absolute fill:#bbf7d0,stroke:#16a34a,color:#000
+    A --> A1["Content already aligned — JS only corrects viewport edges"]
+    A1 --> A2["✅ 8px edge drift, content stays locked"]
+
+    style F2 fill:#fecaca,stroke:#dc2626,color:#000
+    style A2 fill:#bbf7d0,stroke:#16a34a,color:#000
 ```
 
 | | Fixed + hijack | Absolute |
