@@ -1,0 +1,80 @@
+---
+title: Magnetic
+description: A cursor-attraction wrapper that makes inner content subtly follow the mouse position.
+maintainers: ['fabroos']
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+<ComponentPreview name="magnetic-demo" />
+
+## Installation
+
+```bash
+npx shadcn@latest add @joyco/magnetic
+```
+
+## Usage
+
+```tsx
+import * as Magnetic from '@/components/magnetic'
+
+<Magnetic.Root>
+  <Magnetic.Inner>
+    <button>Hover me</button>
+  </Magnetic.Inner>
+</Magnetic.Root>
+```
+
+### With asChild
+
+Use `asChild` on both `Root` and `Inner` to render as the child element without a wrapper `div`:
+
+```tsx
+<Magnetic.Root asChild>
+  <a href="/about">
+    <Magnetic.Inner asChild>
+      <span>About</span>
+    </Magnetic.Inner>
+  </a>
+</Magnetic.Root>
+```
+
+### Custom strength and ease
+
+```tsx
+<Magnetic.Root strength={0.5} ease={500}>
+  <Magnetic.Inner>Click</Magnetic.Inner>
+</Magnetic.Root>
+```
+
+## Props
+
+### Root
+
+Extends `React.ComponentPropsWithRef<'div'>`.
+
+| Prop       | Type      | Default | Description                                    |
+| ---------- | --------- | ------- | ---------------------------------------------- |
+| `asChild`  | `boolean` | `false` | Render as child element via Slot               |
+| `strength` | `number`  | `0.35`  | How strongly inner content follows cursor (0–1) |
+| `ease`     | `number`  | `350`   | Return-to-center transition duration in ms     |
+
+### Inner
+
+Extends `React.ComponentPropsWithRef<'div'>`.
+
+| Prop      | Type      | Default | Description                      |
+| --------- | --------- | ------- | -------------------------------- |
+| `asChild` | `boolean` | `false` | Render as child element via Slot |
+
+## Accessibility
+
+The component respects the `prefers-reduced-motion` media query. When reduced motion is enabled, all magnetic transforms are disabled and the inner content remains stationary.
+
+## How It Works
+
+1. **Root** captures `mousemove` events and stores the cursor position in a ref (no re-renders).
+2. **Inner** attaches native `mouseenter`/`mouseleave` listeners on the Root DOM node.
+3. On hover, a `requestAnimationFrame` loop interpolates the inner element's `translate` toward the cursor offset multiplied by `strength`.
+4. On leave, the RAF loop stops and a CSS transition eases the element back to `translate(0, 0)`.

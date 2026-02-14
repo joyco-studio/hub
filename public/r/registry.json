@@ -178,6 +178,23 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "magnetic",
+      "type": "registry:component",
+      "title": "Magnetic",
+      "description": "A cursor-attraction wrapper that makes inner content subtly follow the mouse position.",
+      "files": [
+        {
+          "path": "registry/joyco/blocks/magnetic.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "lib/compose-refs.ts",
+          "type": "registry:lib"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-slot"]
     }
   ]
 }
