@@ -145,12 +145,12 @@ flowchart LR
     subgraph viewport ["Window (W)"]
         direction TB
         CANVAS["Canvas<br/>(fixed to window)"]
-        CONTENT["DOM content<br/>(scrolls natively via scrollTop)"]
+        VIEW["Viewport<br/>(what user sees)"]
     end
 
     subgraph page ["Page (P)"]
         direction TB
-        SCROLL["Real scrollbar<br/>(scrollTop animated by JS)"]
+        CONTENT["DOM content"]
     end
 
     viewport ---|"D (delta)<br/>JS animates scrollTop,<br/>reads it back for canvas"| page
@@ -239,6 +239,7 @@ flowchart LR
     style viewport fill:#bfdbfe,stroke:#2563eb,color:#000
     style page fill:#f0fdf4,stroke:#16a34a,color:#000
     style CANVAS fill:#e9d5ff,stroke:#7c3aed,color:#000
+    style DOM fill:#dbeafe,stroke:#3b82f6,color:#000
 ```
 
 The canvas sits on the **P** side. The compositor moves the page, and the canvas with it, instantly. DOM elements and the canvas move together on the GPU. JS only needs to correct the canvas position and re-render the WebGL scene.
