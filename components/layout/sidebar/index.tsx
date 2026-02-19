@@ -30,6 +30,18 @@ export function RegistrySidebar({ tree, itemMeta = {}, gameSlugs = [] }: Registr
   const { query, setQuery, results, hasResults, isEmpty, isLoading } =
     useSearch()
 
+  // Auto-select first result when search results appear
+  const [selectedValue, setSelectedValue] = React.useState<string>()
+  
+  React.useEffect(() => {
+    if (hasResults && results.length > 0) {
+      const firstUrl = results[0].url.split('#')[0]
+      setSelectedValue(firstUrl)
+    } else {
+      setSelectedValue(undefined)
+    }
+  }, [hasResults, results])
+
   // Get all folders from the tree
   const folders = tree.children.filter(
     (child): child is PageTree.Folder => child.type === 'folder'
@@ -95,6 +107,8 @@ export function RegistrySidebar({ tree, itemMeta = {}, gameSlugs = [] }: Registr
       <Command
         shouldFilter={false}
         loop
+        value={selectedValue}
+        onValueChange={setSelectedValue}
         className="w-sidebar-width flex flex-col gap-1 text-sm"
         suppressHydrationWarning
       >
