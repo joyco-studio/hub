@@ -178,6 +178,23 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "svg-morph",
+      "type": "registry:component",
+      "title": "SVG Morph",
+      "description": "Smooth SVG path morphing animations with flubber interpolation. Supports auto-looping and controlled step mode.",
+      "files": [
+        {
+          "path": "registry/joyco/blocks/svg-morph.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "hooks/use-svg-morph.ts",
+          "type": "registry:hook"
+        }
+      ],
+      "dependencies": ["flubber", "motion"]
     }
   ]
 }

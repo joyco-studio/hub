@@ -1,0 +1,87 @@
+'use client'
+
+import SvgMorph from '@/registry/joyco/blocks/svg-morph'
+import { useSvgMorph } from '@/hooks/use-svg-morph'
+
+const faceOutline =
+  'M984 1A1026 1026 0 0 0 60 1372a1027 1027 0 0 0 1179 653A1025 1025 0 0 0 984 1zm81 124a894 894 0 0 1 788 549 901 901 0 1 1-788-549z'
+
+const leftEye1 = 'M583 652a122 122 0 1 0 39 240 122 122 0 0 0-39-240z'
+const leftEye2 =
+  'M615 577c-53 6-102 30-145 73-34 33-60 70-85 119-12 24-28 62-27 64a7913 7913 0 0 0 117 41c0-3 12-31 20-47 27-57 61-96 99-115 32-16 58-16 90 1 14 7 26 16 41 30a344 344 0 0 1 77 132l115-42a506 506 0 0 0-80-149c-13-16-39-43-53-54a235 235 0 0 0-169-53z'
+const leftEye3 =
+  'M536 557a318 318 0 0 0-247 165l-3 6 53 29 54 30a234 234 0 0 1 71-76 173 173 0 0 1 211 11 233 233 0 0 1 55 66l55-30 53-30-3-6-31-45a305 305 0 0 0-269-120z'
+
+const rightEye1 = 'M1423 652a122 122 0 1 0 39 240 122 122 0 0 0-39-240z'
+const rightEye2 =
+  'M1387 577c-53 6-102 30-145 73-34 33-60 70-85 119-12 24-28 62-27 64a7913 7913 0 0 0 117 41c0-3 12-31 20-47 27-57 61-96 99-115 32-16 58-16 90 1 14 7 26 16 41 30a344 344 0 0 1 77 132l115-42a516 516 0 0 0-80-149c-13-16-39-43-53-54a235 235 0 0 0-169-53z'
+const rightEye3 =
+  'M1428 557a318 318 0 0 0-247 165l-3 6 53 29 54 30a248 248 0 0 1 71-76 173 173 0 0 1 211 11 233 233 0 0 1 55 66l55-30 53-30-3-6-31-45a305 305 0 0 0-269-120z'
+
+const mouth1 =
+  'M522 1276l-53 31-4 3 2 4 15 23a691 691 0 0 0 265 237 640 640 0 0 0 394 55 656 656 0 0 0 446-319l-106-63-7 10a555 555 0 0 1-224 207 503 503 0 0 1-594-108 551 551 0 0 1-84-108c-1-2-7 1-50 28z'
+const mouth2 =
+  'M468 1176l-55 27-13 6 9 19a835 835 0 0 0 329 363 583 583 0 0 0 638-39 862 862 0 0 0 276-344l-112-52-6 11-16 32a710 710 0 0 1-228 262 485 485 0 0 1-309 81c-76-9-143-33-210-76a682 682 0 0 1-201-206 942 942 0 0 1-58-104l-44 20z'
+const mouth3 =
+  'M281 967l5 34c12 89 22 141 41 203a752 752 0 0 0 328 439 696 696 0 0 0 451 90c104-13 209-52 297-110a756 756 0 0 0 331-551l9-105v-3H281v3z'
+
+const STEPS = ['Neutral', 'Smile', 'Big Smile']
+
+export function SvgMorphControlledDemo() {
+  const { step, setStep, next, prev, isFirst, isLast } = useSvgMorph({
+    totalSteps: STEPS.length,
+  })
+
+  return (
+    <div className="flex flex-col items-center justify-center gap-6 py-14">
+      <SvgMorph
+        viewBox="0 0 2048 2048"
+        width={256}
+        height={256}
+        duration={0.5}
+        step={step}
+        staticPaths={[{ d: faceOutline, fill: 'currentColor' }]}
+        svgs={[
+          { paths: [leftEye1, leftEye2, leftEye3], fill: 'currentColor' },
+          { paths: [rightEye1, rightEye2, rightEye3], fill: 'currentColor' },
+          { paths: [mouth1, mouth2, mouth3], fill: 'currentColor' },
+        ]}
+      />
+      <div className="flex items-center gap-1">
+        <button
+          onClick={prev}
+          disabled={isFirst}
+          className="px-2 py-1 text-sm transition-opacity disabled:opacity-20"
+          aria-label="Previous step"
+        >
+          &larr;
+        </button>
+        {STEPS.map((label, i) => (
+          <span key={label} className="flex items-center gap-1">
+            {i > 0 && <span className="text-sm opacity-20 select-none">|</span>}
+            <button
+              onClick={() => setStep(i)}
+              className={`px-2 py-1 text-sm transition-opacity ${
+                step === i
+                  ? 'font-semibold opacity-100'
+                  : 'opacity-40 hover:opacity-70'
+              }`}
+            >
+              {label}
+            </button>
+          </span>
+        ))}
+        <button
+          onClick={next}
+          disabled={isLast}
+          className="px-2 py-1 text-sm transition-opacity disabled:opacity-20"
+          aria-label="Next step"
+        >
+          &rarr;
+        </button>
+      </div>
+    </div>
+  )
+}
+
+export default SvgMorphControlledDemo

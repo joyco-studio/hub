@@ -20,6 +20,7 @@ const MTPRZ_AVATAR = '/static/c/matiasperz.webp'
 const JOYCO_AVATAR = '/static/c/joyco.webp'
 const JOYBOY_AVATAR = '/static/c/joyboy.webp'
 const FABROOS_AVATAR = '/static/c/fabroos.webp'
+const PEK_AVATAR = '/static/c/pek.webp'
 
 const ANSW_SET = [
   "Processing your request... beep boop... just kidding, I'm way more sophisticated than that. Probably.",
@@ -81,6 +82,16 @@ const initialChat: Chat[] = [
     content: 'You are absolutely right!',
     role: 'peer',
     timestamp: new Date('2025-12-26T01:03:00.000Z'),
+  },
+  {
+    type: 'message',
+    id: '5',
+    avatar: PEK_AVATAR,
+    name: 'PEK',
+    fallback: 'P',
+    content: 'I told him to use a linter... lol',
+    role: 'peer',
+    timestamp: new Date('2025-12-26T01:05:00.000Z'),
   },
   { type: 'event', id: '4', content: '__JOYBOY__ left the group' },
 ]
