@@ -42,6 +42,5 @@
     "name": "Image Upscaler",
     "link": "https://image-upscaling.net/upscaling/en.html"
   },
-  { "name": "OKLCH Picker", "link": "https://oklch.com/" },
-  { "name": "OKLCH Bulk Convert", "link": "https://oklch.fyi/bulk-convert" }
+  { "name": "OKLCH Picker", "link": "https://oklch.com/" }
 ]
