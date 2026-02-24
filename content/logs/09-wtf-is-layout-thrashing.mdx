@@ -5,7 +5,7 @@ author: 'matiasperz'
 
 Layout thrashing is when JavaScript repeatedly writes to the DOM and then reads layout-dependent properties in the same frame, forcing the browser to recalculate layout synchronously instead of batching it. Each read-after-write cycle is called a **forced reflow**, and when they happen dozens or hundreds of times per frame, your animation goes from 60fps to slideshow.
 
-This post breaks down a real case we found and fixed in our codebase.
+This post breaks down two real cases we found and fixed in our codebase.
 
 ## How the browser renders a frame
 
@@ -138,6 +138,111 @@ Replace `top`/`left` with GSAP's `y`/`x` shorthand, which maps to `translateY`/`
 Now when GSAP renders the highlight tween, it reads `transform` instead of `top`. Transforms don't require layout, so even though the SVG path was just modified, no forced reflow happens. The browser batches the layout computation into the next natural paint.
 
 The bracket proxy `onUpdate` that writes to the SVG path **stays as-is** — it was never the problem. It only **invalidated** layout. The problem was the **read** that followed.
+
+## The second bug: GSAP + SVG `setAttribute`
+
+Same codebase, different component. A Chrome DevTools trace showed **1,010 forced reflows in 7 seconds** — 413 in a single 1-second window — all from GSAP animating SVG gradient positions.
+
+### The code
+
+A `PulseLine` component sweeps a `<linearGradient>` down a vertical line by animating its `y1`/`y2` attributes:
+
+```tsx showLineNumbers
+tl.fromTo(
+  pulseGradientEl,
+  { attr: { y1: -40, y2: 0 } },
+  { attr: { y1: 162, y2: 202 }, duration: 1, ease: 'none' }
+)
+```
+
+A `usePulseConnections` hook does the same for diagonal connection lines, animating `x1`/`y1`/`x2`/`y2` on 9 gradient elements:
+
+```tsx showLineNumbers
+pulseTl.fromTo(
+  gradientEl,
+  { attr: { x1: fromX, y1: fromY, x2: fromX2, y2: fromY2 } },
+  { attr: { x1: toX, y1: toY, x2: toX2, y2: toY2 }, duration: 0.8, ease: 'none' }
+)
+```
+
+### Why `setAttribute` thrashes
+
+This is a different mechanism than the `top` + `getComputedStyle` bug above. There's no explicit read/write interleaving in our code — the thrashing happens inside GSAP's `attr` plugin.
+
+GSAP's `AttrPlugin` calls `element.setAttribute(name, value)` for each property, one by one. For SVG geometry attributes (`y1`, `y2`, `x1`, `x2` on `<linearGradient>`), each `setAttribute` call immediately **invalidates layout**. If the browser's rendering internals (or GSAP's nested render pipeline) touch anything layout-dependent between sets, a **synchronous layout** is forced.
+
+The trace confirmed this — the thrashing came from GSAP's own render chain:
+
+| Caller | Forced layouts |
+|--------|---------------|
+| `ut → render → i.render` (GSAP core render) | 620 |
+| `render → i.render → i.render` (nested render) | 120 |
+| `onUpdate → eg → i.render` (app callback) | 118 |
+
+With 9 gradients × 2–4 attributes each × 60 frames/sec, you get hundreds of `InvalidateLayout → Layout` pairs per second. Each one is a synchronous detour in the middle of the animation tick.
+
+### Why CSS custom properties don't thrash
+
+`style.setProperty('--pulse-y1', '50')` doesn't invalidate layout. Custom properties are inert tokens — the browser doesn't know or care what they mean. It just marks the element's style as dirty and moves on.
+
+The actual geometry change only happens later, when the browser resolves `y1: calc(var(--pulse-y1) * 1px)` during its **normal scheduled style recalculation** — once per frame, after all JS has finished. All variable updates within a single GSAP tick get batched into that one pass.
+
+```
+setAttribute('y1', '50')        → Immediate layout invalidation
+setAttribute('y2', '90')        → Another invalidation, possible forced layout between
+
+style.setProperty('--y1', '50') → Style marked dirty (no layout involved)
+style.setProperty('--y2', '90') → Style marked dirty (no layout involved)
+                                → Browser resolves both in one batched style recalc + layout
+```
+
+### The fix
+
+**Step 1:** Add a CSS binding inside each SVG that maps custom properties to gradient geometry:
+
+```tsx showLineNumbers
+<defs>
+  <style>{`
+    [data-pulse-gradient] {
+      x1: calc(var(--pulse-x1) * 1px);
+      y1: calc(var(--pulse-y1) * 1px);
+      x2: calc(var(--pulse-x2) * 1px);
+      y2: calc(var(--pulse-y2) * 1px);
+    }
+  `}</style>
+</defs>
+```
+
+This works because SVG 2 promotes `x1`/`y1`/`x2`/`y2` to CSS properties, so they can be set via stylesheets. The `calc(var(...) * 1px)` converts the unitless number from the custom property into a valid CSS `<length>`.
+
+**Step 2:** Replace the SVG attributes on the gradient element with initial CSS custom properties:
+
+```diff showLineNumbers
+  <linearGradient
+    id={pulseGradientId}
++   data-pulse-gradient
+    x1="17.2998"
+-   y1="-40"
+    x2="17.2998"
+-   y2="0"
+    gradientUnits="userSpaceOnUse"
++   style={{ '--pulse-y1': -40, '--pulse-y2': 0 }}
+  >
+```
+
+**Step 3:** Swap GSAP's `attr:` for CSS variable animation:
+
+```diff showLineNumbers
+  tl.fromTo(
+    pulseGradientEl,
+-   { attr: { y1: -40, y2: 0 } },
+-   { attr: { y1: 162, y2: 202 }, duration: 1, ease: 'none' }
++   { '--pulse-y1': -40, '--pulse-y2': 0 },
++   { '--pulse-y1': 162, '--pulse-y2': 202, duration: 1, ease: 'none' }
+  )
+```
+
+When GSAP encounters properties starting with `--`, it uses `element.style.setProperty()` instead of `setAttribute()`. No layout invalidation, no forced reflows. The ~1,010 synchronous layout pairs drop to zero.
 
 ## Rules of thumb
 
