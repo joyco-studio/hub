@@ -8,7 +8,8 @@
     "gsap"
   ],
   "registryDependencies": [
-    "@joyco/scramble"
+    "@joyco/scramble",
+    "button"
   ],
   "files": [
     {
