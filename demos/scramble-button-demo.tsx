@@ -13,19 +13,19 @@ function ScrambleButtonDemo() {
         <ScrambleButton
           text="GET STARTED"
           scramble={scrambled}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 cursor-pointer rounded-md px-5 py-2 text-sm font-medium tracking-wider uppercase transition-colors"
+          variant="default"
         />
         <ScrambleButton
           text="LEARN MORE"
           scramble={scrambled}
-          scrambleChars="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-          className="bg-secondary text-secondary-foreground hover:bg-secondary/80 h-10 cursor-pointer rounded-md px-5 py-2 text-sm font-medium tracking-wider uppercase transition-colors"
+          chars="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+          variant="secondary"
         />
         <ScrambleButton
           text="SUBSCRIBE"
           scramble={scrambled}
-          scrambleChars="01"
-          className="border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground h-10 cursor-pointer rounded-md border px-5 py-2 text-sm font-medium tracking-wider uppercase transition-colors"
+          chars="01"
+          variant="outline"
         />
       </div>
 

@@ -11,10 +11,14 @@ export interface ScrambleEffectConfig {
   duration?: number
   /** GSAP ease string. */
   ease?: string
-  /** Seconds of full scramble before characters start resolving. */
-  revealDelay?: number
-  /** How many scramble frames each character gets before resolving (higher = more chaotic). */
-  scrambleFrames?: number
+  /** How many randomization cycles each character gets before resolving (higher = more chaotic). */
+  cycles?: number
+  /** Probability (0–1) that each character scrambles. Default 1. */
+  chance?: number
+  /** Show all character positions from the start rather than growing in. Default true. */
+  overflow?: boolean
+  /** Skip prefers-reduced-motion check. Default false. */
+  ignoreReducedMotion?: boolean
 }
 
 const randomChar = (chars: string) =>
@@ -25,8 +29,10 @@ interface InternalConfig {
   chars: string
   duration: number
   ease: string
-  revealDelay: number
-  scrambleFrames: number
+  cycles: number
+  chance: number
+  overflow: boolean
+  ignoreReducedMotion: boolean
 }
 
 gsap.registerEffect({
@@ -35,8 +41,19 @@ gsap.registerEffect({
     const el = targets[0] as HTMLElement
     const finalText = (config.text as string) || el.textContent || ''
     const chars = config.chars as string
-    const revealDelay = config.revealDelay as number
-    const scrambleFrames = config.scrambleFrames as number
+    const cycles = config.cycles as number
+    const chance = config.chance as number
+    const overflow = config.overflow as boolean
+
+    // prefers-reduced-motion guard
+    if (
+      !config.ignoreReducedMotion &&
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      el.textContent = finalText
+      return gsap.to({ p: 0 }, { p: 1, duration: 0 })
+    }
 
     // Auto-scale duration: ~50ms per character, min 0.3s, max 1.2s
     const autoDuration = Math.min(1.2, Math.max(0.3, finalText.length * 0.05))
@@ -57,29 +74,28 @@ gsap.registerEffect({
     const resolved = new Array(len).fill(false)
     let lastProgress = -1
 
+    // Pre-resolve characters that skip scrambling based on chance
+    for (let i = 0; i < len; i++) {
+      if (Math.random() >= chance) resolved[i] = true
+    }
+
     return gsap.to(
       { progress: 0 },
       {
         progress: 1,
-        duration: duration + revealDelay,
+        duration,
         ease: config.ease,
         onUpdate: function () {
-          const rawP = this.progress()
-          // Account for revealDelay: remap progress so reveal starts after delay
-          const delayFraction =
-            duration + revealDelay > 0
-              ? revealDelay / (duration + revealDelay)
-              : 0
-          const p =
-            delayFraction >= 1
-              ? 0
-              : Math.max(0, (rawP - delayFraction) / (1 - delayFraction))
+          const p = this.progress()
 
-          if (rawP === lastProgress) return
-          lastProgress = rawP
+          if (p === lastProgress) return
+          lastProgress = p
 
+          const visibleCount = overflow ? len : Math.round(p * len)
           let display = ''
           for (let i = 0; i < len; i++) {
+            if (i >= visibleCount) break
+
             if (finalText[i] === ' ') {
               display += ' '
               continue
@@ -91,7 +107,7 @@ gsap.registerEffect({
             }
 
             // Check if this character should resolve
-            if (p >= schedule[i] && frameCounts[i] >= scrambleFrames) {
+            if (p >= schedule[i] && frameCounts[i] >= cycles) {
               resolved[i] = true
               display += finalText[i]
               continue
@@ -114,12 +130,14 @@ gsap.registerEffect({
     )
   },
   defaults: {
-    duration: 0.3,
+    duration: 0.5,
     ease: 'none',
     chars: DEFAULT_CHARS,
     text: '',
-    revealDelay: 0,
-    scrambleFrames: 2,
+    cycles: 2,
+    chance: 1,
+    overflow: true,
+    ignoreReducedMotion: false,
   },
   extendTimeline: true,
 })

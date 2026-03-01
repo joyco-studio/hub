@@ -17,13 +17,15 @@ export interface ScrambleButtonProps
   /** The text to display and scramble on hover */
   text: string
   /** Character set for scramble animation. Repeated chars increase their probability. */
-  scrambleChars?: string
+  chars?: string
   /** Duration of the scramble animation in seconds. 0 = auto-scale with text length. */
-  scrambleDuration?: number
-  /** Seconds of full scramble before characters start resolving. */
-  scrambleRevealDelay?: number
-  /** How many scramble frames each character gets before resolving (higher = more chaotic). */
-  scrambleFrames?: number
+  duration?: number
+  /** How many randomization cycles each character gets before resolving (higher = more chaotic). */
+  cycles?: number
+  /** Probability (0–1) that each character scrambles. Default 1. */
+  chance?: number
+  /** Animate from empty string, growing text in. Default false. */
+  overflow?: boolean
   /** Programmatically trigger the scramble animation (useful for touch devices). */
   scramble?: boolean
 }
@@ -34,10 +36,11 @@ export interface ScrambleButtonProps
 
 export function ScrambleButton({
   text,
-  scrambleChars,
-  scrambleDuration = 0,
-  scrambleRevealDelay = 0,
-  scrambleFrames,
+  chars,
+  duration = 0,
+  cycles,
+  chance,
+  overflow,
   scramble,
   variant,
   size,
@@ -55,18 +58,13 @@ export function ScrambleButton({
     tweenRef.current?.kill()
     tweenRef.current = gsap.effects.scramble(textRef.current, {
       text,
-      ...(scrambleChars != null && { chars: scrambleChars }),
-      ...(scrambleDuration > 0 && { duration: scrambleDuration }),
-      ...(scrambleRevealDelay > 0 && { revealDelay: scrambleRevealDelay }),
-      ...(scrambleFrames != null && { scrambleFrames }),
+      ...(chars != null && { chars }),
+      ...(duration != null && duration > 0 && { duration }),
+      ...(cycles != null && { cycles }),
+      ...(chance != null && { chance }),
+      ...(overflow != null && { overflow }),
     })
-  }, [
-    text,
-    scrambleChars,
-    scrambleDuration,
-    scrambleRevealDelay,
-    scrambleFrames,
-  ])
+  }, [text, chars, duration, cycles, chance, overflow])
 
   const resetText = React.useCallback(() => {
     if (!textRef.current) return
