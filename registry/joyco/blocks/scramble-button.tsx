@@ -2,18 +2,16 @@
 
 import * as React from 'react'
 import gsap from 'gsap'
-import { type VariantProps } from 'class-variance-authority'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import '@/lib/gsap/effects/scramble'
 
 /* -------------------------------------------------------------------------------------------------
  * Types
  * -----------------------------------------------------------------------------------------------*/
 
-export interface ScrambleButtonProps
-  extends
-    React.ComponentPropsWithRef<'button'>,
-    VariantProps<typeof buttonVariants> {
+export interface ScrambleButtonProps extends React.ComponentPropsWithRef<
+  typeof Button
+> {
   /** The text to display and scramble on hover */
   text: string
   /** Character set for scramble animation. Repeated chars increase their probability. */
