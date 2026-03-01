@@ -47,6 +47,16 @@ export function getGameSlugs(): string[] {
     .map((page) => page.slugs[page.slugs.length - 1])
 }
 
+/**
+ * Get all effect slugs based on frontmatter type: 'effect'
+ */
+export function getEffectSlugs(): string[] {
+  const allPages = source.getPages()
+  return allPages
+    .filter((page) => page.data.type === 'effect')
+    .map((page) => page.slugs[page.slugs.length - 1])
+}
+
 export function getRelatedPages(
   currentPage: InferPageType<typeof source>,
   limit = 3
@@ -64,11 +74,14 @@ export function getRelatedPages(
   if (!itemType) return []
 
   // Helper to convert page to RelatedItem
-  const pageToRelatedItem = (page: InferPageType<typeof source>): RelatedItem => {
+  const pageToRelatedItem = (
+    page: InferPageType<typeof source>
+  ): RelatedItem => {
     const logNumber = itemType === 'log' ? getLogNumber(page.slugs) : null
-    const displayTitle = itemType === 'log' && logNumber
-      ? stripLogPrefixFromTitle(page.data.title, logNumber)
-      : page.data.title
+    const displayTitle =
+      itemType === 'log' && logNumber
+        ? stripLogPrefixFromTitle(page.data.title, logNumber)
+        : page.data.title
 
     return {
       name: page.slugs[page.slugs.length - 1],

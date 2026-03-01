@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react'
-import { source, getGameSlugs } from '@/lib/source'
+import { source, getGameSlugs, getEffectSlugs } from '@/lib/source'
 import { TreeContextProvider } from 'fumadocs-ui/contexts/tree'
 import {
   LayoutContextProvider,
@@ -14,13 +14,12 @@ const itemMeta: Record<
   string,
   { badge?: 'new' | 'updated'; dot?: 'red' | 'blue' | 'green' | 'yellow' }
 > = {
-  // Example:
-  // '/components/scroll-area': { badge: 'new' },
-  // '/components/infinite-list': { badge: 'updated' },
+  '/toolbox/skills': { badge: 'new' },
 }
 
 export default function Layout({ children }: LayoutProps<'/'>) {
   const gameSlugs = getGameSlugs()
+  const effectSlugs = getEffectSlugs()
 
   return (
     <LayoutProvider defaultLayout="fixed" storageKey="layout">
@@ -35,7 +34,12 @@ export default function Layout({ children }: LayoutProps<'/'>) {
               } as CSSProperties
             }
           >
-            <RegistrySidebar tree={source.pageTree} itemMeta={itemMeta} gameSlugs={gameSlugs} />
+            <RegistrySidebar
+              tree={source.pageTree}
+              itemMeta={itemMeta}
+              gameSlugs={gameSlugs}
+              effectSlugs={effectSlugs}
+            />
             {children}
           </LayoutBody>
         </LayoutContextProvider>

@@ -21,9 +21,15 @@ type RegistrySidebarProps = {
   tree: PageTree.Root
   itemMeta?: Record<string, SidebarItemMeta>
   gameSlugs?: string[]
+  effectSlugs?: string[]
 }
 
-export function RegistrySidebar({ tree, itemMeta = {}, gameSlugs = [] }: RegistrySidebarProps) {
+export function RegistrySidebar({
+  tree,
+  itemMeta = {},
+  gameSlugs = [],
+  effectSlugs = [],
+}: RegistrySidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const { layout } = useLayout()
@@ -77,7 +83,13 @@ export function RegistrySidebar({ tree, itemMeta = {}, gameSlugs = [] }: Registr
 
     return (
       <nav className="bg-accent/70 flex flex-col overflow-y-auto">
-        <SidebarSection folder={folder} defaultOpen meta={itemMeta} gameSlugs={gameSlugs} />
+        <SidebarSection
+          folder={folder}
+          defaultOpen
+          meta={itemMeta}
+          gameSlugs={gameSlugs}
+          effectSlugs={effectSlugs}
+        />
       </nav>
     )
   }
@@ -98,7 +110,11 @@ export function RegistrySidebar({ tree, itemMeta = {}, gameSlugs = [] }: Registr
         className="w-sidebar-width flex flex-col gap-1 text-sm"
         suppressHydrationWarning
       >
-        <SidebarSearch query={query} setQuery={setQuery} isLoading={isLoading} />
+        <SidebarSearch
+          query={query}
+          setQuery={setQuery}
+          isLoading={isLoading}
+        />
         {renderContent()}
         <div className="bg-muted flex-1" />
         <SocialLinks />
