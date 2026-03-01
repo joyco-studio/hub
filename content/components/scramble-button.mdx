@@ -33,8 +33,8 @@ import { ScrambleButton } from '@/components/scramble-button'
 ## Custom Characters
 
 ```tsx
-<ScrambleButton text="BINARY" scrambleChars="01" />
-<ScrambleButton text="CLEAN" scrambleChars="ABCDEFGHIJKLMNOPQRSTUVWXYZ" />
+<ScrambleButton text="BINARY" chars="01" />
+<ScrambleButton text="CLEAN" chars="ABCDEFGHIJKLMNOPQRSTUVWXYZ" />
 ```
 
 ## Programmatic Control
@@ -49,11 +49,12 @@ const [active, setActive] = React.useState(false)
 
 ## Props
 
-| Prop                  | Type      | Default | Description                                                            |
-| --------------------- | --------- | ------- | ---------------------------------------------------------------------- |
-| `text`                | `string`  | —       | The text to display and scramble on hover                              |
-| `scrambleChars`       | `string`  | —       | Custom character set for the scramble animation                        |
-| `scrambleDuration`    | `number`  | `0`     | Duration in seconds. `0` = auto-scale with text length                 |
-| `scrambleRevealDelay` | `number`  | `0`     | Seconds of full scramble before characters start resolving             |
-| `scrambleFrames`      | `number`  | —       | Scramble frames per character before resolving (higher = more chaotic) |
-| `scramble`            | `boolean` | —       | Programmatically trigger the scramble (useful for touch devices)       |
+| Prop       | Type      | Default | Description                                                                 |
+| ---------- | --------- | ------- | --------------------------------------------------------------------------- |
+| `text`     | `string`  | —       | The text to display and scramble on hover                                   |
+| `chars`    | `string`  | —       | Custom character set for the scramble animation                             |
+| `duration` | `number`  | `0`     | Duration in seconds. `0` = auto-scale with text length                      |
+| `cycles`   | `number`  | —       | Randomization cycles per character before resolving (higher = more chaotic) |
+| `chance`   | `number`  | —       | Probability (0–1) that each character scrambles                             |
+| `overflow` | `boolean` | —       | Show all character positions from the start rather than growing in          |
+| `scramble` | `boolean` | —       | Programmatically trigger the scramble (useful for touch devices)            |
