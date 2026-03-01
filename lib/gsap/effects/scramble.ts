@@ -114,12 +114,12 @@ gsap.registerEffect({
     )
   },
   defaults: {
-    duration: 0,
+    duration: 0.3,
     ease: 'none',
     chars: DEFAULT_CHARS,
     text: '',
     revealDelay: 0,
-    scrambleFrames: 3,
+    scrambleFrames: 2,
   },
   extendTimeline: true,
 })

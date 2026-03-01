@@ -178,6 +178,33 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "scramble",
+      "type": "registry:component",
+      "title": "Scramble",
+      "description": "A GSAP registered effect that decodes text with staggered character-by-character reveal animation.",
+      "files": [
+        {
+          "path": "lib/gsap/effects/scramble.ts",
+          "type": "registry:lib"
+        }
+      ],
+      "dependencies": ["gsap"]
+    },
+    {
+      "name": "scramble-button",
+      "type": "registry:component",
+      "title": "Scramble Button",
+      "description": "A button that scrambles its text on hover using the scramble GSAP effect.",
+      "files": [
+        {
+          "path": "registry/joyco/blocks/scramble-button.tsx",
+          "type": "registry:component"
+        }
+      ],
+      "dependencies": ["gsap"],
+      "registryDependencies": ["@joyco/scramble"]
     }
   ]
 }

@@ -2,14 +2,18 @@
 
 import * as React from 'react'
 import gsap from 'gsap'
-import { cn } from '@/lib/utils'
+import { type VariantProps } from 'class-variance-authority'
+import { Button, buttonVariants } from '@/components/ui/button'
 import '@/lib/gsap/effects/scramble'
 
 /* -------------------------------------------------------------------------------------------------
  * Types
  * -----------------------------------------------------------------------------------------------*/
 
-export interface ScrambleButtonProps extends React.ComponentPropsWithRef<'button'> {
+export interface ScrambleButtonProps
+  extends
+    React.ComponentPropsWithRef<'button'>,
+    VariantProps<typeof buttonVariants> {
   /** The text to display and scramble on hover */
   text: string
   /** Character set for scramble animation. Repeated chars increase their probability. */
@@ -35,6 +39,8 @@ export function ScrambleButton({
   scrambleRevealDelay = 0,
   scrambleFrames,
   scramble,
+  variant,
+  size,
   className,
   onMouseEnter,
   onMouseLeave,
@@ -100,12 +106,11 @@ export function ScrambleButton({
   )
 
   return (
-    <button
+    <Button
       ref={ref}
-      className={cn(
-        'inline-flex items-center justify-center whitespace-nowrap',
-        className
-      )}
+      variant={variant}
+      size={size}
+      className={className}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       {...props}
@@ -113,6 +118,6 @@ export function ScrambleButton({
       <span ref={textRef} data-slot="text">
         {text}
       </span>
-    </button>
+    </Button>
   )
 }
