@@ -12,6 +12,7 @@ import GamepadIcon from '@/components/icons/gamepad'
 import TextScanIcon from '@/components/icons/text-scan'
 import { Minus, Plus } from 'lucide-react'
 import { getLogNumber, stripLogPrefixFromTitle } from '@/lib/log-utils'
+import { MetaBadge } from '@/components/layout/meta-badge'
 
 export type SidebarItemMeta = {
   badge?: 'new' | 'updated'
@@ -98,17 +99,7 @@ export function SidebarItems({ folder, meta = {} }: SidebarItemsProps) {
                 )}
                 <span className="truncate">{displayName}</span>
                 {itemMeta.badge && (
-                  <span
-                    className={cn(
-                      'ml-auto shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase',
-                      itemMeta.badge === 'new' &&
-                        'bg-blue-500/20 text-blue-400',
-                      itemMeta.badge === 'updated' &&
-                        'bg-orange-500/20 text-orange-400'
-                    )}
-                  >
-                    {itemMeta.badge}
-                  </span>
+                  <MetaBadge type={itemMeta.badge} className="ml-auto" />
                 )}
               </Link>
             )
@@ -198,17 +189,7 @@ function CollapsibleSubSection({
                   )}
                   <span className="truncate">{displayName}</span>
                   {itemMeta.badge && (
-                    <span
-                      className={cn(
-                        'ml-auto shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase',
-                        itemMeta.badge === 'new' &&
-                          'bg-blue-500/20 text-blue-400',
-                        itemMeta.badge === 'updated' &&
-                          'bg-orange-500/20 text-orange-400'
-                      )}
-                    >
-                      {itemMeta.badge}
-                    </span>
+                    <MetaBadge type={itemMeta.badge} className="ml-auto" />
                   )}
                 </Link>
               )
@@ -364,17 +345,7 @@ export function SidebarSection({
                     )}
                     <span className="truncate">{displayName}</span>
                     {itemMeta.badge && (
-                      <span
-                        className={cn(
-                          'ml-auto shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase',
-                          itemMeta.badge === 'new' &&
-                            'bg-blue-500/20 text-blue-400',
-                          itemMeta.badge === 'updated' &&
-                            'bg-orange-500/20 text-orange-400'
-                        )}
-                      >
-                        {itemMeta.badge}
-                      </span>
+                      <MetaBadge type={itemMeta.badge} className="ml-auto" />
                     )}
                   </Link>
                 )

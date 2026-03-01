@@ -14,9 +14,7 @@ const itemMeta: Record<
   string,
   { badge?: 'new' | 'updated'; dot?: 'red' | 'blue' | 'green' | 'yellow' }
 > = {
-  // Example:
-  // '/components/scroll-area': { badge: 'new' },
-  // '/components/infinite-list': { badge: 'updated' },
+  '/toolbox/skills': { badge: 'new' },
 }
 
 export default function Layout({ children }: LayoutProps<'/'>) {

@@ -10,10 +10,12 @@ import Image from 'next/image'
 import { ImageCols } from '@/components/image-cols'
 import { PackageManagerCommand } from './components/package-manager-command'
 import { AgentsScriptCommand } from './components/agents-script-command'
+import { Mermaid } from './components/mermaid'
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     ...defaultMdxComponents,
+    Mermaid,
     CodeTabs: CodeTabs,
     FileCodeblock: FileCodeblock,
     Image: ({
