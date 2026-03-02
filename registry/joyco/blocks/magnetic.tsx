@@ -14,7 +14,6 @@ type MagneticContextValue = {
   mousePos: React.RefObject<{ x: number; y: number }>
   strength: number
   ease: number
-  isHovered: React.RefObject<boolean>
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -53,7 +52,6 @@ function Root({
 }: RootProps) {
   const rootRef = React.useRef<HTMLElement | null>(null)
   const mousePos = React.useRef({ x: 0, y: 0 })
-  const isHovered = React.useRef(false)
   const composedRef = useComposedRefs(forwardedRef, rootRef)
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -62,17 +60,15 @@ function Root({
   }
 
   const handleMouseEnter = (e: React.MouseEvent) => {
-    isHovered.current = true
     props.onMouseEnter?.(e as React.MouseEvent<HTMLDivElement>)
   }
 
   const handleMouseLeave = (e: React.MouseEvent) => {
-    isHovered.current = false
     props.onMouseLeave?.(e as React.MouseEvent<HTMLDivElement>)
   }
 
   const contextValue = React.useMemo<MagneticContextValue>(
-    () => ({ rootRef, mousePos, strength, ease, isHovered }),
+    () => ({ rootRef, mousePos, strength, ease }),
     [strength, ease]
   )
 
@@ -113,6 +109,7 @@ function Inner({
   const composedRef = useComposedRefs(forwardedRef, innerRef)
   const rafId = React.useRef<number>(0)
   const current = React.useRef({ x: 0, y: 0 })
+  const isLooping = React.useRef(false)
   const prefersReducedMotion = React.useRef(false)
 
   const applyTick = React.useEffectEvent(() => {
@@ -127,19 +124,33 @@ function Inner({
     const centerY = rect.top + window.scrollY + rect.height / 2
 
     const lerpFactor = 0.15
+    const settleThreshold = 0.1
     const targetX = (mousePos.current.x - centerX) * strength
     const targetY = (mousePos.current.y - centerY) * strength
 
     current.current.x += (targetX - current.current.x) * lerpFactor
     current.current.y += (targetY - current.current.y) * lerpFactor
 
+    const settled =
+      Math.abs(targetX - current.current.x) < settleThreshold &&
+      Math.abs(targetY - current.current.y) < settleThreshold
+
+    console.log('tick', !settled)
+
+    if (settled) {
+      current.current.x = targetX
+      current.current.y = targetY
+      isLooping.current = false
+    }
+
     el.style.transform = `translate3d(${current.current.x}px, ${current.current.y}px, 0)`
 
-    return true
+    return !settled
   })
 
   const applyLeave = React.useEffectEvent(() => {
     cancelAnimationFrame(rafId.current)
+    isLooping.current = false
 
     if (prefersReducedMotion.current) return
 
@@ -189,18 +200,32 @@ function Inner({
       if (!el) return
 
       el.style.transition = ''
+      isLooping.current = true
+      rafId.current = requestAnimationFrame(tick)
+    }
+
+    function handleMove() {
+      if (isLooping.current) return
+
+      const el = innerRef.current
+      if (!el || prefersReducedMotion.current) return
+
+      el.style.transition = ''
+      isLooping.current = true
       rafId.current = requestAnimationFrame(tick)
     }
 
     root.addEventListener('mouseenter', handleEnter)
+    root.addEventListener('mousemove', handleMove)
     root.addEventListener('mouseleave', applyLeave)
 
     return () => {
       cancelAnimationFrame(rafId.current)
       root.removeEventListener('mouseenter', handleEnter)
+      root.removeEventListener('mousemove', handleMove)
       root.removeEventListener('mouseleave', applyLeave)
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps -- applyTick/applyLeave are effect events, rootRef is a stable ref
+  }, [rootRef])
 
   const Comp = asChild ? Slot : 'div'
 
