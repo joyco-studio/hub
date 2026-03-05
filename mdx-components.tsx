@@ -45,7 +45,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
       caption?: string
     } & Omit<React.ComponentProps<typeof Image>, 'src' | 'alt'>) => (
       <figure
-        className={cn('my-6', className)}
+        className={cn('my-6 mx-auto', className)}
         style={width ? { maxWidth: width, ...style } : style}
       >
         <Image src={src} alt={alt} className="rounded-lg" width={width} {...props} />
