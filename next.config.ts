@@ -19,6 +19,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'qfxa88yauvyse9vr.public.blob.vercel-storage.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'r2.joyco.studio',
+      },
     ],
   },
   env: {
