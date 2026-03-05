@@ -15,6 +15,8 @@ Chrome DevTools has a real-time performance dashboard that most developers never
 
 A new panel appears at the bottom of DevTools with real-time graphs.
 
+<Figure src="https://r2.joyco.studio/V7bfPG7opvrr.png" alt="Chrome DevTools menu showing More tools > Performance monitor" width={2158} height={1824} />
+
 ## What it shows
 
 The Performance monitor tracks these metrics in real time:
@@ -30,6 +32,8 @@ The Performance monitor tracks these metrics in real time:
 | **Layouts / sec** | How many layout recalculations the browser is doing per second. High numbers = layout thrashing. |
 | **Style recalcs / sec** | How many style recalculations per second. High values often mean expensive CSS selectors or frequent class changes. |
 
+<Figure src="https://r2.joyco.studio/nAEKU7Tc8L0K.png" alt="Chrome DevTools Performance monitor panel showing real-time metrics" width={2158} height={954} />
+
 ## When to use it
 
 **Debugging memory leaks.** Open the monitor, navigate around your app, and watch the JS heap size and DOM Nodes. If either keeps climbing without coming back down, you have a leak. This is faster than taking heap snapshots because you can see the trend in real time.
@@ -40,6 +44,3 @@ The Performance monitor tracks these metrics in real time:
 
 **Quick sanity check during development.** Keep it open while you work. It's the equivalent of `htop` for your web page. You'll catch performance regressions the moment they happen instead of discovering them in a Lighthouse audit later.
 
-## The mental model
-
-Think of it as a dashboard for the browser's rendering engine. The Performance tab records a trace you analyze later. The Performance **monitor** is a live feed. Use the trace for deep analysis. Use the monitor for ambient awareness.
