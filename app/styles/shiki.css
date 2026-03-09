@@ -42,7 +42,7 @@
 @media (pointer: coarse) {
   [data-rehype-pretty-code-figure] pre {
     overscroll-behavior-x: none;
-    overscroll-behavior-y: none;
+    touch-action: pan-x pan-y;
   }
 }
 
