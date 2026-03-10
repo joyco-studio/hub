@@ -9,11 +9,13 @@ import { SidebarSearch } from './search'
 import { SearchResults } from './search-results'
 import { NoResults } from './no-results'
 import { SidebarSection, type SidebarItemMeta } from './section'
+import { LabSidebarSection } from './lab-section'
 import { SocialLinks } from './social-links'
 import { NavAside } from '../nav-aside'
 import { useLayout } from '@/hooks/use-layout'
 import { useSearch } from '@/hooks/use-search'
 import { cn } from '@/lib/utils'
+import type { Experiment } from '@/lib/lab'
 
 export type { SidebarItemMeta }
 
@@ -22,6 +24,7 @@ type RegistrySidebarProps = {
   itemMeta?: Record<string, SidebarItemMeta>
   gameSlugs?: string[]
   effectSlugs?: string[]
+  experiments?: Experiment[]
 }
 
 export function RegistrySidebar({
@@ -29,6 +32,7 @@ export function RegistrySidebar({
   itemMeta = {},
   gameSlugs = [],
   effectSlugs = [],
+  experiments = [],
 }: RegistrySidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
@@ -75,6 +79,15 @@ export function RegistrySidebar({
     // Show no results only when confirmed empty
     if (isEmpty) {
       return <NoResults query={query} />
+    }
+
+    // Lab section has its own data source (not from Fumadocs tree)
+    if (pathname.startsWith('/lab')) {
+      return (
+        <nav className="bg-accent/70 flex flex-col overflow-y-auto">
+          <LabSidebarSection experiments={experiments} />
+        </nav>
+      )
     }
 
     // Default: show sidebar navigation (idle or loading states)

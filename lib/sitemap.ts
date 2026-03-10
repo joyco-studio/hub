@@ -1,5 +1,6 @@
 import CubeIcon from '@/components/icons/3d-cube'
 import FileIcon from '@/components/icons/file'
+import FlaskIcon from '@/components/icons/flask'
 import GridIcon from '@/components/icons/grid'
 import TerminalWithCursorIcon from '@/components/icons/terminal-w-cursor'
 import { SVGProps } from 'react'
@@ -25,5 +26,10 @@ export const sitemap: SitemapItem[] = [
     label: 'Logs',
     href: '/logs',
     icon: FileIcon,
+  },
+  {
+    label: 'Lab',
+    href: '/lab',
+    icon: FlaskIcon,
   },
 ]

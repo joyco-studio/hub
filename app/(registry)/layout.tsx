@@ -8,6 +8,7 @@ import {
 import { LayoutProvider } from '@/hooks/use-layout'
 import { RegistrySidebar } from '@/components/layout/sidebar'
 import { MobileNav } from '@/components/layout/mobile-nav'
+import { getExperiments } from '@/lib/lab'
 
 // Optional: Define item metadata for badges/dots
 const itemMeta: Record<
@@ -17,15 +18,20 @@ const itemMeta: Record<
   '/toolbox/skills': { badge: 'new' },
 }
 
-export default function Layout({ children }: LayoutProps<'/'>) {
+export default async function Layout({ children }: LayoutProps<'/'>) {
   const gameSlugs = getGameSlugs()
   const effectSlugs = getEffectSlugs()
+  const { experiments } = await getExperiments()
 
   return (
     <LayoutProvider defaultLayout="fixed" storageKey="layout">
       <TreeContextProvider tree={source.pageTree}>
         <LayoutContextProvider>
-          <MobileNav tree={source.pageTree} itemMeta={itemMeta} />
+          <MobileNav
+            tree={source.pageTree}
+            itemMeta={itemMeta}
+            experiments={experiments}
+          />
           <LayoutBody
             style={
               {
@@ -39,6 +45,7 @@ export default function Layout({ children }: LayoutProps<'/'>) {
               itemMeta={itemMeta}
               gameSlugs={gameSlugs}
               effectSlugs={effectSlugs}
+              experiments={experiments}
             />
             {children}
           </LayoutBody>
