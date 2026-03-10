@@ -37,6 +37,36 @@ export type RelatedItem = {
   logNumber?: string | null
 }
 
+type PageTreeNode = {
+  type?: string
+  $id?: string
+  children?: PageTreeNode[]
+}
+
+const countPages = (node: PageTreeNode | undefined): number => {
+  if (!node) return 0
+  if (node.type === 'page') return 1
+  return (node.children ?? []).reduce(
+    (sum, child) => sum + countPages(child),
+    0
+  )
+}
+
+const getTopLevelFolder = (segment: string) => {
+  const children = source.pageTree.children as unknown as PageTreeNode[]
+  return children.find(
+    (child) => child.type === 'folder' && child.$id?.split(':')[1] === segment
+  )
+}
+
+export function getRegistryCounts() {
+  return {
+    components: countPages(getTopLevelFolder('components')),
+    toolbox: countPages(getTopLevelFolder('toolbox')),
+    logs: countPages(getTopLevelFolder('logs')),
+  }
+}
+
 /**
  * Get all game slugs based on frontmatter type: 'game'
  */
