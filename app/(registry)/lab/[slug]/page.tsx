@@ -6,6 +6,8 @@ import { RegistryMetaProvider } from '@/components/registry-meta'
 import { ExperimentIframe } from '@/components/lab/experiment-iframe'
 import { ExperimentTOC } from '@/components/lab/experiment-toc'
 
+export const revalidate = 30
+
 type PageProps = {
   params: Promise<{ slug: string }>
 }

@@ -6,6 +6,8 @@ import { RegistryMetaProvider } from '@/components/registry-meta'
 import FlaskIcon from '@/components/icons/flask'
 import { Badge } from '@/components/ui/badge'
 
+export const revalidate = 30
+
 export const metadata: Metadata = {
   title: 'Lab',
   description:
@@ -18,12 +20,14 @@ export default async function LabPage() {
 
   return (
     <RegistryMetaProvider counts={counts}>
-      <article className="px-content-sides mx-auto w-full max-w-[900px] py-6 [grid-area:main] md:pt-8 xl:pt-14 xl:layout:[--fd-toc-width:268px]">
+      <article className="px-content-sides xl:layout:[--fd-toc-width:268px] mx-auto w-full max-w-[900px] py-6 [grid-area:main] md:pt-8 xl:pt-14">
         <Badge variant="accent" className="mb-6">
           Lab
         </Badge>
 
-        <h1 className="mb-4 text-3xl leading-tight font-semibold">Experiments</h1>
+        <h1 className="mb-4 text-3xl leading-tight font-semibold">
+          Experiments
+        </h1>
         <p className="text-foreground/70 mb-10 text-lg">
           Creative explorations and experimental projects from the studio.
         </p>
@@ -46,7 +50,7 @@ export default async function LabPage() {
                 <span className="font-mono text-sm font-medium tracking-wide uppercase">
                   {experiment.title}
                 </span>
-                <span className="text-muted-foreground text-sm leading-relaxed">
+                <span className="text-muted-foreground line-clamp-3 text-sm leading-relaxed">
                   {experiment.description}
                 </span>
                 {experiment.tags && experiment.tags.length > 0 && (
