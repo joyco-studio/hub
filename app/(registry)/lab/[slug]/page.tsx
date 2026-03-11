@@ -22,7 +22,7 @@ export default async function ExperimentPage({ params }: PageProps) {
 
   return (
     <RegistryMetaProvider counts={counts}>
-      <div className="h-[calc(100dvh-var(--mobile-header-height))] w-full [grid-area:main] md:h-screen xl:layout:[--fd-toc-width:268px]">
+      <div className="h-[calc(100dvh-var(--mobile-header-height))] w-full [grid-area:main] md:h-screen">
         <ExperimentIframe src={experiment.href} title={experiment.title} />
       </div>
       <ExperimentTOC

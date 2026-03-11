@@ -1,8 +1,8 @@
 'use client'
 
+import * as React from 'react'
 import { ArrowUpRight } from 'lucide-react'
 import FlaskIcon from '@/components/icons/flask'
-import { useLayout } from '@/hooks/use-layout'
 import { cn } from '@/lib/utils'
 
 type ExperimentTOCProps = {
@@ -18,60 +18,86 @@ export function ExperimentTOC({
   href,
   tags,
 }: ExperimentTOCProps) {
-  const { layout } = useLayout()
+  const [open, setOpen] = React.useState(false)
+
+  React.useEffect(() => {
+    if (!open) return
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false)
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [open])
 
   return (
     <div
       className={cn(
-        'sticky top-0 flex h-screen gap-1 [grid-area:toc] max-xl:hidden'
+        'fixed top-0 right-0 z-(--z-toc-popover) flex h-screen items-center max-md:top-(--mobile-header-height) max-md:h-[calc(100dvh-var(--mobile-header-height))]',
+        'transition-transform duration-300 ease-in-out',
+        !open && 'translate-x-[268px]'
       )}
     >
-      <div className="flex h-full w-(--fd-toc-width) flex-col gap-1">
-        <div className="bg-muted flex flex-1 flex-col gap-4 px-6 py-4">
-          <div className="flex items-center gap-1.5">
-            <FlaskIcon
-              className="text-muted-foreground size-4"
-              aria-hidden="true"
-            />
-            <span className="text-muted-foreground font-mono text-xs font-medium tracking-wide uppercase">
-              Experiment
-            </span>
-          </div>
-          <div className="flex flex-1 flex-col gap-2">
-            <h3 className="text-sm font-semibold">{title}</h3>
-            <p className="text-muted-foreground text-xs leading-relaxed">
-              {description}
-            </p>
+      <div className="flex">
+        <button
+          type="button"
+          onClick={() => setOpen((prev) => !prev)}
+          aria-label={
+            open ? 'Close experiment details' : 'Open experiment details'
+          }
+          aria-expanded={open}
+          className={cn(
+            'bg-muted hover:bg-accent text-muted-foreground flex h-28 w-7 shrink-0 cursor-pointer items-center justify-center self-center rounded-l-[4px] border-y border-l transition-colors',
+            'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none'
+          )}
+        >
+          <span className="-rotate-90 font-mono text-[10px] font-medium tracking-widest whitespace-nowrap uppercase select-none">
+            Details
+          </span>
+        </button>
+
+        <div className="flex w-[268px] flex-col gap-1">
+          <div className="bg-muted flex flex-col gap-4 px-6 py-4">
+            <div className="flex items-center gap-1.5">
+              <FlaskIcon
+                className="text-muted-foreground size-4"
+                aria-hidden="true"
+              />
+              <span className="text-muted-foreground font-mono text-xs font-medium tracking-wide uppercase">
+                Experiment
+              </span>
+            </div>
+            <div className="flex flex-col gap-2">
+              <h3 className="text-sm font-semibold">{title}</h3>
+              <p className="text-muted-foreground text-xs leading-relaxed">
+                {description}
+              </p>
+            </div>
+            {tags && tags.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="bg-accent text-muted-foreground px-2 py-0.5 font-mono text-xs tracking-wide uppercase"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-foreground hover:text-foreground/80 focus-visible:ring-ring inline-flex items-center gap-1.5 font-mono text-xs font-medium tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            >
+              Open externally
+              <ArrowUpRight className="size-3" aria-hidden="true" />
+            </a>
           </div>
         </div>
-        {tags && tags.length > 0 && (
-          <div className="bg-muted flex flex-wrap gap-1 px-6 py-4">
-            {tags.map((tag) => (
-              <span
-                key={tag}
-                className="bg-accent text-muted-foreground px-2 py-0.5 font-mono text-xs tracking-wide uppercase"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-muted text-foreground hover:text-foreground/80 focus-visible:ring-ring inline-flex items-center gap-1.5 px-6 py-4 font-mono text-xs font-medium tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none"
-        >
-          Open externally
-          <ArrowUpRight className="size-3" aria-hidden="true" />
-        </a>
       </div>
-      <div
-        className={cn(
-          'bg-muted/50 min-w-aside-width hidden 2xl:block',
-          layout === 'full' ? '' : 'flex-1'
-        )}
-      />
     </div>
   )
 }
