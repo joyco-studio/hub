@@ -239,6 +239,10 @@ const LabCard = ({
               fontSize: '20px',
               color: '#FFFFFF',
               fontWeight: '400',
+              lineHeight: 1.4,
+              overflow: 'hidden',
+              display: 'block',
+              lineClamp: 3,
             }}
           >
             {description}
