@@ -27,7 +27,7 @@ export function ExperimentTOC({
       )}
     >
       <div className="flex h-full w-(--fd-toc-width) flex-col gap-1">
-        <div className="bg-muted flex grow flex-col gap-4 px-6 py-4">
+        <div className="bg-muted flex flex-1 flex-col gap-4 px-6 py-4">
           <div className="flex items-center gap-1.5">
             <FlaskIcon
               className="text-muted-foreground size-4"
@@ -37,9 +37,9 @@ export function ExperimentTOC({
               Experiment
             </span>
           </div>
-          <div className="flex grow flex-col gap-2">
+          <div className="flex flex-1 flex-col gap-2">
             <h3 className="text-sm font-semibold">{title}</h3>
-            <p className="text-muted-foreground grow text-xs leading-relaxed">
+            <p className="text-muted-foreground text-xs leading-relaxed">
               {description}
             </p>
           </div>
