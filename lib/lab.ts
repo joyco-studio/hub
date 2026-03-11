@@ -8,6 +8,83 @@ export type Experiment = {
   href: string
   date?: string
   tags?: string[]
+  repo?: string
+}
+
+export type RepoContributor = {
+  login: string
+  avatar_url: string
+  html_url: string
+}
+
+const GITHUB_HOST_RE = /^github\.com$/i
+const GITLAB_HOST_RE = /^gitlab\.com$/i
+
+function parseRepoOwnerAndName(
+  repoUrl: string
+): { host: 'github' | 'gitlab'; owner: string; repo: string } | null {
+  try {
+    const url = new URL(repoUrl)
+
+    let host: 'github' | 'gitlab' | null = null
+    if (GITHUB_HOST_RE.test(url.hostname)) host = 'github'
+    else if (GITLAB_HOST_RE.test(url.hostname)) host = 'gitlab'
+
+    if (!host) return null
+
+    const segments = url.pathname.split('/').filter(Boolean)
+    if (segments.length < 2) return null
+
+    return { host, owner: segments[0], repo: segments[1] }
+  } catch {
+    return null
+  }
+}
+
+export async function getRepoContributors(
+  repoUrl: string | undefined
+): Promise<RepoContributor[]> {
+  if (!repoUrl) return []
+
+  const parsed = parseRepoOwnerAndName(repoUrl)
+  if (!parsed) return []
+
+  if (parsed.host === 'github') {
+    try {
+      const res = await fetch(
+        `https://api.github.com/repos/${parsed.owner}/${parsed.repo}/contributors?per_page=10`,
+        {
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+            ...(process.env.GITHUB_TOKEN && {
+              Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+            }),
+          },
+          next: { revalidate: 3600 },
+        }
+      )
+      if (!res.ok) return []
+
+      const data: Array<{
+        login: string
+        avatar_url: string
+        html_url: string
+        type: string
+      }> = await res.json()
+
+      return data
+        .filter((c) => c.type === 'User')
+        .map(({ login, avatar_url, html_url }) => ({
+          login,
+          avatar_url,
+          html_url,
+        }))
+    } catch {
+      return []
+    }
+  }
+
+  return []
 }
 
 type ExperimentsResponse = {

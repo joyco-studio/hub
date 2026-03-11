@@ -4,12 +4,15 @@ import * as React from 'react'
 import { ArrowUpRight } from 'lucide-react'
 import FlaskIcon from '@/components/icons/flask'
 import { cn } from '@/lib/utils'
+import type { RepoContributor } from '@/lib/lab'
 
 type ExperimentTOCProps = {
   title: string
   description: string
   href: string
   tags?: string[]
+  repo?: string
+  authors?: RepoContributor[]
 }
 
 export function ExperimentTOC({
@@ -17,6 +20,8 @@ export function ExperimentTOC({
   description,
   href,
   tags,
+  repo,
+  authors,
 }: ExperimentTOCProps) {
   const [open, setOpen] = React.useState(false)
 
@@ -86,15 +91,58 @@ export function ExperimentTOC({
                 ))}
               </div>
             )}
-            <a
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-foreground hover:text-foreground/80 focus-visible:ring-ring inline-flex items-center gap-1.5 font-mono text-xs font-medium tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none"
-            >
-              Open externally
-              <ArrowUpRight className="size-3" aria-hidden="true" />
-            </a>
+            {authors && authors.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <span className="text-muted-foreground font-mono text-[10px] font-medium tracking-wide uppercase">
+                  Authors
+                </span>
+                <div className="flex flex-col gap-1.5">
+                  {authors.map((author) => (
+                    <a
+                      key={author.login}
+                      href={author.html_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:bg-accent focus-visible:ring-ring -mx-1.5 flex items-center gap-2 rounded-sm px-1.5 py-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                    >
+                      <img
+                        src={author.avatar_url}
+                        alt=""
+                        width={20}
+                        height={20}
+                        className="rounded-full"
+                        loading="lazy"
+                      />
+                      <span className="text-foreground text-xs font-medium">
+                        {author.login}
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="flex flex-col gap-2">
+              <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-foreground hover:text-foreground/80 focus-visible:ring-ring inline-flex items-center gap-1.5 font-mono text-xs font-medium tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              >
+                Open externally
+                <ArrowUpRight className="size-3" aria-hidden="true" />
+              </a>
+              {repo && (
+                <a
+                  href={repo}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-foreground hover:text-foreground/80 focus-visible:ring-ring inline-flex items-center gap-1.5 font-mono text-xs font-medium tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                >
+                  View source
+                  <ArrowUpRight className="size-3" aria-hidden="true" />
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </div>
