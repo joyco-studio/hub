@@ -27,42 +27,44 @@ export function ExperimentTOC({
       )}
     >
       <div className="flex h-full w-(--fd-toc-width) flex-col gap-1">
-        <div className="bg-muted flex flex-col gap-4 px-6 py-4">
+        <div className="bg-muted flex grow flex-col gap-4 px-6 py-4">
           <div className="flex items-center gap-1.5">
-            <FlaskIcon className="text-muted-foreground size-4" aria-hidden="true" />
+            <FlaskIcon
+              className="text-muted-foreground size-4"
+              aria-hidden="true"
+            />
             <span className="text-muted-foreground font-mono text-xs font-medium tracking-wide uppercase">
               Experiment
             </span>
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="flex grow flex-col gap-2">
             <h3 className="text-sm font-semibold">{title}</h3>
-            <p className="text-muted-foreground text-xs leading-relaxed">
+            <p className="text-muted-foreground grow text-xs leading-relaxed">
               {description}
             </p>
           </div>
-          {tags && tags.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="bg-accent text-muted-foreground px-2 py-0.5 font-mono text-xs tracking-wide uppercase"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-          <a
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-foreground hover:text-foreground/80 inline-flex items-center gap-1.5 font-mono text-xs font-medium tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-          >
-            Open externally
-            <ArrowUpRight className="size-3" aria-hidden="true" />
-          </a>
         </div>
-        <div className="bg-muted flex-1" />
+        {tags && tags.length > 0 && (
+          <div className="bg-muted flex flex-wrap gap-1 px-6 py-4">
+            {tags.map((tag) => (
+              <span
+                key={tag}
+                className="bg-accent text-muted-foreground px-2 py-0.5 font-mono text-xs tracking-wide uppercase"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-muted text-foreground hover:text-foreground/80 focus-visible:ring-ring inline-flex items-center gap-1.5 px-6 py-4 font-mono text-xs font-medium tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none"
+        >
+          Open externally
+          <ArrowUpRight className="size-3" aria-hidden="true" />
+        </a>
       </div>
       <div
         className={cn(
