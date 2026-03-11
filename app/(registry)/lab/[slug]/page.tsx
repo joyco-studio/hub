@@ -51,5 +51,8 @@ export async function generateMetadata({
   return {
     title: experiment.title,
     description: experiment.description,
+    openGraph: {
+      images: [`/og/lab/${slug}`],
+    },
   }
 }

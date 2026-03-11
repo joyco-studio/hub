@@ -1,5 +1,6 @@
 import { ImageResponseOptions } from 'next/server'
 import { CubeIcon, FileIcon, TerminalWithCursorIcon } from '../icons'
+import FlaskIcon from '../icons/flask'
 
 const TYPE_LOGO = {
   components: CubeIcon,
@@ -74,6 +75,223 @@ export function DocsOgImage({
         <Box style={{ height: '45%' }} />
         <Box style={{ height: '25%' }} />
       </Col>
+    </div>
+  )
+}
+
+interface LabOgImageProps {
+  title: string
+  description?: string
+  tags?: string[]
+  date?: string
+}
+
+export function LabOgImage({
+  title,
+  description,
+  tags,
+  date,
+}: LabOgImageProps) {
+  const displayTags = tags?.slice(0, 3) ?? []
+
+  return (
+    <div
+      style={{
+        width: '1200px',
+        height: '630px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: '5px',
+        background: '#121212',
+      }}
+    >
+      <Col
+        style={{
+          width: '29.33%',
+        }}
+      >
+        <Box style={{ height: '20%' }} />
+        <Box style={{ height: '45%' }} />
+        <Box style={{ height: '38%' }} />
+      </Col>
+      <Col
+        style={{
+          width: '39.33%',
+        }}
+      >
+        <Box style={{ height: '15%' }} />
+        <Box style={{ height: '87%', background: 'transparent' }}>
+          <LabCard
+            title={title}
+            description={description}
+            tags={displayTags}
+            date={date}
+            style={{ height: '100%' }}
+          />
+        </Box>
+        <Box style={{ height: '15%' }} />
+      </Col>
+      <Col
+        style={{
+          width: '29.33%',
+        }}
+      >
+        <Box style={{ height: '30%' }} />
+        <Box style={{ height: '45%' }} />
+        <Box style={{ height: '25%' }} />
+      </Col>
+    </div>
+  )
+}
+
+const LabCard = ({
+  title,
+  description,
+  tags,
+  date,
+  style,
+}: Pick<LabOgImageProps, 'title' | 'description' | 'tags' | 'date'> & {
+  style?: React.CSSProperties
+}) => {
+  return (
+    <div
+      style={{
+        fontFamily: 'PublicSans',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '5px',
+        flex: 1,
+        flexGrow: 1,
+        overflow: 'hidden',
+        ...style,
+      }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          display: 'flex',
+          gap: '5px',
+          height: '45px',
+        }}
+      >
+        <div
+          style={{
+            aspectRatio: '1/1',
+            background: '#191919',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '45px',
+          }}
+        >
+          <FlaskIcon style={{ color: '#FFFFFF' }} />
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            gap: '5px',
+            alignItems: 'center',
+            background: '#191919',
+            width: '100%',
+            padding: '14px',
+          }}
+        >
+          <div
+            style={{
+              fontSize: '18px',
+              color: '#FFFFFF',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              fontFamily: 'RobotoMono',
+            }}
+          >
+            LAB
+          </div>
+        </div>
+      </div>
+      {/* Body */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-end',
+          padding: '40px',
+          gap: '5px',
+          background: '#0000FF',
+          flexGrow: 1,
+          fontFamily: 'PublicSans',
+        }}
+      >
+        <div
+          style={{
+            fontSize: '56px',
+            color: '#FFFFFF',
+            fontWeight: '600',
+          }}
+        >
+          {title}
+        </div>
+        {description && (
+          <div
+            style={{
+              fontFamily: 'PublicSans',
+              fontSize: '20px',
+              color: '#FFFFFF',
+              fontWeight: '400',
+            }}
+          >
+            {description}
+          </div>
+        )}
+      </div>
+      {/* Footer */}
+      <div
+        style={{
+          display: 'flex',
+          gap: '5px',
+          height: '45px',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            gap: '8px',
+            alignItems: 'center',
+            background: '#191919',
+            width: '100%',
+            padding: '14px',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div
+            style={{
+              fontSize: '14px',
+              color: '#F1F1F1',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              fontFamily: 'RobotoMono',
+              opacity: 0.5,
+            }}
+          >
+            {tags?.join(' · ')}
+          </div>
+          {date && (
+            <div
+              style={{
+                fontSize: '18px',
+                color: '#F1F1F1',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                fontFamily: 'RobotoMono',
+                flexShrink: 0,
+              }}
+            >
+              {formatDate(date)}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
