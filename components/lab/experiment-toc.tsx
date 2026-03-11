@@ -106,7 +106,7 @@ export function ExperimentTOC({
                       className="hover:bg-accent focus-visible:ring-ring -mx-1.5 flex items-center gap-2 rounded-sm px-1.5 py-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
                     >
                       <img
-                        src={author.avatar_url}
+                        src={`${author.avatar_url}&s=40`}
                         alt=""
                         width={20}
                         height={20}
