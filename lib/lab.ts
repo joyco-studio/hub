@@ -15,7 +15,7 @@ type ExperimentsResponse = {
 }
 
 export async function getExperiments(): Promise<ExperimentsResponse> {
-  const res = await fetch(EXPERIMENTS_URL, { next: { revalidate: 3600 } })
+  const res = await fetch(EXPERIMENTS_URL, { next: { revalidate: 30 } })
 
   if (!res.ok) return { experiments: [] }
 
