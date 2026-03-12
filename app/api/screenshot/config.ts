@@ -6,6 +6,10 @@ export type DemoConfig = {
     height: number
   }
   preview?: string
+  gotoOptions?: {
+    waitUntil: string
+    timeout: number
+  }
 }
 
 export const config: Record<string, Partial<DemoConfig>> = {
@@ -74,10 +78,14 @@ export const experimentConfig: Record<string, Partial<DemoConfig>> = {}
 
 export const experimentDefaultConfig: DemoConfig = {
   styles: '',
-  timeout: 2000,
+  timeout: 3000,
   viewport: {
     width: 1440,
     height: 900,
+  },
+  gotoOptions: {
+    waitUntil: 'load',
+    timeout: 30000,
   },
 }
 

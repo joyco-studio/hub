@@ -36,7 +36,7 @@ async function fetchScreenshotFromCloudflare(
           body: JSON.stringify({
             url: targetUrl,
             viewport: config.viewport,
-            gotoOptions: {
+            gotoOptions: config.gotoOptions ?? {
               waitUntil: 'networkidle0',
               timeout: 30000,
             },
@@ -73,6 +73,7 @@ async function fetchScreenshotFromCloudflare(
       lastError = error as Error
       if (attempt < MAX_RETRIES - 1) {
         const backoffMs = INITIAL_BACKOFF_MS * Math.pow(2, attempt)
+        console.error(lastError)
         console.log(
           `Request failed, retrying in ${backoffMs}ms (attempt ${attempt + 1}/${MAX_RETRIES})`
         )
