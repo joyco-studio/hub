@@ -15,6 +15,39 @@ type ExperimentTOCProps = {
   authors?: RepoContributor[]
 }
 
+function ContributorAvatar(author: RepoContributor) {
+  let avatarSrc
+  try {
+    const u = new URL(author.avatar_url)
+    u.searchParams.set('s', '40')
+    avatarSrc = u.toString()
+  } catch {
+    avatarSrc = author.avatar_url
+  }
+
+  return (
+    <a
+      key={author.login}
+      href={author.html_url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="hover:bg-accent focus-visible:ring-ring -mx-1.5 flex items-center gap-2 rounded-sm px-1.5 py-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+    >
+      <img
+        src={avatarSrc}
+        alt=""
+        width={20}
+        height={20}
+        className="rounded-full"
+        loading="lazy"
+      />
+      <span className="text-foreground text-xs font-medium">
+        {author.login}
+      </span>
+    </a>
+  )
+}
+
 export function ExperimentTOC({
   title,
   description,
@@ -97,28 +130,7 @@ export function ExperimentTOC({
                   Authors
                 </span>
                 <div className="flex flex-col gap-1.5">
-                  {authors.map((author) => (
-                    <a
-                      key={author.login}
-                      href={author.html_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:bg-accent focus-visible:ring-ring -mx-1.5 flex items-center gap-2 rounded-sm px-1.5 py-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                    >
-                      <img
-                      <img
-                        src={(() => { try { const u = new URL(author.avatar_url); u.searchParams.set('s', '40'); return u.toString() } catch { return author.avatar_url } })()}
-                        alt=""
-                        width={20}
-                        height={20}
-                        className="rounded-full"
-                        loading="lazy"
-                      />
-                      <span className="text-foreground text-xs font-medium">
-                        {author.login}
-                      </span>
-                    </a>
-                  ))}
+                  {authors.map(ContributorAvatar)}
                 </div>
               </div>
             )}
