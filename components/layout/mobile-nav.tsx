@@ -50,7 +50,11 @@ const sectionIcons: Record<
  * MobileNav - Main mobile navigation component
  * -------------------------------------------------------------------------------------------------*/
 
-export function MobileNav({ tree, itemMeta = {}, experiments = [] }: MobileNavProps) {
+export function MobileNav({
+  tree,
+  itemMeta = {},
+  experiments = [],
+}: MobileNavProps) {
   const pathname = usePathname()
   const router = useRouter()
   const inputRef = React.useRef<HTMLInputElement>(null)
