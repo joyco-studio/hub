@@ -20,7 +20,7 @@ export function ExperimentIframe({
   const [debug, setDebug] = useLocalStorage('lab-debug', false)
 
   const iframeSrc = React.useMemo(() => {
-    const url = new URL(src, window.location.origin)
+    const url = new URL(src)
     if (debug) {
       url.searchParams.set('debug', 'true')
     }
@@ -55,7 +55,7 @@ export function ExperimentIframe({
         size="sm"
         aria-label={debug ? 'Hide controls' : 'Show controls'}
         onClick={() => setDebug((prev) => !prev)}
-        className="absolute bottom-4 right-4"
+        className="absolute right-4 bottom-4"
       >
         {debug ? 'Hide controls' : 'Show controls'}
       </Button>
