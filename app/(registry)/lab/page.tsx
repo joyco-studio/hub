@@ -1,10 +1,10 @@
-import Link from 'next/link'
 import type { Metadata } from 'next'
 import { getExperiments } from '@/lib/lab'
 import { getRegistryCounts } from '@/lib/source'
 import { RegistryMetaProvider } from '@/components/registry-meta'
 import FlaskIcon from '@/components/icons/flask'
 import { Badge } from '@/components/ui/badge'
+import { ExperimentCard } from '@/components/cards/experiment-card'
 
 export const revalidate = 30
 
@@ -42,30 +42,13 @@ export default async function LabPage() {
         ) : (
           <div className="grid gap-2 sm:grid-cols-2">
             {experiments.map((experiment) => (
-              <Link
+              <ExperimentCard
                 key={experiment.slug}
-                href={`/lab/${experiment.slug}`}
-                className="bg-muted hover:bg-accent group flex flex-col gap-2 p-5 transition-colors"
-              >
-                <span className="font-mono text-sm font-medium tracking-wide uppercase">
-                  {experiment.title}
-                </span>
-                <span className="text-muted-foreground line-clamp-3 text-sm leading-relaxed">
-                  {experiment.description}
-                </span>
-                {experiment.tags && experiment.tags.length > 0 && (
-                  <div className="mt-1 flex flex-wrap gap-1">
-                    {experiment.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="bg-accent text-muted-foreground px-2 py-0.5 font-mono text-xs tracking-wide uppercase"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </Link>
+                slug={experiment.slug}
+                title={experiment.title}
+                description={experiment.description}
+                tags={experiment.tags}
+              />
             ))}
           </div>
         )}

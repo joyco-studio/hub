@@ -1,7 +1,14 @@
 import { APP_BASE_URL } from '@/lib/constants'
 import { NextRequest, NextResponse } from 'next/server'
 import { unstable_cache } from 'next/cache'
-import { baseScreenshStyle, DemoConfig, getDemoConfig } from './config'
+import {
+  baseScreenshStyle,
+  baseExperimentStyle,
+  DemoConfig,
+  getDemoConfig,
+  getExperimentConfig,
+} from './config'
+import { getExperimentBySlug } from '@/lib/lab'
 
 const CLOUDFLARE_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID
 const CLOUDFLARE_API_TOKEN = process.env.CLOUDFLARE_API_TOKEN
@@ -11,7 +18,8 @@ const INITIAL_BACKOFF_MS = 2000
 
 async function fetchScreenshotFromCloudflare(
   targetUrl: string,
-  config: DemoConfig
+  config: DemoConfig,
+  baseStyle: string = baseScreenshStyle
 ): Promise<string> {
   let lastError: Error | null = null
   console.log('fetchScreenshotFromCloudflare', config)
@@ -36,7 +44,7 @@ async function fetchScreenshotFromCloudflare(
             addStyleTag: [
               {
                 content: `
-                  ${baseScreenshStyle}
+                  ${baseStyle}
                   ${config.styles}
                 `,
               },
@@ -87,13 +95,30 @@ const getCachedScreenshot = unstable_cache(
   { revalidate: false }
 )
 
+const getCachedExperimentScreenshot = unstable_cache(
+  async (slug: string) => {
+    const experiment = await getExperimentBySlug(slug)
+    if (!experiment) throw new Error(`Experiment not found: ${slug}`)
+
+    const experimentConfig = getExperimentConfig(slug)
+    return fetchScreenshotFromCloudflare(
+      experiment.href,
+      experimentConfig,
+      baseExperimentStyle
+    )
+  },
+  ['experiment-screenshot'],
+  { revalidate: 86400 }
+)
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const name = searchParams.get('name')
+  const experiment = searchParams.get('experiment')
 
-  if (!name) {
+  if (!name && !experiment) {
     return NextResponse.json(
-      { error: 'Missing required parameter: name' },
+      { error: 'Missing required parameter: name or experiment' },
       { status: 400 }
     )
   }
@@ -106,7 +131,9 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const base64Image = await getCachedScreenshot(name)
+    const base64Image = experiment
+      ? await getCachedExperimentScreenshot(experiment)
+      : await getCachedScreenshot(name!)
     const imageBuffer = Buffer.from(base64Image, 'base64')
 
     return new NextResponse(imageBuffer, {
@@ -117,6 +144,14 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('Screenshot generation error:', error)
+
+    if (
+      error instanceof Error &&
+      error.message.startsWith('Experiment not found')
+    ) {
+      return NextResponse.json({ error: error.message }, { status: 404 })
+    }
+
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

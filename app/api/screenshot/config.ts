@@ -69,3 +69,30 @@ body * {
   scrollbar-width: none;
 }
 `
+
+export const experimentConfig: Record<string, Partial<DemoConfig>> = {}
+
+export const experimentDefaultConfig: DemoConfig = {
+  styles: '',
+  timeout: 2000,
+  viewport: {
+    width: 1440,
+    height: 900,
+  },
+}
+
+export function getExperimentConfig(slug: string) {
+  const selectedConfig = experimentConfig[slug]
+
+  return Object.assign({}, experimentDefaultConfig, selectedConfig)
+}
+
+export const baseExperimentStyle: string = `
+::-webkit-scrollbar {
+  display: none;
+}
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+`
