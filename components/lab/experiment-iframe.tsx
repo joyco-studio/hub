@@ -20,11 +20,15 @@ export function ExperimentIframe({
   const [debug, setDebug] = useLocalStorage('lab-debug', false)
 
   const iframeSrc = React.useMemo(() => {
-    const url = new URL(src)
-    if (debug) {
-      url.searchParams.set('debug', 'true')
+    try {
+      const url = new URL(src)
+      if (debug) {
+        url.searchParams.set('debug', 'true')
+      }
+      return url.toString()
+    } catch {
+      return src
     }
-    return url.toString()
   }, [src, debug])
 
   return (

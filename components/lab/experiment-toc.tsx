@@ -106,7 +106,8 @@ export function ExperimentTOC({
                       className="hover:bg-accent focus-visible:ring-ring -mx-1.5 flex items-center gap-2 rounded-sm px-1.5 py-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
                     >
                       <img
-                        src={`${author.avatar_url}&s=40`}
+                      <img
+                        src={(() => { try { const u = new URL(author.avatar_url); u.searchParams.set('s', '40'); return u.toString() } catch { return author.avatar_url } })()}
                         alt=""
                         width={20}
                         height={20}
