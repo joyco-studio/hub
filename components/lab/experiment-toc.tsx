@@ -53,7 +53,7 @@ export function ExperimentTOC({
           }
           aria-expanded={open}
           className={cn(
-            'bg-muted hover:bg-accent text-muted-foreground flex h-28 w-7 shrink-0 cursor-pointer items-center justify-center self-center rounded-l-[4px] border-y border-l transition-colors',
+            'bg-muted hover:bg-accent text-muted-foreground flex h-28 w-7 shrink-0 cursor-pointer items-center justify-center self-center border-y border-l transition-colors',
             'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none'
           )}
         >

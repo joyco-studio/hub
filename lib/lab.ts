@@ -41,6 +41,40 @@ function parseRepoOwnerAndName(
   }
 }
 
+function githubHeaders() {
+  return {
+    Accept: 'application/vnd.github.v3+json',
+    ...(process.env.GITHUB_TOKEN && {
+      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+    }),
+  }
+}
+
+export async function isRepoPublic(
+  repoUrl: string | undefined
+): Promise<boolean> {
+  if (!repoUrl) return false
+
+  const parsed = parseRepoOwnerAndName(repoUrl)
+  if (!parsed || parsed.host !== 'github') return false
+
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/${parsed.owner}/${parsed.repo}`,
+      {
+        headers: githubHeaders(),
+        next: { revalidate: 3600 },
+      }
+    )
+    if (!res.ok) return false
+
+    const data: { private: boolean } = await res.json()
+    return !data.private
+  } catch {
+    return false
+  }
+}
+
 export async function getRepoContributors(
   repoUrl: string | undefined
 ): Promise<RepoContributor[]> {
@@ -54,12 +88,7 @@ export async function getRepoContributors(
       const res = await fetch(
         `https://api.github.com/repos/${parsed.owner}/${parsed.repo}/contributors?per_page=10`,
         {
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-            ...(process.env.GITHUB_TOKEN && {
-              Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-            }),
-          },
+          headers: githubHeaders(),
           next: { revalidate: 3600 },
         }
       )

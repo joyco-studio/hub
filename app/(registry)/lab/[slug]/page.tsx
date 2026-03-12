@@ -4,6 +4,7 @@ import {
   getExperiments,
   getExperimentBySlug,
   getRepoContributors,
+  isRepoPublic,
 } from '@/lib/lab'
 import { getRegistryCounts } from '@/lib/source'
 import { RegistryMetaProvider } from '@/components/registry-meta'
@@ -23,7 +24,10 @@ export default async function ExperimentPage({ params }: PageProps) {
   if (!experiment) notFound()
 
   const counts = getRegistryCounts()
-  const authors = await getRepoContributors(experiment.repo)
+  const [repoPublic, authors] = await Promise.all([
+    isRepoPublic(experiment.repo),
+    getRepoContributors(experiment.repo),
+  ])
 
   return (
     <RegistryMetaProvider counts={counts}>
@@ -35,7 +39,7 @@ export default async function ExperimentPage({ params }: PageProps) {
         description={experiment.description}
         href={experiment.href}
         tags={experiment.tags}
-        repo={experiment.repo}
+        repo={repoPublic ? experiment.repo : undefined}
         authors={authors}
       />
     </RegistryMetaProvider>

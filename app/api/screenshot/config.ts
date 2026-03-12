@@ -74,7 +74,14 @@ body * {
 }
 `
 
-export const experimentConfig: Record<string, Partial<DemoConfig>> = {}
+export const experimentConfig: Record<string, Partial<DemoConfig>> = {
+  'joyco-miami': {
+    timeout: 5000,
+  },
+  'msdf-text-fluidsim': {
+    timeout: 3200,
+  },
+}
 
 export const experimentDefaultConfig: DemoConfig = {
   styles: '',

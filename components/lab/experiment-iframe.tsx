@@ -2,6 +2,8 @@
 
 import * as React from 'react'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { useLocalStorage } from '@/hooks/use-local-storage'
 
 type ExperimentIframeProps = {
   src: string
@@ -15,6 +17,15 @@ export function ExperimentIframe({
   className,
 }: ExperimentIframeProps) {
   const [isLoading, setIsLoading] = React.useState(true)
+  const [debug, setDebug] = useLocalStorage('lab-debug', false)
+
+  const iframeSrc = React.useMemo(() => {
+    const url = new URL(src, window.location.origin)
+    if (debug) {
+      url.searchParams.set('debug', 'true')
+    }
+    return url.toString()
+  }, [src, debug])
 
   return (
     <div
@@ -32,13 +43,22 @@ export function ExperimentIframe({
         </div>
       )}
       <iframe
-        src={src}
+        src={iframeSrc}
         title={title}
         className="h-full w-full border-0"
         sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
         allow="accelerometer; camera; gyroscope; microphone"
         onLoad={() => setIsLoading(false)}
       />
+      <Button
+        variant={debug ? 'default' : 'outline'}
+        size="sm"
+        aria-label={debug ? 'Hide controls' : 'Show controls'}
+        onClick={() => setDebug((prev) => !prev)}
+        className="absolute bottom-4 right-4"
+      >
+        {debug ? 'Hide controls' : 'Show controls'}
+      </Button>
     </div>
   )
 }
