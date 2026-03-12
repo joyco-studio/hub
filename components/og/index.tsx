@@ -1,5 +1,6 @@
 import { ImageResponseOptions } from 'next/server'
 import { CubeIcon, FileIcon, TerminalWithCursorIcon } from '../icons'
+import FlaskIcon from '../icons/flask'
 
 const TYPE_LOGO = {
   components: CubeIcon,
@@ -9,6 +10,16 @@ const TYPE_LOGO = {
 
 export const isTypeLogo = (type: string): type is keyof typeof TYPE_LOGO => {
   return type in TYPE_LOGO
+}
+
+interface OgCardProps {
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
+  label: string
+  title: string
+  description?: string
+  subtitle?: string
+  date?: string
+  style?: React.CSSProperties
 }
 
 interface DocsOgImageProps {
@@ -27,6 +38,52 @@ export function DocsOgImage({
   date,
 }: DocsOgImageProps) {
   return (
+    <OgImageLayout>
+      <OgCard
+        icon={TYPE_LOGO[type]}
+        label={type}
+        title={title}
+        description={description}
+        subtitle={author}
+        date={date}
+        style={{ height: '100%' }}
+      />
+    </OgImageLayout>
+  )
+}
+
+interface LabOgImageProps {
+  title: string
+  description?: string
+  tags?: string[]
+  date?: string
+}
+
+export function LabOgImage({
+  title,
+  description,
+  tags,
+  date,
+}: LabOgImageProps) {
+  const displayTags = tags?.slice(0, 3) ?? []
+
+  return (
+    <OgImageLayout>
+      <OgCard
+        icon={FlaskIcon}
+        label="LAB"
+        title={title}
+        description={description}
+        subtitle={displayTags.join(' · ')}
+        date={date}
+        style={{ height: '100%' }}
+      />
+    </OgImageLayout>
+  )
+}
+
+const OgImageLayout = ({ children }: { children: React.ReactNode }) => {
+  return (
     <div
       style={{
         width: '1200px',
@@ -38,38 +95,19 @@ export function DocsOgImage({
         background: '#121212',
       }}
     >
-      <Col
-        style={{
-          width: '29.33%',
-        }}
-      >
+      <Col style={{ width: '29.33%' }}>
         <Box style={{ height: '20%' }} />
         <Box style={{ height: '45%' }} />
         <Box style={{ height: '38%' }} />
       </Col>
-      <Col
-        style={{
-          width: '39.33%',
-        }}
-      >
+      <Col style={{ width: '39.33%' }}>
         <Box style={{ height: '15%' }} />
         <Box style={{ height: '87%', background: 'transparent' }}>
-          <Card
-            type={type}
-            title={title}
-            description={description}
-            author={author}
-            date={date}
-            style={{ height: '100%' }}
-          />
+          {children}
         </Box>
         <Box style={{ height: '15%' }} />
       </Col>
-      <Col
-        style={{
-          width: '29.33%',
-        }}
-      >
+      <Col style={{ width: '29.33%' }}>
         <Box style={{ height: '30%' }} />
         <Box style={{ height: '45%' }} />
         <Box style={{ height: '25%' }} />
@@ -78,47 +116,15 @@ export function DocsOgImage({
   )
 }
 
-const Col = ({ children, style }: React.ComponentProps<'div'>) => {
-  return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '5px',
-        flexGrow: 1,
-        flexShrink: 0,
-        ...style,
-      }}
-    >
-      {children}
-    </div>
-  )
-}
-const Box = ({ style, ...props }: React.ComponentProps<'div'>) => {
-  return (
-    <div
-      style={{
-        background: '#191919',
-        display: 'flex',
-        ...style,
-      }}
-      {...props}
-    />
-  )
-}
-
-const Card = ({
-  type,
+const OgCard = ({
+  icon: Icon,
+  label,
   title,
   description,
-  author,
+  subtitle,
   date,
   style,
-}: Pick<
-  DocsOgImageProps,
-  'title' | 'description' | 'type' | 'author' | 'date'
-> & { style?: React.CSSProperties }) => {
-  const Icon = TYPE_LOGO[type]
+}: OgCardProps) => {
   return (
     <div
       style={{
@@ -171,7 +177,7 @@ const Card = ({
               fontFamily: 'RobotoMono',
             }}
           >
-            {type}
+            {label}
           </div>
         </div>
       </div>
@@ -181,7 +187,7 @@ const Card = ({
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'flex-end',
-          padding: '40px',
+          padding: '24px',
           gap: '5px',
           background: '#0000FF',
           flexGrow: 1,
@@ -193,20 +199,28 @@ const Card = ({
             fontSize: '56px',
             color: '#FFFFFF',
             fontWeight: '600',
+            lineHeight: 1,
           }}
         >
           {title}
         </div>
-        <div
-          style={{
-            fontFamily: 'PublicSans',
-            fontSize: '20px',
-            color: '#FFFFFF',
-            fontWeight: '400',
-          }}
-        >
-          {description}
-        </div>
+        {description && (
+          <div
+            style={{
+              marginTop: '12px',
+              fontFamily: 'PublicSans',
+              fontSize: '20px',
+              color: '#FFFFFF',
+              fontWeight: '400',
+              lineHeight: 1.4,
+              overflow: 'hidden',
+              display: 'block',
+              lineClamp: 3,
+            }}
+          >
+            {description}
+          </div>
+        )}
       </div>
       {/* Footer */}
       <div
@@ -219,7 +233,7 @@ const Card = ({
         <div
           style={{
             display: 'flex',
-            gap: '5px',
+            gap: '8px',
             alignItems: 'center',
             background: '#191919',
             width: '100%',
@@ -229,7 +243,7 @@ const Card = ({
         >
           <div
             style={{
-              fontSize: '18px',
+              fontSize: '14px',
               color: '#F1F1F1',
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
@@ -237,7 +251,7 @@ const Card = ({
               opacity: 0.5,
             }}
           >
-            {author}
+            {subtitle}
           </div>
           {date && (
             <div
@@ -247,6 +261,7 @@ const Card = ({
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em',
                 fontFamily: 'RobotoMono',
+                flexShrink: 0,
               }}
             >
               {formatDate(date)}
@@ -255,6 +270,35 @@ const Card = ({
         </div>
       </div>
     </div>
+  )
+}
+
+const Col = ({ children, style }: React.ComponentProps<'div'>) => {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '5px',
+        flexGrow: 1,
+        flexShrink: 0,
+        ...style,
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+const Box = ({ style, ...props }: React.ComponentProps<'div'>) => {
+  return (
+    <div
+      style={{
+        background: '#191919',
+        display: 'flex',
+        ...style,
+      }}
+      {...props}
+    />
   )
 }
 

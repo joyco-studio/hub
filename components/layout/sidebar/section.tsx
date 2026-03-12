@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import CubeIcon from '@/components/icons/3d-cube'
 import TerminalWithCursorIcon from '@/components/icons/terminal-w-cursor'
 import FileIcon from '@/components/icons/file'
+import FlaskIcon from '@/components/icons/flask'
 import GamepadIcon from '@/components/icons/gamepad'
 import TextScanIcon from '@/components/icons/text-scan'
 import { Minus, Plus } from 'lucide-react'
@@ -37,6 +38,7 @@ const sectionIcons: Record<
   components: CubeIcon,
   toolbox: TerminalWithCursorIcon,
   logs: FileIcon,
+  lab: FlaskIcon,
 }
 
 type SidebarItemsProps = {

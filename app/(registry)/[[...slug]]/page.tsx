@@ -4,7 +4,7 @@ import { createRelativeLink } from 'fumadocs-ui/mdx'
 import { readFile } from 'fs/promises'
 import path from 'path'
 
-import { getPageImage, getLLMText, getRelatedPages, source } from '@/lib/source'
+import { getPageImage, getLLMText, getRelatedPages, getRegistryCounts, source } from '@/lib/source'
 import { getLogNumber, stripLogPrefixFromTitle } from '@/lib/log-utils'
 import { getDownloadStats } from '@/lib/stats'
 import { getMDXComponents } from '@/mdx-components'
@@ -25,7 +25,6 @@ import { RelatedItems } from '@/components/preview/related-items'
 import { TOCScrollArea } from '@/components/toc'
 import { TOCItems } from '@/components/toc/clerk'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { RegistryMetaProvider } from '@/components/registry-meta'
 import { PageGithubLinkButton } from '@/components/page-github-link-button'
@@ -43,28 +42,6 @@ const getCategoryLabel = (slugs: string[]) => {
     logs: 'Log',
   }
   return labels[category] || category
-}
-
-type PageTreeNode = {
-  type?: string
-  $id?: string
-  children?: PageTreeNode[]
-}
-
-const countPages = (node: PageTreeNode | undefined): number => {
-  if (!node) return 0
-  if (node.type === 'page') return 1
-  return (node.children ?? []).reduce(
-    (sum, child) => sum + countPages(child),
-    0
-  )
-}
-
-const getTopLevelFolder = (segment: string) => {
-  const children = source.pageTree.children as unknown as PageTreeNode[]
-  return children.find(
-    (child) => child.type === 'folder' && child.$id?.split(':')[1] === segment
-  )
 }
 
 async function getComponentSource(
@@ -118,11 +95,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
 
   const toc = page.data.toc
   const hasToc = toc.length > 0
-  const counts = {
-    components: countPages(getTopLevelFolder('components')),
-    toolbox: countPages(getTopLevelFolder('toolbox')),
-    logs: countPages(getTopLevelFolder('logs')),
-  }
+  const counts = getRegistryCounts()
 
   return (
     <RegistryMetaProvider counts={counts}>
