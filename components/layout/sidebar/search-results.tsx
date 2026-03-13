@@ -140,9 +140,7 @@ export function SearchResults({
                 const tags = tagResult?.content.split(', ')
 
                 const contentPreview = pageResults
-                  .filter(
-                    (r) => r.type !== 'page' && !r.id.endsWith('-tags')
-                  )
+                  .filter((r) => r.type !== 'page' && !r.id.endsWith('-tags'))
                   .map((r) => r.content)
                   .join(' ')
                   .trim()
@@ -168,7 +166,7 @@ export function SearchResults({
                     {tags && (
                       <span
                         data-slot="command-item-tags"
-                        className="flex flex-wrap gap-1 pt-0.5"
+                        className="flex flex-wrap gap-1 pt-0.5 uppercase"
                       >
                         {tags.map((tag) => (
                           <span
