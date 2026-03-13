@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import CubeIcon from '@/components/icons/3d-cube'
 import TerminalWithCursorIcon from '@/components/icons/terminal-w-cursor'
 import FileIcon from '@/components/icons/file'
+import FlaskIcon from '@/components/icons/flask'
 
 export type SearchResult = {
   id: string
@@ -29,12 +30,14 @@ const sectionIcons: Record<
   components: CubeIcon,
   toolbox: TerminalWithCursorIcon,
   logs: FileIcon,
+  lab: FlaskIcon,
 }
 
 const sectionLabels: Record<string, string> = {
   components: 'Components',
   toolbox: 'Toolbox',
   logs: 'Logs',
+  lab: 'Lab',
 }
 
 /* -------------------------------------------------------------------------------------------------

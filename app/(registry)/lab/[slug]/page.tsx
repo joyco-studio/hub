@@ -63,7 +63,11 @@ export async function generateMetadata({
     title: experiment.title,
     description: experiment.description,
     openGraph: {
+      type: 'article',
       images: [`/og/lab/${slug}`],
+    },
+    twitter: {
+      card: 'summary_large_image',
     },
   }
 }
