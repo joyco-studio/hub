@@ -28,11 +28,11 @@ export async function GET(request: Request) {
   const experimentResults = experiments
     .filter((e) => matchesQuery(e, q))
     .flatMap((e) => {
-      const entries = [
+      const entries: { id: string; url: string; type: 'page' | 'text'; content: string }[] = [
         {
           id: `lab-${e.slug}`,
           url: `/lab/${e.slug}`,
-          type: 'page' as const,
+          type: 'page',
           content: e.title,
         },
       ]
@@ -41,7 +41,7 @@ export async function GET(request: Request) {
         entries.push({
           id: `lab-${e.slug}-desc`,
           url: `/lab/${e.slug}`,
-          type: 'text' as const,
+          type: 'text',
           content: e.description,
         })
       }
@@ -53,7 +53,7 @@ export async function GET(request: Request) {
         entries.push({
           id: `lab-${e.slug}-tags`,
           url: `/lab/${e.slug}`,
-          type: 'text' as const,
+          type: 'text',
           content: matchedTags.join(', '),
         })
       }
