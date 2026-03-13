@@ -133,8 +133,16 @@ export function SearchResults({
                 const pageResult = pageResults.find((r) => r.type === 'page')
                 const title =
                   pageResult?.content ?? pageResults[0]?.content ?? pageUrl
+
+                const tagResult = pageResults.find((r) =>
+                  r.id.endsWith('-tags')
+                )
+                const tags = tagResult?.content.split(', ')
+
                 const contentPreview = pageResults
-                  .filter((r) => r.type !== 'page')
+                  .filter(
+                    (r) => r.type !== 'page' && !r.id.endsWith('-tags')
+                  )
                   .map((r) => r.content)
                   .join(' ')
                   .trim()
@@ -157,6 +165,21 @@ export function SearchResults({
                     >
                       <HighlightedText text={title} query={query} />
                     </span>
+                    {tags && (
+                      <span
+                        data-slot="command-item-tags"
+                        className="flex flex-wrap gap-1 pt-0.5"
+                      >
+                        {tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="bg-muted text-muted-foreground rounded-sm px-1.5 py-0.5 font-mono text-[10px] leading-tight tracking-wide"
+                          >
+                            <HighlightedText text={tag} query={query} />
+                          </span>
+                        ))}
+                      </span>
+                    )}
                     {contentPreview && (
                       <span
                         data-slot="command-item-description"
