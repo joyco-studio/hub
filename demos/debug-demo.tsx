@@ -2,24 +2,21 @@
 
 import * as THREE from 'three/webgpu'
 import {
-  Fn,
   cos,
   dot,
   float,
   floor,
   fract,
-  hash,
   mix,
   mod,
-  mul,
   select,
   sin,
   smoothstep,
+  sqrt,
   sub,
   time,
   uv,
   vec2,
-  vec4,
 } from 'three/tsl'
 import { Canvas, extend, useThree } from '@react-three/fiber'
 import { useEffect, useMemo } from 'react'
@@ -29,23 +26,6 @@ import { useUniforms } from '@/hooks/use-uniforms'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 extend(THREE as any)
-
-// TSL simplex-ish noise built from hash
-const noise2D = Fn(([p_immutable]: [ReturnType<typeof vec2>]) => {
-  const p = vec2(p_immutable).toVar()
-  const i = floor(p).toVar()
-  const f = fract(p).toVar()
-  const u = f.mul(f).mul(sub(float(3), mul(float(2), f)))
-
-  const a = hash(i)
-  const b = hash(i.add(vec2(1, 0)))
-  const c = hash(i.add(vec2(0, 1)))
-  const d = hash(i.add(vec2(1, 1)))
-
-  return mix(mix(a, b, u.x), mix(c, d, u.x), u.y)
-    .mul(2)
-    .sub(1)
-})
 
 function GradientMesh() {
   const [ref, folder] = useDebugBindings(
@@ -57,16 +37,14 @@ function GradientMesh() {
       angle: 45,
       stripes: 20,
       sharpness: 20.0,
-      noiseScale: 3.0,
-      noiseStrength: 0.15,
+      swirlStrength: 9.0,
       speed: 1.0,
     },
     {
       angle: { min: 0, max: 360, step: 1 },
       stripes: { min: 1, max: 20, step: 1 },
       sharpness: { min: 1, max: 20, step: 0.1 },
-      noiseScale: { min: 0, max: 10, step: 0.1 },
-      noiseStrength: { min: 0, max: 1, step: 0.01 },
+      swirlStrength: { min: 0, max: 10, step: 0.1 },
       speed: { min: 0, max: 5, step: 0.1 },
       colorA: { type: 'color' },
       colorB: { type: 'color' },
@@ -81,8 +59,7 @@ function GradientMesh() {
     uAngle: ref.current.angle,
     uStripes: ref.current.stripes,
     uSharpness: ref.current.sharpness,
-    uNoiseScale: ref.current.noiseScale,
-    uNoiseStrength: ref.current.noiseStrength,
+    uSwirlStrength: ref.current.swirlStrength,
     uSpeed: ref.current.speed,
   })
 
@@ -98,22 +75,26 @@ function GradientMesh() {
         uAngle: ref.current.angle,
         uStripes: ref.current.stripes,
         uSharpness: ref.current.sharpness,
-        uNoiseScale: ref.current.noiseScale,
-        uNoiseStrength: ref.current.noiseStrength,
+        uSwirlStrength: ref.current.swirlStrength,
         uSpeed: ref.current.speed,
       })
     })
   }, [folder, ref, setUniforms])
 
   const material = useMemo(() => {
+    const centered = sub(uv(), vec2(0.5))
+    const dist = sqrt(dot(centered, centered))
+    const swirlAngle = dist.mul(uniforms.uSwirlStrength).add(time.mul(uniforms.uSpeed).mul(0.3))
+    const ca = cos(swirlAngle)
+    const sa = sin(swirlAngle)
+    const swirled = vec2(
+      centered.x.mul(ca).sub(centered.y.mul(sa)),
+      centered.x.mul(sa).add(centered.y.mul(ca))
+    )
+
     const rad = uniforms.uAngle.mul(Math.PI / 180)
     const dir = vec2(cos(rad), sin(rad))
-    const linear = dot(sub(uv(), vec2(0.5)), dir).add(0.5)
-
-    const n = noise2D(
-      uv().add(time.mul(uniforms.uSpeed).mul(0.05)).mul(uniforms.uNoiseScale)
-    ).mul(uniforms.uNoiseStrength)
-    const distorted = linear.add(n)
+    const distorted = dot(swirled, dir).add(0.5)
 
     const t = smoothstep(
       sub(float(0.5), float(0.5).div(uniforms.uSharpness)),
