@@ -247,6 +247,45 @@
         "@joyco/scramble",
         "button"
       ]
+    },
+    {
+      "name": "debug",
+      "type": "registry:component",
+      "title": "Debug",
+      "description": "A tweakpane-powered debug panel with URL-persisted state, draggable UI, and reactive hooks for binding component values.",
+      "files": [
+        {
+          "path": "registry/joyco/blocks/debug/provider.tsx",
+          "type": "registry:lib"
+        },
+        {
+          "path": "registry/joyco/blocks/debug/context.tsx",
+          "type": "registry:lib"
+        },
+        {
+          "path": "registry/joyco/blocks/debug/hooks.tsx",
+          "type": "registry:lib"
+        },
+        {
+          "path": "registry/joyco/blocks/debug/hash-state.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "registry/joyco/blocks/debug/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "registry/joyco/blocks/debug/use-draggable.ts",
+          "type": "registry:lib"
+        }
+      ],
+      "dependencies": [
+        "@tweakpane/core",
+        "debounce",
+        "zustand",
+        "tweakpane",
+        "lodash.debounce"
+      ]
     }
   ]
 }
