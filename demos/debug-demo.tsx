@@ -19,9 +19,10 @@ import {
   time,
   uv,
   vec2,
+  vec4,
 } from 'three/tsl'
-import { Canvas, extend, useFrame, useThree } from '@react-three/fiber'
-import { useEffect, useMemo, useRef } from 'react'
+import { Canvas, extend, useThree } from '@react-three/fiber'
+import { useEffect, useMemo } from 'react'
 
 import { DebugProvider, useDebugBindings } from '@/registry/joyco/blocks/debug'
 import { useUniforms } from '@/hooks/use-uniforms'
@@ -89,7 +90,7 @@ function GradientMesh() {
     if (!folder) return
     // eslint-disable-next-line react-hooks/immutability
     folder.expanded = true
-    folder.on('change', (e) => {
+    folder.on('change', () => {
       setUniforms({
         uColorA: ref.current.colorA,
         uColorB: ref.current.colorB,
@@ -105,44 +106,32 @@ function GradientMesh() {
   }, [folder, ref, setUniforms])
 
   const material = useMemo(() => {
-    const {
-      uColorA,
-      uColorB,
-      uColorC,
-      uAngle,
-      uStripes,
-      uSharpness,
-      uNoiseScale,
-      uNoiseStrength,
-      uSpeed,
-    } = uniforms
-
-    const rad = uAngle.mul(Math.PI / 180)
+    const rad = uniforms.uAngle.mul(Math.PI / 180)
     const dir = vec2(cos(rad), sin(rad))
     const linear = dot(sub(uv(), vec2(0.5)), dir).add(0.5)
 
     const n = noise2D(
-      uv().add(time.mul(uSpeed).mul(0.05)).mul(uNoiseScale)
-    ).mul(uNoiseStrength)
+      uv().add(time.mul(uniforms.uSpeed).mul(0.05)).mul(uniforms.uNoiseScale)
+    ).mul(uniforms.uNoiseStrength)
     const distorted = linear.add(n)
 
     const t = smoothstep(
-      sub(float(0.5), float(0.5).div(uSharpness)),
-      float(0.5).add(float(0.5).div(uSharpness)),
-      fract(distorted.mul(uStripes))
+      sub(float(0.5), float(0.5).div(uniforms.uSharpness)),
+      float(0.5).add(float(0.5).div(uniforms.uSharpness)),
+      fract(distorted.mul(uniforms.uStripes))
     )
 
-    const stripeIdx = mod(floor(distorted.mul(uStripes)), float(3))
+    const stripeIdx = mod(floor(distorted.mul(uniforms.uStripes)), float(3))
 
     const fromColor = select(
       stripeIdx.lessThan(0.5),
-      uColorA,
-      select(stripeIdx.lessThan(1.5), uColorB, uColorC)
+      uniforms.uColorA,
+      select(stripeIdx.lessThan(1.5), uniforms.uColorB, uniforms.uColorC)
     )
     const toColor = select(
       stripeIdx.lessThan(0.5),
-      uColorB,
-      select(stripeIdx.lessThan(1.5), uColorC, uColorA)
+      uniforms.uColorB,
+      select(stripeIdx.lessThan(1.5), uniforms.uColorC, uniforms.uColorA)
     )
 
     const finalColor = mix(fromColor, toColor, t)
@@ -151,9 +140,6 @@ function GradientMesh() {
     mat.colorNode = finalColor
     return mat
   }, [uniforms])
-
-  const matRef = useRef(material)
-  matRef.current = material
 
   const viewport = useThree((s) => s.viewport)
 
@@ -179,6 +165,7 @@ function DebugDemo() {
             renderer.toneMapping = THREE.NoToneMapping
             return renderer
           }}
+          flat
           style={{ width: '100%', height: '100%' }}
         >
           <GradientMesh />
