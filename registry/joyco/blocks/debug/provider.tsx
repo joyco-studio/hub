@@ -13,8 +13,7 @@ import debounce from 'lodash.debounce'
 import { Pane } from 'tweakpane'
 
 import { parseHashState, writeHashState } from './hash-state'
-import { DebugContext, useDebug } from './context'
-import { setOnFolderCreated, clearAllFolders } from './hooks'
+import { DebugContext, useDebug, type DebugRegistry } from './context'
 import { useDraggable } from './use-draggable'
 
 export function DebugParamSync() {
@@ -77,6 +76,11 @@ export function DebugProvider({
   const [pane, setPane] = useState<Pane | null>(null)
   const paneRef = useRef<Pane | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const registryRef = useRef<DebugRegistry>({
+    folderEntries: new Map(),
+    stores: new Map(),
+    onFolderCreated: null,
+  })
   const pendingStateRef = useRef<Record<string, unknown> | null>(null)
   const safetyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -94,7 +98,7 @@ export function DebugProvider({
     [flushPendingImport]
   )
 
-  // Create pane lazily on first enable; keep it alive across toggles
+  // Create pane once on mount; keep it alive across visibility toggles
   useEffect(() => {
     if (paneRef.current || !containerRef.current) return
 
@@ -106,7 +110,7 @@ export function DebugProvider({
 
     paneRef.current = instance
     setPane(instance)
-    setOnFolderCreated(schedulePendingImport)
+    registryRef.current.onFolderCreated = schedulePendingImport
 
     const urlState = parseHashState()
     if (urlState) {
@@ -151,10 +155,13 @@ export function DebugProvider({
       schedulePendingImport.cancel()
       if (safetyTimerRef.current) clearTimeout(safetyTimerRef.current)
       pendingStateRef.current = null
-      clearAllFolders()
+      const reg = registryRef.current
+      for (const [, entry] of reg.folderEntries) entry.folder.dispose()
+      reg.folderEntries.clear()
+      reg.stores.clear()
+      reg.onFolderCreated = null
       paneRef.current?.dispose()
       paneRef.current = null
-      setOnFolderCreated(null)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -162,7 +169,7 @@ export function DebugProvider({
   useDraggable(containerRef, '.tp-rotv_t', !!pane)
 
   return (
-    <DebugContext.Provider value={{ pane, enabled, setEnabled }}>
+    <DebugContext.Provider value={{ pane, enabled, setEnabled, registry: registryRef.current }}>
       <Suspense fallback={null}>
         <DebugParamSync />
       </Suspense>

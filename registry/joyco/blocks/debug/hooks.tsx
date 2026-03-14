@@ -1,57 +1,41 @@
 'use client'
 
-import React, { useEffect as useLayoutEffect, useRef, useState } from 'react'
+import React, { useLayoutEffect, useRef, useState } from 'react'
 import { createStore, useStore } from 'zustand'
 import type { StoreApi } from 'zustand'
 import type { BindingParams, FolderApi } from 'tweakpane'
 import type { Pane } from 'tweakpane'
 
-import { useDebug, type FolderEntry } from './context'
+import { useDebug, type DebugRegistry } from './context'
 
 // ---------------------------------------------------------------------------
-// Module-level folder registry (replaces provider's foldersRef)
+// Folder helpers — scoped to a DebugRegistry instance
 // ---------------------------------------------------------------------------
 
-const folderEntries = new Map<string, FolderEntry>()
-let _onFolderCreated: (() => void) | null = null
-export function setOnFolderCreated(cb: (() => void) | null) {
-  _onFolderCreated = cb
-}
-
-function getOrCreateFolder(pane: Pane, title: string): FolderApi {
-  const existing = folderEntries.get(title)
+function getOrCreateFolder(reg: DebugRegistry, pane: Pane, title: string): FolderApi {
+  const existing = reg.folderEntries.get(title)
   if (existing) {
     existing.refCount++
-    _onFolderCreated?.()
+    reg.onFolderCreated?.()
     return existing.folder
   }
   const f = pane.addFolder({ title, expanded: false })
-  folderEntries.set(title, { folder: f, refCount: 1 })
-  _onFolderCreated?.()
+  reg.folderEntries.set(title, { folder: f, refCount: 1 })
+  reg.onFolderCreated?.()
   return f
 }
 
-function releaseFolder(title: string) {
-  const entry = folderEntries.get(title)
-  if (!entry) {
-    return
-  }
+function releaseFolder(reg: DebugRegistry, title: string) {
+  const entry = reg.folderEntries.get(title)
+  if (!entry) return
 
   entry.refCount--
 
   if (entry.refCount <= 0) {
     entry.folder.dispose()
-    folderEntries.delete(title)
-    stores.delete(title)
+    reg.folderEntries.delete(title)
+    reg.stores.delete(title)
   }
-}
-
-export function clearAllFolders() {
-  for (const [, entry] of folderEntries) {
-    entry.folder.dispose()
-  }
-  folderEntries.clear()
-  stores.clear()
 }
 
 // ---------------------------------------------------------------------------
@@ -59,21 +43,21 @@ export function clearAllFolders() {
 // ---------------------------------------------------------------------------
 
 export function useDebugFolder(title: string): FolderApi | null {
-  const { pane } = useDebug()
+  const { pane, registry } = useDebug()
   const [folder, setFolder] = useState<FolderApi | null>(null)
 
   useLayoutEffect(() => {
     if (!pane) return
 
-    const f = getOrCreateFolder(pane, title)
+    const f = getOrCreateFolder(registry, pane, title)
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setFolder(f)
 
     return () => {
-      releaseFolder(title)
+      releaseFolder(registry, title)
       setFolder(null)
     }
-  }, [pane, title])
+  }, [pane, registry, title])
 
   return folder
 }
@@ -87,16 +71,14 @@ type DebugTarget = Record<string, unknown>
 export type DebugOptions<T> = Partial<Record<keyof T, BindingParams>>
 
 // ---------------------------------------------------------------------------
-// Store registry — keyed by folder title
+// Store helpers — scoped to a DebugRegistry instance
 // ---------------------------------------------------------------------------
 
-const stores = new Map<string, StoreApi<DebugTarget>>()
-
-function getOrCreateStore<T extends DebugTarget>(key: string, initial: T): StoreApi<T> {
-  let store = stores.get(key) as StoreApi<T> | undefined
+function getOrCreateStore<T extends DebugTarget>(reg: DebugRegistry, key: string, initial: T): StoreApi<T> {
+  let store = reg.stores.get(key) as StoreApi<T> | undefined
   if (!store) {
     store = createStore<T>(() => ({ ...initial }))
-    stores.set(key, store)
+    reg.stores.set(key, store)
   } else {
     // Merge new keys from later useDebugBindings calls
     const current = store.getState()
@@ -113,8 +95,8 @@ function getOrCreateStore<T extends DebugTarget>(key: string, initial: T): Store
   return store
 }
 
-function getStore<T extends DebugTarget>(key: string): StoreApi<T> {
-  const store = stores.get(key) as StoreApi<T> | undefined
+function getStore<T extends DebugTarget>(reg: DebugRegistry, key: string): StoreApi<T> {
+  const store = reg.stores.get(key) as StoreApi<T> | undefined
   if (!store) {
     throw new Error(
       `[useDebugState] No store found for "${key}". Make sure useDebugBindings("${key}", ...) mounts before useDebugState("${key}", ...).`
@@ -145,6 +127,7 @@ export function useDebugBindings<T extends DebugTarget>(
   target: T,
   options?: DebugOptions<T>
 ): [React.RefObject<T>, FolderApi | null, StoreApi<T>] {
+  const { registry } = useDebug()
   const folder = useDebugFolder(folderTitle)
   const optionsRef = useRef(options)
   // eslint-disable-next-line react-hooks/refs
@@ -153,13 +136,13 @@ export function useDebugBindings<T extends DebugTarget>(
 
   // Create store eagerly during render so useDebugState can access it
   // in the same render cycle (before effects run).
-  const store = getOrCreateStore(folderTitle, target)
+  const store = getOrCreateStore(registry, folderTitle, target)
 
   useLayoutEffect(() => {
     if (!folder) return
 
     const raw = targetRef.current
-    const store = getOrCreateStore(folderTitle, raw)
+    const store = getOrCreateStore(registry, folderTitle, raw)
 
     // Proxy intercepts external mutations so the folder UI stays in sync
     const proxy = new Proxy(raw, {
@@ -186,7 +169,7 @@ export function useDebugBindings<T extends DebugTarget>(
     }
     // target is expected to be a stable ref (e.g. useRef().current).
     // options is read from a ref — safe to define inline.
-  }, [folder, folderTitle])
+  }, [folder, folderTitle, registry])
 
   return [targetRef, folder, store]
 }
@@ -203,6 +186,7 @@ export function useDebugState(
   storeOrTitle: StoreApi<DebugTarget> | string,
   selector?: (state: DebugTarget) => unknown
 ) {
-  const store = typeof storeOrTitle === 'string' ? getStore(storeOrTitle) : storeOrTitle
+  const { registry } = useDebug()
+  const store = typeof storeOrTitle === 'string' ? getStore(registry, storeOrTitle) : storeOrTitle
   return useStore(store, selector as (state: DebugTarget) => unknown)
 }
