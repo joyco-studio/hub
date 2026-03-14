@@ -1,6 +1,7 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "infinite-list",
+  "type": "registry:component",
   "title": "Infinite List",
   "description": "A bias-based infinite scroll wrapper and hook.",
   "files": [
@@ -9,6 +10,5 @@
       "content": "'use client'\n\nimport { useState, useMemo, useCallback, Children } from 'react'\n\nexport function useInfiniteList({\n  pageSize,\n  initialItems,\n  initialPage = 1,\n}: {\n  pageSize: number\n  initialItems?: unknown[]\n  initialPage?: number\n}) {\n  const [requestedPage, setRequestedPage] = useState(initialPage)\n\n  const bias = useMemo(() => {\n    const bias = Math.max(0, (initialItems?.length ?? 0) - pageSize)\n    if (bias !== pageSize && bias !== 0) {\n      console.warn(\n        `[useInfiniteList] bias (${bias}) differs from pageSize (${pageSize}). ` +\n          `This will cause instantly displayed items to be appended with more items when the next page loads.`\n      )\n    }\n    return bias\n  }, [initialItems?.length, pageSize])\n\n  const displayLimit = requestedPage * pageSize\n\n  const nextPage = useCallback(() => {\n    setRequestedPage((current) => current + 1)\n  }, [])\n\n  return {\n    offset: requestedPage * pageSize + bias,\n    displayLimit,\n    pageSize,\n    nextPage,\n  }\n}\n\nexport function MaskedList({\n  children,\n  displayLimit,\n}: ReturnType<typeof useInfiniteList> & { children: React.ReactNode }) {\n  const childArray = Children.toArray(children)\n  const visibleChildren = childArray.slice(0, displayLimit)\n  return <>{visibleChildren}</>\n}\n",
       "type": "registry:component"
     }
-  ],
-  "type": "registry:component"
+  ]
 }
