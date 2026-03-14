@@ -26,16 +26,6 @@ function App() {
     </DebugProvider>
   )
 }
-
-function MyScene() {
-  const [ref] = useDebugBindings('Scene', {
-    speed: 1,
-    opacity: 0.5,
-    color: '#ff0000',
-  })
-
-  return <div style={{ opacity: ref.current.opacity }}>Speed: {ref.current.speed}</div>
-}
 ```
 
 ## API
@@ -44,13 +34,34 @@ function MyScene() {
 
 Wraps your app to provide the tweakpane debug panel. Activated via `?debug` query param or `Alt+D` shortcut.
 
+| Prop       | Type       | Default          | Description                                      |
+| ---------- | ---------- | ---------------- | ------------------------------------------------ |
+| `position` | `string`   | `'bottom-left'`  | Panel position: `top-left`, `top-right`, `bottom-left`, `bottom-right` |
+| `title`    | `string`   | `'Debug'`        | Title shown on the panel                         |
+| `padding`  | `number`   | `8`              | Padding from the viewport edge                   |
+| `enabled`  | `boolean`  | `false`          | Whether the panel starts visible                 |
+
 ### useDebugBindings
 
+Creates a tweakpane folder with bindings for each key in `target`. Returns a **ref**, the **folder API**, and a **zustand store**.
+
 ```tsx
-const [ref, folder, store] = useDebugBindings(folderTitle, target, options?)
+const [ref, folder, store] = useDebugBindings('Box', {
+  width: 120,
+  height: 120,
+  color: '#6366f1',
+}, {
+  width: { min: 50, max: 300, step: 1 },
+  height: { min: 50, max: 300, step: 1 },
+  color: { type: 'color' },
+})
 ```
 
-Creates a tweakpane folder with bindings for each key in `target`. Returns a ref that stays in sync with the UI, the folder API, and a zustand store for reactive subscriptions.
+| Return    | Type              | Description                                                      |
+| --------- | ----------------- | ---------------------------------------------------------------- |
+| `ref`     | `RefObject<T>`    | Mutable ref kept in sync with the UI. **Not reactive** — reads from `ref.current` won't trigger re-renders. Use this for imperative reads (e.g. in `useFrame`, animation loops, or event handlers). |
+| `folder`  | `FolderApi \| null` | Tweakpane folder handle for manual control (e.g. `folder.expanded = true`) |
+| `store`   | `StoreApi<T>`     | Zustand store. Pass to `useDebugState` for reactive subscriptions. |
 
 | Param         | Type              | Description                                    |
 | ------------- | ----------------- | ---------------------------------------------- |
@@ -60,17 +71,55 @@ Creates a tweakpane folder with bindings for each key in `target`. Returns a ref
 
 ### useDebugState
 
+Reactively subscribes to debug values. Use this when you need tweakpane changes to trigger re-renders.
+
 ```tsx
-const state = useDebugState(folderTitle)
-const value = useDebugState(store, (s) => s.someKey)
+// Subscribe to all values — re-renders on any change
+const state = useDebugState(store)
+
+// Subscribe with a selector — re-renders only when the selected value changes
+const width = useDebugState(store, (s) => s.width)
+
+// Subscribe by folder title (store must already exist via useDebugBindings)
+const state = useDebugState<{ speed: number }>('Box')
 ```
 
-Reactively subscribes to debug values. Accepts either a folder title string or a direct zustand store reference, with an optional selector.
+Accepts either a direct `StoreApi` reference (returned by `useDebugBindings`) or a folder title string, with an optional selector.
 
 ### useDebugFolder
 
+Returns a tweakpane `FolderApi` for manual control. Handles ref-counted creation and disposal automatically.
+
 ```tsx
-const folder = useDebugFolder(title)
+const folder = useDebugFolder('Advanced')
+
+// Add custom buttons, separators, etc.
+useEffect(() => {
+  if (!folder) return
+  const btn = folder.addButton({ title: 'Reset' })
+  btn.on('click', () => { /* ... */ })
+  return () => btn.dispose()
+}, [folder])
 ```
 
-Returns a tweakpane `FolderApi` for manual control. Handles ref-counted creation and disposal.
+### Ref vs State
+
+`useDebugBindings` returns a **ref** (`ref.current`) that is always up-to-date but does **not** trigger React re-renders. This is ideal for non-React consumers like Three.js `useFrame` loops, canvas drawing, or Web Audio.
+
+For React-driven UI that needs to re-render when a value changes, pass the `store` to `useDebugState`:
+
+```tsx
+function DebuggedBox() {
+  const [ref, , store] = useDebugBindings('Box', {
+    width: 120,
+    color: '#6366f1',
+  })
+
+  // Reactive — triggers re-renders
+  const { width, color } = useDebugState(store)
+
+  return (
+    <div style={{ width, backgroundColor: color }} />
+  )
+}
+```

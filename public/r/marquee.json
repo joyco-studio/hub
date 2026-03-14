@@ -1,7 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "marquee",
-  "type": "registry:component",
   "title": "Marquee",
   "description": "The all in one marquee component with smooth Web Animations API.",
   "dependencies": [
@@ -13,5 +12,6 @@
       "content": "'use client'\n\nimport {\n  Marquee as MarqueeComponent,\n  useMarquee as useMarqueeHook,\n} from '@joycostudio/marquee/react'\n\nexport const useMarquee = useMarqueeHook\n\nexport function Marquee({\n  children,\n  ...props\n}: React.ComponentProps<typeof MarqueeComponent>) {\n  return (\n    <MarqueeComponent {...props}>\n      <div className=\"flex items-center gap-8 px-4\">{children}</div>\n    </MarqueeComponent>\n  )\n}\n",
       "type": "registry:component"
     }
-  ]
+  ],
+  "type": "registry:component"
 }
