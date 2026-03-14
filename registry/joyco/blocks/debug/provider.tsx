@@ -108,7 +108,12 @@ export function DebugProvider({
       safetyTimerRef.current = setTimeout(() => flushPendingImport(), 2000)
     }
 
-    const copyLinkBtn = instance.addButton({ title: 'Copy Link' })
+    const exportFolder = instance.addFolder({
+      title: 'Export',
+      expanded: false,
+    })
+
+    const copyLinkBtn = exportFolder.addButton({ title: 'Copy Link' })
     copyLinkBtn.on('click', () => {
       writeHashState(instance.exportState())
       navigator.clipboard.writeText(window.location.href).catch(() => {})
@@ -118,7 +123,7 @@ export function DebugProvider({
       }, 1500)
     })
 
-    const copyStateBtn = instance.addButton({ title: 'Copy State' })
+    const copyStateBtn = exportFolder.addButton({ title: 'Copy State' })
     copyStateBtn.on('click', () => {
       const json = JSON.stringify(instance.exportState(), null, 2)
       navigator.clipboard.writeText(json).catch(() => {})
