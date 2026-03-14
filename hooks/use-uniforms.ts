@@ -69,5 +69,6 @@ export function useUniforms<T extends Record<string, UniformValue>>(
     }
 
     return [nodes, set] as const
-  }, [initialValues])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- initialValues are set-once
+  }, [])
 }

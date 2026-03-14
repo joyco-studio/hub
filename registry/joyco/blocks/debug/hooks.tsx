@@ -157,12 +157,6 @@ export function useDebugBindings<T extends DebugTarget>(
 
     const apis = bindKeys(folder, proxy, optionsRef.current)
 
-    for (const b of apis) {
-      b.on('change', () => {
-        store.setState({ ...raw })
-      })
-    }
-
     return () => {
       for (const a of apis) a.dispose()
       targetRef.current = raw
