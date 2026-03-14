@@ -1,18 +1,10 @@
 'use client'
 
-import { useEffect } from 'react'
 import {
   DebugProvider,
   useDebugBindings,
   useDebugState,
 } from '@/registry/joyco/blocks/debug'
-import { useDebug } from '@/registry/joyco/blocks/debug/context'
-
-function ForceEnable() {
-  const { setEnabled } = useDebug()
-  useEffect(() => setEnabled(true), [setEnabled])
-  return null
-}
 
 function DebuggedBox() {
   const [, folder, store] = useDebugBindings(
@@ -81,8 +73,7 @@ function DebuggedBox() {
 
 function DebugDemo() {
   return (
-    <DebugProvider title="Debug Box Demo" position="top-right">
-      <ForceEnable />
+    <DebugProvider title="Debug Box Demo" position="top-right" enabled>
       <div className="bg-background flex h-screen w-full items-center justify-center p-8">
         <DebuggedBox />
       </div>

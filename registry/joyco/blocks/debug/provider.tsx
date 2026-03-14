@@ -59,6 +59,7 @@ interface DebugProviderProps {
   position?: Position
   title?: string
   padding?: number
+  enabled?: boolean
 }
 
 export function DebugProvider({
@@ -66,8 +67,13 @@ export function DebugProvider({
   position = 'bottom-left',
   title = 'Debug',
   padding = 8,
+  enabled: enabledProp = false,
 }: DebugProviderProps) {
-  const [enabled, setEnabled] = useState(false)
+  const [enabled, setEnabled] = useState(enabledProp)
+
+  useEffect(() => {
+    setEnabled(enabledProp)
+  }, [enabledProp])
   const [pane, setPane] = useState<Pane | null>(null)
   const paneRef = useRef<Pane | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
