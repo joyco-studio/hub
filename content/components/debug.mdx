@@ -1,0 +1,76 @@
+---
+title: Debug Hooks
+description: A tweakpane-powered debug panel with URL-persisted state, draggable UI, and reactive hooks for binding component values.
+maintainers: ['matiasperz']
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+<ComponentPreview iframe name="debug-demo" />
+
+## Installation
+
+```bash
+npx shadcn@latest add @joyco/debug
+```
+
+## Usage
+
+```tsx
+import { DebugProvider, useDebugBindings, useDebugState } from '@/components/debug'
+
+function App() {
+  return (
+    <DebugProvider>
+      <MyScene />
+    </DebugProvider>
+  )
+}
+
+function MyScene() {
+  const [ref] = useDebugBindings('Scene', {
+    speed: 1,
+    opacity: 0.5,
+    color: '#ff0000',
+  })
+
+  return <div style={{ opacity: ref.current.opacity }}>Speed: {ref.current.speed}</div>
+}
+```
+
+## API
+
+### DebugProvider
+
+Wraps your app to provide the tweakpane debug panel. Activated via `?debug` query param or `Alt+D` shortcut.
+
+### useDebugBindings
+
+```tsx
+const [ref, folder, store] = useDebugBindings(folderTitle, target, options?)
+```
+
+Creates a tweakpane folder with bindings for each key in `target`. Returns a ref that stays in sync with the UI, the folder API, and a zustand store for reactive subscriptions.
+
+| Param         | Type              | Description                                    |
+| ------------- | ----------------- | ---------------------------------------------- |
+| `folderTitle` | `string`          | Name of the tweakpane folder                   |
+| `target`      | `Record<string, unknown>` | Object with initial values to bind   |
+| `options`     | `DebugOptions<T>` | Optional per-key tweakpane binding params      |
+
+### useDebugState
+
+```tsx
+const state = useDebugState(folderTitle)
+const value = useDebugState(store, (s) => s.someKey)
+```
+
+Reactively subscribes to debug values. Accepts either a folder title string or a direct zustand store reference, with an optional selector.
+
+### useDebugFolder
+
+```tsx
+const folder = useDebugFolder(title)
+```
+
+Returns a tweakpane `FolderApi` for manual control. Handles ref-counted creation and disposal.
