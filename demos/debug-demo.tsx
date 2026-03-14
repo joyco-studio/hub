@@ -90,9 +90,19 @@ function GradientMesh() {
     // eslint-disable-next-line react-hooks/immutability
     folder.expanded = true
     folder.on('change', (e) => {
-      console.log(e)
+      setUniforms({
+        uColorA: ref.current.colorA,
+        uColorB: ref.current.colorB,
+        uColorC: ref.current.colorC,
+        uAngle: ref.current.angle,
+        uStripes: ref.current.stripes,
+        uSharpness: ref.current.sharpness,
+        uNoiseScale: ref.current.noiseScale,
+        uNoiseStrength: ref.current.noiseStrength,
+        uSpeed: ref.current.speed,
+      })
     })
-  }, [folder])
+  }, [folder, ref, setUniforms])
 
   const material = useMemo(() => {
     const {
@@ -144,20 +154,6 @@ function GradientMesh() {
 
   const matRef = useRef(material)
   matRef.current = material
-
-  useFrame(() => {
-    setUniforms({
-      uColorA: ref.current.colorA,
-      uColorB: ref.current.colorB,
-      uColorC: ref.current.colorC,
-      uAngle: ref.current.angle,
-      uStripes: ref.current.stripes,
-      uSharpness: ref.current.sharpness,
-      uNoiseScale: ref.current.noiseScale,
-      uNoiseStrength: ref.current.noiseStrength,
-      uSpeed: ref.current.speed,
-    })
-  })
 
   const viewport = useThree((s) => s.viewport)
 
