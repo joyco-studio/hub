@@ -125,7 +125,15 @@ export async function getExperiments(): Promise<ExperimentsResponse> {
 
   if (!res.ok) return { experiments: [] }
 
-  return res.json()
+  const data: ExperimentsResponse = await res.json()
+
+  data.experiments.sort((a, b) => {
+    if (!a.date) return 1
+    if (!b.date) return -1
+    return new Date(b.date).getTime() - new Date(a.date).getTime()
+  })
+
+  return data
 }
 
 export async function getExperimentBySlug(
