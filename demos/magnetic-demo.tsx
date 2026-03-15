@@ -1,7 +1,7 @@
 'use client'
 
 import { Logo } from '@/components/logos'
-import * as Magnetic from '@/registry/joyco/blocks/magnetic'
+import * as Magnetic from '@/registry/components/magnetic'
 
 function MagneticDemo() {
   return (

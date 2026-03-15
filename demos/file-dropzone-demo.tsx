@@ -1,6 +1,6 @@
 'use client'
 
-import { FileDropzone } from '@/registry/joyco/blocks/file-dropzone'
+import { FileDropzone } from '@/registry/components/file-dropzone'
 
 function FileForm() {
   const handleUpload = (file: File) => {

@@ -54,7 +54,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { useComposedRefs } from '@/lib/compose-refs'
+import { useComposedRefs } from '@/registry/lib/compose-refs'
 import { cn } from '@/lib/utils'
 import { useLazyRef } from '@/hooks/use-lazy-ref'
 

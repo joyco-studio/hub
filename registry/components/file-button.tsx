@@ -1,6 +1,6 @@
 'use client'
 import { Button } from '@/components/ui/button'
-import { useFileUpload } from '@/hooks/use-file-upload'
+import { useFileUpload } from '@/registry/hooks/use-file-upload'
 
 export interface FileInputProps {
   onUpload: (file: File) => Promise<unknown> | void

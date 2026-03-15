@@ -3,7 +3,7 @@
 import * as React from 'react'
 import gsap from 'gsap'
 import { Button } from '@/components/ui/button'
-import '@/lib/gsap/effects/scramble'
+import '@/registry/lib/gsap/effects/scramble'
 
 /* -------------------------------------------------------------------------------------------------
  * Types

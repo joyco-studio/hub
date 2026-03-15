@@ -52,7 +52,7 @@ async function getComponentSource(
   try {
     const filePath = path.join(
       process.cwd(),
-      'registry/joyco/blocks',
+      'registry/components',
       `${componentSlug}.tsx`
     )
     const source = await readFile(filePath, 'utf-8')

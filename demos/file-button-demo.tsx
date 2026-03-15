@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { FileInputButton } from '@/registry/joyco/blocks/file-button'
+import { FileInputButton } from '@/registry/components/file-button'
 import { Button } from '@/components/ui/button'
 
 import {

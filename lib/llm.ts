@@ -64,7 +64,7 @@ export function processMdxForLLMs(content: string): string {
 
       return files
         .map((f) => {
-          const source = fs.readFileSync(f, 'utf8').replaceAll('@/registry/joyco/blocks/', '@/components/')
+          const source = fs.readFileSync(f, 'utf8').replaceAll('@/registry/components/', '@/components/')
           const lang = f.endsWith('.ts') ? 'ts' : 'tsx'
           const title = isDir ? ` title="${path.basename(f)}"` : ''
           return `\`\`\`${lang}${title}\n${source}\n\`\`\``

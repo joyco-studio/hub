@@ -21,7 +21,7 @@ import {
 import { Canvas, extend, useThree } from '@react-three/fiber'
 import { useEffect, useMemo } from 'react'
 
-import { DebugProvider, useDebugBindings } from '@/registry/joyco/blocks/debug'
+import { DebugProvider, useDebugBindings } from '@/registry/lib/debug'
 import { useUniforms } from '@/hooks/use-uniforms'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

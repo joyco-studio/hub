@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { ScrambleButton } from '@/registry/joyco/blocks/scramble-button'
+import { ScrambleButton } from '@/registry/components/scramble-button'
 import { Switch } from '@/components/ui/switch'
 
 function ScrambleButtonDemo() {

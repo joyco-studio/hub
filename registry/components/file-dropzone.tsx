@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import { useFileUpload } from '@/hooks/use-file-upload'
+import { useFileUpload } from '@/registry/hooks/use-file-upload'
 
 export interface FileDropzoneProps {
   accept?: string

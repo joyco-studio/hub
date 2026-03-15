@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils'
 import {
   ScrollAreaViewport,
   ScrollAreaContent,
-} from '@/registry/joyco/blocks/scroll-area'
+} from '@/registry/components/scroll-area'
 
 const notifications = [
   {

@@ -3,7 +3,7 @@
 import * as React from 'react'
 import type Hls from 'hls.js'
 import type { ErrorData, ManifestParsedData, LevelSwitchedData } from 'hls.js'
-import { useComposedRefs } from '@/lib/compose-refs'
+import { useComposedRefs } from '@/registry/lib/compose-refs'
 
 /* -------------------------------------------------------------------------------------------------
  * Types

@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { useLocalStorage } from '@/hooks/use-local-storage'
+import { useLocalStorage } from '@/registry/hooks/use-local-storage'
 
 type ExperimentIframeProps = {
   src: string

@@ -10,7 +10,7 @@
       "description": "A bias-based infinite scroll wrapper and hook.",
       "files": [
         {
-          "path": "registry/joyco/blocks/infinite-list.tsx",
+          "path": "registry/components/infinite-list.tsx",
           "type": "registry:component"
         }
       ]
@@ -22,7 +22,7 @@
       "description": "The all in one marquee component with smooth Web Animations API.",
       "files": [
         {
-          "path": "registry/joyco/blocks/marquee.tsx",
+          "path": "registry/components/marquee.tsx",
           "type": "registry:component"
         }
       ],
@@ -37,11 +37,11 @@
       "description": "A button that opens a file input when clicked.",
       "files": [
         {
-          "path": "registry/joyco/blocks/file-button.tsx",
+          "path": "registry/components/file-button.tsx",
           "type": "registry:component"
         },
         {
-          "path": "hooks/use-file-upload.tsx",
+          "path": "registry/hooks/use-file-upload.tsx",
           "type": "registry:hook"
         }
       ],
@@ -56,11 +56,11 @@
       "description": "A drag-and-drop file upload component with image preview, validation, and error handling.",
       "files": [
         {
-          "path": "registry/joyco/blocks/file-dropzone.tsx",
+          "path": "registry/components/file-dropzone.tsx",
           "type": "registry:component"
         },
         {
-          "path": "hooks/use-file-upload.tsx",
+          "path": "registry/hooks/use-file-upload.tsx",
           "type": "registry:hook"
         }
       ],
@@ -75,7 +75,7 @@
       "description": "A full-screen overlay mobile menu.",
       "files": [
         {
-          "path": "registry/joyco/blocks/mobile-menu.tsx",
+          "path": "registry/components/mobile-menu.tsx",
           "type": "registry:component"
         }
       ],
@@ -92,7 +92,7 @@
       "description": "A scrollable area component with customizable top and bottom shadows that appear when content overflows.",
       "files": [
         {
-          "path": "registry/joyco/blocks/scroll-area.tsx",
+          "path": "registry/components/scroll-area.tsx",
           "type": "registry:component"
         }
       ],
@@ -107,7 +107,7 @@
       "description": "A composable chat component",
       "files": [
         {
-          "path": "registry/joyco/blocks/chat.tsx",
+          "path": "registry/components/chat.tsx",
           "type": "registry:component"
         },
         {
@@ -131,11 +131,11 @@
       "description": "A headless HLS video player with native HLS detection and error handling.",
       "files": [
         {
-          "path": "registry/joyco/blocks/hls-video-player.tsx",
+          "path": "registry/components/hls-video-player.tsx",
           "type": "registry:component"
         },
         {
-          "path": "lib/compose-refs.ts",
+          "path": "registry/lib/compose-refs.ts",
           "type": "registry:lib"
         }
       ],
@@ -150,7 +150,7 @@
       "description": "A particle emitter for showing ephemeral action feedback hints that fade out.",
       "files": [
         {
-          "path": "registry/joyco/blocks/action-hint.tsx",
+          "path": "registry/components/action-hint.tsx",
           "type": "registry:component"
         }
       ]
@@ -162,7 +162,7 @@
       "description": "A canvas-based image sequence player with binary progressive loading for smooth playback.",
       "files": [
         {
-          "path": "registry/joyco/blocks/image-sequence.tsx",
+          "path": "registry/components/image-sequence.tsx",
           "type": "registry:component"
         }
       ]
@@ -174,7 +174,7 @@
       "description": "A lightweight typewriter text component that cycles through phrases with minimal JavaScript.",
       "files": [
         {
-          "path": "registry/joyco/blocks/typewriter.tsx",
+          "path": "registry/components/typewriter.tsx",
           "type": "registry:component"
         },
         {
@@ -190,7 +190,7 @@
       "description": "A WAAPI-powered spritesheet animator for squared grid-based spritesheets with stepped frame animation.",
       "files": [
         {
-          "path": "registry/joyco/blocks/spritesheet-sequencer.tsx",
+          "path": "registry/components/spritesheet-sequencer.tsx",
           "type": "registry:component"
         }
       ]
@@ -202,11 +202,11 @@
       "description": "A cursor-attraction wrapper that makes inner content subtly follow the mouse position.",
       "files": [
         {
-          "path": "registry/joyco/blocks/magnetic.tsx",
+          "path": "registry/components/magnetic.tsx",
           "type": "registry:component"
         },
         {
-          "path": "lib/compose-refs.ts",
+          "path": "registry/lib/compose-refs.ts",
           "type": "registry:lib"
         }
       ],
@@ -221,7 +221,7 @@
       "description": "A GSAP registered effect that decodes text with staggered character-by-character reveal animation.",
       "files": [
         {
-          "path": "lib/gsap/effects/scramble.ts",
+          "path": "registry/lib/gsap/effects/scramble.ts",
           "type": "registry:lib"
         }
       ],
@@ -236,7 +236,7 @@
       "description": "A button that scrambles its text on hover using the scramble GSAP effect.",
       "files": [
         {
-          "path": "registry/joyco/blocks/scramble-button.tsx",
+          "path": "registry/components/scramble-button.tsx",
           "type": "registry:component"
         }
       ],
@@ -249,33 +249,113 @@
       ]
     },
     {
+      "name": "brick-breaker",
+      "type": "registry:component",
+      "title": "Brick Breaker",
+      "description": "A fully-featured brick breaker game with multiple levels, brick types, and proper collision physics.",
+      "files": [
+        {
+          "path": "registry/components/games/brick-breaker/index.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/brick-breaker/brick-breaker.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/brick-breaker/ui.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/brick-breaker/types.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/brick-breaker/config.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/brick-breaker/levels.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/brick-breaker/utils.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/brick-breaker/use-brick-breaker.ts",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "snake-game",
+      "type": "registry:component",
+      "title": "Snake Game",
+      "description": "A minimal, themeable snake game component with highscore persistence.",
+      "files": [
+        {
+          "path": "registry/components/games/snake-game/index.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/snake-game/snake-game.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/snake-game/types.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/snake-game/config.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/snake-game/utils.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/snake-game/use-snake-game.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "registry/hooks/use-local-storage.ts",
+          "type": "registry:hook"
+        }
+      ],
+      "registryDependencies": [
+        "button",
+        "kbd"
+      ]
+    },
+    {
       "name": "debug",
       "type": "registry:component",
       "title": "Debug",
       "description": "A tweakpane-powered debug panel with URL-persisted state, draggable UI, and reactive hooks for binding component values.",
       "files": [
         {
-          "path": "registry/joyco/blocks/debug/provider.tsx",
+          "path": "registry/lib/debug/provider.tsx",
           "type": "registry:lib"
         },
         {
-          "path": "registry/joyco/blocks/debug/context.tsx",
+          "path": "registry/lib/debug/context.tsx",
           "type": "registry:lib"
         },
         {
-          "path": "registry/joyco/blocks/debug/hooks.tsx",
+          "path": "registry/lib/debug/hooks.tsx",
           "type": "registry:lib"
         },
         {
-          "path": "registry/joyco/blocks/debug/hash-state.ts",
+          "path": "registry/lib/debug/hash-state.ts",
           "type": "registry:lib"
         },
         {
-          "path": "registry/joyco/blocks/debug/index.ts",
+          "path": "registry/lib/debug/index.ts",
           "type": "registry:lib"
         },
         {
-          "path": "registry/joyco/blocks/debug/use-draggable.ts",
+          "path": "registry/lib/debug/use-draggable.ts",
           "type": "registry:lib"
         }
       ],

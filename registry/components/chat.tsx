@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/input-group'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { useUserInterruption } from '@/hooks/use-interruption'
-import { useComposedRefs } from '@/lib/compose-refs'
+import { useComposedRefs } from '@/registry/lib/compose-refs'
 
 type ChatMessageVariant = 'self' | 'peer' | 'system'
 

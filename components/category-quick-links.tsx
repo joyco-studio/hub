@@ -7,7 +7,7 @@ import {
   CategoryCardLinkHeader,
   CategoryCardLinkSplash,
 } from '@/components/category-card-link'
-import { CanvasSequence } from '@/registry/joyco/blocks/image-sequence'
+import { CanvasSequence } from '@/registry/components/image-sequence'
 import { useRegistryMeta } from '@/components/registry-meta'
 import CubeIcon from './icons/3d-cube'
 import TerminalWithCursorIcon from './icons/terminal-w-cursor'

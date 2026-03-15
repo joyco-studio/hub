@@ -13,7 +13,7 @@ import {
   ChatMessageAvatar,
   ChatInputField,
   type ChatSubmitEvent,
-} from '@/registry/joyco/blocks/chat'
+} from '@/registry/components/chat'
 import { Mention, MentionContent, MentionItem } from '@/components/ui/mention'
 import * as MentionPrimitive from '@diceui/mention'
 import { ArrowUpIcon } from 'lucide-react'

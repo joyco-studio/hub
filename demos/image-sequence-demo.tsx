@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CanvasSequence } from '@/registry/joyco/blocks/image-sequence'
+import { CanvasSequence } from '@/registry/components/image-sequence'
 import { cn } from '@/lib/utils'
 
 const sequences = [

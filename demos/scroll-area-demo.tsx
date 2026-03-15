@@ -3,7 +3,7 @@
 import {
   ScrollAreaViewport,
   ScrollAreaContent,
-} from '@/registry/joyco/blocks/scroll-area'
+} from '@/registry/components/scroll-area'
 import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import {

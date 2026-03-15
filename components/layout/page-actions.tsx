@@ -6,7 +6,7 @@ import { useCopyToClipboard } from '@/components/copy-button'
 import {
   ActionHintEmitter,
   useActionHint,
-} from '@/registry/joyco/blocks/action-hint'
+} from '@/registry/components/action-hint'
 import { ChevronDown, Check, Code } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
