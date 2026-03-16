@@ -60,7 +60,7 @@ export function ExperimentIframe({
         size="sm"
         aria-label={debug ? 'Hide controls' : 'Show controls'}
         onClick={() => setDebug((prev) => !prev)}
-        className="absolute right-4 bottom-4"
+        className="absolute right-4 bottom-4 z-31"
       >
         {debug ? 'Hide controls' : 'Show controls'}
       </Button>
