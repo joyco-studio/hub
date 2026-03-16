@@ -2,14 +2,13 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "debug",
   "type": "registry:component",
-  "title": "Debug",
+  "title": "Debug Hooks",
   "description": "A tweakpane-powered debug panel with URL-persisted state, draggable UI, and reactive hooks for binding component values.",
   "dependencies": [
     "@tweakpane/core",
-    "debounce",
+    "lodash.debounce",
     "zustand",
-    "tweakpane",
-    "lodash.debounce"
+    "tweakpane"
   ],
   "files": [
     {
