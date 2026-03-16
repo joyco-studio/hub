@@ -5,7 +5,6 @@ import {
   LayoutContextProvider,
   LayoutBody,
 } from '@/components/layout/docs/client'
-import { LayoutProvider } from '@/hooks/use-layout'
 import { RegistrySidebar } from '@/components/layout/sidebar'
 import { MobileNav } from '@/components/layout/mobile-nav'
 import { getExperiments } from '@/lib/lab'
@@ -24,33 +23,31 @@ export default async function Layout({ children }: LayoutProps<'/'>) {
   const { experiments } = await getExperiments()
 
   return (
-    <LayoutProvider defaultLayout="fixed" storageKey="layout">
-      <TreeContextProvider tree={source.pageTree}>
-        <LayoutContextProvider>
-          <MobileNav
+    <TreeContextProvider tree={source.pageTree}>
+      <LayoutContextProvider>
+        <MobileNav
+          tree={source.pageTree}
+          itemMeta={itemMeta}
+          experiments={experiments}
+        />
+        <LayoutBody
+          style={
+            {
+              '--fd-sidebar-width':
+                'calc(var(--aside-width) + var(--spacing) + var(--sidebar-width))',
+            } as CSSProperties
+          }
+        >
+          <RegistrySidebar
             tree={source.pageTree}
             itemMeta={itemMeta}
+            gameSlugs={gameSlugs}
+            effectSlugs={effectSlugs}
             experiments={experiments}
           />
-          <LayoutBody
-            style={
-              {
-                '--fd-sidebar-width':
-                  'calc(var(--aside-width) + var(--spacing) + var(--sidebar-width))',
-              } as CSSProperties
-            }
-          >
-            <RegistrySidebar
-              tree={source.pageTree}
-              itemMeta={itemMeta}
-              gameSlugs={gameSlugs}
-              effectSlugs={effectSlugs}
-              experiments={experiments}
-            />
-            {children}
-          </LayoutBody>
-        </LayoutContextProvider>
-      </TreeContextProvider>
-    </LayoutProvider>
+          {children}
+        </LayoutBody>
+      </LayoutContextProvider>
+    </TreeContextProvider>
   )
 }

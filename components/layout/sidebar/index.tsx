@@ -12,9 +12,7 @@ import { SidebarSection, type SidebarItemMeta } from './section'
 import { LabSidebarSection } from './lab-section'
 import { SocialLinks } from './social-links'
 import { NavAside } from '../nav-aside'
-import { useLayout } from '@/hooks/use-layout'
 import { useSearch } from '@/hooks/use-search'
-import { cn } from '@/lib/utils'
 import type { Experiment } from '@/lib/lab'
 
 export type { SidebarItemMeta }
@@ -36,7 +34,6 @@ export function RegistrySidebar({
 }: RegistrySidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
-  const { layout } = useLayout()
   const { query, setQuery, results, hasResults, isEmpty, isLoading } =
     useSearch()
 
@@ -108,13 +105,7 @@ export function RegistrySidebar({
   }
 
   return (
-    <div className="sticky top-0 hidden h-screen shrink-0 gap-1 [grid-area:sidebar] md:flex md:justify-end">
-      <div
-        className={cn(
-          'bg-muted/50 hidden flex-1',
-          layout === 'fixed' && '2xl:block'
-        )}
-      />
+    <div className="sticky top-0 hidden h-screen shrink-0 gap-1 [grid-area:sidebar] md:flex">
       <NavAside />
 
       <Command
