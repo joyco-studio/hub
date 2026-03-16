@@ -266,10 +266,6 @@ code::-webkit-scrollbar-thumb:hover {
 
 html {
   overscroll-behavior: none;
-  --fd-layout-width: 97rem;
-}
-
-html.layout-full {
   --fd-layout-width: 100%;
 }
 
