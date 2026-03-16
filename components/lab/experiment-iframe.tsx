@@ -22,6 +22,7 @@ export function ExperimentIframe({
   const iframeSrc = React.useMemo(() => {
     try {
       const url = new URL(src)
+      url.searchParams.set('lab', 'true')
       if (debug) {
         url.searchParams.set('debug', 'true')
       }
