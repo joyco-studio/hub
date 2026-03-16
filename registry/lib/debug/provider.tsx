@@ -66,13 +66,10 @@ export function DebugProvider({
   position = 'bottom-left',
   title = 'Debug',
   padding = 8,
-  enabled: enabledProp = false,
+  enabled: enabledProp,
 }: DebugProviderProps) {
-  const [enabled, setEnabled] = useState(enabledProp)
+  const [enabled, setEnabled] = useState(enabledProp ?? false)
 
-  useEffect(() => {
-    setEnabled(enabledProp)
-  }, [enabledProp])
   const [pane, setPane] = useState<Pane | null>(null)
   const paneRef = useRef<Pane | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -149,6 +146,11 @@ export function DebugProvider({
     if (paneRef.current) paneRef.current.hidden = !enabled
   }, [enabled])
 
+  useEffect(() => {
+    if (enabledProp === undefined) return
+    setEnabled(enabledProp)
+  }, [enabledProp])
+
   // Dispose pane on provider unmount only
   useEffect(() => {
     return () => {
@@ -169,7 +171,9 @@ export function DebugProvider({
   useDraggable(containerRef, '.tp-rotv_t', !!pane)
 
   return (
-    <DebugContext.Provider value={{ pane, enabled, setEnabled, registry: registryRef.current }}>
+    <DebugContext.Provider
+      value={{ pane, enabled, setEnabled, registry: registryRef.current }}
+    >
       <Suspense fallback={null}>
         <DebugParamSync />
       </Suspense>
