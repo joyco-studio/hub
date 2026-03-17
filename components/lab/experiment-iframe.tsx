@@ -9,12 +9,14 @@ type ExperimentIframeProps = {
   src: string
   title: string
   className?: string
+  hasControls: boolean
 }
 
 export function ExperimentIframe({
   src,
   title,
   className,
+  hasControls,
 }: ExperimentIframeProps) {
   const [isLoading, setIsLoading] = React.useState(true)
   const [debug, setDebug] = useLocalStorage('lab-debug', false)
@@ -55,15 +57,17 @@ export function ExperimentIframe({
         allow="accelerometer; camera; gyroscope; microphone"
         onLoad={() => setIsLoading(false)}
       />
-      <Button
-        variant={debug ? 'default' : 'outline'}
-        size="sm"
-        aria-label={debug ? 'Hide controls' : 'Show controls'}
-        onClick={() => setDebug((prev) => !prev)}
-        className="absolute right-4 bottom-4 z-31"
-      >
-        {debug ? 'Hide controls' : 'Show controls'}
-      </Button>
+      {hasControls && (
+        <Button
+          variant={debug ? 'default' : 'outline'}
+          size="sm"
+          aria-label={debug ? 'Hide controls' : 'Show controls'}
+          onClick={() => setDebug((prev) => !prev)}
+          className="absolute right-4 bottom-4 z-31"
+        >
+          {debug ? 'Hide controls' : 'Show controls'}
+        </Button>
+      )}
     </div>
   )
 }

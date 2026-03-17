@@ -9,6 +9,7 @@ export type Experiment = {
   date?: string
   tags?: string[]
   repo?: string
+  hasControls: boolean
 }
 
 export type RepoContributor = {
