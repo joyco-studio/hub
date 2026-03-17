@@ -59,7 +59,7 @@ export function MobileNav({
   const router = useRouter()
   const inputRef = React.useRef<HTMLInputElement>(null)
   const [state, setState] = React.useState<MobileNavState>('closed')
-  const { query, setQuery, results, hasResults, isEmpty } = useSearch()
+  const { query, setQuery, results, resultsForQuery, hasResults, isEmpty } = useSearch()
 
   // Close menu on navigation
   React.useEffect(() => {
@@ -204,6 +204,7 @@ export function MobileNav({
           query={query}
           setQuery={setQuery}
           results={results}
+          resultsForQuery={resultsForQuery}
           hasResults={hasResults}
           isEmpty={isEmpty}
           onClose={handleClose}
@@ -456,6 +457,7 @@ type MobileSearchContentProps = {
   query: string
   setQuery: (query: string) => void
   results: SearchResult[]
+  resultsForQuery: string
   hasResults: boolean
   isEmpty: boolean
   onClose: () => void
@@ -467,6 +469,7 @@ function MobileSearchContent({
   query,
   setQuery,
   results,
+  resultsForQuery,
   hasResults,
   isEmpty,
   onClose,
@@ -499,7 +502,7 @@ function MobileSearchContent({
           className="sr-only"
         />
         {hasResults && (
-          <SearchResults results={results} query={query} onSelect={onSelect} />
+          <SearchResults key={resultsForQuery} results={results} query={query} onSelect={onSelect} />
         )}
         {isEmpty && <NoResults query={query} />}
         {!hasResults && !isEmpty && (

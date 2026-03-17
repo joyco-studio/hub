@@ -64,6 +64,7 @@ export function CommandPalette() {
   const inputRef = React.useRef<HTMLInputElement>(null)
   const [isOpen, setIsOpen] = React.useState(false)
   const [recentItems, setRecentItems] = React.useState<RecentItem[]>([])
+  const [selectedValue, setSelectedValue] = React.useState('')
   const { query, setQuery, results, hasResults, isEmpty, isLoading } =
     useSearch()
 
@@ -71,6 +72,21 @@ export function CommandPalette() {
   React.useEffect(() => {
     setRecentItems(getRecentItems())
   }, [])
+
+  // Reset selection to first visible item before paint whenever the item set changes.
+  // useLayoutEffect ensures the correct value is committed before the browser paints,
+  // so the user never sees a frame with a stale or missing selection.
+  React.useLayoutEffect(() => {
+    if (hasResults && results.length > 0) {
+      setSelectedValue(results[0].url.split('#')[0])
+    } else if (!hasResults && !isEmpty) {
+      setSelectedValue(
+        recentItems.length > 0
+          ? recentItems[0].title
+          : suggestedSearches[0]
+      )
+    }
+  }, [results, hasResults, isEmpty, recentItems])
 
   const handleClose = React.useCallback(() => {
     setIsOpen(false)
@@ -156,6 +172,8 @@ export function CommandPalette() {
       <Command
         shouldFilter={false}
         loop
+        value={selectedValue}
+        onValueChange={setSelectedValue}
         className="bg-background relative mx-4 flex w-full max-w-xl flex-col shadow-2xl"
       >
         {/* Search input - styled like sidebar */}

@@ -34,7 +34,7 @@ export function RegistrySidebar({
 }: RegistrySidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
-  const { query, setQuery, results, hasResults, isEmpty, isLoading } =
+  const { query, setQuery, results, resultsForQuery, hasResults, isEmpty, isLoading } =
     useSearch()
 
   // Get all folders from the tree
@@ -66,6 +66,7 @@ export function RegistrySidebar({
     if (hasResults) {
       return (
         <SearchResults
+          key={resultsForQuery}
           results={results}
           query={query}
           onSelect={handleSelect}
