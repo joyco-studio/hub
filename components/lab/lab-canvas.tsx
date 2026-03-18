@@ -158,7 +158,6 @@ export function LabCanvas({ experiments }: LabCanvasProps) {
         backgroundImage:
           'radial-gradient(circle, var(--color-border) 1px, transparent 1px)',
         backgroundSize: '24px 24px',
-        backgroundPosition: `${offset.x % 24}px ${offset.y % 24}px`,
       }}
       onKeyDown={handleKeyDown}
       onDragStart={(e) => e.preventDefault()}

@@ -32,9 +32,6 @@ export function useCanvasPan(initialOffset: Point = { x: 0, y: 0 }) {
     if (contentRef.current) {
       contentRef.current.style.transform = `translate(${offsetRef.current.x}px, ${offsetRef.current.y}px)`
     }
-    if (containerRef.current) {
-      containerRef.current.style.backgroundPosition = `${offsetRef.current.x % 24}px ${offsetRef.current.y % 24}px`
-    }
   }, [])
 
   const syncStateThrottled = useCallback(() => {
