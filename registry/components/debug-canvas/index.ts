@@ -1,0 +1,5 @@
+export { DebugOrbitControls } from './debug-orbit-controls'
+export { DebugFlyControls } from './debug-fly-controls'
+export { DebugGridHelper } from './debug-grid-helper'
+export { DebugCameraMonitor } from './debug-camera-monitor'
+export { PerfMonitor as DebugPerfMonitor } from './debug-perf-monitor'

@@ -329,6 +329,45 @@
       ]
     },
     {
+      "name": "debug-canvas",
+      "type": "registry:component",
+      "title": "Debug Canvas",
+      "description": "Drop-in R3F debug helpers: orbit/fly controls, grid, camera monitor, and performance stats — all toggled via a shared tweakpane folder.",
+      "files": [
+        {
+          "path": "registry/components/debug-canvas/index.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/debug-canvas/debug-orbit-controls.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/debug-canvas/debug-fly-controls.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/debug-canvas/debug-grid-helper.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/debug-canvas/debug-camera-monitor.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/debug-canvas/debug-perf-monitor.tsx",
+          "type": "registry:component"
+        }
+      ],
+      "dependencies": [
+        "stats-gl",
+        "@react-three/drei"
+      ],
+      "registryDependencies": [
+        "@joyco/debug"
+      ]
+    },
+    {
       "name": "debug",
       "type": "registry:component",
       "title": "Debug Hooks",
