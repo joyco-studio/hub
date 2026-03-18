@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { getExperiments } from '@/lib/lab'
 import { getRegistryCounts } from '@/lib/source'
 import { RegistryMetaProvider } from '@/components/registry-meta'
-import { LabCanvas } from '@/components/lab/lab-canvas'
+import { LabView } from '@/components/lab/lab-view'
 
 export const revalidate = 30
 
@@ -18,7 +18,7 @@ export default async function LabPage() {
 
   return (
     <RegistryMetaProvider counts={counts}>
-      <LabCanvas experiments={experiments} />
+      <LabView experiments={experiments} />
     </RegistryMetaProvider>
   )
 }

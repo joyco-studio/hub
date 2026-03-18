@@ -6,6 +6,7 @@ import { useCanvasPan } from '@/hooks/use-canvas-pan'
 import { ExperimentCard } from '@/components/cards/experiment-card'
 import { Badge } from '@/components/ui/badge'
 import FlaskIcon from '@/components/icons/flask'
+import { LabViewToggle } from './lab-view-toggle'
 
 const CELL_WIDTH = 380
 const CELL_HEIGHT = 320
@@ -21,6 +22,7 @@ interface LabCanvasProps {
     description?: string
     tags?: string[]
   }>
+  onViewChange: () => void
 }
 
 interface VisibleCard {
@@ -40,7 +42,7 @@ function wrapIndex(n: number, m: number) {
   return ((n % m) + m) % m
 }
 
-export function LabCanvas({ experiments }: LabCanvasProps) {
+export function LabCanvas({ experiments, onViewChange }: LabCanvasProps) {
   const [measureRef, bounds] = useMeasure()
   const { offset, isDragging, containerRef, contentRef, handlers, resetView } =
     useCanvasPan()
@@ -193,12 +195,18 @@ export function LabCanvas({ experiments }: LabCanvasProps) {
         ))}
       </div>
 
-      <div className="from-background via-background/80 pointer-events-none absolute top-0 left-0 z-10 w-full bg-gradient-to-b to-transparent p-6 pr-16 pb-12">
-        <div className="pointer-events-auto">
-          <Badge variant="accent" className="mb-3">
-            Lab
-          </Badge>
-          <h1 className="text-2xl leading-tight font-semibold">Experiments</h1>
+      <div className="from-background via-background/80 px-content-sides pointer-events-none absolute top-0 left-0 z-10 w-full bg-linear-to-b to-transparent py-6 pb-12 md:pt-8 lg:pr-16">
+        <Badge variant="accent" className="mb-6 xl:mb-3">
+          Lab
+        </Badge>
+
+        <div className="mb-4 flex items-center justify-between">
+          <h1 className="text-3xl leading-tight font-semibold">Experiments</h1>
+          <LabViewToggle
+            view="canvas"
+            onToggle={onViewChange}
+            className="top-4 right-4 lg:absolute"
+          />
         </div>
       </div>
 
