@@ -1,0 +1,84 @@
+---
+title: Debug Canvas
+description: Drop-in R3F debug helpers — orbit/fly controls, grid, camera monitor, and performance stats — all toggled via a shared tweakpane folder.
+maintainers: ['justkahdri']
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+<ComponentPreview iframe name="debug-canvas-demo" />
+
+## Installation
+
+```bash
+npx shadcn@latest add @joyco/debug-canvas
+```
+
+This will also install `@joyco/debug` if not already present.
+
+## Usage
+
+Place the helpers inside your R3F `<Canvas>`, wrapped in a `<DebugProvider>`:
+
+```tsx
+import { Canvas } from '@react-three/fiber'
+import { DebugProvider } from '@/components/debug'
+import {
+  DebugOrbitControls,
+  DebugFlyControls,
+  DebugGridHelper,
+  DebugCameraMonitor,
+  DebugPerfMonitor,
+} from '@/components/debug-canvas'
+
+function App() {
+  return (
+    <DebugProvider>
+      <Canvas>
+        <DebugOrbitControls />
+        <DebugFlyControls />
+        <DebugGridHelper />
+        <DebugCameraMonitor />
+        <DebugPerfMonitor />
+        {/* Your scene */}
+      </Canvas>
+    </DebugProvider>
+  )
+}
+```
+
+All helpers are no-ops until the debug panel is opened (`Alt+D` or `?debug`), then each can be individually toggled from the **Canvas** folder.
+
+## Components
+
+### DebugOrbitControls
+
+Enables `@react-three/drei` `OrbitControls`. Reads the camera target from `camera.userData.target` (if it's a `Vector3`) or projects 20 units along the camera's forward direction. Enables `pointerEvents` on the canvas while active.
+
+**Toggle:** `orbitControls` in the Canvas folder.
+
+### DebugFlyControls
+
+FPS-style camera controls — WASD movement, mouse look (pointer lock on click), Shift to sprint (5×), Space to ascend.
+
+**Toggle:** `flyControls` in the Canvas folder, or **Alt+F** keyboard shortcut.
+
+### DebugGridHelper
+
+Renders a `<gridHelper args={[100, 100]} />`.
+
+**Toggle:** `gridHelper` in the Canvas folder.
+
+### DebugCameraMonitor
+
+Adds read-only `cam pos` and `cam rot` bindings to the Canvas folder. Updates every frame. Always visible when the Canvas folder exists — no toggle.
+
+### DebugPerfMonitor
+
+Mounts a `stats-gl` overlay (FPS, Hz) with custom TRI (triangles) and CALL (draw calls) panels. Positioned fixed at the bottom-right corner.
+
+**Toggle:** `perfMonitor` in the Canvas folder.
+
+## Peer Dependencies
+
+Your project must have `@react-three/fiber` and `three` installed.
