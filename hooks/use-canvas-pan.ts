@@ -168,6 +168,17 @@ export function useCanvasPan(initialOffset: Point = { x: 0, y: 0 }) {
     [startInertia]
   )
 
+  const onPointerCancel = useCallback(() => {
+    if (!isPointerDown.current) return
+    isPointerDown.current = false
+    activePointerId.current = null
+    stopInertia()
+    if (didDrag.current) {
+      setIsDragging(false)
+      setOffset({ ...offsetRef.current })
+    }
+  }, [stopInertia])
+
   const onClickCapture = useCallback((e: React.MouseEvent) => {
     if (didDrag.current) {
       e.preventDefault()
@@ -185,6 +196,20 @@ export function useCanvasPan(initialOffset: Point = { x: 0, y: 0 }) {
     [applyTransform, stopInertia]
   )
 
+  const panBy = useCallback(
+    (delta: Point) => {
+      stopInertia()
+      const target = {
+        x: offsetRef.current.x + delta.x,
+        y: offsetRef.current.y + delta.y,
+      }
+      offsetRef.current = target
+      applyTransform()
+      setOffset({ ...target })
+    },
+    [applyTransform, stopInertia]
+  )
+
   useEffect(() => {
     return () => {
       if (rafId.current) cancelAnimationFrame(rafId.current)
@@ -196,8 +221,9 @@ export function useCanvasPan(initialOffset: Point = { x: 0, y: 0 }) {
     onPointerDown,
     onPointerMove,
     onPointerUp,
+    onPointerCancel,
     onClickCapture,
   }
 
-  return { offset, isDragging, containerRef, contentRef, handlers, resetView }
+  return { offset, isDragging, containerRef, contentRef, handlers, resetView, panBy }
 }

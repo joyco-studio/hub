@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import { getExperiments } from '@/lib/lab'
 import { getRegistryCounts } from '@/lib/source'
@@ -18,7 +19,9 @@ export default async function LabPage() {
 
   return (
     <RegistryMetaProvider counts={counts}>
-      <LabView experiments={experiments} />
+      <Suspense>
+        <LabView experiments={experiments} />
+      </Suspense>
     </RegistryMetaProvider>
   )
 }

@@ -45,7 +45,7 @@ function wrapIndex(n: number, m: number) {
 
 export function LabCanvas({ experiments, onViewChange }: LabCanvasProps) {
   const [measureRef, bounds] = useMeasure()
-  const { offset, isDragging, containerRef, contentRef, handlers, resetView } =
+  const { offset, isDragging, containerRef, contentRef, handlers, resetView, panBy } =
     useCanvasPan()
 
   const hasInitialized = useRef(false)
@@ -127,13 +127,10 @@ export function LabCanvas({ experiments, onViewChange }: LabCanvasProps) {
       const delta = keyMap[e.key]
       if (delta) {
         e.preventDefault()
-        resetView({
-          x: offset.x + delta.x,
-          y: offset.y + delta.y,
-        })
+        panBy(delta)
       }
     },
-    [offset, resetView]
+    [panBy]
   )
 
   if (experiments.length === 0) {
