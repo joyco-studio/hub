@@ -161,6 +161,7 @@ export function LabCanvas({ experiments }: LabCanvasProps) {
         backgroundPosition: `${offset.x % 24}px ${offset.y % 24}px`,
       }}
       onKeyDown={handleKeyDown}
+      onDragStart={(e) => e.preventDefault()}
       {...handlers}
     >
       <div
