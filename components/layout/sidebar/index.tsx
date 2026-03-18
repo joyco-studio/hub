@@ -22,6 +22,7 @@ type RegistrySidebarProps = {
   itemMeta?: Record<string, SidebarItemMeta>
   gameSlugs?: string[]
   effectSlugs?: string[]
+  canvasSlugs?: string[]
   experiments?: Experiment[]
 }
 
@@ -30,6 +31,7 @@ export function RegistrySidebar({
   itemMeta = {},
   gameSlugs = [],
   effectSlugs = [],
+  canvasSlugs = [],
   experiments = [],
 }: RegistrySidebarProps) {
   const pathname = usePathname()
@@ -100,6 +102,7 @@ export function RegistrySidebar({
           meta={itemMeta}
           gameSlugs={gameSlugs}
           effectSlugs={effectSlugs}
+          canvasSlugs={canvasSlugs}
         />
       </nav>
     )

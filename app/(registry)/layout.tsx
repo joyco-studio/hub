@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react'
-import { source, getGameSlugs, getEffectSlugs } from '@/lib/source'
+import { source, getGameSlugs, getEffectSlugs, getCanvasSlugs } from '@/lib/source'
 import { TreeContextProvider } from 'fumadocs-ui/contexts/tree'
 import {
   LayoutContextProvider,
@@ -21,6 +21,7 @@ const itemMeta: Record<
 export default async function Layout({ children }: LayoutProps<'/'>) {
   const gameSlugs = getGameSlugs()
   const effectSlugs = getEffectSlugs()
+  const canvasSlugs = getCanvasSlugs()
   const { experiments } = await getExperiments()
 
   return (
@@ -44,6 +45,7 @@ export default async function Layout({ children }: LayoutProps<'/'>) {
             itemMeta={itemMeta}
             gameSlugs={gameSlugs}
             effectSlugs={effectSlugs}
+            canvasSlugs={canvasSlugs}
             experiments={experiments}
           />
           {children}

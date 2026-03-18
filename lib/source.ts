@@ -87,6 +87,16 @@ export function getEffectSlugs(): string[] {
     .map((page) => page.slugs[page.slugs.length - 1])
 }
 
+/**
+ * Get all canvas slugs based on frontmatter type: 'canvas'
+ */
+export function getCanvasSlugs(): string[] {
+  const allPages = source.getPages()
+  return allPages
+    .filter((page) => page.data.type === 'canvas')
+    .map((page) => page.slugs[page.slugs.length - 1])
+}
+
 export function getRelatedPages(
   currentPage: InferPageType<typeof source>,
   limit = 3
