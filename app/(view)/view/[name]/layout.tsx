@@ -19,6 +19,18 @@ export default function ViewLayout({
           background-color: transparent !important;
         }
       `}</style>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            document.addEventListener('keydown', function(e) {
+              if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                window.parent.postMessage({ type: 'joyco:open-command-palette' }, '*');
+              }
+            });
+          `,
+        }}
+      />
       {children}
     </div>
   )
