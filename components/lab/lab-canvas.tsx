@@ -5,6 +5,7 @@ import useMeasure from 'react-use-measure'
 import { useCanvasPan } from '@/hooks/use-canvas-pan'
 import { ExperimentCard } from '@/components/cards/experiment-card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import FlaskIcon from '@/components/icons/flask'
 import { LabViewToggle } from './lab-view-toggle'
 
@@ -210,11 +211,13 @@ export function LabCanvas({ experiments, onViewChange }: LabCanvasProps) {
         </div>
       </div>
 
-      <button
+      <Button
         type="button"
         aria-label="Reset canvas view"
         onClick={() => resetView(initialOffset)}
-        className="bg-background/80 text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 pointer-events-auto absolute right-4 bottom-4 z-10 flex size-10 items-center justify-center rounded-lg border backdrop-blur-sm transition-colors focus-visible:ring-2"
+        size="icon-lg"
+        variant="muted"
+        className="pointer-events-auto absolute right-4 bottom-4 z-10"
       >
         <svg
           aria-hidden="true"
@@ -232,7 +235,7 @@ export function LabCanvas({ experiments, onViewChange }: LabCanvasProps) {
           <line x1="4" y1="8" x2="6" y2="8" />
           <line x1="10" y1="8" x2="12" y2="8" />
         </svg>
-      </button>
+      </Button>
     </div>
   )
 }
