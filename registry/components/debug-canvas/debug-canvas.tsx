@@ -5,7 +5,7 @@ import { type ReactNode } from 'react'
 import { DebugControls } from './debug-controls'
 import { DebugGridHelper } from './debug-grid-helper'
 import { DebugCameraMonitor } from './debug-camera-monitor'
-import { PerfMonitor as DebugPerfMonitor } from './debug-perf-monitor'
+import { DebugPerfMonitor } from './debug-perf-monitor'
 
 interface DebugCanvasProps extends CanvasProps {
   children?: ReactNode

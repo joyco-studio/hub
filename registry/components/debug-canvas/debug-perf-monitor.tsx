@@ -7,7 +7,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 
 type Panel = InstanceType<typeof Stats.Panel>
 
-export function PerfMonitor() {
+export function DebugPerfMonitor() {
   const [, , store] = useDebugBindings('Canvas', { perfMonitor: false })
   const enabled = useDebugState(store, (s) => s.perfMonitor)
 
@@ -77,14 +77,14 @@ function PerfMonitorGL() {
 
     return () => {
       cancelled = true
-      cleanupP.then((applyFlexLayout) => {
-        if (applyFlexLayout) window.removeEventListener('resize', applyFlexLayout)
-      })
       statsRef.current = null
       trianglesPanelRef.current = null
       callsPanelRef.current = null
-      stats.dom.remove()
-      stats.dispose()
+      cleanupP.then((applyFlexLayout) => {
+        if (applyFlexLayout) window.removeEventListener('resize', applyFlexLayout)
+        stats.dom.remove()
+        stats.dispose()
+      })
     }
   }, [gl])
 

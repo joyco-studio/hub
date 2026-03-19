@@ -51,7 +51,7 @@ export function DebugCameraMonitor() {
     p.y = camera.position.y
     p.z = camera.position.z
 
-    _euler.setFromQuaternion(camera.quaternion)
+    _euler.setFromQuaternion(camera.quaternion, 'YXZ')
     r.x = _euler.x * RAD2DEG
     r.y = _euler.y * RAD2DEG
     r.z = _euler.z * RAD2DEG

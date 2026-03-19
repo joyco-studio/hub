@@ -94,6 +94,7 @@ function ActiveFlyControls() {
           keys.d = pressed
           break
         case 'Space':
+          e.preventDefault()
           keys.space = pressed
           break
         case 'ShiftLeft':
