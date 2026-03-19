@@ -11,9 +11,9 @@ const STORAGE_KEY = 'lab-view'
 
 function getInitialView(searchParam: string | null): View {
   if (searchParam === 'list') return 'list'
-  if (typeof window === 'undefined') return 'canvas'
+  if (typeof window === 'undefined') return 'list'
   const stored = localStorage.getItem(STORAGE_KEY)
-  return stored === 'list' ? 'list' : 'canvas'
+  return stored === 'canvas' ? 'canvas' : 'list'
 }
 
 interface LabViewProps {
