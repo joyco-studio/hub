@@ -84,6 +84,8 @@ function PerfMonitorGL() {
         if (applyFlexLayout) window.removeEventListener('resize', applyFlexLayout)
         stats.dom.remove()
         stats.dispose()
+      }).catch(() => {
+        // init failed — nothing was appended, nothing to clean up
       })
     }
   }, [gl])

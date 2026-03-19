@@ -9,15 +9,15 @@ import { useDebugBindings, useDebugState } from '@/registry/lib/debug'
 function ActiveOrbitControls() {
   const camera = useThree((s) => s.camera)
   const gl = useThree((s) => s.gl)
-  const targetRef = useRef(new Vector3())
 
   const [target] = useState(() => {
+    const t = new Vector3()
     if (camera.userData.target instanceof Vector3) {
-      return targetRef.current.copy(camera.userData.target)
+      return t.copy(camera.userData.target)
     }
     const dir = new Vector3()
     camera.getWorldDirection(dir)
-    return targetRef.current.copy(camera.position).add(dir.multiplyScalar(20))
+    return t.copy(camera.position).add(dir.multiplyScalar(20))
   })
 
   useEffect(() => {
