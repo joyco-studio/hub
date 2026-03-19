@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils'
+import { ShortcutsRelay } from './shortcuts-relay'
 
 export default function ViewLayout({
   children,
@@ -19,18 +20,7 @@ export default function ViewLayout({
           background-color: transparent !important;
         }
       `}</style>
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            document.addEventListener('keydown', function(e) {
-              if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-                e.preventDefault();
-                window.parent.postMessage({ type: 'joyco:open-command-palette' }, window.location.origin);
-              }
-            });
-          `,
-        }}
-      />
+      <ShortcutsRelay />
       {children}
     </div>
   )
