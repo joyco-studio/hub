@@ -332,18 +332,18 @@
       "name": "debug-canvas",
       "type": "registry:component",
       "title": "Debug Canvas",
-      "description": "Drop-in R3F debug helpers: orbit/fly controls, grid, camera monitor, and performance stats — all toggled via a shared tweakpane folder.",
+      "description": "An enhanced R3F Canvas with built-in debug helpers — orbit/fly controls (mutually exclusive), grid, camera monitor, and performance stats — all toggled via a shared tweakpane folder.",
       "files": [
         {
           "path": "registry/components/debug-canvas/index.ts",
           "type": "registry:component"
         },
         {
-          "path": "registry/components/debug-canvas/debug-orbit-controls.tsx",
+          "path": "registry/components/debug-canvas/debug-canvas.tsx",
           "type": "registry:component"
         },
         {
-          "path": "registry/components/debug-canvas/debug-fly-controls.tsx",
+          "path": "registry/components/debug-canvas/debug-controls.tsx",
           "type": "registry:component"
         },
         {

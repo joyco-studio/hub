@@ -1,9 +1,35 @@
 'use client'
 
+import { OrbitControls } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Euler, Vector3 } from 'three'
 import { useDebugBindings, useDebugState } from '@/registry/lib/debug'
+
+function ActiveOrbitControls() {
+  const camera = useThree((s) => s.camera)
+  const gl = useThree((s) => s.gl)
+  const targetRef = useRef(new Vector3())
+
+  const [target] = useState(() => {
+    if (camera.userData.target instanceof Vector3) {
+      return targetRef.current.copy(camera.userData.target)
+    }
+    const dir = new Vector3()
+    camera.getWorldDirection(dir)
+    return targetRef.current.copy(camera.position).add(dir.multiplyScalar(20))
+  })
+
+  useEffect(() => {
+    const canvas = gl.domElement
+    canvas.style.pointerEvents = 'auto'
+    return () => {
+      canvas.style.pointerEvents = ''
+    }
+  }, [gl])
+
+  return <OrbitControls target={target} makeDefault />
+}
 
 const HALF_PI = Math.PI / 2
 const _forward = new Vector3()
@@ -19,7 +45,6 @@ function ActiveFlyControls() {
   const sprintMultiplier = 5
   const sensitivity = 0.002
 
-  // Initialise yaw/pitch from current camera orientation
   useEffect(() => {
     const euler = new Euler()
     euler.setFromQuaternion(camera.quaternion, 'YXZ')
@@ -27,7 +52,6 @@ function ActiveFlyControls() {
     pitchRef.current = euler.x
   }, [camera])
 
-  // Pointer lock + mouse look
   useEffect(() => {
     const canvas = gl.domElement
     canvas.style.pointerEvents = 'auto'
@@ -52,7 +76,6 @@ function ActiveFlyControls() {
     }
   }, [gl])
 
-  // Keyboard
   useEffect(() => {
     const keys = keysRef.current
 
@@ -91,14 +114,11 @@ function ActiveFlyControls() {
     }
   }, [])
 
-  // Apply rotation + movement each frame
   useFrame((_, delta) => {
     const keys = keysRef.current
 
-    // Rotation — YXZ order, Z is always 0 (no roll)
     camera.rotation.set(pitchRef.current, yawRef.current, 0, 'YXZ')
 
-    // Movement relative to camera heading
     camera.getWorldDirection(_forward)
     _right.crossVectors(_forward, camera.up).normalize()
 
@@ -113,29 +133,42 @@ function ActiveFlyControls() {
   return null
 }
 
-export function DebugFlyControls() {
-  const [targetRef, folder, store] = useDebugBindings('Canvas', {
+export function DebugControls() {
+  const [targetRef, , store] = useDebugBindings('Canvas', {
+    orbitControls: false,
     flyControls: false,
   })
 
+  // Mutual exclusion: enabling one disables the other
+  useEffect(() => {
+    return store.subscribe((state, prev) => {
+      if (state.orbitControls && !prev.orbitControls && state.flyControls) {
+        targetRef.current.flyControls = false
+      } else if (state.flyControls && !prev.flyControls && state.orbitControls) {
+        targetRef.current.orbitControls = false
+      }
+    })
+  }, [store, targetRef])
+
+  // Alt+F keyboard toggle for fly controls
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.altKey && e.code === 'KeyF') {
         e.preventDefault()
-        const next = !targetRef.current.flyControls
-        targetRef.current.flyControls = next
-        store.setState({ flyControls: next })
-        folder?.refresh()
+        targetRef.current.flyControls = !targetRef.current.flyControls
       }
     }
-
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [targetRef, folder, store])
+  }, [targetRef])
 
-  const flyControlsEnabled = useDebugState(store, (s) => s.flyControls)
+  const orbit = useDebugState(store, (s) => s.orbitControls)
+  const fly = useDebugState(store, (s) => s.flyControls)
 
-  if (!flyControlsEnabled) return null
-
-  return <ActiveFlyControls />
+  return (
+    <>
+      {orbit && <ActiveOrbitControls />}
+      {fly && <ActiveFlyControls />}
+    </>
+  )
 }

@@ -1,15 +1,7 @@
 'use client'
 
-import { Canvas } from '@react-three/fiber'
-
 import { DebugProvider } from '@/registry/lib/debug'
-import {
-  DebugOrbitControls,
-  DebugFlyControls,
-  DebugGridHelper,
-  DebugCameraMonitor,
-  DebugPerfMonitor,
-} from '@/registry/components/debug-canvas'
+import { DebugCanvas } from '@/registry/components/debug-canvas'
 
 function Scene() {
   return (
@@ -31,12 +23,6 @@ function Scene() {
         <cylinderGeometry args={[0.25, 0.25, 0.5, 32]} />
         <meshStandardMaterial color="#facc15" />
       </mesh>
-
-      <DebugOrbitControls />
-      <DebugFlyControls />
-      <DebugGridHelper />
-      <DebugCameraMonitor />
-      <DebugPerfMonitor />
     </>
   )
 }
@@ -45,12 +31,12 @@ function DebugCanvasDemo() {
   return (
     <DebugProvider title="Canvas Debug" position="top-right" enabled>
       <div className="bg-background h-screen w-full">
-        <Canvas
+        <DebugCanvas
           camera={{ position: [3, 2, 5], fov: 50 }}
           style={{ width: '100%', height: '100%' }}
         >
           <Scene />
-        </Canvas>
+        </DebugCanvas>
       </div>
     </DebugProvider>
   )

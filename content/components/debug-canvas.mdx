@@ -1,6 +1,6 @@
 ---
 title: Debug Canvas
-description: "Drop-in R3F debug helpers — orbit/fly controls, grid, camera monitor, and performance stats — all toggled via a shared tweakpane folder."
+description: An enhanced R3F Canvas with built-in debug helpers — orbit/fly controls, grid, camera monitor, and performance stats — all toggled via a shared tweakpane folder.
 maintainers: ['justkahdri']
 type: canvas
 ---
@@ -19,30 +19,18 @@ This will also install `@joyco/debug` if not already present.
 
 ## Usage
 
-Place the helpers inside your R3F `<Canvas>`, wrapped in a `<DebugProvider>`:
+Use `DebugCanvas` as a drop-in replacement for R3F's `Canvas`. It includes all debug helpers automatically:
 
 ```tsx
-import { Canvas } from '@react-three/fiber'
 import { DebugProvider } from '@/components/debug'
-import {
-  DebugOrbitControls,
-  DebugFlyControls,
-  DebugGridHelper,
-  DebugCameraMonitor,
-  DebugPerfMonitor,
-} from '@/components/debug-canvas'
+import { DebugCanvas } from '@/components/debug-canvas'
 
 function App() {
   return (
     <DebugProvider>
-      <Canvas>
-        <DebugOrbitControls />
-        <DebugFlyControls />
-        <DebugGridHelper />
-        <DebugCameraMonitor />
-        <DebugPerfMonitor />
+      <DebugCanvas camera={{ position: [3, 2, 5], fov: 50 }}>
         {/* Your scene */}
-      </Canvas>
+      </DebugCanvas>
     </DebugProvider>
   )
 }
@@ -50,31 +38,33 @@ function App() {
 
 All helpers are no-ops until the debug panel is opened (`Alt+D` or `?debug`), then each can be individually toggled from the **Canvas** folder.
 
-## Components
+## Debug Helpers
 
-### DebugOrbitControls
+### Orbit Controls
 
 Enables `@react-three/drei` `OrbitControls`. Reads the camera target from `camera.userData.target` (if it's a `Vector3`) or projects 20 units along the camera's forward direction. Enables `pointerEvents` on the canvas while active.
 
 **Toggle:** `orbitControls` in the Canvas folder.
 
-### DebugFlyControls
+### Fly Controls
 
 FPS-style camera controls — WASD movement, mouse look (pointer lock on click), Shift to sprint (5×), Space to ascend.
 
 **Toggle:** `flyControls` in the Canvas folder, or **Alt+F** keyboard shortcut.
 
-### DebugGridHelper
+> **Note:** Orbit and fly controls are mutually exclusive — enabling one automatically disables the other.
+
+### Grid Helper
 
 Renders a `<gridHelper args={[100, 100]} />`.
 
 **Toggle:** `gridHelper` in the Canvas folder.
 
-### DebugCameraMonitor
+### Camera Monitor
 
 Adds read-only `cam pos` and `cam rot` bindings to the Canvas folder. Updates every frame. Always visible when the Canvas folder exists — no toggle.
 
-### DebugPerfMonitor
+### Perf Monitor
 
 Mounts a `stats-gl` overlay (FPS, Hz) with custom TRI (triangles) and CALL (draw calls) panels. Positioned fixed at the bottom-right corner.
 
