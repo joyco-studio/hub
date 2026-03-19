@@ -23,7 +23,7 @@ export function ExperimentCardImage({
   return (
     <div
       className={cn(
-        'border-border bg-muted dark relative overflow-hidden rounded-md border',
+        'border-border bg-muted dark relative overflow-hidden rounded-md border select-none pointer-events-none',
         className
       )}
       {...props}

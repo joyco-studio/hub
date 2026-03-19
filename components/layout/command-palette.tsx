@@ -128,6 +128,17 @@ export function CommandPalette() {
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [])
 
+  // Handle cmd+k propagated from iframes via postMessage
+  React.useEffect(() => {
+    const handleMessage = (e: MessageEvent) => {
+      if (e.data?.type === 'joyco:open-command-palette') {
+        setIsOpen((prev) => !prev)
+      }
+    }
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [])
+
   // Focus input when dialog opens
   React.useEffect(() => {
     if (isOpen) {

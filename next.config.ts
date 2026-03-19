@@ -30,7 +30,14 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_VERCEL_BRANCH_URL: process.env.VERCEL_BRANCH_URL,
   },
   async redirects() {
-    return getExternalComponentRedirects()
+    return [
+      ...getExternalComponentRedirects(),
+      {
+        source: '/lab/list',
+        destination: '/lab?view=list',
+        permanent: false,
+      },
+    ]
   },
   async rewrites() {
     return [

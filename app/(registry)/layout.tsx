@@ -8,6 +8,7 @@ import {
 import { RegistrySidebar } from '@/components/layout/sidebar'
 import { MobileNav } from '@/components/layout/mobile-nav'
 import { getExperiments } from '@/lib/lab'
+import { CommandPalette } from '@/components/layout/command-palette'
 
 // Optional: Define item metadata for badges/dots
 const itemMeta: Record<
@@ -48,6 +49,7 @@ export default async function Layout({ children }: LayoutProps<'/'>) {
           {children}
         </LayoutBody>
       </LayoutContextProvider>
+      <CommandPalette />
     </TreeContextProvider>
   )
 }

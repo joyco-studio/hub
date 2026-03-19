@@ -4,7 +4,6 @@ import { Public_Sans, Roboto_Mono } from 'next/font/google'
 import { RootProvider } from 'fumadocs-ui/provider/next'
 import { Analytics } from '@vercel/analytics/next'
 import { cn } from '@/lib/utils'
-import { CommandPalette } from '@/components/layout/command-palette'
 import { APP_BASE_URL } from '@/lib/constants'
 
 const publicSans = Public_Sans({
@@ -91,7 +90,6 @@ export default function Layout({ children }: LayoutProps<'/'>) {
           }}
         >
           {children}
-          <CommandPalette />
         </RootProvider>
         <Analytics />
       </body>
