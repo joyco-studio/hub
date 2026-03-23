@@ -2,7 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "debug-canvas",
   "type": "registry:component",
-  "title": "Canvas",
+  "title": "r3f Canvas",
   "description": "An enhanced R3F Canvas with built-in debug helpers — orbit/fly controls (mutually exclusive), grid, camera monitor, and performance stats — all toggled via a shared tweakpane folder.",
   "dependencies": [
     "stats-gl",
