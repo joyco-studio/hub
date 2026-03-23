@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable react-hooks/immutability */
 
 import { OrbitControls } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
@@ -11,13 +12,10 @@ function ActiveOrbitControls() {
   const gl = useThree((s) => s.gl)
 
   const [target] = useState(() => {
-    const t = new Vector3()
     if (camera.userData.target instanceof Vector3) {
-      return t.copy(camera.userData.target)
+      return new Vector3().copy(camera.userData.target)
     }
-    const dir = new Vector3()
-    camera.getWorldDirection(dir)
-    return t.copy(camera.position).add(dir.multiplyScalar(20))
+    return new Vector3(0, 0, 0)
   })
 
   useEffect(() => {
@@ -40,7 +38,14 @@ function ActiveFlyControls() {
   const gl = useThree((s) => s.gl)
   const yawRef = useRef(0)
   const pitchRef = useRef(0)
-  const keysRef = useRef({ w: false, a: false, s: false, d: false, space: false, shift: false })
+  const keysRef = useRef({
+    w: false,
+    a: false,
+    s: false,
+    d: false,
+    space: false,
+    shift: false,
+  })
   const speed = 3
   const sprintMultiplier = 5
   const sensitivity = 0.002
@@ -145,7 +150,11 @@ export function DebugControls() {
     return store.subscribe((state, prev) => {
       if (state.orbitControls && !prev.orbitControls && state.flyControls) {
         targetRef.current.flyControls = false
-      } else if (state.flyControls && !prev.flyControls && state.orbitControls) {
+      } else if (
+        state.flyControls &&
+        !prev.flyControls &&
+        state.orbitControls
+      ) {
         targetRef.current.orbitControls = false
       }
     })
