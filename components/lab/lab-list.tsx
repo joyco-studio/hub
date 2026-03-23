@@ -35,11 +35,7 @@ export function LabList({ experiments, onViewChange }: LabListProps) {
 
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-3xl leading-tight font-semibold">Experiments</h1>
-        <LabViewToggle
-          view="list"
-          onToggle={onViewChange}
-          className="top-4 right-1.25 lg:absolute"
-        />
+        <LabViewToggle view="list" onToggle={onViewChange} />
       </div>
 
       <p className="text-foreground/70 mb-10 text-lg">

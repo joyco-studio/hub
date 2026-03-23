@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import useMeasure from 'react-use-measure'
 import { useCanvasPan } from '@/hooks/use-canvas-pan'
 import { ExperimentCard } from '@/components/cards/experiment-card'
@@ -45,27 +45,35 @@ function wrapIndex(n: number, m: number) {
 
 export function LabCanvas({ experiments, onViewChange }: LabCanvasProps) {
   const [measureRef, bounds] = useMeasure()
-  const { offset, isDragging, containerRef, contentRef, handlers, resetView, panBy } =
-    useCanvasPan()
+  const {
+    offset,
+    isDragging,
+    containerRef,
+    contentRef,
+    handlers,
+    resetView,
+    panBy,
+  } = useCanvasPan()
 
   const hasInitialized = useRef(false)
-  const [initialOffset, setInitialOffset] = useState({ x: 0, y: 0 })
 
   const blockRows = Math.ceil(experiments.length / COLUMNS)
+
+  const initialOffset = useMemo(() => {
+    const totalWidth = COLUMNS * CELL_STEP_X - GAP
+    const totalHeight = blockRows * CELL_STEP_Y - GAP
+    return {
+      x: (bounds.width - totalWidth) / 2,
+      y: (bounds.height - totalHeight) / 2,
+    }
+  }, [bounds.width, bounds.height, blockRows])
 
   useEffect(() => {
     if (bounds.width > 0 && bounds.height > 0 && !hasInitialized.current) {
       hasInitialized.current = true
-      const totalWidth = COLUMNS * CELL_STEP_X - GAP
-      const totalHeight = blockRows * CELL_STEP_Y - GAP
-      const centered = {
-        x: (bounds.width - totalWidth) / 2,
-        y: (bounds.height - totalHeight) / 2,
-      }
-      setInitialOffset(centered)
-      resetView(centered)
+      resetView(initialOffset)
     }
-  }, [bounds.width, bounds.height, blockRows, resetView])
+  }, [bounds.width, bounds.height, initialOffset, resetView])
 
   const visibleCards = useMemo((): VisibleCard[] => {
     if (bounds.width === 0 || bounds.height === 0 || experiments.length === 0)
@@ -107,8 +115,7 @@ export function LabCanvas({ experiments, onViewChange }: LabCanvasProps) {
   const mergedRef = useCallback(
     (node: HTMLDivElement | null) => {
       measureRef(node)
-      ;(containerRef as React.MutableRefObject<HTMLDivElement | null>).current =
-        node
+      containerRef.current = node
     },
     [measureRef, containerRef]
   )
