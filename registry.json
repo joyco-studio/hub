@@ -26,9 +26,7 @@
           "type": "registry:component"
         }
       ],
-      "dependencies": [
-        "@joycostudio/marquee"
-      ]
+      "dependencies": ["@joycostudio/marquee"]
     },
     {
       "name": "file-button",
@@ -45,9 +43,7 @@
           "type": "registry:hook"
         }
       ],
-      "registryDependencies": [
-        "button"
-      ]
+      "registryDependencies": ["button"]
     },
     {
       "name": "file-dropzone",
@@ -64,9 +60,7 @@
           "type": "registry:hook"
         }
       ],
-      "registryDependencies": [
-        "button"
-      ]
+      "registryDependencies": ["button"]
     },
     {
       "name": "mobile-menu",
@@ -96,9 +90,7 @@
           "type": "registry:component"
         }
       ],
-      "dependencies": [
-        "@radix-ui/react-presence"
-      ]
+      "dependencies": ["@radix-ui/react-presence"]
     },
     {
       "name": "chat",
@@ -115,14 +107,8 @@
           "type": "registry:hook"
         }
       ],
-      "dependencies": [
-        "debounce",
-        "react-use-measure"
-      ],
-      "registryDependencies": [
-        "input-group",
-        "avatar"
-      ]
+      "dependencies": ["debounce", "react-use-measure"],
+      "registryDependencies": ["input-group", "avatar"]
     },
     {
       "name": "hls-video-player",
@@ -139,9 +125,7 @@
           "type": "registry:lib"
         }
       ],
-      "dependencies": [
-        "hls.js"
-      ]
+      "dependencies": ["hls.js"]
     },
     {
       "name": "action-hint",
@@ -210,9 +194,7 @@
           "type": "registry:lib"
         }
       ],
-      "dependencies": [
-        "@radix-ui/react-slot"
-      ]
+      "dependencies": ["@radix-ui/react-slot"]
     },
     {
       "name": "scramble",
@@ -225,9 +207,7 @@
           "type": "registry:lib"
         }
       ],
-      "dependencies": [
-        "gsap"
-      ]
+      "dependencies": ["gsap"]
     },
     {
       "name": "scramble-button",
@@ -240,13 +220,8 @@
           "type": "registry:component"
         }
       ],
-      "dependencies": [
-        "gsap"
-      ],
-      "registryDependencies": [
-        "@joyco/scramble",
-        "button"
-      ]
+      "dependencies": ["gsap"],
+      "registryDependencies": ["@joyco/scramble", "button"]
     },
     {
       "name": "brick-breaker",
@@ -323,10 +298,41 @@
           "type": "registry:hook"
         }
       ],
-      "registryDependencies": [
-        "button",
-        "kbd"
-      ]
+      "registryDependencies": ["button", "kbd"]
+    },
+    {
+      "name": "debug-canvas",
+      "type": "registry:component",
+      "title": "r3f Canvas",
+      "description": "An enhanced R3F Canvas with built-in debug helpers — orbit/fly controls (mutually exclusive), grid, camera monitor, and performance stats — all toggled via a shared tweakpane folder.",
+      "files": [
+        {
+          "path": "registry/components/debug-canvas/index.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/debug-canvas/debug-canvas.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/debug-canvas/debug-controls.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/debug-canvas/debug-grid-helper.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/debug-canvas/debug-camera-monitor.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/debug-canvas/debug-perf-monitor.tsx",
+          "type": "registry:component"
+        }
+      ],
+      "dependencies": ["stats-gl", "@react-three/drei"],
+      "registryDependencies": ["@joyco/debug"]
     },
     {
       "name": "debug",
