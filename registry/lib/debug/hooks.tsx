@@ -112,6 +112,7 @@ function getStore<T extends DebugTarget>(reg: DebugRegistry, key: string): Store
 function bindKeys<T extends DebugTarget>(folder: FolderApi, target: T, options?: DebugOptions<T>) {
   const apis: ReturnType<FolderApi['addBinding']>[] = []
   for (const key of Object.keys(target)) {
+    if (key.startsWith('_')) continue // skip internal/private props (e.g. GSAP)
     const opts = options?.[key as keyof T]
     apis.push(folder.addBinding(target, key, opts))
   }
@@ -130,6 +131,7 @@ export function useDebugBindings<T extends DebugTarget>(
   const { registry } = useDebug()
   const folder = useDebugFolder(folderTitle)
   const optionsRef = useRef(options)
+
   // eslint-disable-next-line react-hooks/refs
   optionsRef.current = options
   const targetRef = useRef(target)
@@ -144,18 +146,53 @@ export function useDebugBindings<T extends DebugTarget>(
     const raw = targetRef.current
     const store = getOrCreateStore(registry, folderTitle, raw)
 
-    // Proxy intercepts external mutations so the folder UI stays in sync
+    // Shallow-clone helper that spreads nested objects so Zustand sees new refs
+    const shallowClone = (obj: Record<string, unknown>): T => {
+      const next: Record<string, unknown> = {}
+      for (const k of Object.keys(obj)) {
+        const v = obj[k]
+        next[k] = v !== null && typeof v === 'object' && !Array.isArray(v) ? { ...v } : v
+      }
+      return next as T
+    }
+
+    // Proxy intercepts external mutations so the folder UI stays in sync.
+    // The `get` trap wraps nested plain objects in a child Proxy so that
+    // mutations like `targetRef.current.position.x = 5` are intercepted.
     const proxy = new Proxy(raw, {
+      get(obj, prop) {
+        const value = Reflect.get(obj, prop)
+        if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+          return new Proxy(value as Record<string, unknown>, {
+            set(nested, nestedProp, nestedValue) {
+              const result = Reflect.set(nested, nestedProp, nestedValue)
+              folder.refresh()
+              store.setState(shallowClone(obj as Record<string, unknown>))
+              return result
+            },
+          })
+        }
+        return value
+      },
       set(obj, prop, value) {
         const result = Reflect.set(obj, prop, value)
         folder.refresh()
-        store.setState({ ...obj })
+        store.setState(shallowClone(obj as Record<string, unknown>))
         return result
       },
     }) as T
     targetRef.current = proxy
 
     const apis = bindKeys(folder, proxy, optionsRef.current)
+
+    // Tweakpane may mutate nested objects directly without going through
+    // our proxy's property access chain, so attach change listeners as
+    // a safety net to keep the Zustand store in sync with UI changes.
+    for (const api of apis) {
+      api.on('change', () => {
+        store.setState(shallowClone(raw as Record<string, unknown>))
+      })
+    }
 
     return () => {
       for (const a of apis) a.dispose()

@@ -1,14 +1,7 @@
 'use client'
 
 import { useSearchParams } from 'next/navigation'
-import {
-  Suspense,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from 'react'
+import { Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import debounce from 'lodash.debounce'
 import { Pane } from 'tweakpane'
 
@@ -43,10 +36,7 @@ export function DebugParamSync() {
 
 type Position = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
 
-const positionStyles: Record<
-  Position,
-  Pick<React.CSSProperties, 'top' | 'right' | 'bottom' | 'left'>
-> = {
+const positionStyles: Record<Position, Pick<React.CSSProperties, 'top' | 'right' | 'bottom' | 'left'>> = {
   'top-left': { top: 0, left: 0 },
   'top-right': { top: 0, right: 0 },
   'bottom-left': { bottom: 0, left: 0 },
@@ -171,9 +161,7 @@ export function DebugProvider({
   useDraggable(containerRef, '.tp-rotv_t', !!pane)
 
   return (
-    <DebugContext.Provider
-      value={{ pane, enabled, setEnabled, registry: registryRef.current }}
-    >
+    <DebugContext.Provider value={{ pane, enabled, setEnabled, registry: registryRef.current }}>
       <Suspense fallback={null}>
         <DebugParamSync />
       </Suspense>
