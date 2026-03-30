@@ -36,8 +36,15 @@ export function RegistrySidebar({
 }: RegistrySidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
-  const { query, setQuery, results, resultsForQuery, hasResults, isEmpty, isLoading } =
-    useSearch()
+  const {
+    query,
+    setQuery,
+    results,
+    resultsForQuery,
+    hasResults,
+    isEmpty,
+    isLoading,
+  } = useSearch()
 
   // Get all folders from the tree
   const folders = tree.children.filter(
@@ -108,6 +115,26 @@ export function RegistrySidebar({
     )
   }
 
+  const fillerRef = React.useRef<HTMLDivElement | null>(null)
+
+  React.useEffect(() => {
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.contentRect.height) {
+          entry.target.classList.remove('-my-0.5')
+        } else {
+          entry.target.classList.add('-my-0.5')
+        }
+      }
+    })
+
+    fillerRef.current && observer.observe(fillerRef.current)
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
+
   return (
     <div className="sticky top-0 hidden h-screen shrink-0 gap-1 [grid-area:sidebar] md:flex">
       <NavAside />
@@ -124,7 +151,7 @@ export function RegistrySidebar({
           isLoading={isLoading}
         />
         {renderContent()}
-        <div className="bg-muted flex-1" />
+        <div ref={fillerRef} className="bg-muted flex-1" />
         <SocialLinks />
       </Command>
     </div>
