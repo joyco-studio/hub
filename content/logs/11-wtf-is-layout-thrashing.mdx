@@ -12,7 +12,7 @@ The browser pipeline for a single frame looks like this (and YOU should know thi
 <Figure src="https://r2.joyco.studio/nbOp4PikfFPi.png" alt="Browser rendering pipeline" width={1903} height={520} />
 
 1. **JavaScript**: your code runs: event handlers, `requestAnimationFrame` callbacks, GSAP tweens, React commits. Any DOM mutations happen here.
-2. **Style**: the browser matches CSS selectors to elements and resolves every property into a final `computed value`.
+2. **Style**: the browser matches CSS selectors to elements and resolves every property into a final `computed value`. This one could be long if impacts too many elements.
 3. **Layout**: with `computed styles` in hand, the browser calculates how much space each element takes up and where it sits on the page. This can be slow depending on the complexity the layout.
 4. **Paint**: the browser records draw calls (fills, strokes, text, images) into display lists for each layer. This step is fast depending on the number of layers and the effects applied to them.
 5. **Composite**: the GPU takes the painted layers, applies transforms and opacity, and composites them into the final frame on screen.
