@@ -240,6 +240,47 @@ clip-path: polygon(...); /* complex geometry clipping */
 * { will-change: transform, opacity; } /* GPU memory bomb */
 ```
 
+**Painting off-screen layers.** The browser tries to **cull** layers that are completely outside the viewport, if a layer isn't visible, it skips painting it entirely. But several things can break this optimization and force the browser to paint layers you can't even see:
+
+- **`overflow: visible` (the default).** If a parent has `overflow: visible`, the browser can't guarantee its children are clipped to any boundary, so it has to paint them even if they're positioned off-screen. They _might_ have content that bleeds into the viewport.
+
+- **Large or unbounded layers.** If an element's layer is very large (e.g., a `position: absolute` element with a huge width/height, or a canvas element sized way beyond the viewport), the browser has to rasterize the full layer even if only a sliver is visible. Rasterization cost scales with the layer's pixel area, not what's on screen.
+
+- **`will-change` on off-screen elements.** Promoted layers stay in GPU memory and get composited even when off-screen. If you promote 200 list items but only 10 are visible, you're paying for 200 layers.
+
+```css
+/* The browser can cull this — content is clipped to the container */
+.scroll-container {
+  overflow: hidden; /* or auto/scroll */
+  contain: paint;   /* explicitly tells the browser nothing paints outside */
+}
+
+/* The browser CANNOT cull children here — they might overflow into view */
+.container {
+  overflow: visible; /* default — no clip boundary */
+}
+```
+
+**`content-visibility: auto`** is the strongest hint you can give. It tells the browser to skip _all_ rendering work (style, layout, paint) for elements that are off-screen, and the browser automatically starts rendering them as they approach the viewport:
+
+```css
+.card {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 300px; /* placeholder height so scroll doesn't jump */
+}
+```
+
+This is especially effective for long pages with many sections or cards — the browser only pays the paint (and layout) cost for what's actually near the viewport.
+
+**`contain: paint`** is lighter — it doesn't skip layout, but it tells the browser that nothing inside this element paints outside its bounds, which lets the compositor cull the layer when it scrolls out of view:
+
+```css
+.widget {
+  contain: paint;
+  /* browser now knows: if this box is off-screen, nothing inside it is visible */
+}
+```
+
 ### Pain point summary
 
 | Symptom | Cause | Fix |
@@ -248,6 +289,8 @@ clip-path: polygon(...); /* complex geometry clipping */
 | High GPU memory usage | Too many layers | Audit layers in DevTools (Layers panel), remove unnecessary `will-change` |
 | Blurry/slow blur effects | `filter: blur()` on large elements without compositing | Add `will-change: filter` or use `backdrop-filter` (composited) |
 | Paint on every frame during animation | Animating color, background, box-shadow | If possible, use opacity transitions or pre-render states |
+| Painting off-screen content | `overflow: visible` preventing culling | Add `contain: paint` or `overflow: hidden` to clip boundaries |
+| Slow initial paint on long pages | Too many elements painted at once | Use `content-visibility: auto` to defer off-screen rendering |
 
 ## 5. Composite
 
@@ -354,4 +397,18 @@ Here's the full picture of what each property change triggers:
 | `font-size`, `text-align` | Yes | Yes | Yes | Yes |
 | `display`, `position`, `float` | Yes | Yes | Yes | Yes |
 
-The fewer steps triggered, the cheaper the change. The golden rule: **animate `transform` and `opacity`, everything else should be mutated wisely and controlled.**
+The fewer steps triggered, the cheaper the change.
+
+## The mental model
+
+There's no golden rule. "Just use `transform` and `opacity`" is good advice for animations, but it doesn't cover the full picture, you'll still hit `backdrop-filter` re-sampling costs, layer explosions, wide style invalidations, or layout thrashing from a read/write loop buried three files deep.
+
+Optimization here is not about memorizing a checklist. It's about understanding what each step costs, what triggers it, and what helps the browser skip it. Every CSS property you touch, every DOM mutation, every layout read has a cost that propagates through one or more of these stages. The job is to be **conservative about what you do** and keep the downstream impact in mind:
+
+- Before adding a `will-change`, ask if the element actually animates, or if you're just burning GPU memory for nothing.
+- Before toggling a class on `body`, ask how many elements that invalidates, or if you can scope it to a subtree.
+- Before animating `width` or `height`, ask if a `transform: scale()` achieves the same visual result without triggering layout.
+- Before adding `backdrop-filter: blur()` on a large moving element, ask if the GPU re-sampling cost per frame is worth it on your target devices.
+- Before rendering 2000 DOM nodes, ask if `content-visibility: auto` or virtualization can cut the work to what's actually visible.
+
+None of these are rules. They're trade-offs. Sometimes you _need_ to animate `height` because `scale` distorts content. Sometimes you _need_ `backdrop-filter` on a large panel because the design calls for it. The point is to make those decisions knowing what you're paying for, not to discover it later in a DevTools flame chart.
