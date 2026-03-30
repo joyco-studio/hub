@@ -65,3 +65,32 @@ Use the `pointer` media feature to style elements based on whether the user has 
 ```
 
 Reference [pointer media feature docs](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/pointer)
+
+## Slot variant (data-slot targeting)
+
+Use `matchVariant` to create a `slot-*` variant that targets children by their `data-slot` attribute. This gives you a clean, composable way to style slotted elements from a parent class — no need to write nested selectors or reach into child components.
+
+```ts title="slot-variant.ts"
+import type { PluginAPI } from "tailwindcss/plugin"
+
+export default function ({ matchVariant }: PluginAPI) {
+  matchVariant("slot", (value: string) => `& [data-slot="${value}"]`)
+}
+```
+
+Load it via `@plugin` in your CSS:
+
+```css title="globals.css"
+@plugin "./styles/slot-variant.ts";
+```
+
+Then use it to style slotted children from the parent:
+
+```html
+<button class="slot-[icon]:size-4 slot-[label]:font-medium">
+  <svg data-slot="icon" />
+  <span data-slot="label">Click me</span>
+</button>
+```
+
+Because `matchVariant` supports arbitrary values via bracket syntax, you can target any `data-slot` value without registering it upfront.
