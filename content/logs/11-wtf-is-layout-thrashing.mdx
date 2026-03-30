@@ -85,6 +85,12 @@ This example is pretty constrained tho. Codebases don't look like this, you have
 
 Doing this you'll avoid the browser invalidating layout during the current frame, which lowers the chance of thrashing by a lot if any other part of you code happens to read layout properties.
 
+### 3. Avoid modifying DOM early in the rAF
+
+Don't modify anything queryable from CSS at the start of your `requestAnimationFrame` callback. As soon as you write to a layout-affecting property, the browser schedules a `Style Recalculation` followed by a `Layout Recalculation` for the next frame, this is expected and fine on its own. The problem is that you're marking the layout as dirty too early in the pipeline, which means **any layout read later in the same frame** becomes a forced reflow (the browser has to resolve the impact of your DOM mutation before it can answer the read).
+
+Most of the time this is completely avoidable, it's just a matter of orchestrating the order of your reads and writes.
+
 ## Check for thrashing in DevTools
 
 1. Open Chrome DevTools → **Performance** tab
