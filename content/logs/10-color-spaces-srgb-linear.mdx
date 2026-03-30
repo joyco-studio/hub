@@ -15,8 +15,6 @@ The contract is simple: the file stores this "pumped up" version, and the displa
 
 ### How does it look like?
 
-{/* TODO: upload sRGB encode/decode curve graphs to R2 and add <Figure> components here */}
-
 <Figure src="https://r2.joyco.studio/Tpo9EPhncb7y.png" alt="sRGB encode/decode curve graphs" width={3600} height={2088} />
 
 > Keep in mind that the "Decode" fn is applied to the encoded curve. This means that it flattens it again converting sRGB to Linear. It's the inverse operation.
@@ -41,10 +39,8 @@ There was never "extra precision." The moment you baked from a high-precision so
 
 When the GPU decodes back to linear, those 122 dark values get mapped back into the 0.0–0.2 range, you don't magically get the in-between values back. You just get 122 unevenly spaced points instead of the ~51 evenly spaced ones you would have gotten with linear storage. The distribution was decided at bake time, and decoding simply restores the original spacing.
 
-{/* TODO: upload bake-time diagram (Linear 16-bit/32-bit → sRGB 8-bit) to R2 and add <Figure> component here */}
 <Figure src="https://r2.joyco.studio/VuF7BqOqb6qZ.png" alt="Bake-time diagram (Linear 16-bit/32-bit → sRGB 8-bit)" width={3011} height={1398} />
 
-{/* TODO: upload decode diagram (sRGB 8-bit → Linear 16-bit in WebGL GPU) to R2 and add <Figure> component here */}
 <Figure src="https://r2.joyco.studio/e5bRUYGlEVvH.png" alt="Decode diagram (sRGB 8-bit → Linear 16-bit in WebGL GPU)" width={3011} height={1398} />
 
 It's like pouring water from a small bottle into a big tank, the tank can hold way more, but you only have the water you brought. The GPU gives you a 16-bit float container with room for tens of thousands of distinct values, but you're only filling it with the 256 you packed at bake time. The extra capacity of the container doesn't create new data, it just holds your quantized samples with more breathing room between them. Which points in the broad color space get displayed at the end depends on the ones you stored in the first step. And that depends on the strategy you chose, sRGB is just one of the options. And now that you understand sRGB, meet the underlying concept: gamma.
@@ -55,7 +51,6 @@ Gamma is the general concept, sRGB is just one specific implementation of it. Ga
 
 That's what some games are letting you configure when they show a "gamma" or "brightness" slider with an image saying "adjust until the logo is barely visible." Even though sRGB assumes a ~2.2 decode curve, not every monitor actually hits that perfectly. A cheap panel might behave more like 2.0, an older TV might be closer to 2.4. The slider lets you adjust so the game's output matches what your screen actually does, making sure the darks land where the developers intended.
 
-{/* TODO: upload game gamma slider screenshot to R2 and add <Figure> component here */}
 <Figure src="https://r2.joyco.studio/U7nwGUjoLXPZ.png" alt="Doom gamma slider screenshot" width={1920} height={1080} />
 
 ### But wait, weren't the game textures already baked in sRGB?
