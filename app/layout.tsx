@@ -4,7 +4,7 @@ import { Public_Sans, Roboto_Mono } from 'next/font/google'
 import { RootProvider } from 'fumadocs-ui/provider/next'
 import { Analytics } from '@vercel/analytics/next'
 import { cn } from '@/lib/utils'
-import { CommandPalette } from '@/components/layout/command-palette'
+import { APP_BASE_URL } from '@/lib/constants'
 
 const publicSans = Public_Sans({
   subsets: ['latin'],
@@ -17,9 +17,18 @@ const robotoMono = Roboto_Mono({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(APP_BASE_URL),
   title: {
     template: '%s | JOYCO Hub',
     default: 'JOYCO Hub',
+  },
+  description:
+    'Open-source UI components, tools, and experiments by JOYCO Studio.',
+  openGraph: {
+    siteName: 'JOYCO Hub',
+  },
+  twitter: {
+    card: 'summary_large_image',
   },
   icons: {
     icon: [
@@ -81,7 +90,6 @@ export default function Layout({ children }: LayoutProps<'/'>) {
           }}
         >
           {children}
-          <CommandPalette />
         </RootProvider>
         <Analytics />
       </body>

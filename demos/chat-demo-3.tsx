@@ -12,7 +12,7 @@ import {
   ChatMessageBubble,
   ChatMessageTime,
   ChatSubmitEvent,
-} from '@/registry/joyco/blocks/chat'
+} from '@/registry/components/chat'
 
 type Message = {
   type: 'message'

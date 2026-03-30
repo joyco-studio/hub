@@ -27,6 +27,7 @@ export async function GET(
       components: 'components-opengraph-image.png',
       logs: 'logs-opengraph-image.png',
       toolbox: 'toolbox-opengraph-image.png',
+      lab: 'lab-opengraph-image.png',
     }
 
     const ogImageFile =

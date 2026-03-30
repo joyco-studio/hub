@@ -1,6 +1,6 @@
 'use client'
 
-import { BrickBreaker } from '@/registry/joyco/blocks/brick-breaker'
+import { BrickBreaker } from '@/registry/components/games/brick-breaker'
 
 function BrickBreakerDemo() {
   return (

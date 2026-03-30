@@ -16,7 +16,7 @@ import {
   MediaPlayerVideo,
   MediaPlayerVolume,
 } from '@/components/ui/media-player'
-import { HLSVideoPlayer } from '@/registry/joyco/blocks/hls-video-player'
+import { HLSVideoPlayer } from '@/registry/components/hls-video-player'
 
 function HLSVideoPlayerWithControlsDemo() {
   return (

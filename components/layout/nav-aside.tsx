@@ -8,7 +8,6 @@ import { cn } from '@/lib/utils'
 import { usePathname } from 'next/navigation'
 import { Button } from '../ui/button'
 import { ThemeToggle } from './theme-toggle'
-import { LayoutToggle } from './layout-toggle'
 import { Slot } from '@radix-ui/react-slot'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 
@@ -39,7 +38,6 @@ export const NavAside = () => {
         )
       })}
       <div className="bg-muted flex-1" />
-      <LayoutToggle />
       <ThemeToggle />
     </div>
   )

@@ -14,7 +14,7 @@ import {
   BrickBreakerMessage,
   type Level,
   type BrickDefinition,
-} from '@/registry/joyco/blocks/brick-breaker'
+} from '@/registry/components/games/brick-breaker'
 import { Button } from '@/components/ui/button'
 
 // Shorthand for level design

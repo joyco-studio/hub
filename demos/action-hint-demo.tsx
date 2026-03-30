@@ -3,7 +3,7 @@
 import {
   ActionHintEmitter,
   useActionHint,
-} from '@/registry/joyco/blocks/action-hint'
+} from '@/registry/components/action-hint'
 import { Button } from '@/components/ui/button'
 import { Copy, Check, Download, Share2, Bookmark } from 'lucide-react'
 

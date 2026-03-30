@@ -4,7 +4,6 @@ import { type ReactNode } from 'react'
 import TextScanIcon from '@/components/icons/text-scan'
 import { TOCScrollArea } from '@/components/toc'
 import { TOCItems } from '@/components/toc/clerk'
-import { useLayout } from '@/hooks/use-layout'
 import { cn } from '@/lib/utils'
 
 export interface ClerkTOCProps {
@@ -23,8 +22,6 @@ export interface ClerkTOCProps {
 }
 
 export function TOC({ header, footer, className }: ClerkTOCProps) {
-  const { layout } = useLayout()
-
   return (
     <div
       id="nd-toc"
@@ -50,13 +47,7 @@ export function TOC({ header, footer, className }: ClerkTOCProps) {
         {footer}
         <div className="bg-muted flex-1" />
       </div>
-      {/* Filler panel - only visible at 2xl+ when in fixed layout */}
-      <div
-        className={cn(
-          'bg-muted/50 min-w-aside-width hidden 2xl:block',
-          layout === 'full' ? '' : 'flex-1'
-        )}
-      />
+      <div className="bg-muted/50 min-w-aside-width hidden 2xl:block" />
     </div>
   )
 }

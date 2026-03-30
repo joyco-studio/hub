@@ -1,6 +1,6 @@
 'use client'
 
-import { Marquee } from '@/registry/joyco/blocks/marquee'
+import { Marquee } from '@/registry/components/marquee'
 import { IBMLogo, NasaLogo, SpaceXLogo, ValveLogo } from '@/components/logos'
 
 const LOGOS = [IBMLogo, NasaLogo, SpaceXLogo, ValveLogo]

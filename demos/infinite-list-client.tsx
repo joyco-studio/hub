@@ -6,7 +6,7 @@ import { useState, useTransition } from 'react'
 import {
   MaskedList,
   useInfiniteList,
-} from '@/registry/joyco/blocks/infinite-list'
+} from '@/registry/components/infinite-list'
 import { Button } from '@/components/ui/button'
 import { Card, CardFooter } from '@/components/ui/card'
 

@@ -13,7 +13,9 @@ import SearchIcon from '@/components/icons/search'
 import CubeIcon from '@/components/icons/3d-cube'
 import TerminalWithCursorIcon from '@/components/icons/terminal-w-cursor'
 import FileIcon from '@/components/icons/file'
+import FlaskIcon from '@/components/icons/flask'
 import type { SidebarItemMeta } from './sidebar/section'
+import type { Experiment } from '@/lib/lab'
 import { MetaBadge } from '@/components/layout/meta-badge'
 import { SearchResults } from './sidebar/search-results'
 import { NoResults } from './sidebar/no-results'
@@ -29,6 +31,7 @@ import { useCallback } from 'react'
 type MobileNavProps = {
   tree: PageTree.Root
   itemMeta?: Record<string, SidebarItemMeta>
+  experiments?: Experiment[]
 }
 
 type MobileNavState = 'closed' | 'menu' | 'search'
@@ -40,18 +43,23 @@ const sectionIcons: Record<
   components: CubeIcon,
   toolbox: TerminalWithCursorIcon,
   logs: FileIcon,
+  lab: FlaskIcon,
 }
 
 /* -------------------------------------------------------------------------------------------------
  * MobileNav - Main mobile navigation component
  * -------------------------------------------------------------------------------------------------*/
 
-export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
+export function MobileNav({
+  tree,
+  itemMeta = {},
+  experiments = [],
+}: MobileNavProps) {
   const pathname = usePathname()
   const router = useRouter()
   const inputRef = React.useRef<HTMLInputElement>(null)
   const [state, setState] = React.useState<MobileNavState>('closed')
-  const { query, setQuery, results, hasResults, isEmpty } = useSearch()
+  const { query, setQuery, results, resultsForQuery, hasResults, isEmpty } = useSearch()
 
   // Close menu on navigation
   React.useEffect(() => {
@@ -90,11 +98,13 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
       folder.$id?.split(':')[1]?.toLowerCase() ?? folderName.toLowerCase()
     return pathname.startsWith(`/${sectionId}`)
   })
-  const currentSectionName = currentFolder
-    ? typeof currentFolder.name === 'string'
-      ? currentFolder.name
-      : String(currentFolder.name)
-    : 'Registry'
+  const currentSectionName = pathname.startsWith('/lab')
+    ? 'Lab'
+    : currentFolder
+      ? typeof currentFolder.name === 'string'
+        ? currentFolder.name
+        : String(currentFolder.name)
+      : 'Registry'
 
   const handleClose = useCallback(() => {
     setState('closed')
@@ -183,6 +193,7 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
         <MobileMenuContent
           tree={tree}
           itemMeta={itemMeta}
+          experiments={experiments}
           onClose={handleClose}
         />
       )}
@@ -193,6 +204,7 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
           query={query}
           setQuery={setQuery}
           results={results}
+          resultsForQuery={resultsForQuery}
           hasResults={hasResults}
           isEmpty={isEmpty}
           onClose={handleClose}
@@ -211,12 +223,14 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
 type MobileMenuContentProps = {
   tree: PageTree.Root
   itemMeta?: Record<string, SidebarItemMeta>
+  experiments?: Experiment[]
   onClose: () => void
 }
 
 function MobileMenuContent({
   tree,
   itemMeta = {},
+  experiments = [],
   onClose,
 }: MobileMenuContentProps) {
   const folders = tree.children.filter(
@@ -242,6 +256,9 @@ function MobileMenuContent({
               itemMeta={itemMeta}
             />
           ))}
+          {experiments.length > 0 && (
+            <MobileLabSection experiments={experiments} />
+          )}
         </nav>
 
         {/* Theme toggle */}
@@ -338,6 +355,64 @@ function MobileMenuSection({ folder, itemMeta = {} }: MobileMenuSectionProps) {
 }
 
 /* -------------------------------------------------------------------------------------------------
+ * MobileLabSection - Lab experiments section in mobile menu
+ * -------------------------------------------------------------------------------------------------*/
+
+function MobileLabSection({ experiments }: { experiments: Experiment[] }) {
+  const [isOpen, setIsOpen] = React.useState(false)
+  const pathname = usePathname()
+  const isActive = pathname.startsWith('/lab')
+
+  return (
+    <div>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={cn(
+          'flex w-full items-center gap-3 px-4 py-4 text-left transition-colors',
+          isActive && 'bg-accent'
+        )}
+      >
+        <FlaskIcon className="size-5" />
+        <span className="font-mono text-xs font-medium tracking-wide uppercase">
+          Lab
+        </span>
+        <span className="ml-auto">
+          {isOpen ? (
+            <Minus className="text-muted-foreground size-4" />
+          ) : (
+            <Plus className="text-muted-foreground size-4" />
+          )}
+        </span>
+      </button>
+
+      {isOpen && (
+        <div className="bg-accent/50 flex flex-col">
+          {experiments.map((experiment) => {
+            const url = `/lab/${experiment.slug}`
+            const isItemActive = pathname === url
+
+            return (
+              <Link
+                key={experiment.slug}
+                href={url}
+                className={cn(
+                  'flex items-center gap-2 py-2 pr-4 pl-12 font-mono text-xs tracking-wide uppercase transition-colors',
+                  isItemActive
+                    ? 'text-foreground bg-accent font-medium'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                )}
+              >
+                <span className="truncate">{experiment.title}</span>
+              </Link>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* -------------------------------------------------------------------------------------------------
  * MobileThemeToggle - Theme selection for mobile menu
  * -------------------------------------------------------------------------------------------------*/
 
@@ -382,6 +457,7 @@ type MobileSearchContentProps = {
   query: string
   setQuery: (query: string) => void
   results: SearchResult[]
+  resultsForQuery: string
   hasResults: boolean
   isEmpty: boolean
   onClose: () => void
@@ -393,6 +469,7 @@ function MobileSearchContent({
   query,
   setQuery,
   results,
+  resultsForQuery,
   hasResults,
   isEmpty,
   onClose,
@@ -425,7 +502,7 @@ function MobileSearchContent({
           className="sr-only"
         />
         {hasResults && (
-          <SearchResults results={results} query={query} onSelect={onSelect} />
+          <SearchResults key={resultsForQuery} results={results} query={query} onSelect={onSelect} />
         )}
         {isEmpty && <NoResults query={query} />}
         {!hasResults && !isEmpty && (

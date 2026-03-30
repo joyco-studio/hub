@@ -8,8 +8,10 @@ import { cn } from '@/lib/utils'
 import CubeIcon from '@/components/icons/3d-cube'
 import TerminalWithCursorIcon from '@/components/icons/terminal-w-cursor'
 import FileIcon from '@/components/icons/file'
+import FlaskIcon from '@/components/icons/flask'
 import GamepadIcon from '@/components/icons/gamepad'
-import { Minus, Plus } from 'lucide-react'
+import TextScanIcon from '@/components/icons/text-scan'
+import { Frame, Minus, Plus } from 'lucide-react'
 import { getLogNumber, stripLogPrefixFromTitle } from '@/lib/log-utils'
 import { MetaBadge } from '@/components/layout/meta-badge'
 
@@ -36,6 +38,7 @@ const sectionIcons: Record<
   components: CubeIcon,
   toolbox: TerminalWithCursorIcon,
   logs: FileIcon,
+  lab: FlaskIcon,
 }
 
 type SidebarItemsProps = {
@@ -206,6 +209,8 @@ type SidebarSectionProps = {
   defaultOpen?: boolean
   meta?: Record<string, SidebarItemMeta>
   gameSlugs?: string[]
+  effectSlugs?: string[]
+  canvasSlugs?: string[]
 }
 
 /**
@@ -217,6 +222,8 @@ export function SidebarSection({
   defaultOpen = true,
   meta = {},
   gameSlugs = [],
+  effectSlugs = [],
+  canvasSlugs = [],
 }: SidebarSectionProps) {
   const [isOpen, setIsOpen] = React.useState(defaultOpen)
   const pathname = usePathname()
@@ -229,17 +236,34 @@ export function SidebarSection({
 
   const isActive = pathname.startsWith(`/${sectionId}`)
 
-  // For components section, split into UI and Games
-  if (sectionId === 'components' && gameSlugs.length > 0) {
+  // For components section, split into UI, Canvas, Effects, and Games
+  if (
+    sectionId === 'components' &&
+    (gameSlugs.length > 0 || effectSlugs.length > 0 || canvasSlugs.length > 0)
+  ) {
     const isGame = (url: string) => {
       const slug = url.split('/').pop() ?? ''
       return gameSlugs.includes(slug)
     }
 
+    const isEffect = (url: string) => {
+      const slug = url.split('/').pop() ?? ''
+      return effectSlugs.includes(slug)
+    }
+
+    const isCanvas = (url: string) => {
+      const slug = url.split('/').pop() ?? ''
+      return canvasSlugs.includes(slug)
+    }
+
     const pages = folder.children.filter(
       (child): child is PageTree.Item => child.type === 'page'
     )
-    const uiPages = pages.filter((page) => !isGame(page.url))
+    const uiPages = pages.filter(
+      (page) => !isGame(page.url) && !isEffect(page.url) && !isCanvas(page.url)
+    )
+    const canvasPages = pages.filter((page) => isCanvas(page.url))
+    const effectPages = pages.filter((page) => isEffect(page.url))
     const gamePages = pages.filter((page) => isGame(page.url))
 
     return (
@@ -251,6 +275,24 @@ export function SidebarSection({
           meta={meta}
           defaultOpen
         />
+        {canvasPages.length > 0 && (
+          <CollapsibleSubSection
+            name="Canvas"
+            icon={Frame}
+            pages={canvasPages}
+            meta={meta}
+            defaultOpen
+          />
+        )}
+        {effectPages.length > 0 && (
+          <CollapsibleSubSection
+            name="Effects"
+            icon={TextScanIcon}
+            pages={effectPages}
+            meta={meta}
+            defaultOpen
+          />
+        )}
         {gamePages.length > 0 && (
           <CollapsibleSubSection
             name="Games"

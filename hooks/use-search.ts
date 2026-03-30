@@ -78,6 +78,7 @@ export function useSearch() {
     query,
     setQuery,
     results,
+    resultsForQuery,
     hasResults,
     isEmpty,
     isLoading,
