@@ -116,7 +116,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
         <article
           id="nd-page"
           className={cn(
-            'px-content-sides mx-auto w-full max-w-[900px] py-6 [grid-area:main] md:pt-8 xl:pt-14',
+            'px-content-sides mx-auto w-full max-w-[900px] py-6 [grid-area:main] md:pt-8 xl:pt-14 md:pb-14 lg:pb-24',
             'xl:layout:[--fd-toc-width:268px]'
           )}
         >
