@@ -65,18 +65,20 @@ export function CategoryIndex({
               <Fragment key={page.url}>
                 <Link
                   href={page.url}
-                  className="group hover:bg-accent/50 flex items-baseline gap-3 rounded-md px-3 py-4 pr-4 transition-colors"
+                  className="group hover:bg-accent/50 flex flex-col gap-1.5 rounded-md px-3 py-4 pt-6 pr-4 transition-colors sm:flex-row sm:items-baseline sm:gap-3 sm:pt-4"
                 >
-                  {logNumber && (
-                    <Badge variant="secondary" className="tabular-nums">
-                      {logNumber}
-                    </Badge>
-                  )}
-                  <span className="text-foreground min-w-0 flex-1 truncate text-sm font-medium">
-                    {displayTitle}
-                  </span>
+                  <div className="flex min-w-0 flex-1 items-baseline gap-3">
+                    {logNumber && (
+                      <Badge variant="secondary" className="tabular-nums">
+                        {logNumber}
+                      </Badge>
+                    )}
+                    <span className="text-foreground min-w-0 flex-1 truncate text-sm font-medium">
+                      {displayTitle}
+                    </span>
+                  </div>
                   {page.data.description && (
-                    <span className="text-muted-foreground block max-sm:hidden truncate text-sm sm:max-w-[50%]">
+                    <span className="text-muted-foreground line-clamp-2 text-sm sm:line-clamp-1 sm:max-w-[50%]">
                       {page.data.description}
                     </span>
                   )}

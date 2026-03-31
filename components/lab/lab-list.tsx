@@ -28,7 +28,7 @@ export function LabList({ experiments, onViewChange }: LabListProps) {
   }
 
   return (
-    <article className="px-content-sides xl:layout:[--fd-toc-width:268px] mx-auto w-full max-w-[900px] py-6 [grid-area:main] md:pt-8 md:pb-14 lg:pb-24 xl:pt-14">
+    <article className="px-content-sides xl:layout:[--fd-toc-width:268px] mx-auto w-full max-w-[900px] pt-6 pb-14 [grid-area:main] md:pt-8 lg:pb-24 xl:pt-14">
       <Badge variant="accent" className="mb-6">
         Lab
       </Badge>
