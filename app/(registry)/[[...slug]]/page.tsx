@@ -238,5 +238,8 @@ export async function generateMetadata(
     openGraph: {
       images: ogImage,
     },
+    twitter: {
+      card: 'summary_large_image',
+    },
   }
 }
