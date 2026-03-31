@@ -40,7 +40,7 @@ export function CategoryIndex({
         />
       </h3>
       {useGrid ? (
-        <div className="grid grid-cols-1 gap-4 pb-16 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {pages.map((page) => (
             <PreviewCard
               key={page.url}
@@ -53,7 +53,7 @@ export function CategoryIndex({
           ))}
         </div>
       ) : (
-        <div className="-mx-3 flex w-[calc(100%+1.5rem)] flex-col pb-16">
+        <div className="-mx-3 flex w-[calc(100%+1.5rem)] flex-col">
           {pages.map((page) => {
             const logNumber = getLogNumber(page.slugs)
             const displayTitle =
