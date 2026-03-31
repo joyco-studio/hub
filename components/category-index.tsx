@@ -65,7 +65,7 @@ export function CategoryIndex({
               <Fragment key={page.url}>
                 <Link
                   href={page.url}
-                  className="group hover:bg-accent/50 flex flex-col gap-1.5 rounded-md px-3 py-4 pt-6 pr-4 transition-colors sm:flex-row sm:items-baseline sm:gap-3 sm:pt-4"
+                  className="group hover:bg-accent/50 flex flex-col gap-1.5 rounded-md px-3 py-4 pr-4 transition-colors sm:flex-row sm:items-baseline sm:gap-3"
                 >
                   <div className="flex min-w-0 flex-1 items-baseline gap-3">
                     {logNumber && (
