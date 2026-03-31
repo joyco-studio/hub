@@ -47,7 +47,6 @@ export function TOC({ header, footer, className }: ClerkTOCProps) {
         {footer}
         <div className="bg-muted flex-1" />
       </div>
-      <div className="bg-muted/50 min-w-aside-width hidden 2xl:block" />
     </div>
   )
 }
