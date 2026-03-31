@@ -12,7 +12,7 @@ Every frame the browser produces follows this sequence:
 
 <Figure src="https://r2.joyco.studio/hTyqgeONsgOA.jpg" alt="Browser rendering pipeline" width={1903} height={520} />
 
-The first four run on the **main thread** (the same thread your JS runs on). The last one, Composite, runs on the **compositor thread**, a separate thread on the GPU side. This distinction is the single most important thing to internalize: anything on the main thread competes with your JS for render time. Anything on the compositor thread is essentially free.
+The first four run on the **main thread** (the same thread your JS runs on). The last one, Composite, runs on the **compositor thread**, a separate thread on the GPU side. This distinction is the single most important thing to internalize: anything on the main thread competes with your JS for render time. Anything on the compositor thread is *cheap*, not free. Layer explosion, implicit promotion, and `backdrop-filter` re-sampling can all make compositing expensive (more on that in [Composite](#5-composite)).
 
 ## 1. JavaScript
 
