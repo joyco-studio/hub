@@ -64,7 +64,6 @@ export function CategoryIndex({
             return (
               <Fragment key={page.url}>
                 <Link
-                  key={page.url}
                   href={page.url}
                   className="group hover:bg-accent/50 flex items-baseline gap-3 rounded-md px-3 py-4 pr-4 transition-colors"
                 >
@@ -77,7 +76,7 @@ export function CategoryIndex({
                     {displayTitle}
                   </span>
                   {page.data.description && (
-                    <span className="text-muted-foreground hidden truncate text-sm sm:block sm:max-w-[50%]">
+                    <span className="text-muted-foreground block max-sm:hidden truncate text-sm sm:max-w-[50%]">
                       {page.data.description}
                     </span>
                   )}
