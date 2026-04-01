@@ -1,5 +1,3 @@
-# JOYCO Registry
+# JOYCO HUB
 
-A collection of reusable React components built for the [shadcn/ui](https://ui.shadcn.com) ecosystem.
-
-**[→ Browse the registry at registry.joyco.studio](https://registry.joyco.studio)**
+**[→ Browse the hub at hub.joyco.studio](https://hub.joyco.studio)**
