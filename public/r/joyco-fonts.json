@@ -1,7 +1,7 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "joyco-fonts",
-  "type": "registry:ui",
+  "type": "registry:lib",
   "title": "JOYCO Fonts",
   "description": "JOYCO brand font configuration with Public Sans and Roboto Mono.",
   "files": [

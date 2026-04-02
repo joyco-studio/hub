@@ -5,7 +5,8 @@
   "title": "Select",
   "description": "Displays a list of options for the user to pick from.",
   "dependencies": [
-    "@radix-ui/react-select"
+    "@radix-ui/react-select",
+    "lucide-react"
   ],
   "files": [
     {

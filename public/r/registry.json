@@ -474,7 +474,7 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": ["@radix-ui/react-dropdown-menu"]
+      "dependencies": ["@radix-ui/react-dropdown-menu", "lucide-react"]
     },
     {
       "name": "input",
@@ -583,7 +583,7 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": ["@radix-ui/react-select"]
+      "dependencies": ["@radix-ui/react-select", "lucide-react"]
     },
     {
       "name": "separator",
@@ -741,7 +741,7 @@
     },
     {
       "name": "joyco-fonts",
-      "type": "registry:ui",
+      "type": "registry:lib",
       "title": "JOYCO Fonts",
       "description": "JOYCO brand font configuration with Public Sans and Roboto Mono.",
       "files": [

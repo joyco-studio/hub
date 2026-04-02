@@ -5,7 +5,8 @@
   "title": "Dropdown Menu",
   "description": "Displays a menu to the user triggered by a button.",
   "dependencies": [
-    "@radix-ui/react-dropdown-menu"
+    "@radix-ui/react-dropdown-menu",
+    "lucide-react"
   ],
   "files": [
     {
