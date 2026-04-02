@@ -9,7 +9,7 @@
   ],
   "registryDependencies": [
     "@joyco/scramble",
-    "button"
+    "@joyco/button"
   ],
   "files": [
     {

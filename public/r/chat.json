@@ -9,8 +9,8 @@
     "react-use-measure"
   ],
   "registryDependencies": [
-    "input-group",
-    "avatar"
+    "@joyco/input-group",
+    "@joyco/avatar"
   ],
   "files": [
     {

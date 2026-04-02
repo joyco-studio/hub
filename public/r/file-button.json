@@ -5,7 +5,7 @@
   "title": "File Button",
   "description": "A button that opens a file input when clicked.",
   "registryDependencies": [
-    "button"
+    "@joyco/button"
   ],
   "files": [
     {

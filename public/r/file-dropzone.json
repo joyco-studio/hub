@@ -5,7 +5,7 @@
   "title": "File Dropzone",
   "description": "A drag-and-drop file upload component with image preview, validation, and error handling.",
   "registryDependencies": [
-    "button"
+    "@joyco/button"
   ],
   "files": [
     {
