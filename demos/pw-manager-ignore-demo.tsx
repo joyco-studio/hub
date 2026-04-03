@@ -121,30 +121,6 @@ function PwManagerIgnoreDemo() {
             />
           </div>
 
-          {/* Attribute inspector */}
-          <div className="border-border bg-muted/50 rounded-lg border p-3">
-            <p className="text-muted-foreground mb-2 text-xs font-medium uppercase tracking-wider">
-              Attributes on inputs
-            </p>
-            <div className="space-y-1 font-mono text-xs">
-              {withAttrs ? (
-                <>
-                  <p className="text-emerald-500">data-1p-ignore</p>
-                  <p className="text-emerald-500">
-                    data-lpignore=&quot;true&quot;
-                  </p>
-                  <p className="text-emerald-500">data-bwignore</p>
-                  <p className="text-emerald-500">
-                    data-form-type=&quot;other&quot;
-                  </p>
-                </>
-              ) : (
-                <p className="text-muted-foreground italic">
-                  No ignore attributes
-                </p>
-              )}
-            </div>
-          </div>
         </form>
 
         <p className="text-muted-foreground text-center text-xs">
