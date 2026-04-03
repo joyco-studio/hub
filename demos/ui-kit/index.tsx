@@ -2,7 +2,6 @@
 
 import * as React from 'react'
 import {
-  BellIcon,
   BoldIcon,
   CopyIcon,
   ItalicIcon,
@@ -111,18 +110,33 @@ const brandColors = [
   { name: 'mint-green', var: '--color-mint-green' },
 ] as const
 
+function InstallCmd({ cmd }: { cmd: string }) {
+  return (
+    <code className="bg-muted text-muted-foreground block rounded-md px-3 py-2 font-mono text-xs">
+      {cmd}
+    </code>
+  )
+}
+
 function Section({
   title,
+  registryName,
   children,
 }: {
   title: string
+  registryName?: string
   children: React.ReactNode
 }) {
   return (
-    <section className="flex flex-col gap-6">
-      <h2 className="font-mono text-lg font-semibold tracking-wide uppercase">
-        {title}
-      </h2>
+    <section className="flex flex-col gap-8">
+      <div className="flex flex-col gap-3">
+        <h2 className="font-mono text-lg font-semibold tracking-wide uppercase">
+          {title}
+        </h2>
+        {registryName && (
+          <InstallCmd cmd={`npx shadcn add @joyco/${registryName}`} />
+        )}
+      </div>
       {children}
     </section>
   )
@@ -180,9 +194,11 @@ export default function UIKit() {
   const [collapsibleOpen, setCollapsibleOpen] = React.useState(false)
 
   return (
-    <div className="not-prose bg-background text-foreground flex flex-col gap-16 p-8">
+    <div className="not-prose bg-background text-foreground flex flex-col gap-22">
+      <InstallCmd cmd="npx shadcn add @joyco/ui" />
+
       {/* ── Button ── */}
-      <Section title="Button">
+      <Section title="Button" registryName="button">
         <SubSection title="Variants">
           <div className="flex flex-wrap items-center gap-3">
             <Button variant="default">Default</Button>
@@ -236,7 +252,7 @@ export default function UIKit() {
       </Section>
 
       {/* ── Badge ── */}
-      <Section title="Badge">
+      <Section title="Badge" registryName="badge">
         <div className="flex flex-wrap items-center gap-3">
           <Badge variant="default">Default</Badge>
           <Badge variant="secondary">Secondary</Badge>
@@ -249,7 +265,7 @@ export default function UIKit() {
       </Section>
 
       {/* ── Input ── */}
-      <Section title="Input">
+      <Section title="Input" registryName="input">
         <div className="flex max-w-sm flex-col gap-4">
           <Labeled label="default">
             <Input placeholder="Default input" />
@@ -264,14 +280,14 @@ export default function UIKit() {
       </Section>
 
       {/* ── Textarea ── */}
-      <Section title="Textarea">
+      <Section title="Textarea" registryName="textarea">
         <div className="max-w-sm">
           <Textarea placeholder="Write something…" rows={3} />
         </div>
       </Section>
 
       {/* ── Select ── */}
-      <Section title="Select">
+      <Section title="Select" registryName="select">
         <div className="max-w-sm">
           <Select>
             <SelectTrigger>
@@ -288,27 +304,36 @@ export default function UIKit() {
       </Section>
 
       {/* ── Tabs ── */}
-      <Section title="Tabs">
+      <Section title="Tabs" registryName="tabs">
         <Tabs defaultValue="overview">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
-          <TabsContent value="overview" className="text-muted-foreground mt-4 text-sm">
+          <TabsContent
+            value="overview"
+            className="text-muted-foreground mt-4 text-sm"
+          >
             Overview content goes here.
           </TabsContent>
-          <TabsContent value="analytics" className="text-muted-foreground mt-4 text-sm">
+          <TabsContent
+            value="analytics"
+            className="text-muted-foreground mt-4 text-sm"
+          >
             Analytics dashboard content.
           </TabsContent>
-          <TabsContent value="settings" className="text-muted-foreground mt-4 text-sm">
+          <TabsContent
+            value="settings"
+            className="text-muted-foreground mt-4 text-sm"
+          >
             Settings panel content.
           </TabsContent>
         </Tabs>
       </Section>
 
       {/* ── Switch ── */}
-      <Section title="Switch">
+      <Section title="Switch" registryName="switch">
         <div className="flex items-end gap-6">
           <Labeled label="default">
             <Switch id="switch-default" />
@@ -326,7 +351,7 @@ export default function UIKit() {
       </Section>
 
       {/* ── Slider ── */}
-      <Section title="Slider">
+      <Section title="Slider" registryName="slider">
         <div className="flex max-w-sm flex-col gap-5">
           <Labeled label="single">
             <Slider defaultValue={[40]} max={100} aria-label="Volume" />
@@ -338,7 +363,7 @@ export default function UIKit() {
       </Section>
 
       {/* ── Card ── */}
-      <Section title="Card">
+      <Section title="Card" registryName="card">
         <Card className="max-w-sm">
           <CardHeader>
             <CardTitle>Project Setup</CardTitle>
@@ -368,7 +393,7 @@ export default function UIKit() {
       </Section>
 
       {/* ── Avatar ── */}
-      <Section title="Avatar">
+      <Section title="Avatar" registryName="avatar">
         <div className="flex items-end gap-4">
           <Labeled label="with image">
             <Avatar>
@@ -390,7 +415,7 @@ export default function UIKit() {
       </Section>
 
       {/* ── Tooltip ── */}
-      <Section title="Tooltip">
+      <Section title="Tooltip" registryName="tooltip">
         <div className="flex items-center gap-4">
           <Tooltip>
             <TooltipTrigger asChild>
@@ -412,7 +437,7 @@ export default function UIKit() {
       </Section>
 
       {/* ── Popover ── */}
-      <Section title="Popover">
+      <Section title="Popover" registryName="popover">
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="outline">Open Popover</Button>
@@ -430,7 +455,7 @@ export default function UIKit() {
       </Section>
 
       {/* ── Dropdown Menu ── */}
-      <Section title="Dropdown Menu">
+      <Section title="Dropdown Menu" registryName="dropdown-menu">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline">Open Menu</Button>
@@ -462,7 +487,7 @@ export default function UIKit() {
       </Section>
 
       {/* ── Collapsible ── */}
-      <Section title="Collapsible">
+      <Section title="Collapsible" registryName="collapsible">
         <Collapsible open={collapsibleOpen} onOpenChange={setCollapsibleOpen}>
           <div className="flex items-center gap-2">
             <CollapsibleTrigger asChild>
@@ -473,15 +498,15 @@ export default function UIKit() {
           </div>
           <CollapsibleContent className="mt-3">
             <div className="bg-muted rounded-md p-4 text-sm">
-              This content is revealed when the collapsible is open. It
-              supports animated enter/exit transitions.
+              This content is revealed when the collapsible is open. It supports
+              animated enter/exit transitions.
             </div>
           </CollapsibleContent>
         </Collapsible>
       </Section>
 
       {/* ── Kbd ── */}
-      <Section title="Kbd">
+      <Section title="Kbd" registryName="kbd">
         <div className="flex flex-wrap items-center gap-4">
           <KbdGroup>
             <Kbd>⌘</Kbd>
@@ -498,7 +523,7 @@ export default function UIKit() {
       </Section>
 
       {/* ── Input Group ── */}
-      <Section title="Input Group">
+      <Section title="Input Group" registryName="input-group">
         <div className="flex max-w-md flex-col gap-4">
           <Labeled label="with icon addon">
             <InputGroup>
@@ -522,7 +547,7 @@ export default function UIKit() {
       </Section>
 
       {/* ── Button Group ── */}
-      <Section title="Button Group">
+      <Section title="Button Group" registryName="button-group">
         <div className="flex flex-wrap items-end gap-6">
           <Labeled label="icon buttons">
             <ButtonGroup>
@@ -548,7 +573,7 @@ export default function UIKit() {
       </Section>
 
       {/* ── Separator ── */}
-      <Section title="Separator">
+      <Section title="Separator" registryName="separator">
         <div className="flex flex-col gap-6">
           <Labeled label="horizontal">
             <Separator />
@@ -573,17 +598,15 @@ export default function UIKit() {
         <SubSection title="Public Sans (sans)">
           <div className="flex flex-col gap-3">
             <p className="text-4xl font-bold">The quick brown fox</p>
-            <p className="text-2xl font-semibold">
-              jumps over the lazy dog
-            </p>
+            <p className="text-2xl font-semibold">jumps over the lazy dog</p>
             <p className="text-xl font-medium">
               ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789
             </p>
             <p className="text-base">
-              The five boxing wizards jump quickly. Pack my box with five
-              dozen liquor jugs.
+              The five boxing wizards jump quickly. Pack my box with five dozen
+              liquor jugs.
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Regular · Medium · Semibold · Bold
             </p>
           </div>
@@ -598,14 +621,17 @@ export default function UIKit() {
             <p className="text-base">
               const result = await fetch(&#39;/api/data&#39;)
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               console.log(&#39;Hello, World!&#39;)
             </p>
           </div>
         </SubSection>
 
         <SubSection title="Tabular Nums">
-          <div className="flex flex-col gap-1 font-mono text-sm" style={{ fontVariantNumeric: 'tabular-nums' }}>
+          <div
+            className="flex flex-col gap-1 font-mono text-sm"
+            style={{ fontVariantNumeric: 'tabular-nums' }}
+          >
             <span>1,234.56</span>
             <span>12,345.67</span>
             <span>123,456.78</span>
@@ -618,11 +644,7 @@ export default function UIKit() {
         <SubSection title="Semantic Colors">
           <div className="flex flex-wrap gap-4">
             {themeColors.map((color) => (
-              <ColorSwatch
-                key={color}
-                name={color}
-                cssVar={`--${color}`}
-              />
+              <ColorSwatch key={color} name={color} cssVar={`--${color}`} />
             ))}
           </div>
         </SubSection>
@@ -630,11 +652,7 @@ export default function UIKit() {
         <SubSection title="Chart Colors">
           <div className="flex flex-wrap gap-4">
             {chartColors.map((color) => (
-              <ColorSwatch
-                key={color}
-                name={color}
-                cssVar={`--${color}`}
-              />
+              <ColorSwatch key={color} name={color} cssVar={`--${color}`} />
             ))}
           </div>
         </SubSection>

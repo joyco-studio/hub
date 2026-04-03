@@ -16,7 +16,7 @@ import { getLogNumber, stripLogPrefixFromTitle } from '@/lib/log-utils'
 import { MetaBadge } from '@/components/layout/meta-badge'
 
 export type SidebarItemMeta = {
-  badge?: 'new' | 'updated'
+  badge?: 'new' | 'updated' | 'internal'
   dot?: 'red' | 'blue' | 'green' | 'yellow'
   hidden?: boolean
 }

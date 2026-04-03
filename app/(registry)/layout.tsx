@@ -20,7 +20,7 @@ export default async function Layout({ children }: LayoutProps<'/'>) {
     { badge?: 'new' | 'updated'; dot?: 'red' | 'blue' | 'green' | 'yellow'; hidden?: boolean }
   > = {
     '/toolbox/skills': { badge: 'new' },
-    ...(!isTeam && { '/toolbox/ui': { hidden: true } }),
+    '/toolbox/ui': isTeam ? { badge: 'internal' } : { hidden: true },
   }
   const gameSlugs = getGameSlugs()
   const effectSlugs = getEffectSlugs()
