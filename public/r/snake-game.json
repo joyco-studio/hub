@@ -5,8 +5,8 @@
   "title": "Snake Game",
   "description": "A minimal, themeable snake game component with highscore persistence.",
   "registryDependencies": [
-    "button",
-    "kbd"
+    "@joyco/button",
+    "@joyco/kbd"
   ],
   "files": [
     {

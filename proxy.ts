@@ -11,6 +11,16 @@ export async function proxy(request: NextRequest) {
     await trackDownload(componentName)
   }
 
+  if (request.nextUrl.searchParams.get('joyco') === '1') {
+    const response = NextResponse.next()
+    response.cookies.set('joyco-team', '1', {
+      maxAge: 60 * 60 * 24 * 365,
+      path: '/',
+      sameSite: 'lax',
+    })
+    return response
+  }
+
   return NextResponse.next()
 }
 

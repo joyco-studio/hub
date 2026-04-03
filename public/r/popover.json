@@ -1,0 +1,17 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "popover",
+  "type": "registry:ui",
+  "title": "Popover",
+  "description": "Displays rich content in a portal triggered by a button.",
+  "dependencies": [
+    "@radix-ui/react-popover"
+  ],
+  "files": [
+    {
+      "path": "components/ui/popover.tsx",
+      "content": "'use client'\nimport * as PopoverPrimitive from '@radix-ui/react-popover'\nimport * as React from 'react'\nimport { cn } from '@/lib/utils'\n\nconst Popover = PopoverPrimitive.Root\n\nconst PopoverTrigger = PopoverPrimitive.Trigger\n\nconst PopoverContent = React.forwardRef<\n  React.ComponentRef<typeof PopoverPrimitive.Content>,\n  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>\n>(({ className, align = 'center', sideOffset = 4, ...props }, ref) => (\n  <PopoverPrimitive.Portal>\n    <PopoverPrimitive.Content\n      ref={ref}\n      align={align}\n      sideOffset={sideOffset}\n      side=\"bottom\"\n      className={cn(\n        'bg-popover/60 text-popover-foreground data-[state=closed]:animate-fd-popover-out data-[state=open]:animate-fd-popover-in z-50 max-h-(--radix-popover-content-available-height) max-w-[98vw] min-w-[240px] origin-(--radix-popover-content-transform-origin) overflow-y-auto rounded-xl p-2 text-sm shadow-lg backdrop-blur-lg focus-visible:outline-none',\n        className\n      )}\n      {...props}\n    />\n  </PopoverPrimitive.Portal>\n))\nPopoverContent.displayName = PopoverPrimitive.Content.displayName\n\nconst PopoverClose = PopoverPrimitive.PopoverClose\n\nexport { Popover, PopoverTrigger, PopoverContent, PopoverClose }\n",
+      "type": "registry:ui"
+    }
+  ]
+}

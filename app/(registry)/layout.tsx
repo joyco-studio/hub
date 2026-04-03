@@ -1,5 +1,11 @@
 import type { CSSProperties } from 'react'
-import { source, getGameSlugs, getEffectSlugs, getCanvasSlugs } from '@/lib/source'
+import { cookies } from 'next/headers'
+import {
+  source,
+  getGameSlugs,
+  getEffectSlugs,
+  getCanvasSlugs,
+} from '@/lib/source'
 import { TreeContextProvider } from 'fumadocs-ui/contexts/tree'
 import {
   LayoutContextProvider,
@@ -10,15 +16,21 @@ import { MobileNav } from '@/components/layout/mobile-nav'
 import { getExperiments } from '@/lib/lab'
 import { CommandPalette } from '@/components/layout/command-palette'
 
-// Optional: Define item metadata for badges/dots
-const itemMeta: Record<
-  string,
-  { badge?: 'new' | 'updated'; dot?: 'red' | 'blue' | 'green' | 'yellow' }
-> = {
-  '/toolbox/skills': { badge: 'new' },
-}
-
 export default async function Layout({ children }: LayoutProps<'/'>) {
+  const cookieStore = await cookies()
+  const isTeam = cookieStore.has('joyco-team')
+
+  const itemMeta: Record<
+    string,
+    {
+      badge?: 'new' | 'updated' | 'internal'
+      dot?: 'red' | 'blue' | 'green' | 'yellow'
+      hidden?: boolean
+    }
+  > = {
+    '/toolbox/skills': { badge: 'new' },
+    '/toolbox/ui': isTeam ? { badge: 'internal' } : { hidden: true },
+  }
   const gameSlugs = getGameSlugs()
   const effectSlugs = getEffectSlugs()
   const canvasSlugs = getCanvasSlugs()

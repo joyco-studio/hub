@@ -43,7 +43,7 @@
           "type": "registry:hook"
         }
       ],
-      "registryDependencies": ["button"]
+      "registryDependencies": ["@joyco/button"]
     },
     {
       "name": "file-dropzone",
@@ -60,7 +60,7 @@
           "type": "registry:hook"
         }
       ],
-      "registryDependencies": ["button"]
+      "registryDependencies": ["@joyco/button"]
     },
     {
       "name": "mobile-menu",
@@ -108,7 +108,7 @@
         }
       ],
       "dependencies": ["debounce", "react-use-measure"],
-      "registryDependencies": ["input-group", "avatar"]
+      "registryDependencies": ["@joyco/input-group", "@joyco/avatar"]
     },
     {
       "name": "hls-video-player",
@@ -221,7 +221,7 @@
         }
       ],
       "dependencies": ["gsap"],
-      "registryDependencies": ["@joyco/scramble", "button"]
+      "registryDependencies": ["@joyco/scramble", "@joyco/button"]
     },
     {
       "name": "brick-breaker",
@@ -298,7 +298,7 @@
           "type": "registry:hook"
         }
       ],
-      "registryDependencies": ["button", "kbd"]
+      "registryDependencies": ["@joyco/button", "@joyco/kbd"]
     },
     {
       "name": "debug-canvas",
@@ -370,6 +370,417 @@
         "lodash.debounce",
         "zustand",
         "tweakpane"
+      ]
+    },
+    {
+      "name": "avatar",
+      "type": "registry:ui",
+      "title": "Avatar",
+      "description": "An image element with a fallback for representing the user.",
+      "files": [
+        {
+          "path": "components/ui/avatar.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-avatar"]
+    },
+    {
+      "name": "badge",
+      "type": "registry:ui",
+      "title": "Badge",
+      "description": "Displays a badge or a component that looks like a badge.",
+      "files": [
+        {
+          "path": "components/ui/badge.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-slot", "class-variance-authority"]
+    },
+    {
+      "name": "button",
+      "type": "registry:ui",
+      "title": "Button",
+      "description": "Displays a button or a component that looks like a button.",
+      "files": [
+        {
+          "path": "components/ui/button.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-slot", "class-variance-authority"]
+    },
+    {
+      "name": "button-group",
+      "type": "registry:ui",
+      "title": "Button Group",
+      "description": "Groups multiple buttons or inputs into a single visual unit.",
+      "files": [
+        {
+          "path": "components/ui/button-group.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-slot", "class-variance-authority"],
+      "registryDependencies": ["@joyco/separator"]
+    },
+    {
+      "name": "card",
+      "type": "registry:ui",
+      "title": "Card",
+      "description": "Displays a card with header, content, and footer.",
+      "files": [
+        {
+          "path": "components/ui/card.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "chart",
+      "type": "registry:ui",
+      "title": "Chart",
+      "description": "Composable charting components built on top of Recharts.",
+      "files": [
+        {
+          "path": "components/ui/chart.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["recharts"]
+    },
+    {
+      "name": "collapsible",
+      "type": "registry:ui",
+      "title": "Collapsible",
+      "description": "An interactive component which expands/collapses a panel.",
+      "files": [
+        {
+          "path": "components/ui/collapsible.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-collapsible"]
+    },
+    {
+      "name": "dropdown-menu",
+      "type": "registry:ui",
+      "title": "Dropdown Menu",
+      "description": "Displays a menu to the user triggered by a button.",
+      "files": [
+        {
+          "path": "registry/ui/dropdown-menu.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-dropdown-menu", "lucide-react"]
+    },
+    {
+      "name": "input",
+      "type": "registry:ui",
+      "title": "Input",
+      "description": "Displays a form input field.",
+      "files": [
+        {
+          "path": "components/ui/input.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "input-group",
+      "type": "registry:ui",
+      "title": "Input Group",
+      "description": "Composable input group with addons, buttons, and textarea support.",
+      "files": [
+        {
+          "path": "components/ui/input-group.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["class-variance-authority"],
+      "registryDependencies": ["@joyco/button", "@joyco/input", "@joyco/textarea"]
+    },
+    {
+      "name": "kbd",
+      "type": "registry:ui",
+      "title": "Kbd",
+      "description": "Displays a keyboard key or shortcut.",
+      "files": [
+        {
+          "path": "components/ui/kbd.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "media-player",
+      "type": "registry:ui",
+      "title": "Media Player",
+      "description": "A composable media player with controls, settings, captions, and PiP support.",
+      "files": [
+        {
+          "path": "components/ui/media-player.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "registry/lib/compose-refs.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "hooks/use-lazy-ref.ts",
+          "type": "registry:hook"
+        }
+      ],
+      "dependencies": [
+        "media-chrome",
+        "@radix-ui/react-direction",
+        "@radix-ui/react-slider",
+        "@radix-ui/react-slot"
+      ],
+      "registryDependencies": [
+        "@joyco/badge",
+        "@joyco/button",
+        "@joyco/dropdown-menu",
+        "@joyco/tooltip"
+      ]
+    },
+    {
+      "name": "mention",
+      "type": "registry:ui",
+      "title": "Mention",
+      "description": "An autocomplete mention input component.",
+      "files": [
+        {
+          "path": "components/ui/mention.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@diceui/mention"]
+    },
+    {
+      "name": "popover",
+      "type": "registry:ui",
+      "title": "Popover",
+      "description": "Displays rich content in a portal triggered by a button.",
+      "files": [
+        {
+          "path": "components/ui/popover.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-popover"]
+    },
+    {
+      "name": "select",
+      "type": "registry:ui",
+      "title": "Select",
+      "description": "Displays a list of options for the user to pick from.",
+      "files": [
+        {
+          "path": "registry/ui/select.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-select", "lucide-react"]
+    },
+    {
+      "name": "separator",
+      "type": "registry:ui",
+      "title": "Separator",
+      "description": "Visually or semantically separates content.",
+      "files": [
+        {
+          "path": "components/ui/separator.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-separator", "class-variance-authority"]
+    },
+    {
+      "name": "slider",
+      "type": "registry:ui",
+      "title": "Slider",
+      "description": "An input where the user selects a value from within a given range.",
+      "files": [
+        {
+          "path": "components/ui/slider.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-slider"]
+    },
+    {
+      "name": "switch",
+      "type": "registry:ui",
+      "title": "Switch",
+      "description": "A control that allows the user to toggle between checked and unchecked.",
+      "files": [
+        {
+          "path": "components/ui/switch.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["radix-ui"]
+    },
+    {
+      "name": "tabs",
+      "type": "registry:ui",
+      "title": "Tabs",
+      "description": "A set of layered sections of content displayed one at a time.",
+      "files": [
+        {
+          "path": "components/ui/tabs.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-tabs"]
+    },
+    {
+      "name": "textarea",
+      "type": "registry:ui",
+      "title": "Textarea",
+      "description": "Displays a form textarea field.",
+      "files": [
+        {
+          "path": "components/ui/textarea.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "tooltip",
+      "type": "registry:ui",
+      "title": "Tooltip",
+      "description": "A popup that displays information related to an element on hover.",
+      "files": [
+        {
+          "path": "components/ui/tooltip.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-tooltip"]
+    },
+    {
+      "name": "joyco-theme",
+      "type": "registry:theme",
+      "title": "JOYCO Theme",
+      "description": "JOYCO brand theme with light and dark mode color tokens.",
+      "cssVars": {
+        "theme": {
+          "radius": "0rem"
+        },
+        "light": {
+          "background": "oklch(1 0 0)",
+          "foreground": "oklch(0.145 0 0)",
+          "card": "oklch(0.97 0 0)",
+          "card-foreground": "oklch(0.145 0 0)",
+          "popover": "oklch(1 0 0)",
+          "popover-foreground": "oklch(0.145 0 0)",
+          "primary": "oklch(0.452 0.313214 264.052)",
+          "primary-foreground": "oklch(1 0 0)",
+          "secondary": "oklch(0.97 0 0)",
+          "secondary-foreground": "oklch(0.205 0 0)",
+          "muted": "oklch(0.97 0 0)",
+          "muted-foreground": "oklch(0.556 0 0)",
+          "accent": "oklch(0.9 0 0)",
+          "accent-foreground": "oklch(0.205 0 0)",
+          "destructive": "oklch(0.577 0.245 27.325)",
+          "border": "oklch(0.922 0 0)",
+          "input": "oklch(0.922 0 0)",
+          "ring": "oklch(0.708 0 0)",
+          "chart-1": "oklch(0.646 0.222 41.116)",
+          "chart-2": "oklch(0.6 0.118 184.704)",
+          "chart-3": "oklch(0.398 0.07 227.392)",
+          "chart-4": "oklch(0.828 0.189 84.429)",
+          "chart-5": "oklch(0.769 0.188 70.08)",
+          "sidebar": "oklch(0.985 0 0)",
+          "sidebar-foreground": "oklch(0.145 0 0)",
+          "sidebar-primary": "oklch(0.205 0 0)",
+          "sidebar-primary-foreground": "oklch(0.985 0 0)",
+          "sidebar-accent": "oklch(0.97 0 0)",
+          "sidebar-accent-foreground": "oklch(0.205 0 0)",
+          "sidebar-border": "oklch(0.922 0 0)",
+          "sidebar-ring": "oklch(0.708 0 0)"
+        },
+        "dark": {
+          "background": "oklch(0.1684 0 0)",
+          "foreground": "oklch(0.985 0 0)",
+          "card": "oklch(0.2046 0 0)",
+          "card-foreground": "oklch(0.985 0 0)",
+          "popover": "oklch(0.205 0 0)",
+          "popover-foreground": "oklch(0.985 0 0)",
+          "primary": "oklch(0.452 0.313214 264.052)",
+          "primary-foreground": "oklch(1 0 0)",
+          "secondary": "oklch(0.269 0 0)",
+          "secondary-foreground": "oklch(0.985 0 0)",
+          "muted": "oklch(0.2134 0 0)",
+          "muted-foreground": "oklch(0.708 0 0)",
+          "accent": "oklch(0.2768 0 0)",
+          "accent-foreground": "oklch(0.8975 0 0)",
+          "destructive": "oklch(0.704 0.191 22.216)",
+          "border": "oklch(0.285 0 0)",
+          "input": "oklch(1 0 0 / 15%)",
+          "ring": "oklch(0.556 0 0)",
+          "chart-1": "oklch(0.488 0.243 264.376)",
+          "chart-2": "oklch(0.696 0.17 162.48)",
+          "chart-3": "oklch(0.769 0.188 70.08)",
+          "chart-4": "oklch(0.627 0.265 303.9)",
+          "chart-5": "oklch(0.645 0.246 16.439)",
+          "sidebar": "oklch(0.205 0 0)",
+          "sidebar-foreground": "oklch(0.985 0 0)",
+          "sidebar-primary": "oklch(0.488 0.243 264.376)",
+          "sidebar-primary-foreground": "oklch(0.985 0 0)",
+          "sidebar-accent": "oklch(0.269 0 0)",
+          "sidebar-accent-foreground": "oklch(0.985 0 0)",
+          "sidebar-border": "oklch(1 0 0 / 10%)",
+          "sidebar-ring": "oklch(0.556 0 0)"
+        }
+      }
+    },
+    {
+      "name": "joyco-fonts",
+      "type": "registry:lib",
+      "title": "JOYCO Fonts",
+      "description": "JOYCO brand font configuration with Public Sans and Roboto Mono.",
+      "files": [
+        {
+          "path": "registry/lib/fonts.ts",
+          "type": "registry:lib",
+          "target": "lib/fonts.ts"
+        }
+      ]
+    },
+    {
+      "name": "ui",
+      "type": "registry:item",
+      "title": "JOYCO UI",
+      "description": "The full JOYCO UI kit — all components and brand theming.",
+      "registryDependencies": [
+        "@joyco/joyco-theme",
+        "@joyco/joyco-fonts",
+        "@joyco/avatar",
+        "@joyco/badge",
+        "@joyco/button",
+        "@joyco/button-group",
+        "@joyco/card",
+        "@joyco/chart",
+        "@joyco/collapsible",
+        "@joyco/dropdown-menu",
+        "@joyco/input",
+        "@joyco/input-group",
+        "@joyco/kbd",
+        "@joyco/media-player",
+        "@joyco/mention",
+        "@joyco/popover",
+        "@joyco/select",
+        "@joyco/separator",
+        "@joyco/slider",
+        "@joyco/switch",
+        "@joyco/tabs",
+        "@joyco/textarea",
+        "@joyco/tooltip"
       ]
     }
   ]

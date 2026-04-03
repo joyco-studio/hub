@@ -1,0 +1,32 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "ui",
+  "type": "registry:item",
+  "title": "JOYCO UI",
+  "description": "The full JOYCO UI kit — all components and brand theming.",
+  "registryDependencies": [
+    "@joyco/joyco-theme",
+    "@joyco/joyco-fonts",
+    "@joyco/avatar",
+    "@joyco/badge",
+    "@joyco/button",
+    "@joyco/button-group",
+    "@joyco/card",
+    "@joyco/chart",
+    "@joyco/collapsible",
+    "@joyco/dropdown-menu",
+    "@joyco/input",
+    "@joyco/input-group",
+    "@joyco/kbd",
+    "@joyco/media-player",
+    "@joyco/mention",
+    "@joyco/popover",
+    "@joyco/select",
+    "@joyco/separator",
+    "@joyco/slider",
+    "@joyco/switch",
+    "@joyco/tabs",
+    "@joyco/textarea",
+    "@joyco/tooltip"
+  ]
+}
