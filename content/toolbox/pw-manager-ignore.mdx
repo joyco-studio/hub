@@ -1,0 +1,52 @@
+---
+title: Password Manager Ignore
+description: Data attributes to prevent password managers from hijacking your inputs.
+maintainers: ['matiasperz']
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+<ComponentPreview name="pw-manager-ignore-demo" height={500} />
+
+## The problem
+
+Password managers like 1Password, LastPass, and Bitwarden will try to autofill any input that looks like a username, email, or password field. This is annoying for inputs that aren't credentials — invite codes, OTPs, search bars, etc.
+
+## The fix
+
+Add these data attributes to your inputs:
+
+```tsx
+<input
+  data-1p-ignore
+  data-lpignore="true"
+  data-bwignore
+  data-form-type="other"
+/>
+```
+
+| Attribute | Password Manager |
+|---|---|
+| `data-1p-ignore` | 1Password |
+| `data-lpignore="true"` | LastPass |
+| `data-bwignore` | Bitwarden |
+| `data-form-type="other"` | Dashlane |
+
+## As a reusable helper
+
+If you're doing this often, extract the attributes:
+
+```ts title="lib/pw-ignore.ts"
+export const pwIgnoreProps = {
+  'data-1p-ignore': true,
+  'data-lpignore': 'true',
+  'data-bwignore': true,
+  'data-form-type': 'other',
+} as const
+```
+
+```tsx
+import { pwIgnoreProps } from '@/lib/pw-ignore'
+
+<input type="text" placeholder="Invite code" {...pwIgnoreProps} />
+```
