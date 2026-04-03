@@ -291,7 +291,7 @@ This is especially effective for long pages with many sections or cards — the 
 | Blurry/slow blur effects | `filter: blur()` on large elements without compositing | Add `will-change: filter` or use `backdrop-filter` (composited) |
 | Paint on every frame during animation | Animating color, background, box-shadow | If possible, use opacity transitions or pre-render states |
 | Painting off-screen content | `overflow: visible` preventing culling | Add `contain: paint` or `overflow: hidden` to clip boundaries |
-| Hidden sections still painted | Tabs/panels in DOM but not visible to user | Use `visibility: hidden` — skips paint while preserving layout space |
+| Hidden sections still painted | Sections in DOM but not visible to user | Use `visibility: hidden` — skips paint while preserving layout space |
 | Slow initial paint on long pages | Too many elements painted at once | Use `content-visibility: auto` to defer off-screen rendering |
 
 ## 5. Composite
