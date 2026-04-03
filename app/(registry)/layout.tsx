@@ -1,6 +1,11 @@
 import type { CSSProperties } from 'react'
 import { cookies } from 'next/headers'
-import { source, getGameSlugs, getEffectSlugs, getCanvasSlugs } from '@/lib/source'
+import {
+  source,
+  getGameSlugs,
+  getEffectSlugs,
+  getCanvasSlugs,
+} from '@/lib/source'
 import { TreeContextProvider } from 'fumadocs-ui/contexts/tree'
 import {
   LayoutContextProvider,
@@ -17,7 +22,11 @@ export default async function Layout({ children }: LayoutProps<'/'>) {
 
   const itemMeta: Record<
     string,
-    { badge?: 'new' | 'updated'; dot?: 'red' | 'blue' | 'green' | 'yellow'; hidden?: boolean }
+    {
+      badge?: 'new' | 'updated' | 'internal'
+      dot?: 'red' | 'blue' | 'green' | 'yellow'
+      hidden?: boolean
+    }
   > = {
     '/toolbox/skills': { badge: 'new' },
     '/toolbox/ui': isTeam ? { badge: 'internal' } : { hidden: true },
