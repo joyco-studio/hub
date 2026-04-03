@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
-import { ShieldOff, ShieldCheck, KeyRound, Mail, Lock } from 'lucide-react'
+import { ShieldOff, ShieldCheck, Mail, Lock } from 'lucide-react'
 
 const pwIgnoreProps = {
   'data-1p-ignore': true,
@@ -85,21 +85,6 @@ function PwManagerIgnoreDemo() {
               key={`password-${inputKey}`}
               type="password"
               placeholder="********"
-              autoComplete="off"
-              className={inputClassName}
-              {...(withAttrs && pwIgnoreProps)}
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-foreground flex items-center gap-2 text-sm font-medium">
-              <KeyRound className="size-4" />
-              Invite Code
-            </label>
-            <input
-              key={`invite-${inputKey}`}
-              type="text"
-              placeholder="Enter invite code"
               autoComplete="off"
               className={inputClassName}
               {...(withAttrs && pwIgnoreProps)}
