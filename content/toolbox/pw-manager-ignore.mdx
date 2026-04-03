@@ -50,19 +50,3 @@ import { pwIgnoreProps } from '@/lib/pw-ignore'
 
 <input type="text" placeholder="Invite code" {...pwIgnoreProps} />
 ```
-
-## Toggling at runtime
-
-Password managers scan inputs **on mount** — they don't watch for attribute changes on existing elements. If you need to dynamically toggle the ignore behavior (e.g. in the demo above), change the `key` so React destroys and re-creates the input:
-
-```tsx
-const [ignored, setIgnored] = useState(true)
-
-<input
-  key={ignored ? 'ignored' : 'active'}
-  type="email"
-  {...(ignored && pwIgnoreProps)}
-/>
-```
-
-This forces a fresh DOM element, so the password manager re-evaluates its targeting criteria against the new attributes.
