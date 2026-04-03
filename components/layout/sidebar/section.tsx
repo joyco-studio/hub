@@ -18,6 +18,7 @@ import { MetaBadge } from '@/components/layout/meta-badge'
 export type SidebarItemMeta = {
   badge?: 'new' | 'updated'
   dot?: 'red' | 'blue' | 'green' | 'yellow'
+  hidden?: boolean
 }
 
 // Helper function to get display name for sidebar items
@@ -74,6 +75,7 @@ export function SidebarItems({ folder, meta = {} }: SidebarItemsProps) {
         {folder.children.map((child) => {
           if (child.type === 'page') {
             const itemMeta = meta[child.url] ?? {}
+            if (itemMeta.hidden) return null
             const isItemActive = pathname === child.url
             const displayName = getDisplayName(child, sectionId)
 
@@ -164,6 +166,7 @@ function CollapsibleSubSection({
           <div className="border-border ml-4 flex flex-col border-l-2">
             {pages.map((page) => {
               const itemMeta = meta[page.url] ?? {}
+              if (itemMeta.hidden) return null
               const isItemActive = pathname === page.url
               const displayName = getDisplayName(page, sectionId)
 
@@ -337,6 +340,7 @@ export function SidebarSection({
             {folder.children.map((child) => {
               if (child.type === 'page') {
                 const itemMeta = meta[child.url] ?? {}
+                if (itemMeta.hidden) return null
                 const isItemActive = pathname === child.url
                 const displayName = getDisplayName(child, sectionId)
 
