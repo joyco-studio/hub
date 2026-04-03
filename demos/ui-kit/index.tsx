@@ -213,7 +213,7 @@ export default function UIKit() {
         </SubSection>
 
         <SubSection title="Sizes">
-          <div className="flex flex-wrap items-end gap-4">
+          <div className="flex flex-wrap items-start gap-4">
             <Labeled label="sm">
               <Button size="sm">Small</Button>
             </Labeled>
