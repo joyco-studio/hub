@@ -24,28 +24,29 @@ function PwManagerIgnoreDemo() {
   return (
     <div className="bg-muted/50 flex min-h-[500px] w-full items-center justify-center p-4 sm:p-8">
       <div className="w-full max-w-md space-y-6">
-        <div className="flex items-center justify-between">
+        <label className="flex cursor-pointer items-center justify-between">
           <div className="flex items-center gap-2">
             {withAttrs ? (
               <ShieldOff className="text-muted-foreground size-5" />
             ) : (
               <ShieldCheck className="size-5 text-amber-500" />
             )}
-            <h2 className="text-foreground text-sm font-semibold">
+            <span className="text-foreground text-sm font-semibold">
               {withAttrs
                 ? 'Password managers ignored'
                 : 'Password managers active'}
-            </h2>
+            </span>
           </div>
           <button
             type="button"
+            role="switch"
+            aria-checked={withAttrs}
             onClick={() => setWithAttrs((v) => !v)}
             className={cn(
               'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200',
               withAttrs ? 'bg-foreground' : 'bg-muted-foreground/30'
             )}
           >
-            <span className="sr-only">Toggle pw manager ignore</span>
             <span
               className={cn(
                 'bg-background pointer-events-none inline-block size-5 rounded-full shadow-lg ring-0 transition-transform duration-200',
@@ -53,7 +54,7 @@ function PwManagerIgnoreDemo() {
               )}
             />
           </button>
-        </div>
+        </label>
 
         <form
           className="bg-card border-border space-y-4 rounded-xl border p-5 shadow-lg"
@@ -122,11 +123,6 @@ function PwManagerIgnoreDemo() {
           </div>
 
         </form>
-
-        <p className="text-muted-foreground text-center text-xs">
-          Toggle the switch — inputs are re-mounted so password managers
-          re-evaluate them.
-        </p>
       </div>
     </div>
   )
