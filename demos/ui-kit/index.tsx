@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { CopyButton } from '@/components/copy-button'
 import {
   BoldIcon,
   CopyIcon,
@@ -112,9 +113,15 @@ const brandColors = [
 
 function InstallCmd({ cmd }: { cmd: string }) {
   return (
-    <code className="bg-muted text-muted-foreground block rounded-md px-3 py-2 font-mono text-xs">
-      {cmd}
-    </code>
+    <div className="bg-code group/code relative flex max-w-xs items-center rounded-md px-3 py-2">
+      <code className="text-code-foreground font-mono text-xs">{cmd}</code>
+      <CopyButton
+        value={cmd}
+        variant="ghost"
+        absolute={false}
+        className="ml-auto size-7"
+      />
+    </div>
   )
 }
 
@@ -397,7 +404,10 @@ export default function UIKit() {
         <div className="flex items-end gap-4">
           <Labeled label="with image">
             <Avatar>
-              <AvatarImage src="https://github.com/justkahdri.png" alt="User" />
+              <AvatarImage
+                src="https://r2.joyco.studio/qykHGCJ16OXi.png"
+                alt="User"
+              />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
           </Labeled>
