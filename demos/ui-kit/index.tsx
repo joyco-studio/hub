@@ -145,6 +145,23 @@ function SubSection({
   )
 }
 
+function Labeled({
+  label,
+  children,
+}: {
+  label: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-muted-foreground font-mono text-[11px] tracking-wide uppercase">
+        {label}
+      </span>
+      {children}
+    </div>
+  )
+}
+
 function ColorSwatch({ name, cssVar }: { name: string; cssVar: string }) {
   return (
     <div className="flex flex-col gap-1.5">
@@ -180,16 +197,26 @@ export default function UIKit() {
         </SubSection>
 
         <SubSection title="Sizes">
-          <div className="flex flex-wrap items-center gap-3">
-            <Button size="sm">Small</Button>
-            <Button size="default">Default</Button>
-            <Button size="lg">Large</Button>
-            <Button size="icon" aria-label="Settings">
-              <SettingsIcon />
-            </Button>
-            <Button size="icon-sm" aria-label="Copy">
-              <CopyIcon />
-            </Button>
+          <div className="flex flex-wrap items-end gap-4">
+            <Labeled label="sm">
+              <Button size="sm">Small</Button>
+            </Labeled>
+            <Labeled label="default">
+              <Button size="default">Default</Button>
+            </Labeled>
+            <Labeled label="lg">
+              <Button size="lg">Large</Button>
+            </Labeled>
+            <Labeled label="icon">
+              <Button size="icon" aria-label="Settings">
+                <SettingsIcon />
+              </Button>
+            </Labeled>
+            <Labeled label="icon-sm">
+              <Button size="icon-sm" aria-label="Copy">
+                <CopyIcon />
+              </Button>
+            </Labeled>
           </div>
         </SubSection>
 
@@ -223,10 +250,16 @@ export default function UIKit() {
 
       {/* ── Input ── */}
       <Section title="Input">
-        <div className="flex max-w-sm flex-col gap-3">
-          <Input placeholder="Default input" />
-          <Input placeholder="Disabled" disabled />
-          <Input type="email" placeholder="Email" aria-invalid="true" />
+        <div className="flex max-w-sm flex-col gap-4">
+          <Labeled label="default">
+            <Input placeholder="Default input" />
+          </Labeled>
+          <Labeled label="disabled">
+            <Input placeholder="Disabled" disabled />
+          </Labeled>
+          <Labeled label="invalid">
+            <Input type="email" placeholder="Email" aria-invalid="true" />
+          </Labeled>
         </div>
       </Section>
 
@@ -276,31 +309,31 @@ export default function UIKit() {
 
       {/* ── Switch ── */}
       <Section title="Switch">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
+        <div className="flex items-end gap-6">
+          <Labeled label="default">
             <Switch id="switch-default" />
-            <label htmlFor="switch-default" className="text-sm">Default</label>
-          </div>
-          <div className="flex items-center gap-2">
+          </Labeled>
+          <Labeled label="checked">
             <Switch id="switch-checked" defaultChecked />
-            <label htmlFor="switch-checked" className="text-sm">Checked</label>
-          </div>
-          <div className="flex items-center gap-2">
+          </Labeled>
+          <Labeled label="sm">
             <Switch id="switch-sm" size="sm" />
-            <label htmlFor="switch-sm" className="text-sm">Small</label>
-          </div>
-          <div className="flex items-center gap-2">
+          </Labeled>
+          <Labeled label="disabled">
             <Switch id="switch-disabled" disabled />
-            <label htmlFor="switch-disabled" className="text-sm">Disabled</label>
-          </div>
+          </Labeled>
         </div>
       </Section>
 
       {/* ── Slider ── */}
       <Section title="Slider">
-        <div className="flex max-w-sm flex-col gap-4">
-          <Slider defaultValue={[40]} max={100} aria-label="Volume" />
-          <Slider defaultValue={[25, 75]} max={100} aria-label="Range" />
+        <div className="flex max-w-sm flex-col gap-5">
+          <Labeled label="single">
+            <Slider defaultValue={[40]} max={100} aria-label="Volume" />
+          </Labeled>
+          <Labeled label="range">
+            <Slider defaultValue={[25, 75]} max={100} aria-label="Range" />
+          </Labeled>
         </div>
       </Section>
 
@@ -336,17 +369,23 @@ export default function UIKit() {
 
       {/* ── Avatar ── */}
       <Section title="Avatar">
-        <div className="flex items-center gap-4">
-          <Avatar>
-            <AvatarImage src="https://github.com/shadcn.png" alt="User" />
-            <AvatarFallback>CN</AvatarFallback>
-          </Avatar>
-          <Avatar>
-            <AvatarFallback>JC</AvatarFallback>
-          </Avatar>
-          <Avatar className="size-12">
-            <AvatarFallback className="text-lg">MP</AvatarFallback>
-          </Avatar>
+        <div className="flex items-end gap-4">
+          <Labeled label="with image">
+            <Avatar>
+              <AvatarImage src="https://github.com/shadcn.png" alt="User" />
+              <AvatarFallback>CN</AvatarFallback>
+            </Avatar>
+          </Labeled>
+          <Labeled label="fallback">
+            <Avatar>
+              <AvatarFallback>JC</AvatarFallback>
+            </Avatar>
+          </Labeled>
+          <Labeled label="large">
+            <Avatar className="size-12">
+              <AvatarFallback className="text-lg">MP</AvatarFallback>
+            </Avatar>
+          </Labeled>
         </div>
       </Section>
 
@@ -460,58 +499,72 @@ export default function UIKit() {
 
       {/* ── Input Group ── */}
       <Section title="Input Group">
-        <div className="flex max-w-md flex-col gap-3">
-          <InputGroup>
-            <InputGroupAddon align="inline-start">
-              <SearchIcon className="text-muted-foreground size-4" />
-            </InputGroupAddon>
-            <InputGroupInput placeholder="Search…" />
-          </InputGroup>
-          <InputGroup>
-            <InputGroupInput placeholder="Type a message…" />
-            <InputGroupAddon align="inline-end">
-              <InputGroupButton size="icon-sm" aria-label="Send">
-                <SendIcon />
-              </InputGroupButton>
-            </InputGroupAddon>
-          </InputGroup>
+        <div className="flex max-w-md flex-col gap-4">
+          <Labeled label="with icon addon">
+            <InputGroup>
+              <InputGroupAddon align="inline-start">
+                <SearchIcon className="text-muted-foreground size-4" />
+              </InputGroupAddon>
+              <InputGroupInput placeholder="Search…" />
+            </InputGroup>
+          </Labeled>
+          <Labeled label="with button addon">
+            <InputGroup>
+              <InputGroupInput placeholder="Type a message…" />
+              <InputGroupAddon align="inline-end">
+                <InputGroupButton size="icon-sm" aria-label="Send">
+                  <SendIcon />
+                </InputGroupButton>
+              </InputGroupAddon>
+            </InputGroup>
+          </Labeled>
         </div>
       </Section>
 
       {/* ── Button Group ── */}
       <Section title="Button Group">
-        <div className="flex flex-wrap gap-4">
-          <ButtonGroup>
-            <Button variant="outline" size="icon" aria-label="Bold">
-              <BoldIcon />
-            </Button>
-            <Button variant="outline" size="icon" aria-label="Italic">
-              <ItalicIcon />
-            </Button>
-            <Button variant="outline" size="icon" aria-label="Underline">
-              <UnderlineIcon />
-            </Button>
-          </ButtonGroup>
-          <ButtonGroup>
-            <Button variant="outline">Copy</Button>
-            <Button variant="outline">Cut</Button>
-            <Button variant="outline">Paste</Button>
-          </ButtonGroup>
+        <div className="flex flex-wrap items-end gap-6">
+          <Labeled label="icon buttons">
+            <ButtonGroup>
+              <Button variant="outline" size="icon" aria-label="Bold">
+                <BoldIcon />
+              </Button>
+              <Button variant="outline" size="icon" aria-label="Italic">
+                <ItalicIcon />
+              </Button>
+              <Button variant="outline" size="icon" aria-label="Underline">
+                <UnderlineIcon />
+              </Button>
+            </ButtonGroup>
+          </Labeled>
+          <Labeled label="text buttons">
+            <ButtonGroup>
+              <Button variant="outline">Copy</Button>
+              <Button variant="outline">Cut</Button>
+              <Button variant="outline">Paste</Button>
+            </ButtonGroup>
+          </Labeled>
         </div>
       </Section>
 
       {/* ── Separator ── */}
       <Section title="Separator">
         <div className="flex flex-col gap-6">
-          <Separator />
-          <Separator brackets />
-          <div className="flex h-8 items-center gap-4">
-            <span className="text-sm">Item A</span>
-            <Separator orientation="vertical" />
-            <span className="text-sm">Item B</span>
-            <Separator orientation="vertical" />
-            <span className="text-sm">Item C</span>
-          </div>
+          <Labeled label="horizontal">
+            <Separator />
+          </Labeled>
+          <Labeled label="brackets">
+            <Separator brackets />
+          </Labeled>
+          <Labeled label="vertical">
+            <div className="flex h-8 items-center gap-4">
+              <span className="text-sm">Item A</span>
+              <Separator orientation="vertical" />
+              <span className="text-sm">Item B</span>
+              <Separator orientation="vertical" />
+              <span className="text-sm">Item C</span>
+            </div>
+          </Labeled>
         </div>
       </Section>
 
