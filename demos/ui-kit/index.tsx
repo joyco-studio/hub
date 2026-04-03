@@ -180,7 +180,7 @@ export default function UIKit() {
   const [collapsibleOpen, setCollapsibleOpen] = React.useState(false)
 
   return (
-    <div className="bg-background text-foreground flex flex-col gap-16 p-8">
+    <div className="not-prose bg-background text-foreground flex flex-col gap-16 p-8">
       {/* ── Button ── */}
       <Section title="Button">
         <SubSection title="Variants">
@@ -372,7 +372,7 @@ export default function UIKit() {
         <div className="flex items-end gap-4">
           <Labeled label="with image">
             <Avatar>
-              <AvatarImage src="https://github.com/shadcn.png" alt="User" />
+              <AvatarImage src="https://github.com/justkahdri.png" alt="User" />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
           </Labeled>
