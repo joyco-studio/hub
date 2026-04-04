@@ -19,9 +19,9 @@ npx shadcn@latest add @joyco/canvas-2d
 
 ### Component
 
-`Canvas2D` is a plain `<canvas>` element that observes its own CSS size and keeps the buffer resolution and DPR in sync. Size it however you want — Tailwind classes, inline styles, flex/grid — no wrapper needed.
+`Canvas2D` is a plain `<canvas>` element that observes its own CSS size and keeps the buffer resolution and DPR in sync.
 
-Return a cleanup function from `onContext` to cancel animation frames or dispose resources — it's called on unmount and before every re-invocation (resize, DPR change).
+Return a cleanup function from `onContext` to cancel animation frames or dispose resources, it's called on unmount and before every re-invocation (resize, DPR change).
 
 ```tsx
 import { Canvas2D } from '@/components/canvas-2d'
@@ -65,8 +65,6 @@ function MyCanvas() {
 
 ### Canvas2D
 
-Extends `React.CanvasHTMLAttributes<HTMLCanvasElement>`.
-
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `maxDpr` | `number` | `2` | Maximum device pixel ratio |
@@ -77,5 +75,3 @@ Extends `React.CanvasHTMLAttributes<HTMLCanvasElement>`.
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | `maxDpr` | `number` | `2` | Maximum device pixel ratio |
-
-**Returns:** `[canvasRef, { ctx, width, height, dpr }]`
