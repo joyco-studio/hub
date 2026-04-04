@@ -1,0 +1,81 @@
+---
+title: Canvas 2D
+description: A 2D canvas component and hook that handles sizing, pixel ratio, and context setup.
+maintainers: ['matiasperez']
+type: canvas
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+<ComponentPreview name="canvas-2d-demo" />
+
+## Installation
+
+```bash
+npx shadcn@latest add @joyco/canvas-2d
+```
+
+## Usage
+
+### Component
+
+`Canvas2D` is a plain `<canvas>` element that observes its own CSS size and keeps the buffer resolution and DPR in sync. Size it however you want — Tailwind classes, inline styles, flex/grid — no wrapper needed.
+
+Return a cleanup function from `onContext` to cancel animation frames or dispose resources — it's called on unmount and before every re-invocation (resize, DPR change).
+
+```tsx
+import { Canvas2D } from '@/components/canvas-2d'
+
+function App() {
+  return (
+    <Canvas2D
+      className="h-96 w-full"
+      onContext={({ ctx, width, height, dpr }) => {
+        let raf: number
+
+        function draw(t: number) {
+          ctx.clearRect(0, 0, width, height)
+          // ... draw
+          raf = requestAnimationFrame(draw)
+        }
+
+        raf = requestAnimationFrame(draw)
+        return () => cancelAnimationFrame(raf)
+      }}
+    />
+  )
+}
+```
+
+### Hook
+
+For more control, use `useCanvas2D` directly. It returns a canvas ref callback and a state object.
+
+```tsx
+import { useCanvas2D } from '@/components/canvas-2d'
+
+function MyCanvas() {
+  const [canvasRef, { ctx, width, height, dpr }] = useCanvas2D({ maxDpr: 2 })
+
+  return <canvas ref={canvasRef} className="h-96 w-full" />
+}
+```
+
+## Props
+
+### Canvas2D
+
+Extends `React.CanvasHTMLAttributes<HTMLCanvasElement>`.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `maxDpr` | `number` | `2` | Maximum device pixel ratio |
+| `onContext` | `(state) => void \| (() => void)` | — | Called with `{ ctx, width, height, dpr }` when the canvas is ready or resizes. Return a cleanup function to dispose resources. |
+
+### useCanvas2D
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| `maxDpr` | `number` | `2` | Maximum device pixel ratio |
+
+**Returns:** `[canvasRef, { ctx, width, height, dpr }]`

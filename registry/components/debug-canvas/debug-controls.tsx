@@ -141,7 +141,7 @@ function ActiveFlyControls() {
 
 export function DebugControls() {
   const [targetRef, , store] = useDebugBindings('Canvas', {
-    orbitControls: false,
+    orbitControls: true,
     flyControls: false,
   })
 

@@ -301,6 +301,18 @@
       "registryDependencies": ["@joyco/button", "@joyco/kbd"]
     },
     {
+      "name": "canvas-2d",
+      "type": "registry:component",
+      "title": "Canvas 2D",
+      "description": "A DPR-aware 2D canvas component and hook that handles sizing, pixel ratio, and context setup automatically.",
+      "files": [
+        {
+          "path": "registry/components/canvas-2d.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "debug-canvas",
       "type": "registry:component",
       "title": "r3f Canvas",

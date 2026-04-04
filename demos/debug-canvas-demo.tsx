@@ -7,7 +7,7 @@ function Scene() {
   return (
     <>
       <ambientLight intensity={0.5} />
-      <directionalLight position={[5, 5, 5]} intensity={1} />
+      <directionalLight position={[-5, 10, -5]} intensity={1} />
 
       <mesh position={[0, 0.5, 0]}>
         <boxGeometry />
@@ -32,7 +32,7 @@ function DebugCanvasDemo() {
     <DebugProvider title="Canvas Debug" position="top-right" enabled>
       <div className="bg-background h-screen w-full">
         <DebugCanvas
-          camera={{ position: [3, 2, 5], fov: 50 }}
+          camera={{ position: [3, 3.5, 3.5], fov: 50 }}
           style={{ width: '100%', height: '100%' }}
         >
           <Scene />

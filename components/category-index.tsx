@@ -7,6 +7,7 @@ import { RegistryCounts } from './registry-meta'
 import { getLogNumber, stripLogPrefixFromTitle } from '@/lib/log-utils'
 import { Badge } from './ui/badge'
 import { Fragment } from 'react'
+
 export function CategoryIndex({
   category,
 }: {
@@ -15,6 +16,7 @@ export function CategoryIndex({
   const pages = source
     .getPages()
     .filter((page) => page.slugs[0] === category && page.slugs.length > 1)
+  if (category === 'logs') pages.reverse()
   const typeMap: Record<keyof RegistryCounts, ItemType> = {
     components: 'component',
     toolbox: 'toolbox',
@@ -31,14 +33,16 @@ export function CategoryIndex({
 
   return (
     <div className="not-prose">
-      <h3 className="mb-6 flex items-center gap-4 text-2xl font-semibold">
-        All {label}{' '}
-        <CategoryIndexBadge
-          variant="secondary"
-          className="h-7 py-0 text-base"
-          category={category}
-        />
-      </h3>
+      {category === 'components' && (
+        <h3 className="mb-6 flex items-center gap-4 text-2xl font-semibold">
+          All {label}{' '}
+          <CategoryIndexBadge
+            variant="secondary"
+            className="h-7 py-0 text-base"
+            category={category}
+          />
+        </h3>
+      )}
       {useGrid ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {pages.map((page) => (
@@ -78,7 +82,7 @@ export function CategoryIndex({
                     </span>
                   </div>
                   {page.data.description && (
-                    <span className="text-muted-foreground line-clamp-2 text-sm sm:line-clamp-1 sm:max-w-[50%]">
+                    <span className="text-muted-foreground line-clamp-2 text-sm sm:line-clamp-1 sm:max-w-[50%] sm:text-right">
                       {page.data.description}
                     </span>
                   )}

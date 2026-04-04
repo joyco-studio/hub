@@ -3,6 +3,7 @@
   "pages": [
     "action-hint",
     "brick-breaker",
+    "canvas-2d",
     "chat",
     "debug",
     "debug-canvas",
