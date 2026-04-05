@@ -1,14 +1,13 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { trackDownload } from '@/lib/track'
+import { trackRegistryDownload } from '@/lib/track'
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
-  const isRegistryPath = pathname.startsWith('/r/')
 
-  if (isRegistryPath) {
+  if (pathname.startsWith('/r/')) {
     const componentName = pathname.replace(/^\/r\//, '').replace(/\.json$/, '')
-    await trackDownload(componentName)
+    await trackRegistryDownload(request, componentName)
   }
 
   if (request.nextUrl.searchParams.get('joyco') === '1') {
