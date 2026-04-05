@@ -4,9 +4,15 @@ import { createRelativeLink } from 'fumadocs-ui/mdx'
 import { readFile } from 'fs/promises'
 import path from 'path'
 
-import { getPageImage, getLLMText, getRelatedPages, getRegistryCounts, source } from '@/lib/source'
+import {
+  getPageImage,
+  getLLMText,
+  getRelatedPages,
+  getRegistryCounts,
+  source,
+} from '@/lib/source'
 import { getLogNumber, stripLogPrefixFromTitle } from '@/lib/log-utils'
-import { getDownloadStats } from '@/lib/stats'
+import { getComponentDownloadStats, getPageViews } from '@/lib/stats'
 import { getMDXComponents } from '@/mdx-components'
 import { Author } from '@/components/layout/author'
 import { Maintainers } from '@/components/layout/maintainers'
@@ -28,6 +34,7 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { RegistryMetaProvider } from '@/components/registry-meta'
 import { PageGithubLinkButton } from '@/components/page-github-link-button'
+import { PageViews } from '@/components/layout/views'
 
 const getComponentSlug = (page: InferPageType<typeof source>) => {
   if (page.slugs[0] !== 'components') return undefined
@@ -84,9 +91,10 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
   })()
 
   const componentSlug = getComponentSlug(page)
-  const downloadStats = componentSlug
-    ? await getDownloadStats(componentSlug)
-    : null
+  const [downloadStats, pageViews] = await Promise.all([
+    componentSlug ? getComponentDownloadStats(componentSlug) : null,
+    isLog ? getPageViews(`/logs/${page.slugs[page.slugs.length - 1]}`) : null,
+  ])
   const componentSource = await getComponentSource(componentSlug)
   const docLinks = [...page.data.docLinks]
   const llmText = await getLLMText(page)
@@ -204,6 +212,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
                   }
                 />
                 {downloadStats && <WeeklyDownloads data={downloadStats} />}
+                {pageViews !== null && <PageViews views={pageViews} />}
               </>
             }
           />

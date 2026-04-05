@@ -5,10 +5,12 @@ import { PreviewCard } from '@/components/cards'
 import { ItemType } from '@/lib/item-types'
 import { RegistryCounts } from './registry-meta'
 import { getLogNumber, stripLogPrefixFromTitle } from '@/lib/log-utils'
+import { getPageViews } from '@/lib/stats'
 import { Badge } from './ui/badge'
+import { EyeIcon } from 'lucide-react'
 import { Fragment } from 'react'
 
-export function CategoryIndex({
+export async function CategoryIndex({
   category,
 }: {
   category: keyof RegistryCounts
@@ -30,6 +32,19 @@ export function CategoryIndex({
         : 'Logs'
   const type = typeMap[category]
   const useGrid = category === 'components'
+
+  const viewsMap =
+    category === 'logs'
+      ? new Map(
+          await Promise.all(
+            pages.map(async (page) => {
+              const slug = page.slugs[page.slugs.length - 1]
+              const views = await getPageViews(`/logs/${slug}`)
+              return [page.url, views] as const
+            })
+          )
+        )
+      : null
 
   return (
     <div className="not-prose">
@@ -77,9 +92,15 @@ export function CategoryIndex({
                         {logNumber}
                       </Badge>
                     )}
-                    <span className="text-foreground min-w-0 flex-1 truncate text-sm font-medium">
+                    <span className="text-foreground min-w-0 truncate text-sm font-medium">
                       {displayTitle}
                     </span>
+                    {viewsMap?.get(page.url) != null && (
+                      <span className="text-muted-foreground flex shrink-0 items-center gap-1 text-xs tabular-nums">
+                        <EyeIcon className="size-3" />
+                        {viewsMap.get(page.url)!.toLocaleString()}
+                      </span>
+                    )}
                   </div>
                   {page.data.description && (
                     <span className="text-muted-foreground line-clamp-2 text-sm sm:line-clamp-1 sm:max-w-[50%] sm:text-right">

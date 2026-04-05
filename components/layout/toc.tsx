@@ -35,7 +35,7 @@ export function TOC({ header, footer, className }: ClerkTOCProps) {
           {header}
           <h3
             id="toc-title"
-            className="text-muted-foreground inline-flex items-center gap-1.5 text-xs font-medium"
+            className="inline-flex items-center gap-1.5 text-xs font-medium"
           >
             <TextScanIcon className="size-4" />
             <span>On this page</span>

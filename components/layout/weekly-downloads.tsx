@@ -33,6 +33,25 @@ function formatDay(dateStr: string): string {
   })
 }
 
+function fillWeek(
+  weekly: { day: string; count: number }[]
+): { day: string; count: number }[] {
+  const now = new Date()
+  const days: { day: string; count: number }[] = []
+  const countByDate = new Map(
+    weekly.map((w) => [w.day.split('T')[0], w.count])
+  )
+
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now)
+    d.setDate(d.getDate() - i)
+    const key = d.toISOString().split('T')[0]
+    days.push({ day: key, count: countByDate.get(key) ?? 0 })
+  }
+
+  return days
+}
+
 export function WeeklyDownloads({ data }: { data: DownloadStats | null }) {
   const [hoveredData, setHoveredData] = useState<{
     day: string
@@ -43,10 +62,12 @@ export function WeeklyDownloads({ data }: { data: DownloadStats | null }) {
     return null
   }
 
-  const chartData = data.weekly.map((item) => ({
+  const chartData = fillWeek(data.weekly).map((item) => ({
     day: formatDay(item.day),
     downloads: item.count,
   }))
+
+  console.log('chartData', chartData)
 
   const totalDownloads = data.total
   const lastDayDownloads = chartData[chartData.length - 1]?.downloads ?? 0
