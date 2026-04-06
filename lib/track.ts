@@ -29,7 +29,7 @@ async function trackDownload(componentName: string, countryCode: string | null) 
         event_name: componentName,
         origin: APP_BASE_URL,
         path: `/r/${componentName}.json`,
-        country_code: countryCode,
+        country: countryCode,
       }),
     })
 

@@ -16,12 +16,12 @@ export async function getComponentDownloadStats(
   from.setDate(from.getDate() - 6)
 
   const countParams = new URLSearchParams({
-    event_type: 'download',
+    event: 'download',
     event_name: slug,
   })
 
   const timeseriesParams = new URLSearchParams({
-    event_type: 'download',
+    event: 'download',
     event_name: slug,
     interval: 'day',
     from: from.toISOString().split('T')[0],
@@ -30,9 +30,9 @@ export async function getComponentDownloadStats(
 
   try {
     const [countRes, timeseriesRes] = await Promise.all([
-      fetch(`${BASE_URL}/analytics/events/count?${countParams}`, { headers }),
+      fetch(`${BASE_URL}/analytics/count?${countParams}`, { headers }),
       fetch(
-        `${BASE_URL}/analytics/events/timeseries?${timeseriesParams}`,
+        `${BASE_URL}/analytics/timeseries?${timeseriesParams}`,
         { headers }
       ),
     ])
@@ -47,8 +47,8 @@ export async function getComponentDownloadStats(
     return {
       total: countJson.data.count,
       weekly: timeseriesJson.data.map(
-        (t: { bucket: string; count: number }) => ({
-          day: t.bucket,
+        (t: { key: string; count: number }) => ({
+          day: t.key,
           count: t.count,
         })
       ),
@@ -66,7 +66,6 @@ export async function getPageViews(
   const headers = { Authorization: `Bearer ${JOYCO_WORKER_SECRET}` }
   const params = new URLSearchParams({
     path: pagePath,
-    metric: 'views',
   })
 
   try {
