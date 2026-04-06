@@ -67,8 +67,6 @@ export function WeeklyDownloads({ data }: { data: DownloadStats | null }) {
     downloads: item.count,
   }))
 
-  console.log('chartData', chartData)
-
   const totalDownloads = data.total
   const lastDayDownloads = chartData[chartData.length - 1]?.downloads ?? 0
 

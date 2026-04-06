@@ -17,12 +17,12 @@ export async function getComponentDownloadStats(
 
   const countParams = new URLSearchParams({
     event: 'download',
-    event_name: slug,
+    event_name: `registry:${slug}`,
   })
 
   const timeseriesParams = new URLSearchParams({
     event: 'download',
-    event_name: slug,
+    event_name: `registry:${slug}`,
     interval: 'day',
     from: from.toISOString().split('T')[0],
     to: to.toISOString().split('T')[0],

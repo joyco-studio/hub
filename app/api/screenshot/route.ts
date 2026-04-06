@@ -22,7 +22,6 @@ async function fetchScreenshotFromCloudflare(
   baseStyle: string = baseScreenshStyle
 ): Promise<string> {
   let lastError: Error | null = null
-  console.log('fetchScreenshotFromCloudflare', config)
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
       const response = await fetch(

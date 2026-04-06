@@ -135,8 +135,6 @@ function Inner({
       Math.abs(targetX - current.current.x) < settleThreshold &&
       Math.abs(targetY - current.current.y) < settleThreshold
 
-    console.log('tick', !settled)
-
     if (settled) {
       current.current.x = targetX
       current.current.y = targetY
