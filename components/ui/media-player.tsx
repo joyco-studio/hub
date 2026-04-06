@@ -778,7 +778,7 @@ interface MediaPlayerVideoProps extends React.ComponentProps<'video'> {
 }
 
 function MediaPlayerVideo(props: MediaPlayerVideoProps) {
-  const { asChild, ref, ...videoProps } = props
+  const { asChild, ref, onClick, ...videoProps } = props
 
   const context = useMediaPlayerContext('MediaPlayerVideo')
   const dispatch = useMediaDispatch()
@@ -787,7 +787,7 @@ function MediaPlayerVideo(props: MediaPlayerVideoProps) {
 
   const onPlayToggle = React.useCallback(
     (event: React.MouseEvent<HTMLVideoElement>) => {
-      props.onClick?.(event)
+      onClick?.(event)
 
       if (event.defaultPrevented) return
 
@@ -800,7 +800,7 @@ function MediaPlayerVideo(props: MediaPlayerVideoProps) {
           : MediaActionTypes.MEDIA_PAUSE_REQUEST,
       })
     },
-    [dispatch, props.onClick]
+    [dispatch, onClick]
   )
 
   const VideoPrimitive = asChild ? Slot : 'video'
@@ -1202,7 +1202,7 @@ function MediaPlayerControlsOverlay(props: DivProps) {
 }
 
 function MediaPlayerPlay(props: React.ComponentProps<typeof Button>) {
-  const { children, className, disabled, ...playButtonProps } = props
+  const { children, className, disabled, onClick, ...playButtonProps } = props
 
   const context = useMediaPlayerContext('MediaPlayerPlay')
   const dispatch = useMediaDispatch()
@@ -1212,7 +1212,7 @@ function MediaPlayerPlay(props: React.ComponentProps<typeof Button>) {
 
   const onPlayToggle = React.useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
-      props.onClick?.(event)
+      onClick?.(event)
 
       if (event.defaultPrevented) return
 
@@ -1222,7 +1222,7 @@ function MediaPlayerPlay(props: React.ComponentProps<typeof Button>) {
           : MediaActionTypes.MEDIA_PAUSE_REQUEST,
       })
     },
-    [dispatch, props.onClick, mediaPaused]
+    [dispatch, onClick, mediaPaused]
   )
 
   return (
@@ -1266,6 +1266,7 @@ function MediaPlayerSeekBackward(props: MediaPlayerSeekBackwardProps) {
     children,
     className,
     disabled,
+    onClick,
     ...seekBackwardProps
   } = props
 
@@ -1279,7 +1280,7 @@ function MediaPlayerSeekBackward(props: MediaPlayerSeekBackwardProps) {
 
   const onSeekBackward = React.useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
-      props.onClick?.(event)
+      onClick?.(event)
 
       if (event.defaultPrevented) return
 
@@ -1288,7 +1289,7 @@ function MediaPlayerSeekBackward(props: MediaPlayerSeekBackwardProps) {
         detail: Math.max(0, mediaCurrentTime - seconds),
       })
     },
-    [dispatch, props.onClick, mediaCurrentTime, seconds]
+    [dispatch, onClick, mediaCurrentTime, seconds]
   )
 
   return (
@@ -1327,6 +1328,7 @@ function MediaPlayerSeekForward(props: MediaPlayerSeekForwardProps) {
     children,
     className,
     disabled,
+    onClick,
     ...seekForwardProps
   } = props
 
@@ -1342,7 +1344,7 @@ function MediaPlayerSeekForward(props: MediaPlayerSeekForwardProps) {
 
   const onSeekForward = React.useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
-      props.onClick?.(event)
+      onClick?.(event)
 
       if (event.defaultPrevented) return
 
@@ -1354,7 +1356,7 @@ function MediaPlayerSeekForward(props: MediaPlayerSeekForwardProps) {
         ),
       })
     },
-    [dispatch, props.onClick, mediaCurrentTime, seekableEnd, seconds]
+    [dispatch, onClick, mediaCurrentTime, seekableEnd, seconds]
   )
 
   return (
@@ -2452,7 +2454,7 @@ function MediaPlayerPlaybackSpeed(props: MediaPlayerPlaybackSpeedProps) {
 interface MediaPlayerLoopProps extends React.ComponentProps<typeof Button> {}
 
 function MediaPlayerLoop(props: MediaPlayerLoopProps) {
-  const { children, className, disabled, ...loopProps } = props
+  const { children, className, disabled, onClick, ...loopProps } = props
 
   const context = useMediaPlayerContext('MediaPlayerLoop')
   const isDisabled = disabled || context.disabled
@@ -2480,7 +2482,7 @@ function MediaPlayerLoop(props: MediaPlayerLoopProps) {
 
   const onLoopToggle = React.useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
-      props.onClick?.(event)
+      onClick?.(event)
       if (event.defaultPrevented) return
 
       const mediaElement = context.mediaRef.current
@@ -2490,7 +2492,7 @@ function MediaPlayerLoop(props: MediaPlayerLoopProps) {
         setIsLooping(newLoopState)
       }
     },
-    [context.mediaRef, props.onClick]
+    [context.mediaRef, onClick]
   )
 
   return (
@@ -2529,7 +2531,7 @@ interface MediaPlayerFullscreenProps extends React.ComponentProps<
 > {}
 
 function MediaPlayerFullscreen(props: MediaPlayerFullscreenProps) {
-  const { children, className, disabled, ...fullscreenProps } = props
+  const { children, className, disabled, onClick, ...fullscreenProps } = props
 
   const context = useMediaPlayerContext('MediaPlayerFullscreen')
   const dispatch = useMediaDispatch()
@@ -2541,7 +2543,7 @@ function MediaPlayerFullscreen(props: MediaPlayerFullscreenProps) {
 
   const onFullscreen = React.useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
-      props.onClick?.(event)
+      onClick?.(event)
 
       if (event.defaultPrevented) return
 
@@ -2551,7 +2553,7 @@ function MediaPlayerFullscreen(props: MediaPlayerFullscreenProps) {
           : MediaActionTypes.MEDIA_ENTER_FULLSCREEN_REQUEST,
       })
     },
-    [dispatch, props.onClick, isFullscreen]
+    [dispatch, onClick, isFullscreen]
   )
 
   return (
@@ -2586,7 +2588,7 @@ interface MediaPlayerPiPProps extends Omit<
 }
 
 function MediaPlayerPiP(props: MediaPlayerPiPProps) {
-  const { children, className, onPipError, disabled, ...pipButtonProps } = props
+  const { children, className, onPipError, disabled, onClick, ...pipButtonProps } = props
 
   const context = useMediaPlayerContext('MediaPlayerPiP')
   const dispatch = useMediaDispatch()
@@ -2598,7 +2600,7 @@ function MediaPlayerPiP(props: MediaPlayerPiPProps) {
 
   const onPictureInPicture = React.useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
-      props.onClick?.(event)
+      onClick?.(event)
 
       if (event.defaultPrevented) return
 
@@ -2622,7 +2624,7 @@ function MediaPlayerPiP(props: MediaPlayerPiPProps) {
         }
       }
     },
-    [dispatch, props.onClick, isPictureInPicture, onPipError, context.mediaRef]
+    [dispatch, onClick, isPictureInPicture, onPipError, context.mediaRef]
   )
 
   return (
@@ -2655,7 +2657,7 @@ function MediaPlayerPiP(props: MediaPlayerPiPProps) {
 }
 
 function MediaPlayerCaptions(props: React.ComponentProps<typeof Button>) {
-  const { children, className, disabled, ...captionsProps } = props
+  const { children, className, disabled, onClick, ...captionsProps } = props
 
   const context = useMediaPlayerContext('MediaPlayerCaptions')
   const dispatch = useMediaDispatch()
@@ -2666,7 +2668,7 @@ function MediaPlayerCaptions(props: React.ComponentProps<typeof Button>) {
   const isDisabled = disabled || context.disabled
   const onCaptionsToggle = React.useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
-      props.onClick?.(event)
+      onClick?.(event)
 
       if (event.defaultPrevented) return
 
@@ -2674,7 +2676,7 @@ function MediaPlayerCaptions(props: React.ComponentProps<typeof Button>) {
         type: MediaActionTypes.MEDIA_TOGGLE_SUBTITLES_REQUEST,
       })
     },
-    [dispatch, props.onClick]
+    [dispatch, onClick]
   )
 
   return (
@@ -2702,7 +2704,7 @@ function MediaPlayerCaptions(props: React.ComponentProps<typeof Button>) {
 }
 
 function MediaPlayerDownload(props: React.ComponentProps<typeof Button>) {
-  const { children, className, disabled, ...downloadProps } = props
+  const { children, className, disabled, onClick, ...downloadProps } = props
 
   const context = useMediaPlayerContext('MediaPlayerDownload')
 
@@ -2710,7 +2712,7 @@ function MediaPlayerDownload(props: React.ComponentProps<typeof Button>) {
 
   const onDownload = React.useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
-      props.onClick?.(event)
+      onClick?.(event)
 
       if (event.defaultPrevented) return
 
@@ -2725,7 +2727,7 @@ function MediaPlayerDownload(props: React.ComponentProps<typeof Button>) {
       link.click()
       document.body.removeChild(link)
     },
-    [context.mediaRef, props.onClick]
+    [context.mediaRef, onClick]
   )
 
   return (
