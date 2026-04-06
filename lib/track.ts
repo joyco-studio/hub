@@ -11,11 +11,13 @@ function getClientIp(request: NextRequest): string {
   )
 }
 
-async function trackDownload(componentName: string, countryCode: string | null) {
+async function trackDownload(path: string, countryCode: string | null) {
   if (!JOYCO_WORKER_SECRET) {
     console.error(`[Registry Download] No worker secret found`)
     return
   }
+
+  const component = path.replace(/^\/r\//, '').replace(/\.json$/, '')
 
   try {
     const response = await fetch('https://workers.joyco.studio/ingest/event', {
@@ -26,21 +28,21 @@ async function trackDownload(componentName: string, countryCode: string | null) 
       },
       body: JSON.stringify({
         event_type: 'download',
-        event_name: componentName,
+        event_name: `registry:${component}`,
         origin: APP_BASE_URL,
-        path: `/r/${componentName}.json`,
+        path,
         country: countryCode,
       }),
     })
 
     if (response.ok) {
       console.info(
-        `[Registry Download] Tracked download for ${componentName}`,
+        `[Registry Download] Tracked download for ${component}`,
         await response.text()
       )
     } else {
       console.error(
-        `[Registry Download] Failed to track for ${componentName}:`,
+        `[Registry Download] Failed to track for ${component}:`,
         await response.text()
       )
     }
@@ -48,7 +50,7 @@ async function trackDownload(componentName: string, countryCode: string | null) 
     return response.ok
   } catch (error: unknown) {
     console.error(
-      `[Registry Download] Failed to track for ${componentName}:`,
+      `[Registry Download] Failed to track for ${component}:`,
       error instanceof Error ? error.message : String(error)
     )
     return
@@ -56,11 +58,10 @@ async function trackDownload(componentName: string, countryCode: string | null) 
 }
 
 export async function trackRegistryDownload(
-  request: NextRequest,
-  componentName: string
+  request: NextRequest
 ) {
   const ip = getClientIp(request)
-  const key = `${ip}:${componentName}`
+  const key = `${ip}:${request.nextUrl.pathname}`
   const now = Date.now()
   const lastSeen = memoryDownloads.get(key)
 
@@ -69,7 +70,7 @@ export async function trackRegistryDownload(
   const countryCode = request.headers.get('x-vercel-ip-country') ?? null
 
   memoryDownloads.set(key, now)
-  await trackDownload(componentName, countryCode)
+  await trackDownload(request.nextUrl.pathname, countryCode)
 
   // Prune stale entries periodically
   if (memoryDownloads.size > 1000) {

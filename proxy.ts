@@ -6,8 +6,7 @@ export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
   if (pathname.startsWith('/r/')) {
-    const componentName = pathname.replace(/^\/r\//, '').replace(/\.json$/, '')
-    await trackRegistryDownload(request, componentName)
+    await trackRegistryDownload(request)
   }
 
   if (request.nextUrl.searchParams.get('joyco') === '1') {
