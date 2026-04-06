@@ -26,9 +26,7 @@
           "type": "registry:component"
         }
       ],
-      "dependencies": [
-        "@joycostudio/marquee"
-      ]
+      "dependencies": ["@joycostudio/marquee"]
     },
     {
       "name": "file-button",
@@ -45,9 +43,7 @@
           "type": "registry:hook"
         }
       ],
-      "registryDependencies": [
-        "@joyco/button"
-      ]
+      "registryDependencies": ["@joyco/button"]
     },
     {
       "name": "file-dropzone",
@@ -64,9 +60,7 @@
           "type": "registry:hook"
         }
       ],
-      "registryDependencies": [
-        "@joyco/button"
-      ]
+      "registryDependencies": ["@joyco/button"]
     },
     {
       "name": "mobile-menu",
@@ -96,9 +90,7 @@
           "type": "registry:component"
         }
       ],
-      "dependencies": [
-        "@radix-ui/react-presence"
-      ]
+      "dependencies": ["@radix-ui/react-presence"]
     },
     {
       "name": "chat",
@@ -119,14 +111,8 @@
           "type": "registry:lib"
         }
       ],
-      "dependencies": [
-        "debounce",
-        "react-use-measure"
-      ],
-      "registryDependencies": [
-        "@joyco/input-group",
-        "@joyco/avatar"
-      ]
+      "dependencies": ["debounce", "react-use-measure"],
+      "registryDependencies": ["@joyco/input-group", "@joyco/avatar"]
     },
     {
       "name": "hls-video-player",
@@ -143,9 +129,7 @@
           "type": "registry:lib"
         }
       ],
-      "dependencies": [
-        "hls.js"
-      ]
+      "dependencies": ["hls.js"]
     },
     {
       "name": "action-hint",
@@ -214,9 +198,7 @@
           "type": "registry:lib"
         }
       ],
-      "dependencies": [
-        "@radix-ui/react-slot"
-      ]
+      "dependencies": ["@radix-ui/react-slot"]
     },
     {
       "name": "scramble",
@@ -229,9 +211,7 @@
           "type": "registry:lib"
         }
       ],
-      "dependencies": [
-        "gsap"
-      ]
+      "dependencies": ["gsap"]
     },
     {
       "name": "scramble-button",
@@ -244,13 +224,8 @@
           "type": "registry:component"
         }
       ],
-      "dependencies": [
-        "gsap"
-      ],
-      "registryDependencies": [
-        "@joyco/scramble",
-        "@joyco/button"
-      ]
+      "dependencies": ["gsap"],
+      "registryDependencies": ["@joyco/scramble", "@joyco/button"]
     },
     {
       "name": "brick-breaker",
@@ -327,10 +302,7 @@
           "type": "registry:hook"
         }
       ],
-      "registryDependencies": [
-        "@joyco/button",
-        "@joyco/kbd"
-      ]
+      "registryDependencies": ["@joyco/button", "@joyco/kbd"]
     },
     {
       "name": "canvas-2d",
@@ -375,13 +347,8 @@
           "type": "registry:component"
         }
       ],
-      "dependencies": [
-        "stats-gl",
-        "@react-three/drei"
-      ],
-      "registryDependencies": [
-        "@joyco/debug"
-      ]
+      "dependencies": ["stats-gl", "@react-three/drei"],
+      "registryDependencies": ["@joyco/debug"]
     },
     {
       "name": "debug",
@@ -432,9 +399,7 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": [
-        "@radix-ui/react-avatar"
-      ]
+      "dependencies": ["@radix-ui/react-avatar"]
     },
     {
       "name": "badge",
@@ -447,10 +412,7 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": [
-        "@radix-ui/react-slot",
-        "class-variance-authority"
-      ]
+      "dependencies": ["@radix-ui/react-slot", "class-variance-authority"]
     },
     {
       "name": "button",
@@ -463,10 +425,7 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": [
-        "@radix-ui/react-slot",
-        "class-variance-authority"
-      ]
+      "dependencies": ["@radix-ui/react-slot", "class-variance-authority"]
     },
     {
       "name": "button-group",
@@ -479,13 +438,8 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": [
-        "@radix-ui/react-slot",
-        "class-variance-authority"
-      ],
-      "registryDependencies": [
-        "@joyco/separator"
-      ]
+      "dependencies": ["@radix-ui/react-slot", "class-variance-authority"],
+      "registryDependencies": ["@joyco/separator"]
     },
     {
       "name": "card",
@@ -510,9 +464,7 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": [
-        "recharts"
-      ]
+      "dependencies": ["recharts"]
     },
     {
       "name": "collapsible",
@@ -525,9 +477,7 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": [
-        "@radix-ui/react-collapsible"
-      ]
+      "dependencies": ["@radix-ui/react-collapsible"]
     },
     {
       "name": "dropdown-menu",
@@ -540,10 +490,7 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": [
-        "@radix-ui/react-dropdown-menu",
-        "lucide-react"
-      ]
+      "dependencies": ["@radix-ui/react-dropdown-menu", "lucide-react"]
     },
     {
       "name": "input",
@@ -568,9 +515,7 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": [
-        "class-variance-authority"
-      ],
+      "dependencies": ["class-variance-authority"],
       "registryDependencies": [
         "@joyco/button",
         "@joyco/input",
@@ -632,9 +577,7 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": [
-        "@diceui/mention"
-      ]
+      "dependencies": ["@diceui/mention"]
     },
     {
       "name": "popover",
@@ -647,9 +590,7 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": [
-        "@radix-ui/react-popover"
-      ]
+      "dependencies": ["@radix-ui/react-popover"]
     },
     {
       "name": "select",
@@ -662,10 +603,7 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": [
-        "@radix-ui/react-select",
-        "lucide-react"
-      ]
+      "dependencies": ["@radix-ui/react-select", "lucide-react"]
     },
     {
       "name": "separator",
@@ -678,10 +616,7 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": [
-        "@radix-ui/react-separator",
-        "class-variance-authority"
-      ]
+      "dependencies": ["@radix-ui/react-separator", "class-variance-authority"]
     },
     {
       "name": "slider",
@@ -694,9 +629,7 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": [
-        "@radix-ui/react-slider"
-      ]
+      "dependencies": ["@radix-ui/react-slider"]
     },
     {
       "name": "switch",
@@ -709,9 +642,7 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": [
-        "radix-ui"
-      ]
+      "dependencies": ["radix-ui"]
     },
     {
       "name": "tabs",
@@ -724,9 +655,7 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": [
-        "@radix-ui/react-tabs"
-      ]
+      "dependencies": ["@radix-ui/react-tabs"]
     },
     {
       "name": "textarea",
@@ -751,18 +680,63 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": [
-        "@radix-ui/react-tooltip"
-      ]
+      "dependencies": ["@radix-ui/react-tooltip"]
     },
     {
       "name": "joyco-theme",
       "type": "registry:theme",
       "title": "JOYCO Theme",
       "description": "JOYCO brand theme with light and dark mode color tokens.",
+      "css": {
+        "@layer base": {
+          "*": {
+            "scrollbar-width": "thin",
+            "scrollbar-color": "var(--accent) transparent"
+          },
+          "*::-webkit-scrollbar": {
+            "-webkit-appearance": "none",
+            "width": "12px",
+            "height": "12px",
+            "background-color": "transparent"
+          },
+          "*::-webkit-scrollbar-track": {
+            "-webkit-appearance": "none",
+            "background-color": "transparent",
+            "border-radius": "0"
+          },
+          "*::-webkit-scrollbar-thumb": {
+            "-webkit-appearance": "none",
+            "background-color": "var(--accent)",
+            "border-radius": "0",
+            "border": "2px solid transparent",
+            "background-clip": "padding-box"
+          },
+          "*::-webkit-scrollbar-thumb:hover": {
+            "background-color": "color-mix(in oklab, var(--accent) 80%, var(--foreground))"
+          },
+          "*::-webkit-scrollbar-corner": {
+            "background-color": "transparent"
+          }
+        }
+      },
       "cssVars": {
         "theme": {
-          "radius": "0rem"
+          "radius": "0rem",
+          "font-sans": "var(--font-public-sans)",
+          "font-mono": "var(--font-roboto-mono)",
+          "default-font-family": "var(--font-sans)",
+          "default-font-family-mono": "var(--font-mono)",
+          "text-base--letter-spacing": "-0.015em",
+          "text-lg--letter-spacing": "-0.02em",
+          "text-xl--letter-spacing": "-0.025em",
+          "text-2xl--letter-spacing": "-0.03em",
+          "text-3xl--letter-spacing": "-0.03em",
+          "text-4xl--letter-spacing": "-0.03em",
+          "text-5xl--letter-spacing": "-0.03em",
+          "text-6xl--letter-spacing": "-0.03em",
+          "text-7xl--letter-spacing": "-0.03em",
+          "text-8xl--letter-spacing": "-0.03em",
+          "text-9xl--letter-spacing": "-0.03em"
         },
         "light": {
           "background": "oklch(1 0 0)",
