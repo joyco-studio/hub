@@ -96,7 +96,7 @@ export async function CategoryIndex({
                       {displayTitle}
                     </span>
                     {viewsMap?.get(page.url) != null && (
-                      <span className="text-muted-foreground flex shrink-0 items-center gap-1 text-xs tabular-nums">
+                      <span className="text-muted-foreground flex shrink-0 items-center gap-1 self-center text-xs tabular-nums">
                         <EyeIcon className="size-3" />
                         {viewsMap.get(page.url)!.toLocaleString()}
                       </span>
