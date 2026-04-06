@@ -11,7 +11,7 @@ function getClientIp(request: NextRequest): string {
   )
 }
 
-async function trackDownload(componentName: string, countryCode: string) {
+async function trackDownload(componentName: string, countryCode: string | null) {
   if (!JOYCO_WORKER_SECRET) {
     console.error(`[Registry Download] No worker secret found`)
     return
@@ -66,7 +66,7 @@ export async function trackRegistryDownload(
 
   if (lastSeen && now - lastSeen <= DEDUP_TTL) return
 
-  const countryCode = request.headers.get('x-vercel-ip-country') ?? 'unknown'
+  const countryCode = request.headers.get('x-vercel-ip-country') ?? null
 
   memoryDownloads.set(key, now)
   await trackDownload(componentName, countryCode)
