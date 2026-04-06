@@ -1,0 +1,311 @@
+---
+title: 13 - Images on the Web
+description: What the browser actually does with your images — intrinsic vs rendered size, srcset, weight, bitmap decoding, and the 2x rule for retina displays.
+author: 'matiasperz'
+---
+
+Images are the heaviest assets on most pages. They account for more transferred bytes than JS, CSS, and fonts combined on the median website. Yet most developers ship them without understanding what the browser is actually doing under the hood — how it picks a source, how it decodes pixels, and why a "small" image can still be 2MB.
+
+## What the inspector is telling you
+
+When you hover over an image in DevTools, you'll see three pieces of information:
+
+- **Rendered size** — the dimensions the image occupies on screen after CSS is applied (e.g., `400×300`).
+- **Intrinsic size** — the actual pixel dimensions of the image file itself (e.g., `1200×900`).
+- **File size (weight)** — how many bytes were transferred over the network (e.g., `287 kB`).
+
+These three numbers tell you almost everything you need to know about whether an image is optimized or not.
+
+If the intrinsic size is much larger than the rendered size, you're downloading pixels the user will never see. The browser has to decode the full intrinsic resolution and then downsample it to the rendered size. You're paying the network cost, the memory cost, and the decode cost of those extra pixels for nothing.
+
+```
+Intrinsic: 3000×2000 (6 million pixels)
+Rendered:  300×200   (60,000 pixels)
+
+You decoded 100x more pixels than needed.
+```
+
+If the intrinsic size is _smaller_ than the rendered size, the browser upscales the image — it looks blurry. This is especially noticeable on retina displays where the rendered CSS pixels map to 2× or 3× physical pixels.
+
+The ideal state: the intrinsic size matches (or is close to) the rendered size multiplied by the device pixel ratio. More on that in [the retina section](#retina-and-the-2x-rule).
+
+## Weight: what you're actually downloading
+
+An image's file size is not its pixel data. To understand weight, you need to understand the difference between a **bitmap** and an **image container**.
+
+### Bitmap
+
+A bitmap is a grid of pixels. Each pixel stores color information. An uncompressed 1000×1000 image at 32 bits per pixel (8 bits each for R, G, B, A) is:
+
+```
+1000 × 1000 × 4 bytes = 4,000,000 bytes ≈ 3.8 MB
+```
+
+That's the _decoded_ size — what the image occupies in memory once the browser has decompressed it. This is also what DevTools shows as "resource size" or "decoded body" for images.
+
+### Image container (the file format)
+
+The file you download is not a raw bitmap. It's a **container** that wraps compressed pixel data along with metadata. The container format (JPEG, PNG, WebP, AVIF) determines:
+
+- **Compression algorithm** — how the pixel data is compressed. JPEG uses DCT-based lossy compression (discards information humans don't notice). PNG uses lossless DEFLATE. WebP and AVIF use more modern algorithms that achieve better ratios at the same quality.
+- **Metadata** — EXIF data (camera info, GPS coordinates, orientation), ICC color profiles, animation data. This can add 10-100+ kB that has nothing to do with pixels. Strip it.
+- **Color space and bit depth** — whether the image uses sRGB, Display P3, 8-bit or 10-bit channels. Wider gamut and higher bit depth means more bytes per pixel.
+
+The **weight** you see in DevTools is the compressed container size — what traveled over the network. The **memory cost** is the decoded bitmap size, which is always larger (often 10-50× larger for well-compressed images).
+
+```
+File on disk (WebP):    87 kB   ← what the user downloads
+Decoded bitmap in RAM: 3.8 MB   ← what the browser allocates in memory
+```
+
+This distinction matters because:
+
+1. A 100 kB image can still use 8 MB of memory once decoded (large intrinsic dimensions).
+2. Switching from JPEG to WebP reduces _transfer_ weight but doesn't change _memory_ weight — the decoded bitmap is the same size regardless of container format.
+3. The only way to reduce memory weight is to reduce the intrinsic pixel dimensions.
+
+### Format comparison
+
+| Format | Compression | Transparency | Animation | Browser support |
+|---|---|---|---|---|
+| JPEG | Lossy | No | No | Universal |
+| PNG | Lossless | Yes | No | Universal |
+| GIF | Lossless (limited palette) | Yes (1-bit) | Yes | Universal |
+| WebP | Lossy or lossless | Yes | Yes | ~97% |
+| AVIF | Lossy or lossless | Yes | Yes | ~92% |
+
+For photos: AVIF > WebP > JPEG. For graphics with transparency: WebP > PNG. Use the `<picture>` element to serve modern formats with fallbacks:
+
+```html
+<picture>
+  <source srcset="/hero.avif" type="image/avif" />
+  <source srcset="/hero.webp" type="image/webp" />
+  <img src="/hero.jpg" alt="Hero image" />
+</picture>
+```
+
+## `srcset` and `sizes`: letting the browser choose
+
+Most developers set a single `src` and call it a day. The problem: a phone on a 375px viewport downloads the same 2400px-wide hero image as a 27" monitor. The `srcset` and `sizes` attributes fix this by giving the browser a menu of image sources and telling it when to use each one.
+
+### `srcset` with width descriptors
+
+```html
+<img
+  src="/hero-800.jpg"
+  srcset="
+    /hero-400.jpg   400w,
+    /hero-800.jpg   800w,
+    /hero-1200.jpg 1200w,
+    /hero-1600.jpg 1600w,
+    /hero-2400.jpg 2400w
+  "
+  sizes="(max-width: 768px) 100vw, 50vw"
+  alt="Hero"
+/>
+```
+
+The `w` descriptor tells the browser the **intrinsic width** of each source file. `400w` means "this file is 400 pixels wide." The browser uses this plus the `sizes` attribute to pick the best source.
+
+### `sizes`: telling the browser how big the image will be
+
+`sizes` tells the browser the **rendered width** of the image at different viewport sizes, _before_ layout happens. This is critical because the browser starts downloading images during HTML parsing, before CSS is loaded or layout is computed. It needs `sizes` to know how wide the image will actually be on screen.
+
+```html
+sizes="(max-width: 768px) 100vw, 50vw"
+```
+
+This reads as: "On viewports up to 768px, this image will be 100% of the viewport width. On anything wider, it'll be 50%."
+
+### How the browser picks a source
+
+The browser combines `sizes` with the device pixel ratio (DPR) to calculate the ideal intrinsic width:
+
+```
+Ideal intrinsic width = rendered width × DPR
+```
+
+**Example:** A user on a 375px-wide phone with a 2× retina display.
+
+1. `sizes` says the image will be `100vw` → rendered width = 375px.
+2. DPR is 2× → ideal intrinsic width = 375 × 2 = 750px.
+3. The browser scans `srcset` and picks the closest match ≥ 750px → `hero-800.jpg`.
+
+**Same page, desktop user** on a 1440px viewport with 1× DPR:
+
+1. `sizes` says the image will be `50vw` → rendered width = 720px.
+2. DPR is 1× → ideal intrinsic width = 720px.
+3. The browser picks `hero-800.jpg`.
+
+**Desktop, retina display** (1440px viewport, 2× DPR):
+
+1. `sizes` → 720px rendered.
+2. DPR 2× → ideal intrinsic width = 1440px.
+3. The browser picks `hero-1600.jpg`.
+
+Without `srcset` and `sizes`, all three users would download `hero-2400.jpg`. With it, you're saving 50-80% of transferred bytes for most users.
+
+### Common mistakes
+
+**Missing `sizes`.** If you provide `srcset` with `w` descriptors but no `sizes`, the browser defaults to `sizes="100vw"` — it assumes the image is full-width. On a desktop where the image is actually 300px wide in a sidebar, the browser will download a source way too large.
+
+**`sizes` doesn't match your CSS.** `sizes` is a _hint_ — the browser trusts it. If your `sizes` says `50vw` but your CSS makes the image `100vw`, the browser will download a source that's half the resolution you need. Keep `sizes` in sync with your layout.
+
+**Using `srcset` with pixel density descriptors for responsive images.** A responsive image is one whose rendered size changes depending on the viewport — a hero image that's `100vw` on mobile but `50vw` on desktop, or a product card image inside a grid that reflows. The `x` descriptor (`1x`, `2x`) tells the browser about device pixel ratio but says nothing about rendered size. It's designed for fixed-size images (icons, logos), not responsive images that change size across viewports:
+
+```html
+<!-- x descriptors: for fixed-size images only -->
+<img
+  src="/logo-100.png"
+  srcset="/logo-100.png 1x, /logo-200.png 2x"
+  alt="Logo"
+/>
+
+<!-- w descriptors + sizes: for responsive images -->
+<img
+  src="/photo-800.jpg"
+  srcset="/photo-400.jpg 400w, /photo-800.jpg 800w, /photo-1600.jpg 1600w"
+  sizes="(max-width: 768px) 100vw, 50vw"
+  alt="Photo"
+/>
+```
+
+## Decoding
+
+When the browser receives a compressed image file, it has to **decode** it — decompress the pixel data from the container format into a raw bitmap in memory. This decode step is actual CPU work, and it can be slow.
+
+### How decoding works
+
+1. The compressed bytes arrive from the network (or cache).
+2. The browser's image decoder reads the container headers (format, dimensions, color profile).
+3. The pixel data is decompressed into a raw bitmap buffer (the decoded size we talked about earlier).
+4. The bitmap is uploaded to a GPU texture for compositing/painting.
+
+### When decoding is slow
+
+**Large intrinsic dimensions.** Decoding time roughly scales with pixel count. A 4000×3000 image (12 million pixels) takes noticeably longer to decode than a 800×600 image (480,000 pixels) — we're talking 25× more pixels to decompress.
+
+**Complex compression formats.** AVIF achieves better compression ratios than JPEG partly because its decoder does more work. On older/slower devices, AVIF decode can be 2-5× slower than JPEG for the same pixel count. WebP sits in between. This is the trade-off: smaller file = less network time, but more CPU time to decode.
+
+**Decoding on the main thread.** By default, browsers try to decode images off the main thread. But there are situations where decoding happens synchronously on the main thread and blocks rendering:
+
+- When an image first appears in the viewport and needs to be painted _now_.
+- On some browsers, when images are added to the DOM dynamically via JS.
+- When memory pressure forces the browser to re-decode a previously evicted bitmap.
+
+### The `decoding` attribute
+
+```html
+<!-- Let the browser decode asynchronously (won't block rendering) -->
+<img src="/photo.jpg" decoding="async" alt="Photo" />
+
+<!-- Force synchronous decoding (blocks until decoded) -->
+<img src="/photo.jpg" decoding="sync" alt="Photo" />
+
+<!-- Let the browser decide (default) -->
+<img src="/photo.jpg" decoding="auto" alt="Photo" />
+```
+
+`decoding="async"` tells the browser it's fine to show the frame without this image if decoding isn't done yet. The image will pop in once decoded. This is what you want for below-the-fold content — it prevents large images from blocking the first paint.
+
+`decoding="sync"` forces the browser to wait. Use this only for critical above-the-fold images where a flash of missing content would be worse than a slightly delayed frame. The LCP image, for example, where you want it decoded before the frame is presented.
+
+### `loading="lazy"` and decoding
+
+Lazy loading (`loading="lazy"`) defers both the _download_ and the _decode_ until the image approaches the viewport. Combine it with `decoding="async"` for below-the-fold images:
+
+```html
+<!-- Above the fold: load eagerly, decode synchronously -->
+<img src="/hero.jpg" loading="eager" decoding="sync" alt="Hero" />
+
+<!-- Below the fold: load lazily, decode asynchronously -->
+<img src="/photo.jpg" loading="lazy" decoding="async" alt="Photo" />
+```
+
+## Retina and the 2x rule
+
+A "retina" display has a device pixel ratio (DPR) greater than 1. Most modern phones are 2× or 3×. A MacBook Pro is 2×. This means a 100×100 CSS pixel area is actually rendered with 200×200 physical pixels on a 2× display.
+
+If your image's intrinsic size matches the CSS rendered size (e.g., both are 400×300), it will look crisp on a 1× display but **blurry on a 2× display** — the browser has to stretch 400×300 decoded pixels across 800×600 physical pixels.
+
+### The rule
+
+For an image rendered at `W × H` CSS pixels on a display with DPR `D`:
+
+```
+Required intrinsic size = W × D   by   H × D
+```
+
+On a 2× display, an image rendered at 400×300 CSS pixels needs a 800×600 intrinsic size to look sharp. This is the **2x rule**.
+
+### The trade-off
+
+Serving 2× images to everyone means:
+
+- **4× the pixel count** (width doubles, height doubles → 2 × 2 = 4× pixels).
+- **~2-4× the file weight** (compression helps, so it's not a perfect 4× increase, but it's significant).
+- **4× the decoded memory cost** (this one is exact — bitmap memory is pixel count × bytes per pixel).
+
+This is why `srcset` matters. You don't want to serve a 2× image to a 1× display:
+
+```html
+<img
+  src="/avatar-100.jpg"
+  srcset="/avatar-100.jpg 1x, /avatar-200.jpg 2x, /avatar-300.jpg 3x"
+  width="100"
+  height="100"
+  alt="Avatar"
+/>
+```
+
+A 1× device gets the 100×100 file (small). A 2× device gets the 200×200 file (4× more pixels but looks sharp). A 3× device gets the 300×300 file.
+
+### Practical thresholds
+
+You might wonder: do I need to go beyond 2×? For most images, **2× is enough**, even on 3× displays. Here's why:
+
+- At 3× DPR, individual physical pixels are extremely small (~0.08mm on a phone). The difference between 2× and 3× is nearly imperceptible for photos at typical viewing distances.
+- The weight difference between 2× and 3× sources is substantial (2.25× more pixels).
+- Most image content (photos, illustrations) doesn't have enough fine detail to benefit from the extra resolution.
+
+The exception is **text rendered in images**, logos with thin lines, and icons with single-pixel strokes. These benefit from 3× because aliasing artifacts are more visible on geometric shapes than on organic photo content.
+
+### A practical setup
+
+```html
+<img
+  srcset="
+    /product-400.webp   400w,
+    /product-800.webp   800w,
+    /product-1200.webp 1200w
+  "
+  sizes="(max-width: 640px) 100vw, 400px"
+  src="/product-800.webp"
+  alt="Product photo"
+  width="400"
+  height="400"
+  loading="lazy"
+  decoding="async"
+/>
+```
+
+On a 640px phone at 2× DPR → rendered at 640px → needs 1280w → gets `product-1200.webp`.
+On a desktop at 1× DPR → rendered at 400px → needs 400w → gets `product-400.webp`.
+On a desktop at 2× DPR → rendered at 400px → needs 800w → gets `product-800.webp`.
+
+Each user downloads only what they need. No wasted pixels, no blurry images.
+
+## The mental model
+
+The browser is doing a lot of work with your images: downloading compressed containers, decompressing bitmaps, allocating memory, uploading textures to the GPU, and compositing them into the final frame. Most of it is invisible until it isn't — until your LCP is 4 seconds because you're decoding a 4000px JPEG on a phone, or your page uses 800 MB of memory because 20 high-res images are all decoded at once.
+
+The levers you have:
+
+- **Intrinsic size** controls memory cost and decode time. Make it as small as possible for the rendered context.
+- **Container format** controls transfer weight. Use modern formats (AVIF, WebP) with fallbacks.
+- **`srcset` + `sizes`** lets the browser pick the right intrinsic size per device. Use `w` descriptors for responsive images, `x` descriptors for fixed-size assets.
+- **`loading`** controls _when_ the download happens. Lazy-load everything below the fold.
+- **`decoding`** controls _how_ the decode interacts with rendering. Async for non-critical images, sync for LCP.
+- **The 2x rule** ensures retina sharpness without overshooting. 2× is the sweet spot for almost everything.
+
+None of these are set-and-forget. The right combination depends on where the image sits in the page, how large it renders, what devices your users have, and what your performance budget allows.
