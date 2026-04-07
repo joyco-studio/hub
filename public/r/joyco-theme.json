@@ -92,6 +92,9 @@
     }
   },
   "css": {
+    "@custom-variant hocus (&:is(:hover, :focus-visible))": {},
+    "@custom-variant dark (&:where(.dark, .dark *))": {},
+    "@custom-variant light (&:where(.light, .light *))": {},
     "@layer base": {
       "*": {
         "scrollbar-width": "thin",

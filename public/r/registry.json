@@ -688,6 +688,9 @@
       "title": "JOYCO Theme",
       "description": "JOYCO brand theme with light and dark mode color tokens.",
       "css": {
+        "@custom-variant hocus (&:is(:hover, :focus-visible))": {},
+        "@custom-variant dark (&:where(.dark, .dark *))": {},
+        "@custom-variant light (&:where(.light, .light *))": {},
         "@layer base": {
           "*": {
             "scrollbar-width": "thin",
@@ -826,6 +829,9 @@
       "title": "JOYCO UI",
       "description": "The full JOYCO UI kit — all components and brand theming.",
       "css": {
+        "@custom-variant hocus (&:is(:hover, :focus-visible))": {},
+        "@custom-variant dark (&:where(.dark, .dark *))": {},
+        "@custom-variant light (&:where(.light, .light *))": {},
         "@layer base": {
           "*": {
             "scrollbar-width": "thin",
