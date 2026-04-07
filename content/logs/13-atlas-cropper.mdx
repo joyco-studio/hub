@@ -1,0 +1,110 @@
+---
+title: 13 - Atlas Cropper
+description: A visual tool for defining, arranging, and extracting crop regions from atlas images — built for texture workflows where precision matters.
+author: 'matiasperz'
+---
+
+## The problem
+
+You have a single atlas image — a spritesheet, a texture map, a design comp — and you need to extract specific rectangular regions from it. Maybe you need those crops mapped onto other images. Maybe you need their coordinates exported as JSON for a renderer. Maybe both.
+
+The usual workflow is painful: open Photoshop, eyeball coordinates, manually note pixel values, re-export every time something shifts. For game dev and WebGL work, where atlases are the standard unit of delivery, this cycle repeats constantly.
+
+Atlas Cropper is a browser-based tool we built to replace that entire loop. Define crops visually, arrange them in a layout, export the config, and batch-extract UV crops — all from a single interface.
+
+## How it works
+
+The tool is organized into four sequential tabs, each handling one stage of the workflow:
+
+### 1. Crop Definition
+
+Upload an atlas image (drag-and-drop or file picker) and draw rectangular regions directly on it. Each crop gets a unique name and color for identification.
+
+The editor behaves like you'd expect from a design tool:
+
+- **Click and drag** to create or move crops
+- **Grab handles** to resize (8-point: corners + edges)
+- **Shift + drag** on a corner to lock aspect ratio
+- **Alt + drag** on an existing crop to duplicate it
+- **Arrow keys** to nudge (1px, or 10px with Shift)
+- **Magnetic snapping** aligns crops to edges and centers of neighboring regions — toggle with `S`, bypass with `Alt`
+
+The canvas is infinite. Middle-click drag to pan, `Ctrl+scroll` to zoom (cursor-centered). `Cmd+0` fits everything to view.
+
+### 2. Layout Arrangement
+
+Position your defined crops in 2D space. Each crop has `x`, `y`, and `z-index` coordinates. This is where you define how the crops relate to each other spatially — useful when your atlas regions need to be reassembled or composited in a specific arrangement.
+
+Features carry over from the crop editor (snapping, pan/zoom, keyboard shortcuts), plus:
+
+- **Origin controls** — define a reference point in absolute pixels or percentages
+- **Constrain mode** — clamp crops within image bounds (`C` to toggle)
+- **Background overlay** — 30% opacity atlas image for reference (`B` to toggle)
+- **Sidebar reordering** — drag crop items to reorder draw priority
+
+### 3. Output
+
+Generates a JSON configuration for the defined crops:
+
+```json
+{
+  "atlasSize": { "width": 1024, "height": 1024 },
+  "crops": [
+    {
+      "crop": { "x": 10, "y": 10, "width": 256, "height": 256 },
+      "position": [0, 0, 0]
+    }
+  ]
+}
+```
+
+One-click copy to clipboard. This is the bridge between the visual tool and whatever consumes the crop data — a game engine, a WebGL shader, a build pipeline.
+
+### 4. UV Crop
+
+Upload one or more base images and associate each with a defined crop. The tool scales the crop coordinates from the atlas dimensions to each target image's dimensions, then extracts the corresponding region.
+
+- **Individual download** as PNG
+- **Batch download** as a ZIP archive
+- **Drag-and-drop** upload for base images
+
+This is where atlas definitions become actual image files you can drop into a project.
+
+## Quality-of-life details
+
+A few things that make repeated use less painful:
+
+| Feature | Shortcut |
+|---------|----------|
+| Add crop | `A` |
+| Delete selected | `Delete` / `Backspace` |
+| Deselect | `Escape` |
+| Undo / Redo | `Cmd+Z` / `Cmd+Shift+Z` |
+| Switch tabs | `1` `2` `3` `4` |
+| Toggle snap | `S` |
+| Toggle background | `B` |
+| Toggle constrain | `C` |
+| Fit to view | `Cmd+0` |
+| Zoom in/out | `Cmd+` / `Cmd-` |
+
+Full undo/redo history (up to 50 snapshots). Save and load crop configurations as JSON files so you can pick up where you left off.
+
+## Why not just use Photoshop / Figma?
+
+Two reasons:
+
+1. **Structured output.** Design tools give you pixels. Atlas Cropper gives you a JSON config with exact coordinates and spatial relationships. No manual transcription of values into code.
+
+2. **UV mapping.** The crop-to-image pipeline lets you define regions once on an atlas and then apply those regions to any number of target images. Resizing is handled automatically. This isn't something general-purpose design tools are built for.
+
+The tool is purpose-built for the specific loop of: define regions on an atlas, export coordinates, extract those regions from other images. It does that loop well and nothing else.
+
+{/* ## Our use case
+
+TODO: Add the specific Joyco use case here — what project drove the need, what the atlas workflow looks like in practice, before/after.
+
+*/}
+
+## Links
+
+- [GitHub Repository](https://github.com/joyco-studio/atlas-cropper)
