@@ -9,10 +9,6 @@ export async function proxy(request: NextRequest) {
     await trackRegistryDownload(request)
   }
 
-  if (pathname === '/toolbox/ui' && !request.cookies.has('joyco-team')) {
-    return NextResponse.redirect(new URL('/', request.url))
-  }
-
   if (request.nextUrl.searchParams.get('joyco') === '1') {
     const response = NextResponse.next()
     response.cookies.set('joyco-team', '1', {
@@ -21,6 +17,10 @@ export async function proxy(request: NextRequest) {
       sameSite: 'lax',
     })
     return response
+  }
+
+  if (pathname === '/toolbox/ui' && !request.cookies.has('joyco-team')) {
+    return NextResponse.redirect(new URL('/', request.url))
   }
 
   return NextResponse.next()
