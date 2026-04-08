@@ -1,3 +1,5 @@
+'use client'
+
 import { useSyncExternalStore } from 'react'
 
 function getSnapshot() {
@@ -8,9 +10,8 @@ function getServerSnapshot() {
   return false
 }
 
-function subscribe(callback: () => void) {
-  const interval = setInterval(callback, 2000)
-  return () => clearInterval(interval)
+function subscribe() {
+  return () => {}
 }
 
 export function useIsTeam() {
