@@ -19,6 +19,10 @@ export async function proxy(request: NextRequest) {
     return response
   }
 
+  if (pathname === '/toolbox/ui' && !request.cookies.has('joyco-team')) {
+    return NextResponse.redirect(new URL('/', request.url))
+  }
+
   return NextResponse.next()
 }
 
