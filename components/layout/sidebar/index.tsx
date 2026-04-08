@@ -13,6 +13,7 @@ import { LabSidebarSection } from './lab-section'
 import { SocialLinks } from './social-links'
 import { NavAside } from '../nav-aside'
 import { useSearch } from '@/hooks/use-search'
+import { useIsTeam } from '@/hooks/use-team-cookie'
 import type { Experiment } from '@/lib/lab'
 
 export type { SidebarItemMeta }
@@ -34,6 +35,14 @@ export function RegistrySidebar({
   canvasSlugs = [],
   experiments = [],
 }: RegistrySidebarProps) {
+  const isTeam = useIsTeam()
+  const resolvedMeta = React.useMemo(
+    () =>
+      isTeam
+        ? { ...itemMeta, '/toolbox/ui': { badge: 'internal' as const } }
+        : itemMeta,
+    [isTeam, itemMeta]
+  )
   const pathname = usePathname()
   const router = useRouter()
   const {
@@ -106,7 +115,7 @@ export function RegistrySidebar({
         <SidebarSection
           folder={folder}
           defaultOpen
-          meta={itemMeta}
+          meta={resolvedMeta}
           gameSlugs={gameSlugs}
           effectSlugs={effectSlugs}
           canvasSlugs={canvasSlugs}
