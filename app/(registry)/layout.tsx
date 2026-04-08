@@ -1,5 +1,4 @@
 import type { CSSProperties } from 'react'
-import { cookies } from 'next/headers'
 import {
   source,
   getGameSlugs,
@@ -16,21 +15,19 @@ import { MobileNav } from '@/components/layout/mobile-nav'
 import { getExperiments } from '@/lib/lab'
 import { CommandPalette } from '@/components/layout/command-palette'
 
-export default async function Layout({ children }: LayoutProps<'/'>) {
-  const cookieStore = await cookies()
-  const isTeam = cookieStore.has('joyco-team')
-
-  const itemMeta: Record<
-    string,
-    {
-      badge?: 'new' | 'updated' | 'internal'
-      dot?: 'red' | 'blue' | 'green' | 'yellow'
-      hidden?: boolean
-    }
-  > = {
-    '/toolbox/skills': { badge: 'new' },
-    '/toolbox/ui': isTeam ? { badge: 'internal' } : { hidden: true },
+const itemMeta: Record<
+  string,
+  {
+    badge?: 'new' | 'updated' | 'internal'
+    dot?: 'red' | 'blue' | 'green' | 'yellow'
+    hidden?: boolean
   }
+> = {
+  '/toolbox/skills': { badge: 'new' },
+  '/toolbox/ui': { hidden: true },
+}
+
+export default async function Layout({ children }: LayoutProps<'/'>) {
   const gameSlugs = getGameSlugs()
   const effectSlugs = getEffectSlugs()
   const canvasSlugs = getCanvasSlugs()

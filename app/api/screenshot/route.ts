@@ -108,7 +108,7 @@ const getCachedExperimentScreenshot = unstable_cache(
     )
   },
   ['experiment-screenshot'],
-  { revalidate: 86400 }
+  { revalidate: 604800 }
 )
 
 export async function GET(request: NextRequest) {
@@ -139,7 +139,7 @@ export async function GET(request: NextRequest) {
     return new NextResponse(imageBuffer, {
       headers: {
         'Content-Type': 'image/png',
-        'Cache-Control': 'public, s-maxage=31536000',
+        'Cache-Control': 'public, max-age=604800, s-maxage=604800, stale-while-revalidate=86400',
       },
     })
   } catch (error) {
