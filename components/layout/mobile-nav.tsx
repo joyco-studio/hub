@@ -16,6 +16,7 @@ import FileIcon from '@/components/icons/file'
 import FlaskIcon from '@/components/icons/flask'
 import type { SidebarItemMeta } from './sidebar/section'
 import type { Experiment } from '@/lib/lab'
+import { useIsTeam } from '@/hooks/use-team-cookie'
 import { MetaBadge } from '@/components/layout/meta-badge'
 import { SearchResults } from './sidebar/search-results'
 import { NoResults } from './sidebar/no-results'
@@ -52,9 +53,17 @@ const sectionIcons: Record<
 
 export function MobileNav({
   tree,
-  itemMeta = {},
+  itemMeta: itemMetaProp = {},
   experiments = [],
 }: MobileNavProps) {
+  const isTeam = useIsTeam()
+  const itemMeta = React.useMemo(
+    () =>
+      isTeam
+        ? { ...itemMetaProp, '/toolbox/ui': { badge: 'internal' as const } }
+        : itemMetaProp,
+    [isTeam, itemMetaProp]
+  )
   const pathname = usePathname()
   const router = useRouter()
   const inputRef = React.useRef<HTMLInputElement>(null)
