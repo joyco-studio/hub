@@ -1,15 +1,16 @@
 {
   "pages": [
-    "quick-links",
-    "settings",
-    "tailwind",
-    "scripts",
-    "pr-guidelines",
+    "containers",
+    "ui",
     "pw-manager-ignore",
+    "skills",
+    "cw",
     "aliases",
     "agents",
-    "cw",
-    "skills",
-    "ui"
+    "pr-guidelines",
+    "tailwind",
+    "settings",
+    "quick-links",
+    "scripts"
   ]
 }
