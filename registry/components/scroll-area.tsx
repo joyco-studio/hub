@@ -117,7 +117,7 @@ export function ScrollAreaViewport({
       ? [
           {
             present: hasScrollTop,
-            position: 'left-0 top-0 right-2 h-8',
+            position: 'left-0 top-0 right-0 h-8',
             slide:
               'data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2',
             gradient:
@@ -126,7 +126,7 @@ export function ScrollAreaViewport({
           },
           {
             present: hasScrollBottom,
-            position: 'left-0 bottom-0 right-2 h-8',
+            position: 'left-0 bottom-0 right-0 h-8',
             slide:
               'data-[state=closed]:slide-out-to-bottom-2 data-[state=open]:slide-in-from-bottom-2',
             gradient:
@@ -137,7 +137,7 @@ export function ScrollAreaViewport({
       : [
           {
             present: hasScrollLeft,
-            position: 'inset-y-0 left-0 bottom-2 w-8',
+            position: 'inset-y-0 left-0 bottom-0 w-8',
             slide:
               'data-[state=closed]:slide-out-to-left-2 data-[state=open]:slide-in-from-left-2',
             gradient:
@@ -146,7 +146,7 @@ export function ScrollAreaViewport({
           },
           {
             present: hasScrollRight,
-            position: 'inset-y-0 right-0 bottom-2 w-8',
+            position: 'inset-y-0 right-0 bottom-0 w-8',
             slide:
               'data-[state=closed]:slide-out-to-right-2 data-[state=open]:slide-in-from-right-2',
             gradient:
@@ -221,10 +221,7 @@ export function ScrollAreaContent({
       ? 'overflow-x-auto overflow-y-hidden'
       : 'overflow-y-auto h-full'
 
-  const paddingClasses =
-    orientation === 'horizontal'
-      ? 'pb-2' // Padding bottom para empujar el scrollbar horizontal hacia abajo
-      : 'pr-2' // Padding right para empujar el scrollbar vertical hacia afuera
+  const paddingClasses = orientation === 'horizontal'
 
   return (
     <div
