@@ -35,6 +35,8 @@ import { cn } from '@/lib/utils'
 import { RegistryMetaProvider } from '@/components/registry-meta'
 import { PageGithubLinkButton } from '@/components/page-github-link-button'
 import { PageViews } from '@/components/layout/views'
+import { MDXContent } from '@/components/content'
+import { getLibraryReadme } from '@/lib/libraries'
 
 const getComponentSlug = (page: InferPageType<typeof source>) => {
   if (page.slugs[0] !== 'components') return undefined
@@ -91,9 +93,11 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
   })()
 
   const componentSlug = getComponentSlug(page)
-  const [downloadStats, pageViews] = await Promise.all([
+  const isLibrary = page.data.type === 'library' && page.data.repo
+  const [downloadStats, pageViews, libraryReadme] = await Promise.all([
     componentSlug ? getComponentDownloadStats(componentSlug) : null,
     isLog ? getPageViews(`/logs/${page.slugs[page.slugs.length - 1]}`) : null,
+    isLibrary ? getLibraryReadme(page.data.repo!) : null,
   ])
   const componentSource = await getComponentSource(componentSlug)
   const docLinks = [...page.data.docLinks]
@@ -101,7 +105,9 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
   const llmUrl = page.slugs.length === 0 ? null : `/${page.slugs.join('/')}.md`
   const relatedItems = getRelatedPages(page, 3)
 
-  const toc = page.data.toc
+  const toc = libraryReadme
+    ? [...page.data.toc, ...libraryReadme.toc]
+    : page.data.toc
   const hasToc = toc.length > 0
   const counts = getRegistryCounts()
 
@@ -187,6 +193,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
                 a: createRelativeLink(source, page),
               })}
             />
+            {libraryReadme && <MDXContent content={libraryReadme.cleaned} />}
           </div>
           {!isTopCategoryPage && relatedItems.length > 0 && (
             <RelatedItems

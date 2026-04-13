@@ -4,6 +4,7 @@ import {
   getGameSlugs,
   getEffectSlugs,
   getCanvasSlugs,
+  getLibrarySlugs,
 } from '@/lib/source'
 import { TreeContextProvider } from 'fumadocs-ui/contexts/tree'
 import {
@@ -31,6 +32,7 @@ export default async function Layout({ children }: LayoutProps<'/'>) {
   const gameSlugs = getGameSlugs()
   const effectSlugs = getEffectSlugs()
   const canvasSlugs = getCanvasSlugs()
+  const librarySlugs = getLibrarySlugs()
   const { experiments } = await getExperiments()
 
   return (
@@ -55,6 +57,7 @@ export default async function Layout({ children }: LayoutProps<'/'>) {
             gameSlugs={gameSlugs}
             effectSlugs={effectSlugs}
             canvasSlugs={canvasSlugs}
+            librarySlugs={librarySlugs}
             experiments={experiments}
           />
           {children}

@@ -24,6 +24,7 @@ type RegistrySidebarProps = {
   gameSlugs?: string[]
   effectSlugs?: string[]
   canvasSlugs?: string[]
+  librarySlugs?: string[]
   experiments?: Experiment[]
 }
 
@@ -33,6 +34,7 @@ export function RegistrySidebar({
   gameSlugs = [],
   effectSlugs = [],
   canvasSlugs = [],
+  librarySlugs = [],
   experiments = [],
 }: RegistrySidebarProps) {
   const isTeam = useIsTeam()
@@ -119,6 +121,7 @@ export function RegistrySidebar({
           gameSlugs={gameSlugs}
           effectSlugs={effectSlugs}
           canvasSlugs={canvasSlugs}
+          librarySlugs={librarySlugs}
         />
       </nav>
     )

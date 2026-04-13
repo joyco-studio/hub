@@ -4,7 +4,7 @@ This file is intended to used as **review guidance** for automated/agent code re
 
 ## CodeBlock component / shiki codeblock styling divergence
 
-The react codeblock component should avoid creating custom styles for itself, prefer styling shiki and it's elements from app/styles/shiki.css and and lib/shiki.ts
+The react codeblock component should avoid creating custom styles for itself, prefer styling shiki and it's elements from app/styles/shiki.css and and lib/mdx.ts
 
 ### Why
 

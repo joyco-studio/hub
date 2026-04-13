@@ -4,7 +4,7 @@ import {
   highlightCode,
   getLanguageFromExtension,
   stripFrontmatter,
-} from '@/lib/shiki'
+} from '@/lib/mdx'
 import { CodeBlock } from '@/components/code-block'
 
 export async function FileCodeblock({

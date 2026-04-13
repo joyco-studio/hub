@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import { getLanguageFromExtension, stripFrontmatter } from '@/lib/shiki'
+import { getLanguageFromExtension, stripFrontmatter } from '@/lib/mdx'
 
 /**
  * Validates that a path is within the project directory to prevent path traversal attacks
