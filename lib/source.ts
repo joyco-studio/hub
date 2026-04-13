@@ -97,6 +97,16 @@ export function getCanvasSlugs(): string[] {
     .map((page) => page.slugs[page.slugs.length - 1])
 }
 
+/**
+ * Get all library slugs based on frontmatter type: 'library'
+ */
+export function getLibrarySlugs(): string[] {
+  const allPages = source.getPages()
+  return allPages
+    .filter((page) => page.data.type === 'library')
+    .map((page) => page.slugs[page.slugs.length - 1])
+}
+
 export function getRelatedPages(
   currentPage: InferPageType<typeof source>,
   limit = 3
