@@ -11,7 +11,7 @@ import FileIcon from '@/components/icons/file'
 import FlaskIcon from '@/components/icons/flask'
 import GamepadIcon from '@/components/icons/gamepad'
 import TextScanIcon from '@/components/icons/text-scan'
-import { Frame, Minus, Plus } from 'lucide-react'
+import { Frame, Library, Minus, Plus } from 'lucide-react'
 import { getLogNumber, stripLogPrefixFromTitle } from '@/lib/log-utils'
 import { MetaBadge } from '@/components/layout/meta-badge'
 
@@ -214,6 +214,7 @@ type SidebarSectionProps = {
   gameSlugs?: string[]
   effectSlugs?: string[]
   canvasSlugs?: string[]
+  librarySlugs?: string[]
 }
 
 /**
@@ -227,6 +228,7 @@ export function SidebarSection({
   gameSlugs = [],
   effectSlugs = [],
   canvasSlugs = [],
+  librarySlugs = [],
 }: SidebarSectionProps) {
   const [isOpen, setIsOpen] = React.useState(defaultOpen)
   const pathname = usePathname()
@@ -309,7 +311,44 @@ export function SidebarSection({
     )
   }
 
-  // For other sections (Toolbox, Logs), render with collapsible header
+  // For toolbox section, split into General and Libraries
+  if (sectionId === 'toolbox' && librarySlugs.length > 0) {
+    const isLibrary = (url: string) => {
+      const slug = url.split('/').pop() ?? ''
+      return librarySlugs.includes(slug)
+    }
+
+    const pages = folder.children.filter(
+      (child): child is PageTree.Item => child.type === 'page'
+    )
+    const generalPages = pages.filter((page) => !isLibrary(page.url))
+    const libraryPages = pages.filter((page) => isLibrary(page.url))
+
+    return (
+      <div className="flex flex-col">
+        <CollapsibleSubSection
+          name="General"
+          icon={TerminalWithCursorIcon}
+          pages={generalPages}
+          meta={meta}
+          defaultOpen
+          sectionId={sectionId}
+        />
+        {libraryPages.length > 0 && (
+          <CollapsibleSubSection
+            name="Libraries"
+            icon={Library}
+            pages={libraryPages}
+            meta={meta}
+            defaultOpen
+            sectionId={sectionId}
+          />
+        )}
+      </div>
+    )
+  }
+
+  // For other sections (Logs), render with collapsible header
   return (
     <div className="flex flex-col">
       <button

@@ -3,7 +3,7 @@ import path from 'path'
 import { getRegistryExampleComponentFile } from '@/lib/registry-examples'
 import { CodeBlock } from '../code-block'
 import { CodeBlockTabs, type CodeTab } from '../code-block-tabs'
-import { highlightCode } from '@/lib/shiki'
+import { highlightCode } from '@/lib/mdx'
 
 function getLanguageFromPath(filePath: string): string {
   const ext = path.extname(filePath).slice(1)
@@ -24,7 +24,10 @@ export async function ComponentSource({
 }: {
   name?: string
   maxHeight?: number
-} & Omit<React.ComponentProps<typeof CodeBlock>, 'rawCode' | 'highlightedCode'>) {
+} & Omit<
+  React.ComponentProps<typeof CodeBlock>,
+  'rawCode' | 'highlightedCode'
+>) {
   if (!name) {
     return null
   }

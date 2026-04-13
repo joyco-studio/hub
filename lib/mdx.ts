@@ -1,4 +1,8 @@
+import { remarkGfm, remarkHeading } from 'fumadocs-core/mdx-plugins'
+import type { PluggableList } from 'unified'
 import { codeToHtml, type ShikiTransformer, BuiltinLanguage } from 'shiki'
+import rehypePrettyCode from 'rehype-pretty-code'
+
 import { cn } from './utils'
 
 export const LANGUAGE_MAP: Record<string, BuiltinLanguage> = {
@@ -33,10 +37,10 @@ export function stripFrontmatter(content: string): string {
  * Command Detection & Transformation
  **/
 
-const commandDetectors: ({
+const commandDetectors: {
   match: (raw: string) => boolean
   transform: (raw: string) => Record<string, string>
-})[] = [
+}[] = [
   {
     // npm install
     match: (raw) => raw.startsWith('npm install'),
@@ -134,7 +138,22 @@ export const transformers = [
       }
     },
   },
-] as ShikiTransformer[]
+] satisfies ShikiTransformer[]
+
+export const remarkPlugins: PluggableList = [remarkGfm, remarkHeading]
+
+export const rehypePlugins: PluggableList = [
+  [
+    rehypePrettyCode,
+    {
+      theme: {
+        dark: 'github-dark',
+        light: 'github-light-default',
+      },
+      transformers,
+    },
+  ],
+]
 
 export const codeClasses = {
   pre: "not-fumadocs-codeblock relative w-full overflow-auto p-4 has-[[data-slot='command-block']]:p-0 has-[[data-line-numbers]]:px-0",
@@ -162,8 +181,8 @@ export async function highlightCode(code: string, language: string = 'tsx') {
         line(node) {
           node.properties['data-line'] = ''
         },
-      }
-    ]
+      },
+    ],
   })
 
   return html
