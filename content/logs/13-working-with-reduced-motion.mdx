@@ -1,0 +1,232 @@
+---
+title: "Reduced motion and GSAP: The Invisible Collision Layer"
+author: 'justkahdri'
+---
+
+You ship a GSAP animation. It works perfectly. Then someone enables "Reduce motion" in macOS accessibility settings, and your carefully centered elements drift out of place. No visible error. No console warning. Just silently broken layout.
+
+This post breaks down why `prefers-reduced-motion` creates non-obvious bugs when you mix CSS-driven layout (Tailwind, vanilla CSS) with JS-driven animation (GSAP), and what to do about it.
+
+## The two transform systems
+
+Modern CSS has [three individual transform properties](https://web.dev/articles/css-individual-transform-properties) that replaced the old `transform` shorthand:
+
+```css
+translate: -50% -50%;
+rotate: 45deg;
+scale: 1.2;
+```
+
+These compose independently. The browser applies them in a fixed order: `translate` then `rotate` then `scale`. The old `transform` shorthand still works and applies on top:
+
+```css
+transform: matrix(...);
+```
+
+When all four are present, the final visual transform is:
+
+```
+translate × rotate × scale × transform
+```
+
+This matters because **GSAP doesn't use the individual CSS properties**. GSAP writes everything into a single `transform` string. And it's aware of the individual properties -- so when it first processes an element, it reads `translate`, `rotate`, and `scale` from the computed style, bakes them into its internal transform cache, and then **clears them**:
+
+```js
+// From GSAP's CSSPlugin (paraphrased)
+if (computedStyle.translate !== "none") {
+  style.transform = `translate3d(${computedStyle.translate}) ...`;
+  style.translate = "none";
+  style.rotate = "none";
+  style.scale = "none";
+}
+```
+
+From that point on, GSAP owns the entire transform pipeline for that element. The CSS `translate`, `rotate`, and `scale` properties are gone.
+
+## The `-50%` detection heuristic
+
+When GSAP reads a percentage-based `translate: -50% -50%` (common for centering an absolutely positioned element), it can't store percentages directly in its cache -- the cache works with pixels. So GSAP resolves the percentage to pixels via `getComputedStyle`, then uses a heuristic to detect if the value was `-50%`:
+
+```js
+cache.xPercent = (Math.round(target.offsetWidth / 2) === Math.round(-x)) ? -50 : 0;
+cache.yPercent = (Math.round(target.offsetHeight / 2) === Math.round(-y)) ? -50 : 0;
+```
+
+If the heuristic passes, GSAP stores `xPercent: -50` and uses percentage-based translate when rendering. If it fails (due to rounding, subpixel dimensions, or timing), GSAP stores `xPercent: 0` and bakes the pixel value into `x` instead.
+
+This heuristic works most of the time. But "most of the time" and "always" are different things.
+
+## Where `prefers-reduced-motion` enters
+
+The standard reduced motion reset looks like this:
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+This rule doesn't touch GSAP directly -- GSAP runs on JavaScript timers, not CSS transitions. But it creates **timing differences** that expose bugs:
+
+### 1. CSS transitions snap, GSAP doesn't
+
+If an element has a CSS transition (even an inherited one) and GSAP reads its transform during the transition, the resolved value depends on when the read happens. Without reduced motion, a 300ms transition might be mid-way when GSAP reads. With reduced motion, the same transition completes in 0.01ms -- effectively instant. The element's dimensions, position, or transform state at the moment GSAP initializes its cache can differ between the two modes.
+
+### 2. CSS animations complete immediately
+
+Any CSS `@keyframes` animation that affects layout or transform completes instantly with reduced motion. If GSAP initializes after an animation that would normally still be running, the element's state is different. This can affect the `-50%` heuristic: the element's `offsetWidth`/`offsetHeight` might differ if an animation was going to change them.
+
+### 3. Layout timing shifts
+
+The reduced motion rule doesn't just affect the animated element -- it affects **everything**. Parent containers, siblings, and wrapper elements all have their transitions snapped. This can cause layout to settle at a different time relative to when GSAP's `useGSAP` hook runs. If GSAP reads dimensions before layout has fully settled, the heuristic fails silently.
+
+### 4. Opacity timing reveals misalignment
+
+Many GSAP animations start elements at `opacity: 0` and fade them in as part of a choreographed sequence. Without reduced motion, the element is invisible during the frames where GSAP first processes its transform -- so even if the centering is slightly off, nobody sees it. With reduced motion, if a CSS fade-in completes instantly (0.01ms), the element becomes visible before GSAP has had a chance to set up its transform correctly. The misalignment was always there; reduced motion just removed the opacity mask that was hiding it.
+
+## The concrete bug
+
+Here's what happens with Tailwind v4 + GSAP when centering an absolutely positioned element:
+
+**Tailwind sets:**
+```css
+.element {
+  translate: -50% -50%;  /* CSS translate property */
+}
+```
+
+**GSAP processes the element (first tween or `gsap.set`):**
+1. Reads `computedStyle.translate` = `-50% -50%`
+2. Writes `style.transform = "translate3d(-50%, -50%, 0)"`
+3. Writes `style.translate = "none"`
+4. Reads the resulting matrix to extract pixel values
+5. Runs the `-50%` heuristic against `offsetWidth`/`offsetHeight`
+
+If step 5 succeeds: `xPercent: -50, yPercent: -50` -- centering works.
+If step 5 fails: `xPercent: 0, yPercent: 0` -- centering is lost, element anchors at top-left.
+
+With reduced motion, step 5 is more likely to fail because the element's dimensions at read time might differ from what the CSS percentage resolves to.
+
+Meanwhile, a sibling element (like a dot indicator) that GSAP never touches keeps its CSS `translate: -50% -50%` intact. Result: the GSAP-animated element and the CSS-only element are no longer co-centered.
+
+## The fix
+
+Don't rely on GSAP's heuristic detection. Be explicit.
+
+### Option A: Remove CSS translate, use GSAP's `xPercent`/`yPercent`
+
+Remove the Tailwind translate classes from elements GSAP will animate, and set centering explicitly in every tween:
+
+```tsx
+// Remove -translate-x-1/2 -translate-y-1/2 from className
+<div data-radar="glow" className="absolute rounded-full opacity-0" ... />
+```
+
+```ts
+// Include xPercent/yPercent in every tween that touches transform
+tl.to(glow, {
+  opacity: 1,
+  scale: 1.5,
+  xPercent: -50,
+  yPercent: -50,
+  duration: 0.35,
+  ease: 'power2.out'
+}, at)
+```
+
+This is compositor-friendly -- `xPercent`/`yPercent` compile to `translate()` inside the `transform` string. No additional pipeline stages.
+
+<Callout title="Why compositor-friendly matters" icon={<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>}>
+  Animating only `transform` and `opacity` skips Layout and Paint entirely — the compositor thread handles these on the GPU without touching the main thread. Any other property (like `top`, `left`, `width`, or `margin`) forces the browser back through the expensive stages of the [render pipeline](/logs/12-the-render-pipeline), blocking JavaScript and causing visible jank.
+</Callout>
+
+### Option B: Use `gsap.set()` to initialize before any tweens
+
+If you prefer keeping the centering visible in markup, initialize GSAP's cache explicitly before any timeline runs:
+
+```ts
+useGSAP(() => {
+  const glows = gsap.utils.toArray('[data-radar="glow"]', container)
+  gsap.set(glows, { xPercent: -50, yPercent: -50 })
+  // ... build timelines
+})
+```
+
+This forces GSAP to store `xPercent: -50` regardless of what the heuristic detects. But it's a footgun -- if someone later removes the `gsap.set` without understanding why it's there, the bug comes back.
+
+### Option C: Don't mix CSS and GSAP transforms on the same element
+
+The cleanest rule: if GSAP will ever animate any transform property on an element, **GSAP owns all transforms on that element**. Don't use Tailwind's `translate-*`, `scale-*`, or `rotate-*` classes on it. Set initial position with `left`/`top` (or `inset`) and let GSAP handle centering.
+
+This avoids the heuristic entirely. No detection, no rounding, no timing sensitivity.
+
+## General rules for `prefers-reduced-motion` + GSAP
+
+### 1. GSAP ignores `prefers-reduced-motion` by default
+
+GSAP has no built-in reduced motion support. Your JS animations run at full speed regardless of the OS setting. If you want to respect the preference, you need to handle it yourself:
+
+```ts
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+if (prefersReducedMotion) {
+  // Skip animations, jump to final state
+  gsap.set(elements, { opacity: 1, scale: 1, x: 0, y: 0 })
+} else {
+  // Run full animation
+  tl.from(elements, { opacity: 0, scale: 0.8, duration: 0.5 })
+}
+```
+
+### 2. The blanket `transition-duration: 0.01ms` rule is a sledgehammer
+
+It works for pure CSS sites. But when you mix CSS and JS animation systems, it creates invisible timing differences. Consider scoping it:
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  /* Only target elements NOT managed by GSAP */
+  :not([data-gsap-managed]) {
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+Or better: don't use a blanket rule at all. Instead, handle reduced motion per-component, deciding whether to skip the animation or show a simplified version.
+
+### 3. Test with reduced motion enabled from the start
+
+Don't treat reduced motion as an afterthought. Enable it in System Settings > Accessibility > Display > Reduce Motion and keep it on during development. Bugs caught early are trivial to fix; bugs caught after 50 animations are shipped are archaeology.
+
+In Chrome DevTools, you can emulate it without changing OS settings: Rendering tab > Emulate CSS media feature `prefers-reduced-motion`.
+
+### 4. Watch for GSAP's `_parseTransform` timing
+
+GSAP parses an element's transform the first time it creates a tween for that element. Whatever state the element is in at that moment becomes the baseline. If CSS transitions or animations haven't settled yet, the baseline is wrong.
+
+Symptoms:
+- Elements jump on first animation frame
+- Centering is off by a few pixels
+- Scale or rotation starts from unexpected values
+
+Fix: ensure GSAP initializes elements after all CSS animations/transitions have completed, or use `gsap.set()` to establish a known baseline.
+
+### 5. `motionPath` + `alignOrigin` is safe
+
+GSAP's `MotionPathPlugin` with `alignOrigin: [0.5, 0.5]` handles centering internally via matrix math and `transformOrigin`, not via `xPercent`/`yPercent`. It doesn't suffer from the heuristic issue. However, it does depend on `offsetWidth`/`offsetHeight` at initialization time, so the same timing caveats apply.
+
+## The mental model
+
+CSS and GSAP have overlapping authority over the `transform` property. When both try to manage it, you get undefined behavior that varies by timing, rounding, and environment.
+
+`prefers-reduced-motion` doesn't cause the bug. It changes the timing enough to expose a bug that was always there: two systems fighting over the same CSS property, with a rounding heuristic as the only mediator.
+
+The fix isn't about reduced motion. It's about ownership. Pick one system per element and stick with it:
+
+- **CSS-only elements**: use Tailwind's `translate-*`, `scale-*`, `rotate-*` freely. The reduced motion media query handles them.
+- **GSAP-animated elements**: use GSAP's `x`, `y`, `xPercent`, `yPercent`, `scale`, `rotation`. Don't set CSS transform properties on these elements. Handle reduced motion in JS.
+
+Two systems, one property, zero ambiguity.
