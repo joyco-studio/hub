@@ -1,5 +1,6 @@
 {
   "pages": [
+    "atlas-cropper",
     "containers",
     "ui",
     "pw-manager-ignore",
