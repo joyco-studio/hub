@@ -44,7 +44,7 @@ Features carry over from the crop editor (snapping, pan/zoom, keyboard shortcuts
 
 ### 3. Output
 
-Generates a JSON configuration for the defined crops:
+Generates a JSON configuration that fully describes the atlas setup:
 
 ```json
 {
@@ -57,6 +57,10 @@ Generates a JSON configuration for the defined crops:
   ]
 }
 ```
+
+- **`atlasSize`** — the canonical pixel dimensions of the source texture. Everything else is relative to this.
+- **`crop`** — size and position of each crop region in atlas space (origin: top-left). This is where the region lives on the source image.
+- **`position`** — where each crop lands in object space (`[x, y, z]`). Each crop positions itself relative to the defined object center, so the layout arrangement translates directly into spatial coordinates a renderer can consume.
 
 One-click copy to clipboard. This is the bridge between the visual tool and whatever consumes the crop data — a game engine, a WebGL shader, a build pipeline.
 
@@ -99,11 +103,35 @@ Two reasons:
 
 The tool is purpose-built for the specific loop of: define regions on an atlas, export coordinates, extract those regions from other images. It does that loop well and nothing else.
 
-{/* ## Our use case
+## Use case: Reconstructing a multi-layer parallax scene
 
-TODO: Add the specific Joyco use case here — what project drove the need, what the atlas workflow looks like in practice, before/after.
+You start with a single flat scene — one image with multiple characters or elements layered on top of each other — and you want to turn it into a parallax composition where each layer can move independently.
 
-*/}
+### 1. Crop Definition
+
+Load the full scene into the cropper and isolate each character or element's bounding box. Each crop captures one layer of the composition.
+
+<Figure src="https://placehold.co/800x450" alt="Crop regions drawn over a full parallax scene" width={800} height={450} />
+
+### 2. Layout Arrangement
+
+Reconstruct the original spatial arrangement — or tweak it. Here you're deciding where each layer will sit in the final parallax result. The positions you define here are the positions the renderer will use.
+
+<Figure src="https://placehold.co/800x450" alt="Layout tab showing repositioned crop layers" width={800} height={450} />
+
+### 3. UV Crop
+
+Download each crop separately using the original atlas image as the source. From here, you can use AI tools to eliminate overlaps between layers and fill in what's behind each character — generating the missing information that parallax will reveal when layers shift.
+
+<Figure src="https://placehold.co/800x450" alt="Individual crop extractions from the atlas" width={800} height={450} />
+
+### 4. Output
+
+Since your downloaded crops are the exact same size as the regions you defined, and positioned relative to atlas space, you can swap in the AI-filled versions directly. Each original overlap now has actual content to display when parallax kicks in.
+
+<Figure src="https://placehold.co/800x450" alt="Final parallax result with AI-filled layers" width={800} height={450} />
+
+In this workflow, the atlas size serves as the shared reference frame — everything gets a position and size relative to that same space, so the crops, the layout, the UV extractions, and the final parallax composition all stay in sync.
 
 ## Links
 
