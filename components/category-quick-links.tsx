@@ -73,7 +73,7 @@ export function CategoryQuickLinks() {
               className="object-contain md:hidden"
               src={sequences[1].getImagePath(18)}
               alt={sequences[1].name}
-              sizes="50vw"
+              sizes="100vw"
               fill
             />
           </CategoryCardLinkSplash>
@@ -108,7 +108,7 @@ export function CategoryQuickLinks() {
               className="object-contain md:hidden"
               src={sequences[2].getImagePath(18)}
               alt={sequences[2].name}
-              sizes="50vw"
+              sizes="100vw"
               fill
             />
           </CategoryCardLinkSplash>
@@ -143,7 +143,7 @@ export function CategoryQuickLinks() {
               className="object-contain md:hidden"
               src={sequences[0].getImagePath(18)}
               alt={sequences[0].name}
-              sizes="50vw"
+              sizes="100vw"
               fill
             />
           </CategoryCardLinkSplash>
