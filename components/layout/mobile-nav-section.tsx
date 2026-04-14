@@ -44,13 +44,13 @@ export function MobileNavSection({
       {href ? (
         <div
           className={cn(
-            'flex w-full items-center gap-3 px-4 text-left transition-colors',
+            'flex w-full items-stretch gap-1 text-left transition-colors',
             isActive && 'bg-accent'
           )}
         >
           <Link
             href={href}
-            className="flex flex-1 items-center gap-3 py-4 text-left transition-colors"
+            className="h-mobile-header bg-secondary flex flex-1 items-center gap-3 pl-4 text-left transition-colors"
           >
             {headerContent}
           </Link>
@@ -58,7 +58,7 @@ export function MobileNavSection({
             type="button"
             aria-expanded={isOpen}
             aria-label={isOpen ? `Collapse ${label}` : `Expand ${label}`}
-            className="flex self-stretch items-center pl-4"
+            className="size-mobile-header bg-secondary flex aspect-square items-center self-stretch px-4"
             onClick={() => setIsOpen(!isOpen)}
           >
             {toggleIcon}
@@ -70,7 +70,7 @@ export function MobileNavSection({
           aria-expanded={isOpen}
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
-            'flex w-full items-center gap-3 px-4 py-4 text-left transition-colors',
+            'bg-secondary flex h-full w-full items-center gap-3 px-4 text-left transition-colors',
             isActive && 'bg-accent'
           )}
         >

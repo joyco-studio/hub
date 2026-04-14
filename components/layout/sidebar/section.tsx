@@ -349,6 +349,13 @@ export function SidebarSection({
   }
 
   // For other sections (Logs), render with collapsible header
+
+  const sortedLogs = (() => {
+    if (sectionId === 'logs') {
+      return folder.children.toReversed()
+    }
+    return folder.children
+  })()
   return (
     <div className="flex flex-col">
       <button
@@ -376,7 +383,7 @@ export function SidebarSection({
       {isOpen && (
         <>
           <div className="border-border ml-4 flex flex-col border-l-2">
-            {folder.children.map((child) => {
+            {sortedLogs.map((child) => {
               if (child.type === 'page') {
                 const itemMeta = meta[child.url] ?? {}
                 if (itemMeta.hidden) return null

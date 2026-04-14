@@ -259,7 +259,7 @@ function MobileMenuContent({
       {/* Menu content */}
       <div className="bg-background relative">
         {/* Navigation sections */}
-        <nav className="flex flex-col">
+        <nav className="bg-background flex flex-col gap-1 py-1">
           {folders.map((folder, index) => (
             <MobileMenuSection
               key={folder.$id ?? index}
@@ -335,9 +335,7 @@ function MobileMenuSection({ folder, itemMeta = {} }: MobileMenuSectionProps) {
               />
             )}
             <span className="truncate">{child.name}</span>
-            {meta.badge && (
-              <MetaBadge type={meta.badge} className="ml-auto" />
-            )}
+            {meta.badge && <MetaBadge type={meta.badge} className="ml-auto" />}
           </Link>
         )
       })}
@@ -391,7 +389,7 @@ function MobileThemeToggle() {
   const { theme, setTheme } = useTheme()
 
   return (
-    <div className="bg-accent/50 pt-10">
+    <div className="bg-accent/50 md:pt-10">
       <div className="bg-background grid gap-y-4 pt-4">
         <p className="text-muted-foreground/80 px-4 font-mono text-xs font-medium tracking-wide uppercase">
           Theme
