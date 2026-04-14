@@ -8,3 +8,21 @@
   ) {
   @apply my-6 first:mt-0 last:mb-0;
 }
+
+/* Library Docs Specifics - Fixes badge images at the beginning */
+.prose.library-docs p:has(a + a) img,
+.prose.library-docs p:has(img + img) img {
+  display: inline-block;
+  margin-top: 0;
+  margin-bottom: 0;
+  vertical-align: middle;
+}
+
+.prose.library-docs p:has(a + a) a,
+.prose.library-docs p:has(img + img) img {
+  margin-right: 0.25rem;
+}
+
+.prose.library-docs p:has(a + a) a {
+  display: inline-block;
+}

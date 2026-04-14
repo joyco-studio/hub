@@ -187,7 +187,12 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
             />
           </div>
 
-          <div className="prose mt-10 flex-1">
+          <div
+            className={cn(
+              'prose mt-10 flex-1',
+              libraryReadme && 'library-docs'
+            )}
+          >
             <MDX
               components={getMDXComponents({
                 a: createRelativeLink(source, page),

@@ -30,7 +30,7 @@ export function getLanguageFromExtension(ext: string): string {
  * Strips frontmatter from content (for guideline files)
  */
 export function stripFrontmatter(content: string): string {
-  return content.replace(/^---\n[\s\S]*?\n---\n*/m, '')
+  return content.replace(/^---\n[\s\S]*?\n---\n*/, '')
 }
 
 /*

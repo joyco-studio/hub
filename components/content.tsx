@@ -7,7 +7,10 @@ export function MDXContent({ content }: { content: string }) {
     <Markdown
       remarkPlugins={remarkPlugins}
       rehypePlugins={rehypePlugins}
-      components={getMDXComponents()}
+      components={{
+        ...getMDXComponents(),
+        img: (props) => <img {...props} alt={props.alt ?? ''} />,
+      }}
     >
       {content}
     </Markdown>
