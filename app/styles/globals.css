@@ -129,6 +129,9 @@
   --z-overlay: 50;
   --z-mobile-nav: 60;
   --z-dialog: 100;
+
+  --color-fd-info: var(--accent-foreground);
+  --fd-card: var(--accent);
 }
 
 html.terminal img,
@@ -281,4 +284,32 @@ body {
     --fd-sidebar-width: 0px !important;
     --fd-toc-width: 0px !important;
   }
+}
+
+[style*='--callout-color'] {
+  border-radius: 0 !important;
+  border: 0;
+  padding-left: 1rem;
+  position: relative;
+
+  & > [role='none'] {
+    height: 100%;
+    position: absolute;
+    width: 0.25rem;
+    left: 0;
+    top: 0;
+  }
+
+  & svg {
+    color: var(--accent-foreground);
+  }
+}
+
+h1 code,
+h2 code,
+h3 code,
+h4 code,
+h5 code,
+h6 code {
+  font-size: 0.83em;
 }
