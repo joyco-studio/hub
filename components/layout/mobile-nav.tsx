@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Command } from 'cmdk'
 import type * as PageTree from 'fumadocs-core/page-tree'
-import { Minus, Plus } from 'lucide-react'
 import CaretDownIcon from '@/components/icons/caret-down'
 import { cn } from '@/lib/utils'
 import { Logo } from '../logos'
@@ -24,6 +23,8 @@ import { useSearch, type SearchResult } from '@/hooks/use-search'
 import { ThemePreview, themes } from './theme-toggle'
 import { useTheme } from 'next-themes'
 import { useCallback } from 'react'
+import { MenuIcon } from '../icons/menu'
+import { MobileNavSection } from './mobile-nav-section'
 
 /* -------------------------------------------------------------------------------------------------
  * Types
@@ -68,7 +69,8 @@ export function MobileNav({
   const router = useRouter()
   const inputRef = React.useRef<HTMLInputElement>(null)
   const [state, setState] = React.useState<MobileNavState>('closed')
-  const { query, setQuery, results, resultsForQuery, hasResults, isEmpty } = useSearch()
+  const { query, setQuery, results, resultsForQuery, hasResults, isEmpty } =
+    useSearch()
 
   // Close menu on navigation
   React.useEffect(() => {
@@ -188,7 +190,7 @@ export function MobileNav({
           className="bg-muted flex aspect-square h-full shrink-0 items-center justify-center"
         >
           {state === 'closed' ? (
-            <div className="bg-muted-foreground size-3" />
+            <MenuIcon className="text-muted-foreground size-6" />
           ) : (
             <span className="font-mono text-xs tracking-wide uppercase">
               ESC
@@ -257,7 +259,7 @@ function MobileMenuContent({
       {/* Menu content */}
       <div className="bg-background relative">
         {/* Navigation sections */}
-        <nav className="flex flex-col">
+        <nav className="bg-background flex flex-col gap-1 py-1">
           {folders.map((folder, index) => (
             <MobileMenuSection
               key={folder.$id ?? index}
@@ -287,7 +289,6 @@ type MobileMenuSectionProps = {
 }
 
 function MobileMenuSection({ folder, itemMeta = {} }: MobileMenuSectionProps) {
-  const [isOpen, setIsOpen] = React.useState(false)
   const pathname = usePathname()
 
   const folderName =
@@ -298,68 +299,47 @@ function MobileMenuSection({ folder, itemMeta = {} }: MobileMenuSectionProps) {
   const isActive = pathname.startsWith(`/${sectionId}`)
 
   return (
-    <div className="">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={cn(
-          'flex w-full items-center gap-3 px-4 py-4 text-left transition-colors',
-          isActive && 'bg-accent'
-        )}
-      >
-        <Icon className="size-5" />
-        <span className="font-mono text-xs font-medium tracking-wide uppercase">
-          {folder.name}
-        </span>
-        <span className="ml-auto">
-          {isOpen ? (
-            <Minus className="text-muted-foreground size-4" />
-          ) : (
-            <Plus className="text-muted-foreground size-4" />
-          )}
-        </span>
-      </button>
+    <MobileNavSection
+      icon={Icon}
+      label={
+        typeof folder.name === 'string' ? folder.name : String(folder.name)
+      }
+      href={`/${sectionId}`}
+      isActive={isActive}
+    >
+      {folder.children.map((child) => {
+        if (child.type !== 'page') return null
+        const meta = itemMeta[child.url] ?? {}
+        const isItemActive = pathname === child.url
 
-      {isOpen && (
-        <div className="bg-accent/50 flex flex-col">
-          {folder.children.map((child) => {
-            if (child.type === 'page') {
-              const meta = itemMeta[child.url] ?? {}
-              const isItemActive = pathname === child.url
-
-              return (
-                <Link
-                  key={child.url}
-                  href={child.url}
-                  className={cn(
-                    'flex items-center gap-2 py-2 pr-4 pl-12 font-mono text-xs tracking-wide uppercase transition-colors',
-                    isItemActive
-                      ? 'text-foreground bg-accent font-medium'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-                  )}
-                >
-                  {meta.dot && (
-                    <span
-                      className={cn(
-                        'size-2 shrink-0 rounded-full',
-                        meta.dot === 'red' && 'bg-red-500',
-                        meta.dot === 'blue' && 'bg-blue-500',
-                        meta.dot === 'green' && 'bg-green-500',
-                        meta.dot === 'yellow' && 'bg-yellow-500'
-                      )}
-                    />
-                  )}
-                  <span className="truncate">{child.name}</span>
-                  {meta.badge && (
-                    <MetaBadge type={meta.badge} className="ml-auto" />
-                  )}
-                </Link>
-              )
-            }
-            return null
-          })}
-        </div>
-      )}
-    </div>
+        return (
+          <Link
+            key={child.url}
+            href={child.url}
+            className={cn(
+              'flex items-center gap-2 py-2 pr-4 pl-12 font-mono text-xs tracking-wide uppercase transition-colors',
+              isItemActive
+                ? 'text-foreground bg-accent font-medium'
+                : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+            )}
+          >
+            {meta.dot && (
+              <span
+                className={cn(
+                  'size-2 shrink-0 rounded-full',
+                  meta.dot === 'red' && 'bg-red-500',
+                  meta.dot === 'blue' && 'bg-blue-500',
+                  meta.dot === 'green' && 'bg-green-500',
+                  meta.dot === 'yellow' && 'bg-yellow-500'
+                )}
+              />
+            )}
+            <span className="truncate">{child.name}</span>
+            {meta.badge && <MetaBadge type={meta.badge} className="ml-auto" />}
+          </Link>
+        )
+      })}
+    </MobileNavSection>
   )
 }
 
@@ -368,56 +348,36 @@ function MobileMenuSection({ folder, itemMeta = {} }: MobileMenuSectionProps) {
  * -------------------------------------------------------------------------------------------------*/
 
 function MobileLabSection({ experiments }: { experiments: Experiment[] }) {
-  const [isOpen, setIsOpen] = React.useState(false)
   const pathname = usePathname()
   const isActive = pathname.startsWith('/lab')
 
   return (
-    <div>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={cn(
-          'flex w-full items-center gap-3 px-4 py-4 text-left transition-colors',
-          isActive && 'bg-accent'
-        )}
-      >
-        <FlaskIcon className="size-5" />
-        <span className="font-mono text-xs font-medium tracking-wide uppercase">
-          Lab
-        </span>
-        <span className="ml-auto">
-          {isOpen ? (
-            <Minus className="text-muted-foreground size-4" />
-          ) : (
-            <Plus className="text-muted-foreground size-4" />
-          )}
-        </span>
-      </button>
+    <MobileNavSection
+      icon={FlaskIcon}
+      label="Lab"
+      href="/lab"
+      isActive={isActive}
+    >
+      {experiments.map((experiment) => {
+        const url = `/lab/${experiment.slug}`
+        const isItemActive = pathname === url
 
-      {isOpen && (
-        <div className="bg-accent/50 flex flex-col">
-          {experiments.map((experiment) => {
-            const url = `/lab/${experiment.slug}`
-            const isItemActive = pathname === url
-
-            return (
-              <Link
-                key={experiment.slug}
-                href={url}
-                className={cn(
-                  'flex items-center gap-2 py-2 pr-4 pl-12 font-mono text-xs tracking-wide uppercase transition-colors',
-                  isItemActive
-                    ? 'text-foreground bg-accent font-medium'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-                )}
-              >
-                <span className="truncate">{experiment.title}</span>
-              </Link>
-            )
-          })}
-        </div>
-      )}
-    </div>
+        return (
+          <Link
+            key={experiment.slug}
+            href={url}
+            className={cn(
+              'flex items-center gap-2 py-2 pr-4 pl-12 font-mono text-xs tracking-wide uppercase transition-colors',
+              isItemActive
+                ? 'text-foreground bg-accent font-medium'
+                : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+            )}
+          >
+            <span className="truncate">{experiment.title}</span>
+          </Link>
+        )
+      })}
+    </MobileNavSection>
   )
 }
 
@@ -429,7 +389,7 @@ function MobileThemeToggle() {
   const { theme, setTheme } = useTheme()
 
   return (
-    <div className="bg-accent/50 pt-10">
+    <div className="bg-accent/50 md:pt-10">
       <div className="bg-background grid gap-y-4 pt-4">
         <p className="text-muted-foreground/80 px-4 font-mono text-xs font-medium tracking-wide uppercase">
           Theme
@@ -511,7 +471,12 @@ function MobileSearchContent({
           className="sr-only"
         />
         {hasResults && (
-          <SearchResults key={resultsForQuery} results={results} query={query} onSelect={onSelect} />
+          <SearchResults
+            key={resultsForQuery}
+            results={results}
+            query={query}
+            onSelect={onSelect}
+          />
         )}
         {isEmpty && <NoResults query={query} />}
         {!hasResults && !isEmpty && (

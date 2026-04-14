@@ -167,7 +167,7 @@ function TOCItem({
           insetInlineStart: offset,
         }}
       />
-      {item.title}
+      <span className="line-clamp-1">{item.title}</span>
     </Primitive.TOCItem>
   )
 }
