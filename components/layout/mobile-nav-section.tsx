@@ -40,17 +40,16 @@ export function MobileNavSection({
   )
 
   return (
-    <div className="relative">
+    <div className="group relative" data-active={isActive}>
       {href ? (
         <div
           className={cn(
-            'flex w-full items-stretch gap-1 text-left transition-colors',
-            isActive && 'bg-accent'
+            'flex w-full items-stretch gap-1 text-left transition-colors'
           )}
         >
           <Link
             href={href}
-            className="h-mobile-header bg-secondary flex flex-1 items-center gap-3 pl-4 text-left transition-colors"
+            className="h-mobile-header group-data-[active='true']:text-foreground group-data-[active='true']:bg-accent bg-secondary flex flex-1 items-center gap-3 pl-4 text-left transition-colors"
           >
             {headerContent}
           </Link>
@@ -58,7 +57,7 @@ export function MobileNavSection({
             type="button"
             aria-expanded={isOpen}
             aria-label={isOpen ? `Collapse ${label}` : `Expand ${label}`}
-            className="size-mobile-header bg-secondary flex aspect-square items-center self-stretch px-4"
+            className="size-mobile-header bg-secondary group-data-[active='true']:bg-accent flex aspect-square items-center self-stretch px-4"
             onClick={() => setIsOpen(!isOpen)}
           >
             {toggleIcon}
@@ -70,8 +69,7 @@ export function MobileNavSection({
           aria-expanded={isOpen}
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
-            'bg-secondary flex h-full w-full items-center gap-3 px-4 text-left transition-colors',
-            isActive && 'bg-accent'
+            "bg-secondary group-data-[active='true']:bg-accent flex h-full w-full items-center gap-3 px-4 text-left transition-colors"
           )}
         >
           {headerContent}
