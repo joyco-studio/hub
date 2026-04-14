@@ -196,7 +196,7 @@ mm.add(
 
 This is better than a manual `window.matchMedia` check because `gsap.matchMedia()` ties the animation lifecycle to the query — if the user toggles reduced motion mid-session, GSAP reverts and re-runs the setup automatically.
 
-### 2. The blanket `transition-duration: 0.01ms` rule is overkill
+### 2. The blanket `transition-duration: 0.01ms` rule is too aggressive
 
 It works for pure CSS sites. But when you mix CSS and JS animation systems, it creates invisible timing differences. Consider scoping it:
 
