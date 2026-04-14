@@ -101,6 +101,12 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
   ])
   const componentSource = await getComponentSource(componentSlug)
   const docLinks = [...page.data.docLinks]
+  if (isLibrary) {
+    docLinks.unshift({
+      label: 'GitHub',
+      href: `https://github.com/${page.data.repo}`,
+    })
+  }
   const llmText = await getLLMText(page)
   const llmUrl = page.slugs.length === 0 ? null : `/${page.slugs.join('/')}.md`
   const relatedItems = getRelatedPages(page, 3)

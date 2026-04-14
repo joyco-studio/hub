@@ -1,6 +1,7 @@
 import { docs } from 'fumadocs-mdx:collections/server'
 import { type InferPageType, loader } from 'fumadocs-core/source'
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons'
+import { getLibraryReadme } from './libraries'
 import { processMdxForLLMs } from './llm'
 import { getLogNumber, stripLogPrefixFromTitle } from './log-utils'
 
@@ -24,9 +25,15 @@ export async function getLLMText(page: InferPageType<typeof source>) {
   const raw = await page.data.getText('raw')
   const processed = processMdxForLLMs(raw)
 
+  let libraryBody = ''
+  if (page.data.type === 'library' && page.data.repo) {
+    const readme = await getLibraryReadme(page.data.repo)
+    if (readme) libraryBody = `\n${readme.cleaned}`
+  }
+
   return `# ${page.data.title}
 
-${processed}`
+${processed}${libraryBody}`
 }
 
 export type RelatedItem = {
