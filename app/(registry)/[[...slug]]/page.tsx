@@ -71,6 +71,9 @@ async function getComponentSource(
   }
 }
 
+export const dynamic = 'force-static'
+export const revalidate = 500
+
 export default async function Page(props: PageProps<'/[[...slug]]'>) {
   const params = await props.params
   const page = source.getPage(params.slug)
