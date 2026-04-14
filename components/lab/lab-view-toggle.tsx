@@ -65,7 +65,7 @@ export function LabViewToggle({
         aria-checked={view === 'list'}
         aria-label="List view"
         onClick={view === 'canvas' ? onToggle : undefined}
-        variant={view === 'list' ? 'accent' : 'muted'}
+        variant={view === 'list' ? 'muted' : 'accent'}
         size="icon-lg"
       >
         <GridIcon />
@@ -76,7 +76,7 @@ export function LabViewToggle({
         aria-checked={view === 'canvas'}
         aria-label="Canvas view"
         onClick={view === 'list' ? onToggle : undefined}
-        variant={view === 'list' ? 'muted' : 'accent'}
+        variant={view === 'list' ? 'accent' : 'muted'}
         size="icon-lg"
       >
         <InfinityIcon />
