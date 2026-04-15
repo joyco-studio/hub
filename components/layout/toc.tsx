@@ -31,7 +31,7 @@ export function TOC({ header, footer, className }: ClerkTOCProps) {
       )}
     >
       <div className="flex h-full max-h-screen w-(--fd-toc-width) flex-col gap-1">
-        <div className="bg-muted flex min-h-0 flex-col px-6 py-4 font-mono uppercase">
+        <div className="bg-muted flex max-h-[77vh] min-h-0 flex-col px-6 py-4 font-mono uppercase">
           {header}
           <h3
             id="toc-title"
@@ -40,10 +40,7 @@ export function TOC({ header, footer, className }: ClerkTOCProps) {
             <TextScanIcon className="size-4" />
             <span>On this page</span>
           </h3>
-          <TOCScrollArea
-            data-slot="toc-scroll-area"
-            className="scrollbar-none max-h-[75vh]"
-          >
+          <TOCScrollArea data-slot="toc-scroll-area" className="scrollbar-none">
             <TOCItems className="[&_a]:text-xs" />
           </TOCScrollArea>
         </div>

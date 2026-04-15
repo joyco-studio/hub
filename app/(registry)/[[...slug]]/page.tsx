@@ -221,14 +221,6 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
         {/* Desktop TOC */}
         {hasToc && (
           <TOC
-            className={cn(
-              !(
-                page.data.maintainers.length > 0 ||
-                downloadStats ||
-                !!pageViews ||
-                isLog
-              ) && 'slot-[toc-scroll-area]:max-h-[75vh]'
-            )}
             footer={
               <>
                 {isLog && <Author author={page.data.author} />}
