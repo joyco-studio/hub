@@ -2,10 +2,14 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { trackRegistryDownload } from '@/lib/track'
 
+// Matches component JSONs like /r/button.json, excluding the /r/registry.json
+// catalog index that shadcn fetches on init/add.
+const REGISTRY_ITEM_PATH = /^\/r\/(?!registry\.json$)[\w-]+\.json$/
+
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
-  if (pathname.startsWith('/r/')) {
+  if (REGISTRY_ITEM_PATH.test(pathname)) {
     await trackRegistryDownload(request)
   }
 
