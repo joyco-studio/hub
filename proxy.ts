@@ -5,7 +5,7 @@ import { trackRegistryDownload } from '@/lib/track'
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
-  if (pathname.startsWith('/r/')) {
+  if (pathname.startsWith('/r/') && pathname !== '/r/registry.json') {
     await trackRegistryDownload(request)
   }
 
