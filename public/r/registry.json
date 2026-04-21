@@ -184,6 +184,23 @@
       ]
     },
     {
+      "name": "svg-morph",
+      "type": "registry:component",
+      "title": "SVG Morph",
+      "description": "Smooth SVG path morphing animations with flubber interpolation and a fully controlled step API.",
+      "files": [
+        {
+          "path": "registry/components/svg-morph.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/hooks/use-svg-morph.ts",
+          "type": "registry:hook"
+        }
+      ],
+      "dependencies": ["flubber", "motion"]
+    },
+    {
       "name": "magnetic",
       "type": "registry:component",
       "title": "Magnetic",

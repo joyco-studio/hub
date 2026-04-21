@@ -1,0 +1,153 @@
+---
+title: SVG Morph
+description: Smooth SVG path morphing animations with a fully controlled step API.
+maintainers: ['alejopequeno']
+docLinks:
+  - label: 'Flubber'
+    href: 'https://github.com/veltman/flubber'
+  - label: 'Motion'
+    href: 'https://motion.dev/'
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+<ComponentPreview name="svg-morph-demo" />
+
+## Installation
+
+```bash
+npx shadcn@latest add @joyco/svg-morph
+```
+
+## Usage
+
+`SvgMorph` is fully controlled — it morphs to whatever `step` you pass. State lives outside the component, driven by the companion `useSvgMorph` hook (or any state you want).
+
+```tsx
+import SvgMorph from '@/components/svg-morph'
+import { useSvgMorph } from '@/hooks/use-svg-morph'
+
+function Example() {
+  const { step } = useSvgMorph({ totalSteps: 3 })
+
+  return (
+    <SvgMorph
+      viewBox="0 0 2048 2048"
+      width={256}
+      height={256}
+      duration={0.5}
+      step={step}
+      staticPaths={[{ d: faceOutline, fill: 'currentColor' }]}
+      svgs={[
+        { paths: [eyeA, eyeB, eyeC], fill: 'currentColor' },
+        { paths: [mouthA, mouthB, mouthC], fill: 'currentColor' },
+      ]}
+    />
+  )
+}
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `svgs` | `{ paths: string[]; fill?: string }[]` | Required | Array of morph slots. Each slot has a `paths` array with the SVG path `d` strings to cycle through, and an optional `fill` color. |
+| `staticPaths` | `{ d: string; fill?: string }[]` | `undefined` | Paths rendered without animation. Useful for compound paths, fixed outlines, or elements that should not morph. |
+| `viewBox` | `string` | Required | The SVG `viewBox` attribute (e.g. `"0 0 2048 2048"`). Defines the coordinate system for all paths. |
+| `transform` | `string` | `undefined` | An SVG transform string applied to a `<g>` wrapper around all children. Useful when paths come from a different coordinate system (e.g. PostScript with inverted Y-axis). |
+| `duration` | `number` | `0.4` | Duration of each morph transition in seconds. |
+| `step` | `number` | `0` | Index of the target path in each `paths` array. The component morphs to this step whenever it changes. |
+| `className` | `string` | `undefined` | CSS class applied to the root `<svg>` element. |
+| `width` | `number \| string` | `undefined` | Width of the `<svg>` element. |
+| `height` | `number \| string` | `undefined` | Height of the `<svg>` element. |
+
+## Controlled Mode
+
+Manage `step` yourself to animate between states on any event (user input, scroll, data change, etc.).
+
+<ComponentPreview name="svg-morph-controlled-demo" />
+
+```tsx
+import SvgMorph from '@/components/svg-morph'
+import { useSvgMorph } from '@/hooks/use-svg-morph'
+
+const STEPS = ['Neutral', 'Smile', 'Big Smile']
+
+function ControlledExample() {
+  const { step, setStep, next, prev, isFirst, isLast } = useSvgMorph({
+    totalSteps: STEPS.length,
+  })
+
+  return (
+    <>
+      <SvgMorph
+        viewBox="0 0 2048 2048"
+        width={256}
+        height={256}
+        duration={0.5}
+        step={step}
+        svgs={[
+          { paths: [pathA1, pathA2, pathA3] },
+          { paths: [pathB1, pathB2, pathB3] },
+        ]}
+      />
+      <div>
+        <button onClick={prev} disabled={isFirst}>Prev</button>
+        {STEPS.map((label, i) => (
+          <button key={label} onClick={() => setStep(i)}>
+            {label}
+          </button>
+        ))}
+        <button onClick={next} disabled={isLast}>Next</button>
+      </div>
+    </>
+  )
+}
+```
+
+## Auto-Looping
+
+The component doesn't auto-advance on its own — compose it in userland with `useEffect`. The demo above is driven by this pattern:
+
+```tsx
+const DURATION = 0.5
+const GAP = 1
+
+function AutoLoopingExample() {
+  const { step, setStep } = useSvgMorph({ totalSteps: 3 })
+
+  useEffect(() => {
+    const id = setTimeout(
+      () => setStep((step + 1) % 3),
+      (DURATION + GAP) * 1000
+    )
+    return () => clearTimeout(id)
+  }, [step, setStep])
+
+  return <SvgMorph duration={DURATION} step={step} {/* ... */} />
+}
+```
+
+### `useSvgMorph` Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `totalSteps` | `number` | Required | Total number of morph steps (should match the length of each `paths` array). |
+| `initialStep` | `number` | `0` | The step to start on. |
+
+### `useSvgMorph` Return
+
+| Value | Type | Description |
+|-------|------|-------------|
+| `step` | `number` | Current step index. |
+| `setStep` | `(step: number) => void` | Jump to a specific step (clamped to valid range). |
+| `next` | `() => void` | Go to the next step. |
+| `prev` | `() => void` | Go to the previous step. |
+| `isFirst` | `boolean` | Whether the current step is the first one. |
+| `isLast` | `boolean` | Whether the current step is the last one. |
+
+## Limitations
+
+- **Fill only** — Flubber operates on filled regions. Convert strokes to outlined paths first.
+- **No compound paths** — Paths with multiple sub-paths (holes, cutouts) break flubber. Place those in `staticPaths` instead.
+- **Synchronized timing** — All morph slots share the same `duration`.
