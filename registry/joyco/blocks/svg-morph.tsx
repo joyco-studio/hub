@@ -1,73 +1,24 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { interpolate } from 'flubber'
 import { animate, motion, useMotionValue, useTransform } from 'motion/react'
 
 type FlubberInterpolator = (t: number) => string
 
-interface SvgMorphPathProps {
-  paths: string[]
-  duration?: number
-  gap?: number
-  fill?: string
-  step?: number
-}
-
-function AutoMorphPath({
-  paths,
-  duration,
-  gap,
-  fill,
-}: {
-  paths: string[]
-  duration: number
-  gap: number
-  fill: string
-}) {
-  const [pathIndex, setPathIndex] = useState(0)
-  const progress = useMotionValue(pathIndex)
-
-  const loopedPaths = useMemo(() => [...paths, paths[0]], [paths])
-  const indices = useMemo(() => loopedPaths.map((_, i) => i), [loopedPaths])
-  const d = useTransform(progress, indices, loopedPaths, {
-    mixer: (a, b) => interpolate(a, b, { maxSegmentLength: 20 }),
-  })
-
-  useEffect(() => {
-    const animation = animate(progress, pathIndex, {
-      duration,
-      ease: 'easeInOut',
-      delay: gap,
-      onComplete: () => {
-        if (pathIndex === loopedPaths.length - 1) {
-          progress.set(0)
-          setPathIndex(1)
-        } else {
-          setPathIndex(pathIndex + 1)
-        }
-      },
-    })
-
-    return () => animation.stop()
-  }, [pathIndex, duration, gap, loopedPaths, progress])
-
-  return <motion.path fill={fill} d={d} />
-}
-
-function ControlledMorphPath({
-  paths,
-  duration,
-  fill,
-  step,
-}: {
+interface MorphPathProps {
   paths: string[]
   duration: number
   fill: string
   step: number
-}) {
+}
+
+function MorphPath({ paths, duration, fill, step }: MorphPathProps) {
+  const safeStep = Math.max(0, Math.min(step, paths.length - 1))
+  const initialPath = paths[safeStep] ?? ''
+
   const progress = useMotionValue(0)
-  const currentPathRef = useRef(paths[step])
+  const currentPathRef = useRef(initialPath)
   const interpolatorRef = useRef<FlubberInterpolator | null>(null)
 
   const d = useTransform(progress, (v: number) => {
@@ -76,16 +27,14 @@ function ControlledMorphPath({
   })
 
   useEffect(() => {
-    const targetPath = paths[step]
-    if (targetPath === currentPathRef.current) return
+    const targetPath = paths[safeStep]
+    if (!targetPath || targetPath === currentPathRef.current) return
 
-    // Capture mid-animation state if interrupted
     const p = progress.get()
     if (interpolatorRef.current && p > 0 && p < 1) {
       currentPathRef.current = interpolatorRef.current(p)
     }
 
-    // Direct interpolation: current visual state → target (skips intermediates)
     interpolatorRef.current = interpolate(
       currentPathRef.current,
       targetPath,
@@ -103,37 +52,11 @@ function ControlledMorphPath({
     })
 
     return () => animation.stop()
-  }, [step, duration, progress, paths])
+  }, [safeStep, duration, progress, paths])
+
+  if (paths.length === 0) return null
 
   return <motion.path fill={fill} d={d} />
-}
-
-function SvgMorphPath({
-  paths,
-  duration = 0.4,
-  gap = 0.5,
-  fill = 'currentColor',
-  step,
-}: SvgMorphPathProps) {
-  if (step !== undefined) {
-    return (
-      <ControlledMorphPath
-        paths={paths}
-        duration={duration}
-        fill={fill}
-        step={step}
-      />
-    )
-  }
-
-  return (
-    <AutoMorphPath
-      paths={paths}
-      duration={duration}
-      gap={gap}
-      fill={fill}
-    />
-  )
 }
 
 interface StaticPath {
@@ -150,7 +73,6 @@ interface SvgMorphProps {
   viewBox: string
   transform?: string
   duration?: number
-  gap?: number
   step?: number
   className?: string
   width?: number | string
@@ -162,9 +84,8 @@ export default function SvgMorph({
   staticPaths,
   viewBox,
   transform,
-  duration,
-  gap,
-  step,
+  duration = 0.4,
+  step = 0,
   className,
   width,
   height,
@@ -175,12 +96,11 @@ export default function SvgMorph({
         <path key={`static-${i}`} d={sp.d} fill={sp.fill ?? 'currentColor'} />
       ))}
       {svgs.map((svg, i) => (
-        <SvgMorphPath
+        <MorphPath
           key={i}
           paths={svg.paths}
-          fill={svg.fill}
+          fill={svg.fill ?? 'currentColor'}
           duration={duration}
-          gap={gap}
           step={step}
         />
       ))}

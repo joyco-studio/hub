@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
 export interface UseSvgMorphOptions {
   totalSteps: number
@@ -32,15 +32,9 @@ export function useSvgMorph({
     [clamp]
   )
 
-  const next = useCallback(
-    () => setStepRaw((s) => clamp(s + 1)),
-    [clamp]
-  )
+  const next = useCallback(() => setStepRaw((s) => clamp(s + 1)), [clamp])
 
-  const prev = useCallback(
-    () => setStepRaw((s) => clamp(s - 1)),
-    [clamp]
-  )
+  const prev = useCallback(() => setStepRaw((s) => clamp(s - 1)), [clamp])
 
   return {
     step,

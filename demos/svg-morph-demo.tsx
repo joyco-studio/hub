@@ -1,6 +1,11 @@
 'use client'
 
+import { useEffect } from 'react'
 import SvgMorph from '@/registry/joyco/blocks/svg-morph'
+import { useSvgMorph } from '@/hooks/use-svg-morph'
+
+const DURATION = 0.5
+const GAP = 1
 
 const faceOutline =
   'M984 1A1026 1026 0 0 0 60 1372a1027 1027 0 0 0 1179 653A1025 1025 0 0 0 984 1zm81 124a894 894 0 0 1 788 549 901 901 0 1 1-788-549z'
@@ -27,14 +32,24 @@ const mouth3 =
   'M281 967l5 34c12 89 22 141 41 203a752 752 0 0 0 328 439 696 696 0 0 0 451 90c104-13 209-52 297-110a756 756 0 0 0 331-551l9-105v-3H281v3z'
 
 export function SvgMorphDemo() {
+  const { step, setStep } = useSvgMorph({ totalSteps: 3 })
+
+  useEffect(() => {
+    const id = setTimeout(
+      () => setStep((step + 1) % 3),
+      (DURATION + GAP) * 1000
+    )
+    return () => clearTimeout(id)
+  }, [step, setStep])
+
   return (
     <div className="flex items-center justify-center py-14">
       <SvgMorph
         viewBox="0 0 2048 2048"
         width={256}
         height={256}
-        duration={0.5}
-        gap={1}
+        duration={DURATION}
+        step={step}
         staticPaths={[{ d: faceOutline, fill: 'currentColor' }]}
         svgs={[
           {
