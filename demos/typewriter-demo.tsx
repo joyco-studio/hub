@@ -1,6 +1,6 @@
 'use client'
 
-import { Typewriter } from '@/registry/joyco/blocks/typewriter'
+import { Typewriter } from '@/registry/components/typewriter'
 
 export default function TypewriterDemo() {
   return (

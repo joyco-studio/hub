@@ -167,7 +167,9 @@ function TOCItem({
           insetInlineStart: offset,
         }}
       />
-      {item.title}
+      <span className="not-prose [&_code]:bg-secondary line-clamp-1">
+        {item.title}
+      </span>
     </Primitive.TOCItem>
   )
 }

@@ -1,3 +1,19 @@
 {
-  "pages": ["quick-links", "settings", "tailwind", "scripts", "pr-guidelines", "aliases", "agents", "cw"]
+  "pages": [
+    "containers",
+    "ui",
+    "pw-manager-ignore",
+    "skills",
+    "cw",
+    "aliases",
+    "agents",
+    "pr-guidelines",
+    "tailwind",
+    "settings",
+    "quick-links",
+    "scripts",
+    "metri",
+    "suno",
+    "susano"
+  ]
 }

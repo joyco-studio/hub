@@ -1,0 +1,60 @@
+---
+title: Scramble Button
+description: A button that scrambles its text on hover using the scramble GSAP effect. Automatically installs the scramble effect as a dependency.
+maintainers: ['joyco-studio']
+docLinks:
+  - label: 'Scramble Effect'
+    href: '/components/scramble'
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+<ComponentPreview name="scramble-button-demo" />
+
+## Installation
+
+```bash
+npx shadcn@latest add @joyco/scramble-button
+```
+
+This automatically installs the [Scramble](/components/scramble) effect.
+
+## Usage
+
+```tsx
+import { ScrambleButton } from '@/components/scramble-button'
+
+;<ScrambleButton
+  text="GET STARTED"
+  className="bg-primary text-primary-foreground rounded-md px-4 py-2 font-mono text-sm"
+/>
+```
+
+## Custom Characters
+
+```tsx
+<ScrambleButton text="BINARY" chars="01" />
+<ScrambleButton text="CLEAN" chars="ABCDEFGHIJKLMNOPQRSTUVWXYZ" />
+```
+
+## Programmatic Control
+
+Use the `scramble` prop for touch devices or custom triggers:
+
+```tsx
+const [active, setActive] = React.useState(false)
+
+<ScrambleButton text="TOGGLE ME" scramble={active} />
+```
+
+## Props
+
+| Prop       | Type      | Default | Description                                                                 |
+| ---------- | --------- | ------- | --------------------------------------------------------------------------- |
+| `text`     | `string`  | —       | The text to display and scramble on hover                                   |
+| `chars`    | `string`  | —       | Custom character set for the scramble animation                             |
+| `duration` | `number`  | `0`     | Duration in seconds. `0` = auto-scale with text length                      |
+| `cycles`   | `number`  | —       | Randomization cycles per character before resolving (higher = more chaotic) |
+| `chance`   | `number`  | —       | Probability (0–1) that each character scrambles                             |
+| `overflow` | `boolean` | —       | Show all character positions from the start rather than growing in          |
+| `scramble` | `boolean` | —       | Programmatically trigger the scramble (useful for touch devices)            |

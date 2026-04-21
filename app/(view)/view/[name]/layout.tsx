@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils'
+import { ShortcutsRelay } from './shortcuts-relay'
 
 export default function ViewLayout({
   children,
@@ -19,6 +20,7 @@ export default function ViewLayout({
           background-color: transparent !important;
         }
       `}</style>
+      <ShortcutsRelay />
       {children}
     </div>
   )

@@ -5,7 +5,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { cn } from './lib/utils'
 import { FileCodeblock } from './components/code-source'
 import { CopyButton } from './components/copy-button'
-import { codeClasses } from './lib/shiki'
+import { codeClasses } from './lib/mdx'
 import Image from 'next/image'
 import { ImageCols } from '@/components/image-cols'
 import { PackageManagerCommand } from './components/package-manager-command'
@@ -18,12 +18,47 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Mermaid,
     CodeTabs: CodeTabs,
     FileCodeblock: FileCodeblock,
-    Image: ({
-      className,
+    Video: ({
+      src,
       alt,
+      caption,
+      className,
+      style,
+      width,
+      height,
       ...props
-    }: React.ComponentProps<typeof Image>) => (
-      <Image className={cn('rounded-lg', className)} alt={alt} {...props} />
+    }: React.ComponentProps<'video'> & {
+      alt?: string
+      caption?: string
+    }) => (
+      <figure
+        className={cn('mx-auto my-6', className)}
+        style={
+          width || height
+            ? {
+                maxWidth: width,
+                aspectRatio: width && height ? `${width}/${height}` : undefined,
+                ...style,
+              }
+            : style
+        }
+      >
+        <video
+          src={src}
+          className="overflow-hidden"
+          width={width}
+          height={height}
+          {...props}
+        />
+        {(caption || alt) && (
+          <figcaption className="text-muted-foreground mt-2 text-center text-sm">
+            {caption || alt}
+          </figcaption>
+        )}
+      </figure>
+    ),
+    Image: ({ alt, ...props }: React.ComponentProps<typeof Image>) => (
+      <Image alt={alt} {...props} />
     ),
     ImageCols: ({
       className,
@@ -36,14 +71,19 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
       alt,
       caption,
       className,
+      style,
+      width,
       ...props
     }: {
       src: string
       alt: string
       caption?: string
     } & Omit<React.ComponentProps<typeof Image>, 'src' | 'alt'>) => (
-      <figure className={cn('my-6', className)}>
-        <Image src={src} alt={alt} className="rounded-lg" {...props} />
+      <figure
+        className={cn('mx-auto my-6', className)}
+        style={width ? { maxWidth: width, ...style } : style}
+      >
+        <Image src={src} alt={alt} width={width} {...props} />
         {(caption || alt) && (
           <figcaption className="text-muted-foreground mt-2 text-center text-sm">
             {caption || alt}
@@ -169,7 +209,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
       children: React.ReactNode
     }) => {
       /* Command component renders it's own pre inside tabs content */
-      if (__iscommand__ === "true") return children 
+      if (__iscommand__ === 'true') return children
       return (
         <div className={cn('group/code relative', className)}>
           {__raw__ && <CopyButton value={__raw__} />}

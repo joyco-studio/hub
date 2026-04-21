@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { Gauge, Pause, Play } from 'lucide-react'
-import { SpritesheetSequencer } from '@/registry/joyco/blocks/spritesheet-sequencer'
+import { SpritesheetSequencer } from '@/registry/components/spritesheet-sequencer'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
 

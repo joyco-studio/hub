@@ -1,0 +1,15 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "joyco-fonts",
+  "type": "registry:lib",
+  "title": "JOYCO Fonts",
+  "description": "JOYCO brand font configuration with Public Sans and Roboto Mono.",
+  "files": [
+    {
+      "path": "registry/lib/fonts.ts",
+      "content": "import { Public_Sans, Roboto_Mono } from 'next/font/google'\n\n/**\n * JOYCO brand fonts.\n *\n * Apply the CSS variable classes to your root `<html>` element:\n *\n * ```tsx\n * // app/layout.tsx\n * import { publicSans, robotoMono } from '@/lib/fonts'\n *\n * export default function RootLayout({ children }) {\n *   return (\n *     <html className={`${publicSans.variable} ${robotoMono.variable}`}>\n *       <body>{children}</body>\n *     </html>\n *   )\n * }\n * ```\n *\n * Then reference them in your Tailwind CSS:\n *\n * ```css\n * @theme inline {\n *   --font-sans: var(--font-public-sans);\n *   --font-mono: var(--font-roboto-mono);\n *   --default-font-family: var(--font-sans);\n *   --default-font-family-mono: var(--font-mono);\n * }\n * ```\n */\nexport const publicSans = Public_Sans({\n  subsets: ['latin'],\n  variable: '--font-public-sans',\n})\n\nexport const robotoMono = Roboto_Mono({\n  subsets: ['latin'],\n  variable: '--font-roboto-mono',\n})\n",
+      "type": "registry:lib",
+      "target": "lib/fonts.ts"
+    }
+  ]
+}

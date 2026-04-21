@@ -4,9 +4,15 @@ import { createRelativeLink } from 'fumadocs-ui/mdx'
 import { readFile } from 'fs/promises'
 import path from 'path'
 
-import { getPageImage, getLLMText, getRelatedPages, source } from '@/lib/source'
+import {
+  getPageImage,
+  getLLMText,
+  getRelatedPages,
+  getRegistryCounts,
+  source,
+} from '@/lib/source'
 import { getLogNumber, stripLogPrefixFromTitle } from '@/lib/log-utils'
-import { getDownloadStats } from '@/lib/stats'
+import { getComponentDownloadStats, getPageViews } from '@/lib/stats'
 import { getMDXComponents } from '@/mdx-components'
 import { Author } from '@/components/layout/author'
 import { Maintainers } from '@/components/layout/maintainers'
@@ -25,10 +31,12 @@ import { RelatedItems } from '@/components/preview/related-items'
 import { TOCScrollArea } from '@/components/toc'
 import { TOCItems } from '@/components/toc/clerk'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { RegistryMetaProvider } from '@/components/registry-meta'
 import { PageGithubLinkButton } from '@/components/page-github-link-button'
+import { PageViews } from '@/components/layout/views'
+import { MDXContent } from '@/components/content'
+import { getLibraryReadme } from '@/lib/libraries'
 
 const getComponentSlug = (page: InferPageType<typeof source>) => {
   if (page.slugs[0] !== 'components') return undefined
@@ -45,28 +53,6 @@ const getCategoryLabel = (slugs: string[]) => {
   return labels[category] || category
 }
 
-type PageTreeNode = {
-  type?: string
-  $id?: string
-  children?: PageTreeNode[]
-}
-
-const countPages = (node: PageTreeNode | undefined): number => {
-  if (!node) return 0
-  if (node.type === 'page') return 1
-  return (node.children ?? []).reduce(
-    (sum, child) => sum + countPages(child),
-    0
-  )
-}
-
-const getTopLevelFolder = (segment: string) => {
-  const children = source.pageTree.children as unknown as PageTreeNode[]
-  return children.find(
-    (child) => child.type === 'folder' && child.$id?.split(':')[1] === segment
-  )
-}
-
 async function getComponentSource(
   componentSlug: string | undefined
 ): Promise<string | null> {
@@ -75,7 +61,7 @@ async function getComponentSource(
   try {
     const filePath = path.join(
       process.cwd(),
-      'registry/joyco/blocks',
+      'registry/components',
       `${componentSlug}.tsx`
     )
     const source = await readFile(filePath, 'utf-8')
@@ -84,6 +70,9 @@ async function getComponentSource(
     return null
   }
 }
+
+export const dynamic = 'force-static'
+export const revalidate = 500
 
 export default async function Page(props: PageProps<'/[[...slug]]'>) {
   const params = await props.params
@@ -107,22 +96,29 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
   })()
 
   const componentSlug = getComponentSlug(page)
-  const downloadStats = componentSlug
-    ? await getDownloadStats(componentSlug)
-    : null
+  const isLibrary = page.data.type === 'library' && page.data.repo
+  const [downloadStats, pageViews, libraryReadme] = await Promise.all([
+    componentSlug ? getComponentDownloadStats(componentSlug) : null,
+    isLog ? getPageViews(`/logs/${page.slugs[page.slugs.length - 1]}`) : null,
+    isLibrary ? getLibraryReadme(page.data.repo!) : null,
+  ])
   const componentSource = await getComponentSource(componentSlug)
   const docLinks = [...page.data.docLinks]
+  if (isLibrary) {
+    docLinks.unshift({
+      label: 'GitHub',
+      href: `https://github.com/${page.data.repo}`,
+    })
+  }
   const llmText = await getLLMText(page)
   const llmUrl = page.slugs.length === 0 ? null : `/${page.slugs.join('/')}.md`
   const relatedItems = getRelatedPages(page, 3)
 
-  const toc = page.data.toc
+  const toc = libraryReadme
+    ? [...page.data.toc, ...libraryReadme.toc]
+    : page.data.toc
   const hasToc = toc.length > 0
-  const counts = {
-    components: countPages(getTopLevelFolder('components')),
-    toolbox: countPages(getTopLevelFolder('toolbox')),
-    logs: countPages(getTopLevelFolder('logs')),
-  }
+  const counts = getRegistryCounts()
 
   return (
     <RegistryMetaProvider counts={counts}>
@@ -143,7 +139,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
         <article
           id="nd-page"
           className={cn(
-            'px-content-sides mx-auto w-full max-w-[900px] py-6 [grid-area:main] md:pt-8 xl:pt-14',
+            'px-content-sides mx-auto w-full max-w-[900px] pt-6 pb-14 [grid-area:main] md:pt-8 lg:pb-24 xl:pt-14',
             'xl:layout:[--fd-toc-width:268px]'
           )}
         >
@@ -200,12 +196,18 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
             />
           </div>
 
-          <div className="prose mt-10 flex-1">
+          <div
+            className={cn(
+              'prose mt-10 flex-1',
+              libraryReadme && 'library-docs'
+            )}
+          >
             <MDX
               components={getMDXComponents({
                 a: createRelativeLink(source, page),
               })}
             />
+            {libraryReadme && <MDXContent content={libraryReadme.cleaned} />}
           </div>
           {!isTopCategoryPage && relatedItems.length > 0 && (
             <RelatedItems
@@ -231,6 +233,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
                   }
                 />
                 {downloadStats && <WeeklyDownloads data={downloadStats} />}
+                {pageViews !== null && <PageViews views={pageViews} />}
               </>
             }
           />
@@ -264,6 +267,9 @@ export async function generateMetadata(
     description: page.data.description,
     openGraph: {
       images: ogImage,
+    },
+    twitter: {
+      card: 'summary_large_image',
     },
   }
 }

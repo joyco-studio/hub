@@ -149,7 +149,7 @@ async function getFileContent(filePath: string) {
   let code = raw
   // code = code.replaceAll('export default', 'export')
   code = code.replaceAll('/* eslint-disable react/no-children-prop */\n', '')
-  code = code.replaceAll('@/registry/joyco/blocks/', '@/components/')
+  code = code.replaceAll('@/registry/components/', '@/components/')
 
   return code
 }

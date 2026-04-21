@@ -13,7 +13,7 @@ import {
   ChatMessageTime,
   ChatMessageAvatar,
   type ChatSubmitEvent,
-} from '@/registry/joyco/blocks/chat'
+} from '@/registry/components/chat'
 import { ArrowUpIcon, Square } from 'lucide-react'
 
 const MTPRZ_AVATAR = '/static/c/matiasperz.webp'

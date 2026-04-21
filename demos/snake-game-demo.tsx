@@ -1,6 +1,6 @@
 'use client'
 
-import { SnakeGame } from '@/registry/joyco/blocks/snake-game'
+import { SnakeGame } from '@/registry/components/games/snake-game'
 
 function SnakeGameDemo() {
   return (

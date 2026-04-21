@@ -13,7 +13,7 @@ import {
   ChatMessageTime,
   ChatMessageAddon,
   type ChatSubmitEvent,
-} from '@/registry/joyco/blocks/chat'
+} from '@/registry/components/chat'
 import { Button } from '@/components/ui/button'
 import { Check, CheckCheck, EllipsisVertical, SmilePlus } from 'lucide-react'
 

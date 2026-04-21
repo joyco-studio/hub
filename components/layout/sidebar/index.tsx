@@ -9,11 +9,12 @@ import { SidebarSearch } from './search'
 import { SearchResults } from './search-results'
 import { NoResults } from './no-results'
 import { SidebarSection, type SidebarItemMeta } from './section'
+import { LabSidebarSection } from './lab-section'
 import { SocialLinks } from './social-links'
 import { NavAside } from '../nav-aside'
-import { useLayout } from '@/hooks/use-layout'
 import { useSearch } from '@/hooks/use-search'
-import { cn } from '@/lib/utils'
+import { useIsTeam } from '@/hooks/use-team-cookie'
+import type { Experiment } from '@/lib/lab'
 
 export type { SidebarItemMeta }
 
@@ -21,14 +22,40 @@ type RegistrySidebarProps = {
   tree: PageTree.Root
   itemMeta?: Record<string, SidebarItemMeta>
   gameSlugs?: string[]
+  effectSlugs?: string[]
+  canvasSlugs?: string[]
+  librarySlugs?: string[]
+  experiments?: Experiment[]
 }
 
-export function RegistrySidebar({ tree, itemMeta = {}, gameSlugs = [] }: RegistrySidebarProps) {
+export function RegistrySidebar({
+  tree,
+  itemMeta = {},
+  gameSlugs = [],
+  effectSlugs = [],
+  canvasSlugs = [],
+  librarySlugs = [],
+  experiments = [],
+}: RegistrySidebarProps) {
+  const isTeam = useIsTeam()
+  const resolvedMeta = React.useMemo(
+    () =>
+      isTeam
+        ? { ...itemMeta, '/toolbox/ui': { badge: 'internal' as const } }
+        : itemMeta,
+    [isTeam, itemMeta]
+  )
   const pathname = usePathname()
   const router = useRouter()
-  const { layout } = useLayout()
-  const { query, setQuery, results, hasResults, isEmpty, isLoading } =
-    useSearch()
+  const {
+    query,
+    setQuery,
+    results,
+    resultsForQuery,
+    hasResults,
+    isEmpty,
+    isLoading,
+  } = useSearch()
 
   // Get all folders from the tree
   const folders = tree.children.filter(
@@ -59,6 +86,7 @@ export function RegistrySidebar({ tree, itemMeta = {}, gameSlugs = [] }: Registr
     if (hasResults) {
       return (
         <SearchResults
+          key={resultsForQuery}
           results={results}
           query={query}
           onSelect={handleSelect}
@@ -71,25 +99,56 @@ export function RegistrySidebar({ tree, itemMeta = {}, gameSlugs = [] }: Registr
       return <NoResults query={query} />
     }
 
+    // Lab section has its own data source (not from Fumadocs tree)
+    if (pathname.startsWith('/lab')) {
+      return (
+        <nav className="bg-accent/70 flex flex-col overflow-y-auto">
+          <LabSidebarSection experiments={experiments} />
+        </nav>
+      )
+    }
+
     // Default: show sidebar navigation (idle or loading states)
     const folder = currentFolder ?? folders[0]
     if (!folder) return null
 
     return (
       <nav className="bg-accent/70 flex flex-col overflow-y-auto">
-        <SidebarSection folder={folder} defaultOpen meta={itemMeta} gameSlugs={gameSlugs} />
+        <SidebarSection
+          folder={folder}
+          defaultOpen
+          meta={resolvedMeta}
+          gameSlugs={gameSlugs}
+          effectSlugs={effectSlugs}
+          canvasSlugs={canvasSlugs}
+          librarySlugs={librarySlugs}
+        />
       </nav>
     )
   }
 
+  const fillerRef = React.useRef<HTMLDivElement | null>(null)
+
+  React.useEffect(() => {
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.contentRect.height) {
+          entry.target.classList.remove('-my-0.5')
+        } else {
+          entry.target.classList.add('-my-0.5')
+        }
+      }
+    })
+
+    fillerRef.current && observer.observe(fillerRef.current)
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
+
   return (
-    <div className="sticky top-0 hidden h-screen shrink-0 gap-1 [grid-area:sidebar] md:flex md:justify-end">
-      <div
-        className={cn(
-          'bg-muted/50 hidden flex-1',
-          layout === 'fixed' && '2xl:block'
-        )}
-      />
+    <div className="sticky top-0 hidden h-screen shrink-0 gap-1 [grid-area:sidebar] md:flex">
       <NavAside />
 
       <Command
@@ -98,9 +157,13 @@ export function RegistrySidebar({ tree, itemMeta = {}, gameSlugs = [] }: Registr
         className="w-sidebar-width flex flex-col gap-1 text-sm"
         suppressHydrationWarning
       >
-        <SidebarSearch query={query} setQuery={setQuery} isLoading={isLoading} />
+        <SidebarSearch
+          query={query}
+          setQuery={setQuery}
+          isLoading={isLoading}
+        />
         {renderContent()}
-        <div className="bg-muted flex-1" />
+        <div ref={fillerRef} className="bg-muted flex-1" />
         <SocialLinks />
       </Command>
     </div>

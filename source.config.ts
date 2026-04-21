@@ -10,7 +10,7 @@ import {
 } from 'fumadocs-mdx/config'
 import { remarkMdxMermaid } from 'fumadocs-core/mdx-plugins'
 
-import { transformers } from './lib/shiki'
+import { transformers } from './lib/mdx'
 import { cn } from './lib/utils'
 
 // You can customise Zod schemas for frontmatter and `meta.json` here
@@ -21,7 +21,8 @@ export const docs = defineDocs({
     schema: frontmatterSchema.extend({
       author: z.string().optional(),
       maintainers: z.array(z.string()).default([]),
-      type: z.enum(['component', 'game']).default('component'),
+      type: z.enum(['component', 'game', 'effect', 'canvas', 'library']).default('component'),
+      repo: z.string().optional(),
       docLinks: z
         .array(
           z.object({

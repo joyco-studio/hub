@@ -1,7 +1,7 @@
 'use client'
 
-import SvgMorph from '@/registry/joyco/blocks/svg-morph'
-import { useSvgMorph } from '@/hooks/use-svg-morph'
+import SvgMorph from '@/registry/components/svg-morph'
+import { useSvgMorph } from '@/registry/hooks/use-svg-morph'
 
 const faceOutline =
   'M984 1A1026 1026 0 0 0 60 1372a1027 1027 0 0 0 1179 653A1025 1025 0 0 0 984 1zm81 124a894 894 0 0 1 788 549 901 901 0 1 1-788-549z'

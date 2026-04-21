@@ -1,7 +1,7 @@
 'use client'
 
 import { Menu, X } from 'lucide-react'
-import * as MobileMenu from '@/registry/joyco/blocks/mobile-menu'
+import * as MobileMenu from '@/registry/components/mobile-menu'
 
 function Header() {
   return (

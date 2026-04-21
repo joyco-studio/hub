@@ -1,5 +1,34 @@
 import { normalize } from './urls'
 
+function githubAuthHeader(): Record<string, string> {
+  const token = process.env.GITHUB_TOKEN
+  if (!token) return {}
+  // Classic PATs (ghp_) use "token" scheme, fine-grained PATs (github_pat_) use "Bearer"
+  const scheme = token.startsWith('github_pat_') ? 'Bearer' : 'token'
+  return { Authorization: `${scheme} ${token}` }
+}
+
+export async function getRepoReadme(
+  repo: string
+): Promise<string | null> {
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/${repo}/contents/README.md`,
+      {
+        headers: {
+          Accept: 'application/vnd.github.raw+json',
+          ...githubAuthHeader(),
+        },
+        next: { revalidate: 3600 },
+      }
+    )
+    if (!res.ok) return null
+    return res.text()
+  } catch {
+    return null
+  }
+}
+
 const DEFAULT_REPO_URL = 'https://github.com/joyco-studio/registry'
 
 function encodePath(path: string) {

@@ -6,19 +6,18 @@ import { lazy } from 'react'
 
 interface ComponentPreviewProps extends React.ComponentProps<'div'> {
   name: string
-  defaultWidth?: number
   height?: number | string
-  resizable?: boolean
-  // if provided, will use the code example from the given file
+  iframe?: boolean
+  resizable?: { defaultWidth?: number }
   codeExampleName?: string
 }
 
 export function ComponentPreview({
   name,
   className,
-  defaultWidth = 375,
   height = 600,
-  resizable = false,
+  iframe,
+  resizable,
   codeExampleName,
   ...props
 }: ComponentPreviewProps) {
@@ -36,6 +35,41 @@ export function ComponentPreview({
     )
   }
 
+  const heightStyle = typeof height === 'number' ? `${height}px` : height
+
+  function renderPreview() {
+    if (iframe) {
+      return (
+        <iframe
+          src={`/view/${name}`}
+          className="border-0"
+          style={{ width: '100%', height: heightStyle }}
+          title={`${name} preview`}
+        />
+      )
+    }
+    if (resizable) {
+      return (
+        <div className="w-full">
+          <ResizableIframe
+            src={`/view/${name}`}
+            defaultWidth={resizable?.defaultWidth ?? 375}
+            minWidth={280}
+            height={height}
+          />
+        </div>
+      )
+    }
+    return (
+      <div
+        data-slot="preview"
+        className="dark:override-shadcn-default-dark radio:override-shadcn-default-light light:override-shadcn-default-light terminal:override-shadcn-default-radio bg-preview h-full w-full"
+      >
+        <LazyComponent name={name} />
+      </div>
+    )
+  }
+
   return (
     <div
       className={cn(
@@ -46,24 +80,7 @@ export function ComponentPreview({
       {...props}
     >
       <div className="relative my-0 flex w-full overflow-hidden rounded-none">
-        {resizable ? (
-          <div className="w-full">
-            <ResizableIframe
-              src={`/view/${name}`}
-              defaultWidth={defaultWidth}
-              minWidth={280}
-              height={height}
-            />
-          </div>
-        ) : (
-          /* For demos, we want to override project theme to default shadcn themes to favor a consistent appearance for the cloning user */
-          <div
-            data-slot="preview"
-            className="dark:override-shadcn-default-dark radio:override-shadcn-default-light light:override-shadcn-default-light terminal:override-shadcn-default-radio bg-preview h-full w-full"
-          >
-            <LazyComponent name={name} />
-          </div>
-        )}
+        {renderPreview()}
       </div>
       <ComponentSource name={codeExampleName ?? name} language="tsx" />
     </div>

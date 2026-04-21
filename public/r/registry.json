@@ -10,7 +10,7 @@
       "description": "A bias-based infinite scroll wrapper and hook.",
       "files": [
         {
-          "path": "registry/joyco/blocks/infinite-list.tsx",
+          "path": "registry/components/infinite-list.tsx",
           "type": "registry:component"
         }
       ]
@@ -22,7 +22,7 @@
       "description": "The all in one marquee component with smooth Web Animations API.",
       "files": [
         {
-          "path": "registry/joyco/blocks/marquee.tsx",
+          "path": "registry/components/marquee.tsx",
           "type": "registry:component"
         }
       ],
@@ -35,15 +35,15 @@
       "description": "A button that opens a file input when clicked.",
       "files": [
         {
-          "path": "registry/joyco/blocks/file-button.tsx",
+          "path": "registry/components/file-button.tsx",
           "type": "registry:component"
         },
         {
-          "path": "hooks/use-file-upload.tsx",
+          "path": "registry/hooks/use-file-upload.tsx",
           "type": "registry:hook"
         }
       ],
-      "registryDependencies": ["button"]
+      "registryDependencies": ["@joyco/button"]
     },
     {
       "name": "file-dropzone",
@@ -52,15 +52,15 @@
       "description": "A drag-and-drop file upload component with image preview, validation, and error handling.",
       "files": [
         {
-          "path": "registry/joyco/blocks/file-dropzone.tsx",
+          "path": "registry/components/file-dropzone.tsx",
           "type": "registry:component"
         },
         {
-          "path": "hooks/use-file-upload.tsx",
+          "path": "registry/hooks/use-file-upload.tsx",
           "type": "registry:hook"
         }
       ],
-      "registryDependencies": ["button"]
+      "registryDependencies": ["@joyco/button"]
     },
     {
       "name": "mobile-menu",
@@ -69,7 +69,7 @@
       "description": "A full-screen overlay mobile menu.",
       "files": [
         {
-          "path": "registry/joyco/blocks/mobile-menu.tsx",
+          "path": "registry/components/mobile-menu.tsx",
           "type": "registry:component"
         }
       ],
@@ -86,7 +86,7 @@
       "description": "A scrollable area component with customizable top and bottom shadows that appear when content overflows.",
       "files": [
         {
-          "path": "registry/joyco/blocks/scroll-area.tsx",
+          "path": "registry/components/scroll-area.tsx",
           "type": "registry:component"
         }
       ],
@@ -99,16 +99,20 @@
       "description": "A composable chat component",
       "files": [
         {
-          "path": "registry/joyco/blocks/chat.tsx",
+          "path": "registry/components/chat.tsx",
           "type": "registry:component"
         },
         {
           "path": "hooks/use-interruption.ts",
           "type": "registry:hook"
+        },
+        {
+          "path": "registry/lib/compose-refs.ts",
+          "type": "registry:lib"
         }
       ],
       "dependencies": ["debounce", "react-use-measure"],
-      "registryDependencies": ["input-group", "avatar"]
+      "registryDependencies": ["@joyco/input-group", "@joyco/avatar"]
     },
     {
       "name": "hls-video-player",
@@ -117,11 +121,11 @@
       "description": "A headless HLS video player with native HLS detection and error handling.",
       "files": [
         {
-          "path": "registry/joyco/blocks/hls-video-player.tsx",
+          "path": "registry/components/hls-video-player.tsx",
           "type": "registry:component"
         },
         {
-          "path": "lib/compose-refs.ts",
+          "path": "registry/lib/compose-refs.ts",
           "type": "registry:lib"
         }
       ],
@@ -134,7 +138,7 @@
       "description": "A particle emitter for showing ephemeral action feedback hints that fade out.",
       "files": [
         {
-          "path": "registry/joyco/blocks/action-hint.tsx",
+          "path": "registry/components/action-hint.tsx",
           "type": "registry:component"
         }
       ]
@@ -146,7 +150,7 @@
       "description": "A canvas-based image sequence player with binary progressive loading for smooth playback.",
       "files": [
         {
-          "path": "registry/joyco/blocks/image-sequence.tsx",
+          "path": "registry/components/image-sequence.tsx",
           "type": "registry:component"
         }
       ]
@@ -158,7 +162,7 @@
       "description": "A lightweight typewriter text component that cycles through phrases with minimal JavaScript.",
       "files": [
         {
-          "path": "registry/joyco/blocks/typewriter.tsx",
+          "path": "registry/components/typewriter.tsx",
           "type": "registry:component"
         },
         {
@@ -174,7 +178,7 @@
       "description": "A WAAPI-powered spritesheet animator for squared grid-based spritesheets with stepped frame animation.",
       "files": [
         {
-          "path": "registry/joyco/blocks/spritesheet-sequencer.tsx",
+          "path": "registry/components/spritesheet-sequencer.tsx",
           "type": "registry:component"
         }
       ]
@@ -183,18 +187,811 @@
       "name": "svg-morph",
       "type": "registry:component",
       "title": "SVG Morph",
-      "description": "Smooth SVG path morphing animations with flubber interpolation. Supports auto-looping and controlled step mode.",
+      "description": "Smooth SVG path morphing animations with flubber interpolation and a fully controlled step API.",
       "files": [
         {
-          "path": "registry/joyco/blocks/svg-morph.tsx",
+          "path": "registry/components/svg-morph.tsx",
           "type": "registry:component"
         },
         {
-          "path": "hooks/use-svg-morph.ts",
+          "path": "registry/hooks/use-svg-morph.ts",
           "type": "registry:hook"
         }
       ],
       "dependencies": ["flubber", "motion"]
+    },
+    {
+      "name": "magnetic",
+      "type": "registry:component",
+      "title": "Magnetic",
+      "description": "A cursor-attraction wrapper that makes inner content subtly follow the mouse position.",
+      "files": [
+        {
+          "path": "registry/components/magnetic.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/lib/compose-refs.ts",
+          "type": "registry:lib"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-slot"]
+    },
+    {
+      "name": "scramble",
+      "type": "registry:component",
+      "title": "Scramble",
+      "description": "A GSAP registered effect that decodes text with staggered character-by-character reveal animation.",
+      "files": [
+        {
+          "path": "registry/lib/gsap/effects/scramble.ts",
+          "type": "registry:lib"
+        }
+      ],
+      "dependencies": ["gsap"]
+    },
+    {
+      "name": "scramble-button",
+      "type": "registry:component",
+      "title": "Scramble Button",
+      "description": "A button that scrambles its text on hover using the scramble GSAP effect.",
+      "files": [
+        {
+          "path": "registry/components/scramble-button.tsx",
+          "type": "registry:component"
+        }
+      ],
+      "dependencies": ["gsap"],
+      "registryDependencies": ["@joyco/scramble", "@joyco/button"]
+    },
+    {
+      "name": "brick-breaker",
+      "type": "registry:component",
+      "title": "Brick Breaker",
+      "description": "A fully-featured brick breaker game with multiple levels, brick types, and proper collision physics.",
+      "files": [
+        {
+          "path": "registry/components/games/brick-breaker/index.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/brick-breaker/brick-breaker.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/brick-breaker/ui.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/brick-breaker/types.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/brick-breaker/config.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/brick-breaker/levels.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/brick-breaker/utils.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/brick-breaker/use-brick-breaker.ts",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "snake-game",
+      "type": "registry:component",
+      "title": "Snake Game",
+      "description": "A minimal, themeable snake game component with highscore persistence.",
+      "files": [
+        {
+          "path": "registry/components/games/snake-game/index.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/snake-game/snake-game.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/snake-game/types.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/snake-game/config.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/snake-game/utils.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/snake-game/use-snake-game.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "registry/hooks/use-local-storage.ts",
+          "type": "registry:hook"
+        }
+      ],
+      "registryDependencies": ["@joyco/button", "@joyco/kbd"]
+    },
+    {
+      "name": "canvas-2d",
+      "type": "registry:component",
+      "title": "Canvas 2D",
+      "description": "A DPR-aware 2D canvas component and hook that handles sizing, pixel ratio, and context setup automatically.",
+      "files": [
+        {
+          "path": "registry/components/canvas-2d.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "debug-canvas",
+      "type": "registry:component",
+      "title": "r3f Canvas",
+      "description": "An enhanced R3F Canvas with built-in debug helpers — orbit/fly controls (mutually exclusive), grid, camera monitor, and performance stats — all toggled via a shared tweakpane folder.",
+      "files": [
+        {
+          "path": "registry/components/debug-canvas/index.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/debug-canvas/debug-canvas.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/debug-canvas/debug-controls.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/debug-canvas/debug-grid-helper.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/debug-canvas/debug-camera-monitor.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/debug-canvas/debug-perf-monitor.tsx",
+          "type": "registry:component"
+        }
+      ],
+      "dependencies": ["stats-gl", "@react-three/drei"],
+      "registryDependencies": ["@joyco/debug"]
+    },
+    {
+      "name": "debug",
+      "type": "registry:component",
+      "title": "Debug Hooks",
+      "description": "A tweakpane-powered debug panel with URL-persisted state, draggable UI, and reactive hooks for binding component values.",
+      "files": [
+        {
+          "path": "registry/lib/debug/provider.tsx",
+          "type": "registry:lib"
+        },
+        {
+          "path": "registry/lib/debug/context.tsx",
+          "type": "registry:lib"
+        },
+        {
+          "path": "registry/lib/debug/hooks.tsx",
+          "type": "registry:lib"
+        },
+        {
+          "path": "registry/lib/debug/hash-state.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "registry/lib/debug/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "registry/lib/debug/use-draggable.ts",
+          "type": "registry:lib"
+        }
+      ],
+      "dependencies": [
+        "@tweakpane/core",
+        "lodash.debounce",
+        "zustand",
+        "tweakpane"
+      ]
+    },
+    {
+      "name": "avatar",
+      "type": "registry:ui",
+      "title": "Avatar",
+      "description": "An image element with a fallback for representing the user.",
+      "files": [
+        {
+          "path": "components/ui/avatar.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-avatar"]
+    },
+    {
+      "name": "badge",
+      "type": "registry:ui",
+      "title": "Badge",
+      "description": "Displays a badge or a component that looks like a badge.",
+      "files": [
+        {
+          "path": "components/ui/badge.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-slot", "class-variance-authority"]
+    },
+    {
+      "name": "button",
+      "type": "registry:ui",
+      "title": "Button",
+      "description": "Displays a button or a component that looks like a button.",
+      "files": [
+        {
+          "path": "components/ui/button.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-slot", "class-variance-authority"]
+    },
+    {
+      "name": "button-group",
+      "type": "registry:ui",
+      "title": "Button Group",
+      "description": "Groups multiple buttons or inputs into a single visual unit.",
+      "files": [
+        {
+          "path": "components/ui/button-group.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-slot", "class-variance-authority"],
+      "registryDependencies": ["@joyco/separator"]
+    },
+    {
+      "name": "card",
+      "type": "registry:ui",
+      "title": "Card",
+      "description": "Displays a card with header, content, and footer.",
+      "files": [
+        {
+          "path": "components/ui/card.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "chart",
+      "type": "registry:ui",
+      "title": "Chart",
+      "description": "Composable charting components built on top of Recharts.",
+      "files": [
+        {
+          "path": "components/ui/chart.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["recharts"]
+    },
+    {
+      "name": "collapsible",
+      "type": "registry:ui",
+      "title": "Collapsible",
+      "description": "An interactive component which expands/collapses a panel.",
+      "files": [
+        {
+          "path": "components/ui/collapsible.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-collapsible"]
+    },
+    {
+      "name": "dropdown-menu",
+      "type": "registry:ui",
+      "title": "Dropdown Menu",
+      "description": "Displays a menu to the user triggered by a button.",
+      "files": [
+        {
+          "path": "registry/ui/dropdown-menu.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-dropdown-menu", "lucide-react"]
+    },
+    {
+      "name": "input",
+      "type": "registry:ui",
+      "title": "Input",
+      "description": "Displays a form input field.",
+      "files": [
+        {
+          "path": "components/ui/input.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "input-group",
+      "type": "registry:ui",
+      "title": "Input Group",
+      "description": "Composable input group with addons, buttons, and textarea support.",
+      "files": [
+        {
+          "path": "components/ui/input-group.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["class-variance-authority"],
+      "registryDependencies": [
+        "@joyco/button",
+        "@joyco/input",
+        "@joyco/textarea"
+      ]
+    },
+    {
+      "name": "kbd",
+      "type": "registry:ui",
+      "title": "Kbd",
+      "description": "Displays a keyboard key or shortcut.",
+      "files": [
+        {
+          "path": "components/ui/kbd.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "media-player",
+      "type": "registry:ui",
+      "title": "Media Player",
+      "description": "A composable media player with controls, settings, captions, and PiP support.",
+      "files": [
+        {
+          "path": "components/ui/media-player.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "registry/lib/compose-refs.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "hooks/use-lazy-ref.ts",
+          "type": "registry:hook"
+        }
+      ],
+      "dependencies": [
+        "media-chrome",
+        "@radix-ui/react-direction",
+        "@radix-ui/react-slider",
+        "@radix-ui/react-slot"
+      ],
+      "registryDependencies": [
+        "@joyco/badge",
+        "@joyco/button",
+        "@joyco/dropdown-menu",
+        "@joyco/tooltip"
+      ]
+    },
+    {
+      "name": "mention",
+      "type": "registry:ui",
+      "title": "Mention",
+      "description": "An autocomplete mention input component.",
+      "files": [
+        {
+          "path": "components/ui/mention.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@diceui/mention"]
+    },
+    {
+      "name": "popover",
+      "type": "registry:ui",
+      "title": "Popover",
+      "description": "Displays rich content in a portal triggered by a button.",
+      "files": [
+        {
+          "path": "components/ui/popover.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-popover"]
+    },
+    {
+      "name": "select",
+      "type": "registry:ui",
+      "title": "Select",
+      "description": "Displays a list of options for the user to pick from.",
+      "files": [
+        {
+          "path": "registry/ui/select.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-select", "lucide-react"]
+    },
+    {
+      "name": "separator",
+      "type": "registry:ui",
+      "title": "Separator",
+      "description": "Visually or semantically separates content.",
+      "files": [
+        {
+          "path": "components/ui/separator.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-separator", "class-variance-authority"]
+    },
+    {
+      "name": "slider",
+      "type": "registry:ui",
+      "title": "Slider",
+      "description": "An input where the user selects a value from within a given range.",
+      "files": [
+        {
+          "path": "components/ui/slider.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-slider"]
+    },
+    {
+      "name": "switch",
+      "type": "registry:ui",
+      "title": "Switch",
+      "description": "A control that allows the user to toggle between checked and unchecked.",
+      "files": [
+        {
+          "path": "components/ui/switch.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["radix-ui"]
+    },
+    {
+      "name": "tabs",
+      "type": "registry:ui",
+      "title": "Tabs",
+      "description": "A set of layered sections of content displayed one at a time.",
+      "files": [
+        {
+          "path": "components/ui/tabs.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-tabs"]
+    },
+    {
+      "name": "textarea",
+      "type": "registry:ui",
+      "title": "Textarea",
+      "description": "Displays a form textarea field.",
+      "files": [
+        {
+          "path": "components/ui/textarea.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "tooltip",
+      "type": "registry:ui",
+      "title": "Tooltip",
+      "description": "A popup that displays information related to an element on hover.",
+      "files": [
+        {
+          "path": "components/ui/tooltip.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-tooltip"]
+    },
+    {
+      "name": "joyco-theme",
+      "type": "registry:theme",
+      "title": "JOYCO Theme",
+      "description": "JOYCO brand theme with light and dark mode color tokens.",
+      "css": {
+        "@custom-variant hocus (&:is(:hover, :focus-visible))": {},
+        "@custom-variant dark (&:where(.dark, .dark *))": {},
+        "@custom-variant light (&:where(.light, .light *))": {},
+        "@layer base": {
+          "*": {
+            "scrollbar-width": "thin",
+            "scrollbar-color": "var(--accent) transparent"
+          },
+          "*::-webkit-scrollbar": {
+            "-webkit-appearance": "none",
+            "width": "12px",
+            "height": "12px",
+            "background-color": "transparent"
+          },
+          "*::-webkit-scrollbar-track": {
+            "-webkit-appearance": "none",
+            "background-color": "transparent",
+            "border-radius": "0"
+          },
+          "*::-webkit-scrollbar-thumb": {
+            "-webkit-appearance": "none",
+            "background-color": "var(--accent)",
+            "border-radius": "0",
+            "border": "2px solid transparent",
+            "background-clip": "padding-box"
+          },
+          "*::-webkit-scrollbar-thumb:hover": {
+            "background-color": "color-mix(in oklab, var(--accent) 80%, var(--foreground))"
+          },
+          "*::-webkit-scrollbar-corner": {
+            "background-color": "transparent"
+          }
+        }
+      },
+      "cssVars": {
+        "theme": {
+          "radius": "0rem",
+          "font-sans": "var(--font-public-sans)",
+          "font-mono": "var(--font-roboto-mono)",
+          "default-font-family": "var(--font-sans)",
+          "default-font-family-mono": "var(--font-mono)",
+          "text-base--letter-spacing": "-0.015em",
+          "text-lg--letter-spacing": "-0.02em",
+          "text-xl--letter-spacing": "-0.025em",
+          "text-2xl--letter-spacing": "-0.03em",
+          "text-3xl--letter-spacing": "-0.03em",
+          "text-4xl--letter-spacing": "-0.03em",
+          "text-5xl--letter-spacing": "-0.03em",
+          "text-6xl--letter-spacing": "-0.03em",
+          "text-7xl--letter-spacing": "-0.03em",
+          "text-8xl--letter-spacing": "-0.03em",
+          "text-9xl--letter-spacing": "-0.03em"
+        },
+        "light": {
+          "background": "oklch(1 0 0)",
+          "foreground": "oklch(0.145 0 0)",
+          "card": "oklch(0.97 0 0)",
+          "card-foreground": "oklch(0.145 0 0)",
+          "popover": "oklch(1 0 0)",
+          "popover-foreground": "oklch(0.145 0 0)",
+          "primary": "oklch(0.452 0.313214 264.052)",
+          "primary-foreground": "oklch(1 0 0)",
+          "secondary": "oklch(0.97 0 0)",
+          "secondary-foreground": "oklch(0.205 0 0)",
+          "muted": "oklch(0.97 0 0)",
+          "muted-foreground": "oklch(0.556 0 0)",
+          "accent": "oklch(0.9 0 0)",
+          "accent-foreground": "oklch(0.205 0 0)",
+          "destructive": "oklch(0.577 0.245 27.325)",
+          "border": "oklch(0.922 0 0)",
+          "input": "oklch(0.922 0 0)",
+          "ring": "oklch(0.708 0 0)",
+          "chart-1": "oklch(0.646 0.222 41.116)",
+          "chart-2": "oklch(0.6 0.118 184.704)",
+          "chart-3": "oklch(0.398 0.07 227.392)",
+          "chart-4": "oklch(0.828 0.189 84.429)",
+          "chart-5": "oklch(0.769 0.188 70.08)",
+          "sidebar": "oklch(0.985 0 0)",
+          "sidebar-foreground": "oklch(0.145 0 0)",
+          "sidebar-primary": "oklch(0.205 0 0)",
+          "sidebar-primary-foreground": "oklch(0.985 0 0)",
+          "sidebar-accent": "oklch(0.97 0 0)",
+          "sidebar-accent-foreground": "oklch(0.205 0 0)",
+          "sidebar-border": "oklch(0.922 0 0)",
+          "sidebar-ring": "oklch(0.708 0 0)",
+          "radius": "0rem"
+        },
+        "dark": {
+          "background": "oklch(0.1684 0 0)",
+          "foreground": "oklch(0.985 0 0)",
+          "card": "oklch(0.2046 0 0)",
+          "card-foreground": "oklch(0.985 0 0)",
+          "popover": "oklch(0.205 0 0)",
+          "popover-foreground": "oklch(0.985 0 0)",
+          "primary": "oklch(0.452 0.313214 264.052)",
+          "primary-foreground": "oklch(1 0 0)",
+          "secondary": "oklch(0.269 0 0)",
+          "secondary-foreground": "oklch(0.985 0 0)",
+          "muted": "oklch(0.2134 0 0)",
+          "muted-foreground": "oklch(0.708 0 0)",
+          "accent": "oklch(0.2768 0 0)",
+          "accent-foreground": "oklch(0.8975 0 0)",
+          "destructive": "oklch(0.704 0.191 22.216)",
+          "border": "oklch(0.285 0 0)",
+          "input": "oklch(1 0 0 / 15%)",
+          "ring": "oklch(0.556 0 0)",
+          "chart-1": "oklch(0.488 0.243 264.376)",
+          "chart-2": "oklch(0.696 0.17 162.48)",
+          "chart-3": "oklch(0.769 0.188 70.08)",
+          "chart-4": "oklch(0.627 0.265 303.9)",
+          "chart-5": "oklch(0.645 0.246 16.439)",
+          "sidebar": "oklch(0.205 0 0)",
+          "sidebar-foreground": "oklch(0.985 0 0)",
+          "sidebar-primary": "oklch(0.488 0.243 264.376)",
+          "sidebar-primary-foreground": "oklch(0.985 0 0)",
+          "sidebar-accent": "oklch(0.269 0 0)",
+          "sidebar-accent-foreground": "oklch(0.985 0 0)",
+          "sidebar-border": "oklch(1 0 0 / 10%)",
+          "sidebar-ring": "oklch(0.556 0 0)"
+        }
+      }
+    },
+    {
+      "name": "joyco-fonts",
+      "type": "registry:lib",
+      "title": "JOYCO Fonts",
+      "description": "JOYCO brand font configuration with Public Sans and Roboto Mono.",
+      "files": [
+        {
+          "path": "registry/lib/fonts.ts",
+          "type": "registry:lib",
+          "target": "lib/fonts.ts"
+        }
+      ]
+    },
+    {
+      "name": "ui",
+      "type": "registry:style",
+      "title": "JOYCO UI",
+      "description": "The full JOYCO UI kit — all components and brand theming.",
+      "css": {
+        "@custom-variant hocus (&:is(:hover, :focus-visible))": {},
+        "@custom-variant dark (&:where(.dark, .dark *))": {},
+        "@custom-variant light (&:where(.light, .light *))": {},
+        "@layer base": {
+          "*": {
+            "scrollbar-width": "thin",
+            "scrollbar-color": "var(--accent) transparent"
+          },
+          "*::-webkit-scrollbar": {
+            "-webkit-appearance": "none",
+            "width": "12px",
+            "height": "12px",
+            "background-color": "transparent"
+          },
+          "*::-webkit-scrollbar-track": {
+            "-webkit-appearance": "none",
+            "background-color": "transparent",
+            "border-radius": "0"
+          },
+          "*::-webkit-scrollbar-thumb": {
+            "-webkit-appearance": "none",
+            "background-color": "var(--accent)",
+            "border-radius": "0",
+            "border": "2px solid transparent",
+            "background-clip": "padding-box"
+          },
+          "*::-webkit-scrollbar-thumb:hover": {
+            "background-color": "color-mix(in oklab, var(--accent) 80%, var(--foreground))"
+          },
+          "*::-webkit-scrollbar-corner": {
+            "background-color": "transparent"
+          }
+        }
+      },
+      "cssVars": {
+        "theme": {
+          "radius": "0rem",
+          "font-sans": "var(--font-public-sans)",
+          "font-mono": "var(--font-roboto-mono)",
+          "default-font-family": "var(--font-sans)",
+          "default-font-family-mono": "var(--font-mono)",
+          "text-base--letter-spacing": "-0.015em",
+          "text-lg--letter-spacing": "-0.02em",
+          "text-xl--letter-spacing": "-0.025em",
+          "text-2xl--letter-spacing": "-0.03em",
+          "text-3xl--letter-spacing": "-0.03em",
+          "text-4xl--letter-spacing": "-0.03em",
+          "text-5xl--letter-spacing": "-0.03em",
+          "text-6xl--letter-spacing": "-0.03em",
+          "text-7xl--letter-spacing": "-0.03em",
+          "text-8xl--letter-spacing": "-0.03em",
+          "text-9xl--letter-spacing": "-0.03em"
+        },
+        "light": {
+          "background": "oklch(1 0 0)",
+          "foreground": "oklch(0.145 0 0)",
+          "card": "oklch(0.97 0 0)",
+          "card-foreground": "oklch(0.145 0 0)",
+          "popover": "oklch(1 0 0)",
+          "popover-foreground": "oklch(0.145 0 0)",
+          "primary": "oklch(0.452 0.313214 264.052)",
+          "primary-foreground": "oklch(1 0 0)",
+          "secondary": "oklch(0.97 0 0)",
+          "secondary-foreground": "oklch(0.205 0 0)",
+          "muted": "oklch(0.97 0 0)",
+          "muted-foreground": "oklch(0.556 0 0)",
+          "accent": "oklch(0.9 0 0)",
+          "accent-foreground": "oklch(0.205 0 0)",
+          "destructive": "oklch(0.577 0.245 27.325)",
+          "border": "oklch(0.922 0 0)",
+          "input": "oklch(0.922 0 0)",
+          "ring": "oklch(0.708 0 0)",
+          "chart-1": "oklch(0.646 0.222 41.116)",
+          "chart-2": "oklch(0.6 0.118 184.704)",
+          "chart-3": "oklch(0.398 0.07 227.392)",
+          "chart-4": "oklch(0.828 0.189 84.429)",
+          "chart-5": "oklch(0.769 0.188 70.08)",
+          "sidebar": "oklch(0.985 0 0)",
+          "sidebar-foreground": "oklch(0.145 0 0)",
+          "sidebar-primary": "oklch(0.205 0 0)",
+          "sidebar-primary-foreground": "oklch(0.985 0 0)",
+          "sidebar-accent": "oklch(0.97 0 0)",
+          "sidebar-accent-foreground": "oklch(0.205 0 0)",
+          "sidebar-border": "oklch(0.922 0 0)",
+          "sidebar-ring": "oklch(0.708 0 0)",
+          "radius": "0rem"
+        },
+        "dark": {
+          "background": "oklch(0.1684 0 0)",
+          "foreground": "oklch(0.985 0 0)",
+          "card": "oklch(0.2046 0 0)",
+          "card-foreground": "oklch(0.985 0 0)",
+          "popover": "oklch(0.205 0 0)",
+          "popover-foreground": "oklch(0.985 0 0)",
+          "primary": "oklch(0.452 0.313214 264.052)",
+          "primary-foreground": "oklch(1 0 0)",
+          "secondary": "oklch(0.269 0 0)",
+          "secondary-foreground": "oklch(0.985 0 0)",
+          "muted": "oklch(0.2134 0 0)",
+          "muted-foreground": "oklch(0.708 0 0)",
+          "accent": "oklch(0.2768 0 0)",
+          "accent-foreground": "oklch(0.8975 0 0)",
+          "destructive": "oklch(0.704 0.191 22.216)",
+          "border": "oklch(0.285 0 0)",
+          "input": "oklch(1 0 0 / 15%)",
+          "ring": "oklch(0.556 0 0)",
+          "chart-1": "oklch(0.488 0.243 264.376)",
+          "chart-2": "oklch(0.696 0.17 162.48)",
+          "chart-3": "oklch(0.769 0.188 70.08)",
+          "chart-4": "oklch(0.627 0.265 303.9)",
+          "chart-5": "oklch(0.645 0.246 16.439)",
+          "sidebar": "oklch(0.205 0 0)",
+          "sidebar-foreground": "oklch(0.985 0 0)",
+          "sidebar-primary": "oklch(0.488 0.243 264.376)",
+          "sidebar-primary-foreground": "oklch(0.985 0 0)",
+          "sidebar-accent": "oklch(0.269 0 0)",
+          "sidebar-accent-foreground": "oklch(0.985 0 0)",
+          "sidebar-border": "oklch(1 0 0 / 10%)",
+          "sidebar-ring": "oklch(0.556 0 0)",
+          "radius": "0rem"
+        }
+      },
+      "registryDependencies": [
+        "@joyco/joyco-fonts",
+        "@joyco/avatar",
+        "@joyco/badge",
+        "@joyco/button",
+        "@joyco/button-group",
+        "@joyco/card",
+        "@joyco/chart",
+        "@joyco/collapsible",
+        "@joyco/dropdown-menu",
+        "@joyco/input",
+        "@joyco/input-group",
+        "@joyco/kbd",
+        "@joyco/media-player",
+        "@joyco/mention",
+        "@joyco/popover",
+        "@joyco/select",
+        "@joyco/separator",
+        "@joyco/slider",
+        "@joyco/switch",
+        "@joyco/tabs",
+        "@joyco/textarea",
+        "@joyco/tooltip"
+      ]
     }
   ]
 }

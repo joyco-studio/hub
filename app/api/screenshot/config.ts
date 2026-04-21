@@ -6,6 +6,10 @@ export type DemoConfig = {
     height: number
   }
   preview?: string
+  gotoOptions?: {
+    waitUntil: string
+    timeout: number
+  }
 }
 
 export const config: Record<string, Partial<DemoConfig>> = {
@@ -61,6 +65,44 @@ body * {
   flex-shrink: 0;
 }
 /* Hide scrollbars */
+::-webkit-scrollbar {
+  display: none;
+}
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+`
+
+export const experimentConfig: Record<string, Partial<DemoConfig>> = {
+  'joyco-miami': {
+    timeout: 5000,
+  },
+  'msdf-text-fluidsim': {
+    timeout: 3200,
+  },
+}
+
+export const experimentDefaultConfig: DemoConfig = {
+  styles: '',
+  timeout: 3000,
+  viewport: {
+    width: 1440,
+    height: 900,
+  },
+  gotoOptions: {
+    waitUntil: 'load',
+    timeout: 30000,
+  },
+}
+
+export function getExperimentConfig(slug: string) {
+  const selectedConfig = experimentConfig[slug]
+
+  return Object.assign({}, experimentDefaultConfig, selectedConfig)
+}
+
+export const baseExperimentStyle: string = `
 ::-webkit-scrollbar {
   display: none;
 }

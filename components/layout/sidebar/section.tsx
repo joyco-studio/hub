@@ -8,13 +8,17 @@ import { cn } from '@/lib/utils'
 import CubeIcon from '@/components/icons/3d-cube'
 import TerminalWithCursorIcon from '@/components/icons/terminal-w-cursor'
 import FileIcon from '@/components/icons/file'
+import FlaskIcon from '@/components/icons/flask'
 import GamepadIcon from '@/components/icons/gamepad'
-import { Minus, Plus } from 'lucide-react'
+import TextScanIcon from '@/components/icons/text-scan'
+import { Frame, Library, Minus, Plus } from 'lucide-react'
 import { getLogNumber, stripLogPrefixFromTitle } from '@/lib/log-utils'
+import { MetaBadge } from '@/components/layout/meta-badge'
 
 export type SidebarItemMeta = {
-  badge?: 'new' | 'updated'
+  badge?: 'new' | 'updated' | 'internal'
   dot?: 'red' | 'blue' | 'green' | 'yellow'
+  hidden?: boolean
 }
 
 // Helper function to get display name for sidebar items
@@ -35,6 +39,7 @@ const sectionIcons: Record<
   components: CubeIcon,
   toolbox: TerminalWithCursorIcon,
   logs: FileIcon,
+  lab: FlaskIcon,
 }
 
 type SidebarItemsProps = {
@@ -70,6 +75,7 @@ export function SidebarItems({ folder, meta = {} }: SidebarItemsProps) {
         {folder.children.map((child) => {
           if (child.type === 'page') {
             const itemMeta = meta[child.url] ?? {}
+            if (itemMeta.hidden) return null
             const isItemActive = pathname === child.url
             const displayName = getDisplayName(child, sectionId)
 
@@ -97,17 +103,7 @@ export function SidebarItems({ folder, meta = {} }: SidebarItemsProps) {
                 )}
                 <span className="truncate">{displayName}</span>
                 {itemMeta.badge && (
-                  <span
-                    className={cn(
-                      'ml-auto shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase',
-                      itemMeta.badge === 'new' &&
-                        'bg-blue-500/20 text-blue-400',
-                      itemMeta.badge === 'updated' &&
-                        'bg-orange-500/20 text-orange-400'
-                    )}
-                  >
-                    {itemMeta.badge}
-                  </span>
+                  <MetaBadge type={itemMeta.badge} className="ml-auto" />
                 )}
               </Link>
             )
@@ -170,6 +166,7 @@ function CollapsibleSubSection({
           <div className="border-border ml-4 flex flex-col border-l-2">
             {pages.map((page) => {
               const itemMeta = meta[page.url] ?? {}
+              if (itemMeta.hidden) return null
               const isItemActive = pathname === page.url
               const displayName = getDisplayName(page, sectionId)
 
@@ -197,17 +194,7 @@ function CollapsibleSubSection({
                   )}
                   <span className="truncate">{displayName}</span>
                   {itemMeta.badge && (
-                    <span
-                      className={cn(
-                        'ml-auto shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase',
-                        itemMeta.badge === 'new' &&
-                          'bg-blue-500/20 text-blue-400',
-                        itemMeta.badge === 'updated' &&
-                          'bg-orange-500/20 text-orange-400'
-                      )}
-                    >
-                      {itemMeta.badge}
-                    </span>
+                    <MetaBadge type={itemMeta.badge} className="ml-auto" />
                   )}
                 </Link>
               )
@@ -225,6 +212,9 @@ type SidebarSectionProps = {
   defaultOpen?: boolean
   meta?: Record<string, SidebarItemMeta>
   gameSlugs?: string[]
+  effectSlugs?: string[]
+  canvasSlugs?: string[]
+  librarySlugs?: string[]
 }
 
 /**
@@ -236,6 +226,9 @@ export function SidebarSection({
   defaultOpen = true,
   meta = {},
   gameSlugs = [],
+  effectSlugs = [],
+  canvasSlugs = [],
+  librarySlugs = [],
 }: SidebarSectionProps) {
   const [isOpen, setIsOpen] = React.useState(defaultOpen)
   const pathname = usePathname()
@@ -248,17 +241,34 @@ export function SidebarSection({
 
   const isActive = pathname.startsWith(`/${sectionId}`)
 
-  // For components section, split into UI and Games
-  if (sectionId === 'components' && gameSlugs.length > 0) {
+  // For components section, split into UI, Canvas, Effects, and Games
+  if (
+    sectionId === 'components' &&
+    (gameSlugs.length > 0 || effectSlugs.length > 0 || canvasSlugs.length > 0)
+  ) {
     const isGame = (url: string) => {
       const slug = url.split('/').pop() ?? ''
       return gameSlugs.includes(slug)
     }
 
+    const isEffect = (url: string) => {
+      const slug = url.split('/').pop() ?? ''
+      return effectSlugs.includes(slug)
+    }
+
+    const isCanvas = (url: string) => {
+      const slug = url.split('/').pop() ?? ''
+      return canvasSlugs.includes(slug)
+    }
+
     const pages = folder.children.filter(
       (child): child is PageTree.Item => child.type === 'page'
     )
-    const uiPages = pages.filter((page) => !isGame(page.url))
+    const uiPages = pages.filter(
+      (page) => !isGame(page.url) && !isEffect(page.url) && !isCanvas(page.url)
+    )
+    const canvasPages = pages.filter((page) => isCanvas(page.url))
+    const effectPages = pages.filter((page) => isEffect(page.url))
     const gamePages = pages.filter((page) => isGame(page.url))
 
     return (
@@ -270,6 +280,24 @@ export function SidebarSection({
           meta={meta}
           defaultOpen
         />
+        {canvasPages.length > 0 && (
+          <CollapsibleSubSection
+            name="Canvas"
+            icon={Frame}
+            pages={canvasPages}
+            meta={meta}
+            defaultOpen
+          />
+        )}
+        {effectPages.length > 0 && (
+          <CollapsibleSubSection
+            name="Effects"
+            icon={TextScanIcon}
+            pages={effectPages}
+            meta={meta}
+            defaultOpen
+          />
+        )}
         {gamePages.length > 0 && (
           <CollapsibleSubSection
             name="Games"
@@ -283,7 +311,51 @@ export function SidebarSection({
     )
   }
 
-  // For other sections (Toolbox, Logs), render with collapsible header
+  // For toolbox section, split into General and Libraries
+  if (sectionId === 'toolbox' && librarySlugs.length > 0) {
+    const isLibrary = (url: string) => {
+      const slug = url.split('/').pop() ?? ''
+      return librarySlugs.includes(slug)
+    }
+
+    const pages = folder.children.filter(
+      (child): child is PageTree.Item => child.type === 'page'
+    )
+    const generalPages = pages.filter((page) => !isLibrary(page.url))
+    const libraryPages = pages.filter((page) => isLibrary(page.url))
+
+    return (
+      <div className="flex flex-col">
+        <CollapsibleSubSection
+          name="General"
+          icon={TerminalWithCursorIcon}
+          pages={generalPages}
+          meta={meta}
+          defaultOpen
+          sectionId={sectionId}
+        />
+        {libraryPages.length > 0 && (
+          <CollapsibleSubSection
+            name="Libraries"
+            icon={Library}
+            pages={libraryPages}
+            meta={meta}
+            defaultOpen
+            sectionId={sectionId}
+          />
+        )}
+      </div>
+    )
+  }
+
+  // For other sections (Logs), render with collapsible header
+
+  const sortedLogs = (() => {
+    if (sectionId === 'logs') {
+      return folder.children.toReversed()
+    }
+    return folder.children
+  })()
   return (
     <div className="flex flex-col">
       <button
@@ -311,9 +383,10 @@ export function SidebarSection({
       {isOpen && (
         <>
           <div className="border-border ml-4 flex flex-col border-l-2">
-            {folder.children.map((child) => {
+            {sortedLogs.map((child) => {
               if (child.type === 'page') {
                 const itemMeta = meta[child.url] ?? {}
+                if (itemMeta.hidden) return null
                 const isItemActive = pathname === child.url
                 const displayName = getDisplayName(child, sectionId)
 
@@ -341,17 +414,7 @@ export function SidebarSection({
                     )}
                     <span className="truncate">{displayName}</span>
                     {itemMeta.badge && (
-                      <span
-                        className={cn(
-                          'ml-auto shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase',
-                          itemMeta.badge === 'new' &&
-                            'bg-blue-500/20 text-blue-400',
-                          itemMeta.badge === 'updated' &&
-                            'bg-orange-500/20 text-orange-400'
-                        )}
-                      >
-                        {itemMeta.badge}
-                      </span>
+                      <MetaBadge type={itemMeta.badge} className="ml-auto" />
                     )}
                   </Link>
                 )

@@ -1,6 +1,7 @@
 import { docs } from 'fumadocs-mdx:collections/server'
 import { type InferPageType, loader } from 'fumadocs-core/source'
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons'
+import { getLibraryReadme } from './libraries'
 import { processMdxForLLMs } from './llm'
 import { getLogNumber, stripLogPrefixFromTitle } from './log-utils'
 
@@ -24,9 +25,15 @@ export async function getLLMText(page: InferPageType<typeof source>) {
   const raw = await page.data.getText('raw')
   const processed = processMdxForLLMs(raw)
 
+  let libraryBody = ''
+  if (page.data.type === 'library' && page.data.repo) {
+    const readme = await getLibraryReadme(page.data.repo)
+    if (readme) libraryBody = `\n${readme.cleaned}`
+  }
+
   return `# ${page.data.title}
 
-${processed}`
+${processed}${libraryBody}`
 }
 
 export type RelatedItem = {
@@ -37,6 +44,36 @@ export type RelatedItem = {
   logNumber?: string | null
 }
 
+type PageTreeNode = {
+  type?: string
+  $id?: string
+  children?: PageTreeNode[]
+}
+
+const countPages = (node: PageTreeNode | undefined): number => {
+  if (!node) return 0
+  if (node.type === 'page') return 1
+  return (node.children ?? []).reduce(
+    (sum, child) => sum + countPages(child),
+    0
+  )
+}
+
+const getTopLevelFolder = (segment: string) => {
+  const children = source.pageTree.children as unknown as PageTreeNode[]
+  return children.find(
+    (child) => child.type === 'folder' && child.$id?.split(':')[1] === segment
+  )
+}
+
+export function getRegistryCounts() {
+  return {
+    components: countPages(getTopLevelFolder('components')),
+    toolbox: countPages(getTopLevelFolder('toolbox')),
+    logs: countPages(getTopLevelFolder('logs')),
+  }
+}
+
 /**
  * Get all game slugs based on frontmatter type: 'game'
  */
@@ -44,6 +81,36 @@ export function getGameSlugs(): string[] {
   const allPages = source.getPages()
   return allPages
     .filter((page) => page.data.type === 'game')
+    .map((page) => page.slugs[page.slugs.length - 1])
+}
+
+/**
+ * Get all effect slugs based on frontmatter type: 'effect'
+ */
+export function getEffectSlugs(): string[] {
+  const allPages = source.getPages()
+  return allPages
+    .filter((page) => page.data.type === 'effect')
+    .map((page) => page.slugs[page.slugs.length - 1])
+}
+
+/**
+ * Get all canvas slugs based on frontmatter type: 'canvas'
+ */
+export function getCanvasSlugs(): string[] {
+  const allPages = source.getPages()
+  return allPages
+    .filter((page) => page.data.type === 'canvas')
+    .map((page) => page.slugs[page.slugs.length - 1])
+}
+
+/**
+ * Get all library slugs based on frontmatter type: 'library'
+ */
+export function getLibrarySlugs(): string[] {
+  const allPages = source.getPages()
+  return allPages
+    .filter((page) => page.data.type === 'library')
     .map((page) => page.slugs[page.slugs.length - 1])
 }
 
@@ -64,11 +131,14 @@ export function getRelatedPages(
   if (!itemType) return []
 
   // Helper to convert page to RelatedItem
-  const pageToRelatedItem = (page: InferPageType<typeof source>): RelatedItem => {
+  const pageToRelatedItem = (
+    page: InferPageType<typeof source>
+  ): RelatedItem => {
     const logNumber = itemType === 'log' ? getLogNumber(page.slugs) : null
-    const displayTitle = itemType === 'log' && logNumber
-      ? stripLogPrefixFromTitle(page.data.title, logNumber)
-      : page.data.title
+    const displayTitle =
+      itemType === 'log' && logNumber
+        ? stripLogPrefixFromTitle(page.data.title, logNumber)
+        : page.data.title
 
     return {
       name: page.slugs[page.slugs.length - 1],

@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect } from 'react'
-import SvgMorph from '@/registry/joyco/blocks/svg-morph'
-import { useSvgMorph } from '@/hooks/use-svg-morph'
+import SvgMorph from '@/registry/components/svg-morph'
+import { useSvgMorph } from '@/registry/hooks/use-svg-morph'
 
 const DURATION = 0.5
 const GAP = 1
