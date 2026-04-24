@@ -1,14 +1,14 @@
 import type { DownloadStats } from '@/components/layout/weekly-downloads'
 
-const JOYCO_WORKER_SECRET = process.env.JOYCO_WORKER_SECRET || ''
+const JOYCO_WORKERS_HUB_TOKEN = process.env.JOYCO_WORKERS_HUB_TOKEN || ''
 const BASE_URL = 'https://workers.joyco.studio'
 
 export async function getComponentDownloadStats(
   slug: string
 ): Promise<DownloadStats | null> {
-  if (!JOYCO_WORKER_SECRET) return null
+  if (!JOYCO_WORKERS_HUB_TOKEN) return null
 
-  const headers = { Authorization: `Bearer ${JOYCO_WORKER_SECRET}` }
+  const headers = { Authorization: `Bearer ${JOYCO_WORKERS_HUB_TOKEN}` }
   const now = new Date()
   const to = new Date(now)
   const from = new Date(now)
@@ -61,9 +61,9 @@ export async function getComponentDownloadStats(
 export async function getPageViews(
   pagePath: string
 ): Promise<number | null> {
-  if (!JOYCO_WORKER_SECRET) return null
+  if (!JOYCO_WORKERS_HUB_TOKEN) return null
 
-  const headers = { Authorization: `Bearer ${JOYCO_WORKER_SECRET}` }
+  const headers = { Authorization: `Bearer ${JOYCO_WORKERS_HUB_TOKEN}` }
   const params = new URLSearchParams({
     path: pagePath,
   })
