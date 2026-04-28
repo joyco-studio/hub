@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { CopyButton } from '@/components/copy-button'
+import { PackageManagerCommand } from '@/components/package-manager-command'
 import {
   BoldIcon,
   CopyIcon,
@@ -111,20 +111,6 @@ const brandColors = [
   { name: 'mint-green', var: '--color-mint-green' },
 ] as const
 
-function InstallCmd({ cmd }: { cmd: string }) {
-  return (
-    <div className="bg-code group/code relative flex max-w-xs items-center rounded-md px-3 py-2">
-      <code className="text-code-foreground font-mono text-xs">{cmd}</code>
-      <CopyButton
-        value={cmd}
-        variant="ghost"
-        absolute={false}
-        className="ml-auto size-7"
-      />
-    </div>
-  )
-}
-
 function Section({
   title,
   registryName,
@@ -135,16 +121,19 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <section className="flex flex-col gap-8">
-      <div className="flex flex-col gap-3">
-        <h2 className="font-mono text-lg font-semibold tracking-wide uppercase">
-          {title}
-        </h2>
-        {registryName && (
-          <InstallCmd cmd={`npx shadcn add @joyco/${registryName}`} />
-        )}
+    <section className="flex flex-col">
+      <h2>{title}</h2>
+      <div className="not-prose bg-preview text-preview-foreground flex flex-col gap-8 overflow-clip p-6">
+        {children}
       </div>
-      {children}
+      {registryName && (
+        <PackageManagerCommand
+          pnpm={`pnpm dlx shadcn@latest add @joyco/${registryName}`}
+          npm={`npx shadcn@latest add @joyco/${registryName}`}
+          yarn={`npx shadcn@latest add @joyco/${registryName}`}
+          bun={`bunx --bun shadcn@latest add @joyco/${registryName}`}
+        />
+      )}
     </section>
   )
 }
@@ -201,8 +190,13 @@ export default function UIKit() {
   const [collapsibleOpen, setCollapsibleOpen] = React.useState(false)
 
   return (
-    <div className="not-prose bg-background text-foreground flex flex-col gap-22">
-      <InstallCmd cmd="npx shadcn add @joyco/ui" />
+    <div className="bg-background text-foreground flex flex-col gap-22">
+      <PackageManagerCommand
+        pnpm="pnpm dlx shadcn@latest add @joyco/ui"
+        npm="npx shadcn@latest add @joyco/ui"
+        yarn="npx shadcn@latest add @joyco/ui"
+        bun="bunx --bun shadcn@latest add @joyco/ui"
+      />
 
       {/* ── Button ── */}
       <Section title="Button" registryName="button">
