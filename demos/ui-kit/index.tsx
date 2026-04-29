@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { CopyButton } from '@/components/copy-button'
+import { PackageManagerCommand } from '@/components/package-manager-command'
 import {
   BoldIcon,
   CopyIcon,
@@ -97,34 +97,6 @@ const themeColors = [
   'ring',
 ] as const
 
-const chartColors = [
-  'chart-1',
-  'chart-2',
-  'chart-3',
-  'chart-4',
-  'chart-5',
-] as const
-
-const brandColors = [
-  { name: 'joyco-blue', var: '--color-joyco-blue' },
-  { name: 'mustard-yellow', var: '--color-mustard-yellow' },
-  { name: 'mint-green', var: '--color-mint-green' },
-] as const
-
-function InstallCmd({ cmd }: { cmd: string }) {
-  return (
-    <div className="bg-code group/code relative flex max-w-xs items-center rounded-md px-3 py-2">
-      <code className="text-code-foreground font-mono text-xs">{cmd}</code>
-      <CopyButton
-        value={cmd}
-        variant="ghost"
-        absolute={false}
-        className="ml-auto size-7"
-      />
-    </div>
-  )
-}
-
 function Section({
   title,
   registryName,
@@ -135,16 +107,19 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <section className="flex flex-col gap-8">
-      <div className="flex flex-col gap-3">
-        <h2 className="font-mono text-lg font-semibold tracking-wide uppercase">
-          {title}
-        </h2>
-        {registryName && (
-          <InstallCmd cmd={`npx shadcn add @joyco/${registryName}`} />
-        )}
+    <section className="flex flex-col">
+      <h2>{title}</h2>
+      <div className="not-prose bg-preview text-preview-foreground mb-6 flex flex-col gap-8 overflow-clip p-6">
+        {children}
       </div>
-      {children}
+      {registryName && (
+        <PackageManagerCommand
+          pnpm={`pnpm dlx shadcn@latest add @joyco/${registryName}`}
+          npm={`npx shadcn@latest add @joyco/${registryName}`}
+          yarn={`yarn dlx shadcn@latest add @joyco/${registryName}`}
+          bun={`bunx --bun shadcn@latest add @joyco/${registryName}`}
+        />
+      )}
     </section>
   )
 }
@@ -185,15 +160,17 @@ function Labeled({
 
 function ColorSwatch({ name, cssVar }: { name: string; cssVar: string }) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <div
-        className="border-border size-12 rounded-sm border"
-        style={{ backgroundColor: `var(${cssVar})` }}
-      />
-      <span className="text-muted-foreground font-mono text-[10px] leading-tight">
-        {name}
-      </span>
-    </div>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          aria-label={name}
+          className="border-border focus-visible:ring-ring/50 size-12 rounded-sm border focus-visible:ring-2 focus-visible:outline-hidden"
+          style={{ backgroundColor: `var(${cssVar})` }}
+        />
+      </TooltipTrigger>
+      <TooltipContent>{name}</TooltipContent>
+    </Tooltip>
   )
 }
 
@@ -201,8 +178,13 @@ export default function UIKit() {
   const [collapsibleOpen, setCollapsibleOpen] = React.useState(false)
 
   return (
-    <div className="not-prose bg-background text-foreground flex flex-col gap-22">
-      <InstallCmd cmd="npx shadcn add @joyco/ui" />
+    <div className="bg-background text-foreground flex flex-col gap-22">
+      <PackageManagerCommand
+        pnpm="pnpm dlx shadcn@latest add @joyco/ui"
+        npm="npx shadcn@latest add @joyco/ui"
+        yarn="yarn dlx shadcn@latest add @joyco/ui"
+        bun="bunx --bun shadcn@latest add @joyco/ui"
+      />
 
       {/* ── Button ── */}
       <Section title="Button" registryName="button">
@@ -450,7 +432,7 @@ export default function UIKit() {
       <Section title="Popover" registryName="popover">
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline">Open Popover</Button>
+            <Button variant="outline" className="mx-auto">Open Popover</Button>
           </PopoverTrigger>
           <PopoverContent>
             <div className="flex flex-col gap-2">
@@ -468,7 +450,7 @@ export default function UIKit() {
       <Section title="Dropdown Menu" registryName="dropdown-menu">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline">Open Menu</Button>
+            <Button variant="outline" className="mx-auto">Open Menu</Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
@@ -607,14 +589,15 @@ export default function UIKit() {
       <Section title="Typography">
         <SubSection title="Public Sans (sans)">
           <div className="flex flex-col gap-3">
-            <p className="text-4xl font-bold">The quick brown fox</p>
-            <p className="text-2xl font-semibold">jumps over the lazy dog</p>
+            <p className="text-4xl font-bold">Break the mold</p>
+            <p className="text-2xl font-semibold">Go monke, ship&nbsp;fast</p>
             <p className="text-xl font-medium">
               ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789
             </p>
             <p className="text-base">
-              The five boxing wizards jump quickly. Pack my box with five dozen
-              liquor jugs.
+              We don&apos;t build what&apos;s expected. We build what&apos;s
+              remembered. Every pixel is a statement, every interaction
+              a&nbsp;rebellion.
             </p>
             <p className="text-muted-foreground text-sm">
               Regular · Medium · Semibold · Bold
@@ -624,15 +607,13 @@ export default function UIKit() {
 
         <SubSection title="Roboto Mono (mono)">
           <div className="flex flex-col gap-3 font-mono">
-            <p className="text-2xl font-bold">The quick brown fox</p>
+            <p className="text-2xl font-bold">No rules, just craft</p>
             <p className="text-lg font-medium">
               ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789
             </p>
-            <p className="text-base">
-              const result = await fetch(&#39;/api/data&#39;)
-            </p>
+            <p className="text-base">const rebellion = await joyco.ignite()</p>
             <p className="text-muted-foreground text-sm">
-              console.log(&#39;Hello, World!&#39;)
+              console.log(&apos;built different&apos;)
             </p>
           </div>
         </SubSection>
@@ -655,26 +636,6 @@ export default function UIKit() {
           <div className="flex flex-wrap gap-4">
             {themeColors.map((color) => (
               <ColorSwatch key={color} name={color} cssVar={`--${color}`} />
-            ))}
-          </div>
-        </SubSection>
-
-        <SubSection title="Chart Colors">
-          <div className="flex flex-wrap gap-4">
-            {chartColors.map((color) => (
-              <ColorSwatch key={color} name={color} cssVar={`--${color}`} />
-            ))}
-          </div>
-        </SubSection>
-
-        <SubSection title="Brand Colors">
-          <div className="flex flex-wrap gap-4">
-            {brandColors.map((color) => (
-              <ColorSwatch
-                key={color.name}
-                name={color.name}
-                cssVar={color.var}
-              />
             ))}
           </div>
         </SubSection>
