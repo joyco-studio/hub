@@ -182,7 +182,7 @@ export default function UIKit() {
       <PackageManagerCommand
         pnpm="pnpm dlx shadcn@latest add @joyco/ui"
         npm="npx shadcn@latest add @joyco/ui"
-        yarn="npx shadcn@latest add @joyco/ui"
+        yarn="yarn dlx shadcn@latest add @joyco/ui"
         bun="bunx --bun shadcn@latest add @joyco/ui"
       />
 
