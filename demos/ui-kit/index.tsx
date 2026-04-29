@@ -97,7 +97,6 @@ const themeColors = [
   'ring',
 ] as const
 
-
 function Section({
   title,
   registryName,
@@ -640,7 +639,6 @@ export default function UIKit() {
             ))}
           </div>
         </SubSection>
-
       </Section>
     </div>
   )
