@@ -109,7 +109,7 @@ function Section({
   return (
     <section className="flex flex-col">
       <h2>{title}</h2>
-      <div className="not-prose bg-preview text-preview-foreground flex flex-col gap-8 overflow-clip p-6">
+      <div className="not-prose bg-preview text-preview-foreground mb-6 flex flex-col gap-8 overflow-clip p-6">
         {children}
       </div>
       {registryName && (
@@ -432,7 +432,7 @@ export default function UIKit() {
       <Section title="Popover" registryName="popover">
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline">Open Popover</Button>
+            <Button variant="outline" className="mx-auto">Open Popover</Button>
           </PopoverTrigger>
           <PopoverContent>
             <div className="flex flex-col gap-2">
@@ -450,7 +450,7 @@ export default function UIKit() {
       <Section title="Dropdown Menu" registryName="dropdown-menu">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline">Open Menu</Button>
+            <Button variant="outline" className="mx-auto">Open Menu</Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
