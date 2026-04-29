@@ -71,10 +71,24 @@ export default function Layout({ children }: LayoutProps<'/'>) {
           dangerouslySetInnerHTML={{
             __html: `
               try {
+                var themes = ['light', 'dark', 'radio', 'terminal']
+                var stored = localStorage.theme
+                var theme
+                if (stored === 'system') {
+                  theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+                } else if (themes.indexOf(stored) !== -1) {
+                  theme = stored
+                } else {
+                  theme = 'dark'
+                }
+                document.documentElement.classList.add(theme)
+                document.documentElement.style.colorScheme = theme === 'light' || theme === 'radio' ? 'light' : 'dark'
                 if (localStorage.layout) {
                   document.documentElement.classList.add('layout-' + localStorage.layout)
                 }
-              } catch (_) {}
+              } catch (_) {
+                document.documentElement.classList.add('dark')
+              }
             `,
           }}
         />
@@ -85,6 +99,8 @@ export default function Layout({ children }: LayoutProps<'/'>) {
             enabled: false,
           }}
           theme={{
+            // If you change `themes` or `defaultTheme`, also update the
+            // anti-flash script in <head> above so SSR and the script agree.
             themes: ['light', 'dark', 'radio', 'terminal'],
             defaultTheme: 'dark',
           }}
