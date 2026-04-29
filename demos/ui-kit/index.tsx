@@ -116,7 +116,7 @@ function Section({
         <PackageManagerCommand
           pnpm={`pnpm dlx shadcn@latest add @joyco/${registryName}`}
           npm={`npx shadcn@latest add @joyco/${registryName}`}
-          yarn={`npx shadcn@latest add @joyco/${registryName}`}
+          yarn={`yarn dlx shadcn@latest add @joyco/${registryName}`}
           bun={`bunx --bun shadcn@latest add @joyco/${registryName}`}
         />
       )}
