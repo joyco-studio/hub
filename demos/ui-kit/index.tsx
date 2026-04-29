@@ -97,19 +97,6 @@ const themeColors = [
   'ring',
 ] as const
 
-const chartColors = [
-  'chart-1',
-  'chart-2',
-  'chart-3',
-  'chart-4',
-  'chart-5',
-] as const
-
-const brandColors = [
-  { name: 'joyco-blue', var: '--color-joyco-blue' },
-  { name: 'mustard-yellow', var: '--color-mustard-yellow' },
-  { name: 'mint-green', var: '--color-mint-green' },
-] as const
 
 function Section({
   title,
@@ -174,15 +161,17 @@ function Labeled({
 
 function ColorSwatch({ name, cssVar }: { name: string; cssVar: string }) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <div
-        className="border-border size-12 rounded-sm border"
-        style={{ backgroundColor: `var(${cssVar})` }}
-      />
-      <span className="text-muted-foreground font-mono text-[10px] leading-tight">
-        {name}
-      </span>
-    </div>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          aria-label={name}
+          className="border-border focus-visible:ring-ring/50 size-12 rounded-sm border focus-visible:ring-2 focus-visible:outline-hidden"
+          style={{ backgroundColor: `var(${cssVar})` }}
+        />
+      </TooltipTrigger>
+      <TooltipContent>{name}</TooltipContent>
+    </Tooltip>
   )
 }
 
@@ -601,14 +590,15 @@ export default function UIKit() {
       <Section title="Typography">
         <SubSection title="Public Sans (sans)">
           <div className="flex flex-col gap-3">
-            <p className="text-4xl font-bold">The quick brown fox</p>
-            <p className="text-2xl font-semibold">jumps over the lazy dog</p>
+            <p className="text-4xl font-bold">Break the mold</p>
+            <p className="text-2xl font-semibold">Go monke, ship&nbsp;fast</p>
             <p className="text-xl font-medium">
               ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789
             </p>
             <p className="text-base">
-              The five boxing wizards jump quickly. Pack my box with five dozen
-              liquor jugs.
+              We don&apos;t build what&apos;s expected. We build what&apos;s
+              remembered. Every pixel is a statement, every interaction
+              a&nbsp;rebellion.
             </p>
             <p className="text-muted-foreground text-sm">
               Regular · Medium · Semibold · Bold
@@ -618,15 +608,13 @@ export default function UIKit() {
 
         <SubSection title="Roboto Mono (mono)">
           <div className="flex flex-col gap-3 font-mono">
-            <p className="text-2xl font-bold">The quick brown fox</p>
+            <p className="text-2xl font-bold">No rules, just craft</p>
             <p className="text-lg font-medium">
               ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789
             </p>
-            <p className="text-base">
-              const result = await fetch(&#39;/api/data&#39;)
-            </p>
+            <p className="text-base">const rebellion = await joyco.ignite()</p>
             <p className="text-muted-foreground text-sm">
-              console.log(&#39;Hello, World!&#39;)
+              console.log(&apos;built different&apos;)
             </p>
           </div>
         </SubSection>
@@ -653,25 +641,6 @@ export default function UIKit() {
           </div>
         </SubSection>
 
-        <SubSection title="Chart Colors">
-          <div className="flex flex-wrap gap-4">
-            {chartColors.map((color) => (
-              <ColorSwatch key={color} name={color} cssVar={`--${color}`} />
-            ))}
-          </div>
-        </SubSection>
-
-        <SubSection title="Brand Colors">
-          <div className="flex flex-wrap gap-4">
-            {brandColors.map((color) => (
-              <ColorSwatch
-                key={color.name}
-                name={color.name}
-                cssVar={color.var}
-              />
-            ))}
-          </div>
-        </SubSection>
       </Section>
     </div>
   )
