@@ -10,7 +10,7 @@ export function MetaBadge({ type, className }: MetaBadgeProps) {
   return (
     <span
       className={cn(
-        'shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase',
+        'shrink-0 px-1.5 py-0.5 text-[10px] font-bold uppercase',
         type === 'new' && 'bg-primary text-primary-foreground',
         type === 'updated' && 'bg-card text-card-foreground',
         type === 'internal' && 'bg-muted text-muted-foreground',
