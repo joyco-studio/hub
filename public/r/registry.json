@@ -697,6 +697,19 @@
       "dependencies": ["@radix-ui/react-tooltip"]
     },
     {
+      "name": "cluster",
+      "type": "registry:ui",
+      "title": "Cluster",
+      "description": "A flex container with the design system gap and an optional filler for space distribution.",
+      "files": [
+        {
+          "path": "components/ui/cluster.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-slot", "class-variance-authority"]
+    },
+    {
       "name": "joyco-theme",
       "type": "registry:theme",
       "title": "JOYCO Theme",
@@ -738,6 +751,8 @@
       },
       "cssVars": {
         "theme": {
+          "gap": "0.25rem",
+          "spacing-gap": "var(--gap)",
           "radius": "0rem",
           "font-sans": "var(--font-public-sans)",
           "font-mono": "var(--font-roboto-mono)",
@@ -879,6 +894,8 @@
       },
       "cssVars": {
         "theme": {
+          "gap": "0.25rem",
+          "spacing-gap": "var(--gap)",
           "radius": "0rem",
           "font-sans": "var(--font-public-sans)",
           "font-mono": "var(--font-roboto-mono)",
@@ -987,7 +1004,8 @@
         "@joyco/switch",
         "@joyco/tabs",
         "@joyco/textarea",
-        "@joyco/tooltip"
+        "@joyco/tooltip",
+        "@joyco/cluster"
       ]
     }
   ]
