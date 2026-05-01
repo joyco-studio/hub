@@ -4,7 +4,7 @@ import type { SidebarItemMeta } from './sidebar/section'
 
 const variantMap = {
   new: 'default',
-  updated: 'secondary',
+  updated: 'card',
   internal: 'muted',
 } as const
 
