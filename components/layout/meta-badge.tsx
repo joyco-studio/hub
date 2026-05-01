@@ -15,7 +15,7 @@ type MetaBadgeProps = {
 
 export function MetaBadge({ type, className }: MetaBadgeProps) {
   return (
-    <Badge variant={variantMap[type]} size="sm" className={cn(className)}>
+    <Badge variant={variantMap[type]} size="sm" className={className}>
       {type}
     </Badge>
   )
