@@ -5,7 +5,7 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const badgeVariants = cva(
-  'inline-flex items-center justify-center border px-2.5 py-1 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden font-mono uppercase tracking-wide',
+  'inline-flex items-center justify-center border font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden font-mono uppercase tracking-wide',
   {
     variants: {
       variant: {
@@ -23,24 +23,41 @@ const badgeVariants = cva(
           'text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
         key: 'bg-accent text-accent-foreground border-2 border-b-4',
       },
+      size: {
+        default: 'px-2.5 py-1 text-xs',
+        sm: 'px-1.5 py-0.5 text-[10px]',
+      },
+      slicedCorners: {
+        true: '[clip-path:polygon(6px_0%,100%_0%,100%_calc(100%-6px),calc(100%-6px)_100%,0%_100%,0%_6px)]',
+        false: '',
+      },
     },
     defaultVariants: {
       variant: 'default',
+      size: 'default',
+      slicedCorners: true,
     },
   }
 )
 
-interface BadgeProps extends React.ComponentProps<'span'> {
-  variant?: VariantProps<typeof badgeVariants>['variant']
+type BadgeProps = React.ComponentProps<'span'> & {
   asChild?: boolean
-}
-function Badge({ className, variant, asChild = false, ...props }: BadgeProps) {
+} & VariantProps<typeof badgeVariants>
+
+function Badge({
+  className,
+  variant,
+  size,
+  slicedCorners,
+  asChild = false,
+  ...props
+}: BadgeProps) {
   const Comp = asChild ? Slot : 'span'
 
   return (
     <Comp
       data-slot="badge"
-      className={cn(badgeVariants({ variant }), className)}
+      className={cn(badgeVariants({ variant, size, slicedCorners }), className)}
       {...props}
     />
   )
