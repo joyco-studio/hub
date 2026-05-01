@@ -6,9 +6,9 @@ export function baseOptions(): BaseLayoutProps {
     nav: {
       title: (
         <div className="flex items-center gap-2">
-          <div className="bg-background rounded-sm border">
-            <Logo className="h-6 w-6" />
-          </div>{' '}
+          <span className="bg-primary text-primary-foreground group/logo block h-6 w-6">
+            <Logo className="h-full w-full" />
+          </span>{' '}
           JOYCO Registry
         </div>
       ),
