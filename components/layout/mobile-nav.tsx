@@ -139,14 +139,9 @@ export function MobileNav({
           href="/"
           data-state={state}
           onClick={handleClose}
-          className={cn(
-            'flex aspect-square h-full shrink-0 items-center justify-center',
-            state === 'search'
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-primary text-primary-foreground'
-          )}
+          className="bg-primary text-primary-foreground group/logo block aspect-square h-full shrink-0"
         >
-          <Logo />
+          <Logo className="h-full w-full" />
         </Link>
 
         {/* Main content area - either dropdown or search input */}
