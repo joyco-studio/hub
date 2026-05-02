@@ -18,7 +18,7 @@ export const Logo = (props: React.SVGProps<SVGSVGElement>) => {
         width="46.8145"
         height="67.1709"
         fill="currentColor"
-        className="origin-top-left [transform-box:fill-box] transition-transform duration-500 ease-out group-hover/logo:[transform:scaleY(0.3656)]"
+        className="origin-top-left transition-transform duration-300 ease-out [transform-box:fill-box] group-hover/logo:[transform:scaleY(0.3656)]"
       />
       <rect
         x="15"
@@ -26,9 +26,15 @@ export const Logo = (props: React.SVGProps<SVGSVGElement>) => {
         width="46.8145"
         height="24.5596"
         fill="currentColor"
-        className="origin-bottom-left [transform-box:fill-box] transition-transform duration-500 ease-out group-hover/logo:[transform:scaleY(2.735)]"
+        className="origin-bottom-left transition-transform duration-300 ease-out [transform-box:fill-box] group-hover/logo:[transform:scaleY(2.735)]"
       />
-      <rect x="15" y="21.4553" width="46.6105" height="9.8527" fill="currentColor" />
+      <rect
+        x="15"
+        y="21.4553"
+        width="46.6105"
+        height="9.8527"
+        fill="currentColor"
+      />
       <circle cx="109.132" cy="110.276" r="3.86842" fill="currentColor" />
     </svg>
   )
