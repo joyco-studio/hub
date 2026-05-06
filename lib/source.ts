@@ -114,6 +114,16 @@ export function getLibrarySlugs(): string[] {
     .map((page) => page.slugs[page.slugs.length - 1])
 }
 
+/**
+ * Get all lib slugs based on frontmatter type: 'lib'
+ */
+export function getLibSlugs(): string[] {
+  const allPages = source.getPages()
+  return allPages
+    .filter((page) => page.data.type === 'lib')
+    .map((page) => page.slugs[page.slugs.length - 1])
+}
+
 export function getRelatedPages(
   currentPage: InferPageType<typeof source>,
   limit = 3
