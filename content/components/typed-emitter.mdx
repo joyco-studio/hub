@@ -1,0 +1,62 @@
+---
+title: Typed Emitter
+description: A thin typed wrapper around tiny-emitter. Subclasses pin an event-map type so on/once/emit are fully type-safe.
+maintainers: ['joyco-studio']
+docLinks:
+  - label: 'tiny-emitter'
+    href: 'https://github.com/scottcorgan/tiny-emitter'
+---
+
+## Installation
+
+```bash
+npx shadcn@latest add @joyco/typed-emitter
+```
+
+## Usage
+
+Extend `TypedEmitter` with an event map (`{ eventName: payloadType }`). Listeners and emits are checked against the map.
+
+```ts
+import { TypedEmitter } from '@/registry/lib/typed-emitter'
+
+type PlayerEvents = {
+  play: { time: number }
+  pause: void
+  seek: { from: number; to: number }
+}
+
+class Player extends TypedEmitter<PlayerEvents> {
+  start() {
+    this.emit('play', { time: 0 })
+  }
+
+  stop() {
+    this.emit('pause', undefined)
+  }
+}
+
+const player = new Player()
+
+const off = player.on('play', ({ time }) => {
+  console.log('playing from', time)
+})
+
+player.start()
+off() // unsubscribe
+```
+
+## API
+
+| Method  | Signature                                                           | Description                                                                                |
+| ------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `on`    | `(event, listener) => () => void`                                   | Subscribe to an event. Returns an unsubscribe function.                                    |
+| `once`  | `(event, listener) => void`                                         | Subscribe to a single firing of an event.                                                  |
+| `off`   | `(event, listener?) => void`                                        | Unsubscribe a specific listener, or all listeners for an event when `listener` is omitted. |
+| `emit`  | `(event, payload) => void`                                          | `protected` — emit an event from the subclass.                                             |
+
+## Notes
+
+- `emit` is `protected` on purpose — events are an implementation detail of the subclass, not part of its public surface. Consumers subscribe with `on`/`once`/`off` and let the class decide when to fire.
+- The unsubscribe function returned by `on` is the recommended way to clean up, particularly inside `useEffect`.
+- For events with no payload, type the value as `void` and pass `undefined` when emitting.
