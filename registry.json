@@ -305,6 +305,19 @@
       "registryDependencies": ["@joyco/button", "@joyco/kbd"]
     },
     {
+      "name": "typed-emitter",
+      "type": "registry:lib",
+      "title": "Typed Emitter",
+      "description": "A thin typed wrapper around tiny-emitter that lets subclasses pin an event-map type for fully typed on/emit.",
+      "files": [
+        {
+          "path": "registry/lib/typed-emitter.ts",
+          "type": "registry:lib"
+        }
+      ],
+      "dependencies": ["tiny-emitter"]
+    },
+    {
       "name": "canvas-2d",
       "type": "registry:component",
       "title": "Canvas 2D",
@@ -384,6 +397,7 @@
       "dependencies": [
         "@tweakpane/core",
         "lodash.debounce",
+        "@types/lodash.debounce",
         "zustand",
         "tweakpane"
       ]

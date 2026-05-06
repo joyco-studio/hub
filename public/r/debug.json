@@ -7,6 +7,7 @@
   "dependencies": [
     "@tweakpane/core",
     "lodash.debounce",
+    "@types/lodash.debounce",
     "zustand",
     "tweakpane"
   ],
