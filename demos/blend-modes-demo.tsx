@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Button } from '@/components/ui/button'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 type Mode = {
   name: string
@@ -18,11 +18,7 @@ const MODES: Mode[] = [
   { name: 'lighten', css: 'lighten', formula: 'max(a, b)' },
   { name: 'color-dodge', css: 'color-dodge', formula: 'a / (1 − b)' },
   { name: 'color-burn', css: 'color-burn', formula: '1 − (1−a) / b' },
-  {
-    name: 'hard-light',
-    css: 'hard-light',
-    formula: 'overlay, branch on b',
-  },
+  { name: 'hard-light', css: 'hard-light', formula: 'overlay, branch on b' },
   { name: 'soft-light', css: 'soft-light', formula: 'gentle overlay (W3C)' },
   { name: 'difference', css: 'difference', formula: '|a − b|' },
   { name: 'exclusion', css: 'exclusion', formula: 'a + b − 2ab' },
@@ -48,6 +44,8 @@ const PRESETS: Record<PresetKey, { label: string; image: string }> = {
   },
 }
 
+const PRESET_KEYS = Object.keys(PRESETS) as PresetKey[]
+
 function BlendModesDemo() {
   const [preset, setPreset] = React.useState<PresetKey>('gradient')
 
@@ -55,31 +53,32 @@ function BlendModesDemo() {
 
   return (
     <div
-      className="flex w-full flex-col gap-6 p-6"
+      className="flex w-full flex-col gap-8 p-6 sm:p-8"
       style={{ isolation: 'isolate' }}
     >
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-muted-foreground mr-2 font-mono text-xs uppercase tracking-wider">
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="text-muted-foreground font-mono text-xs uppercase tracking-wider">
           Top layer
         </span>
-        {(Object.keys(PRESETS) as PresetKey[]).map((key) => (
-          <Button
-            key={key}
-            type="button"
-            variant={preset === key ? 'default' : 'muted'}
-            size="sm"
-            onClick={() => setPreset(key)}
-          >
-            {PRESETS[key].label}
-          </Button>
-        ))}
+        <Tabs
+          value={preset}
+          onValueChange={(v) => setPreset(v as PresetKey)}
+        >
+          <TabsList>
+            {PRESET_KEYS.map((key) => (
+              <TabsTrigger key={key} value={key}>
+                {PRESETS[key].label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       </div>
 
-      <div className="grid grid-cols-2 gap-px bg-border sm:grid-cols-3 lg:grid-cols-4 border-border border">
+      <div className="grid grid-cols-2 gap-x-5 gap-y-7 sm:grid-cols-3 lg:grid-cols-4">
         {MODES.map((mode) => (
           <figure
             key={mode.name}
-            className="bg-background flex flex-col"
+            className="flex flex-col gap-3"
             style={{ contain: 'paint' }}
           >
             <div
@@ -90,11 +89,11 @@ function BlendModesDemo() {
                 backgroundBlendMode: mode.css,
               }}
             />
-            <figcaption className="border-border flex flex-col gap-0.5 border-t px-3 py-2">
+            <figcaption className="flex flex-col gap-1">
               <span className="font-mono text-xs uppercase tracking-wider">
                 {mode.name}
               </span>
-              <span className="text-muted-foreground font-mono text-[10px]">
+              <span className="text-muted-foreground font-mono text-[10px] leading-tight">
                 {mode.formula}
               </span>
             </figcaption>
@@ -102,7 +101,7 @@ function BlendModesDemo() {
         ))}
       </div>
 
-      <p className="text-muted-foreground text-xs">
+      <p className="text-muted-foreground text-xs leading-relaxed">
         Base (<code className="font-mono">a</code>) is a horizontal black→white
         gradient — each cell reads left-to-right as the formula evaluated at{' '}
         <code className="font-mono">a = 0</code> through{' '}
