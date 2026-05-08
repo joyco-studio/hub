@@ -39,8 +39,8 @@ Not `mix(a, b, alpha)`. The blend runs at full strength first, then opacity dial
 | **Exclusion** | `a + b - 2ab` | Smoother difference (no kink at `a = b`). |
 | **Darken** | `min(a, b)` | Channel-wise minimum. |
 | **Lighten** | `max(a, b)` | Channel-wise maximum. |
-| **Overlay** | `a < 0.5 ? 2ab : 1 - 2(1-a)(1-b)` | Multiply the dark half of `a`, screen the bright half. `a = 0.5` is the no-op. |
-| **Hard Light** | Overlay with `a` and `b` swapped | The blend, not the base, picks the branch. |
+| **Overlay** | `a < 0.5 ? 2ab : 1 - 2(1-a)(1-b)` | Multiply the dark half of `a`, screen the bright half. A 50% grey blend (`b = 0.5`) is the no-op. |
+| **Hard Light** | Overlay with `a` and `b` swapped | The blend, not the base, picks the branch. `b = 0.5` is still the no-op. |
 | **Color Dodge** | `a / (1 - b)` | Aggressive brighten. Always clamp. |
 | **Color Burn** | `1 - (1 - a) / b` | Aggressive darken. Always clamp. |
 | **Linear Burn** | `a + b - 1` | Linear darken. |
@@ -68,7 +68,7 @@ Anything you can do darkening in straight space, you can do brightening by flipp
 
 ### Overlay is multiply-then-screen, gated by the base
 
-For each pixel, overlay asks "is `a` in the dark half or the bright half?" and runs multiply or screen accordingly. Mid-grey on the base does nothing. That's what makes overlay good for contrast: shadows get darker, highlights get brighter, midtones stay put.
+For each pixel, overlay asks "is `a` in the dark half or the bright half?" and runs multiply or screen accordingly. A 50% grey **blend** (`b = 0.5`) is the no-op: both branches collapse to `a`. That's why blending an image with itself in overlay mode boosts contrast: shadows get darker, highlights get brighter, and midtones (around `0.5`) barely move.
 
 ### Hard Light is overlay with swapped roles
 
