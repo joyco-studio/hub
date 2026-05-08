@@ -1,0 +1,98 @@
+---
+title: 14 - Blend Modes Math
+description: Quick glossary of the math behind common layer blend modes, for shader work.
+author: 'joyboy'
+---
+
+## Setup
+
+Pick two pixels. `a` is the base (what's already there), `b` is the blend (the layer on top). Both channels are floats in `[0, 1]`, **in linear space** (sRGB math is already wrong, see [10 - Color Spaces](/logs/10-color-spaces-srgb-linear)).
+
+A blend mode is just a per-channel function `f(a, b) → result`. The names are conventions, the formulas are the truth.
+
+## The cheatsheet
+
+### Multiply — `a * b`
+
+Anything in `[0, 1]` multiplied stays in `[0, 1]` and only goes down. White leaves `a` unchanged, black crushes to zero. Shadows, tinting, baking AO onto base color.
+
+### Screen — `1 - (1 - a) * (1 - b)`
+
+Multiply in inverse-space: flip, multiply, flip back. Black is the no-op, white blows out. Highlights, bloom, additive light that doesn't clip as fast as `a + b`.
+
+### Add / Linear Dodge — `a + b`
+
+The most literal "add light." Unbounded, clips above `1`. Emissives, particles, glow.
+
+### Subtract — `a - b`
+
+Strip light. Clamp to `0`.
+
+### Difference — `|a - b|`
+
+Equal pixels go black, opposites go white. Debug visualizer, XOR-ish tricks.
+
+### Darken / Lighten — `min(a, b)` / `max(a, b)`
+
+Channel-wise min/max. Cheap clamp between two passes.
+
+### Overlay — `a < 0.5 ? 2*a*b : 1 - 2*(1 - a)*(1 - b)`
+
+Multiply on the dark half of `a`, screen on the bright half. `a = 0.5` is the no-op. **Hard Light** is the same formula with `a` and `b` swapped — the blend picks the branch instead of the base.
+
+### Soft Light (W3C variant)
+
+```
+if (b <= 0.5)  a - (1 - 2*b) * a * (1 - a)
+else           a + (2*b - 1) * (g(a) - a)
+
+g(a) = a <= 0.25 ? ((16*a - 12)*a + 4)*a : sqrt(a)
+```
+
+Same intent as overlay, gentler curve, no clipping. There is no single "soft light" — Photoshop, W3C, and Pegtop all differ. Pick one and document it.
+
+### Color Dodge / Color Burn — `a / (1 - b)` / `1 - (1 - a) / b`
+
+Division-based brighten/darken. Aggressive: blows up near the singularity. Always clamp.
+
+### Linear Burn / Linear Light — `a + b - 1` / `a + 2*b - 1`
+
+Linear versions of burn / dodge-burn. Clamp to `[0, 1]`.
+
+### Exclusion — `a + b - 2*a*b`
+
+Smoother difference (no kink at `a = b`). Mid-grey on anything yields mid-grey.
+
+## Patterns
+
+- **Multiply ↔ Screen** are duals: `screen(a, b) = 1 - multiply(1 - a, 1 - b)`. Anything you darken in straight space you can brighten by flipping, multiplying, flipping back.
+- **Overlay ↔ Hard Light** are the same formula with arguments swapped.
+- **Difference ↔ Exclusion** are the same idea, exclusion is the differentiable version.
+- **Add / Subtract** ignore the `[0, 1]` contract. Feature in HDR, bug in 8-bit.
+
+## Opacity
+
+A blend mode produces a candidate `c = f(a, b)`. Top-layer opacity `α` is a final lerp against the base:
+
+```
+result = mix(a, c, α)  // a*(1 - α) + c*α
+```
+
+Not `mix(a, b, α)`. The formula runs at full strength first, then opacity dials it back. Easy to get wrong.
+
+## In a shader
+
+```glsl
+vec3 multiply(vec3 a, vec3 b) { return a * b; }
+vec3 screen(vec3 a, vec3 b)   { return 1.0 - (1.0 - a) * (1.0 - b); }
+vec3 overlay(vec3 a, vec3 b) {
+  return mix(2.0 * a * b,
+             1.0 - 2.0 * (1.0 - a) * (1.0 - b),
+             step(0.5, a));
+}
+vec3 blendWithAlpha(vec3 base, vec3 candidate, float alpha) {
+  return mix(base, candidate, alpha);
+}
+```
+
+That's the whole API. Every Photoshop layer blend is one of these (or a combination) running per channel, in linear space, with an opacity lerp on top.
