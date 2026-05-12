@@ -644,10 +644,16 @@ export function BrickBreaker({
   )
 
   // Resolve children, falling back to the default UI when none provided.
-  // The default UI is called as a function so its Fragment children are
-  // flattened by React.Children.toArray and the canvas slot is detected.
+  // The default UI is called as a function so we can inspect its children;
+  // React.Children.toArray does not flatten a top-level Fragment, so unwrap
+  // it explicitly before flattening so the canvas slot is detected.
   const resolvedChildren = children ?? BrickBreakerDefaultUI()
-  const childArray = React.Children.toArray(resolvedChildren)
+  const unwrapped =
+    React.isValidElement(resolvedChildren) &&
+    resolvedChildren.type === React.Fragment
+      ? (resolvedChildren.props as { children?: React.ReactNode }).children
+      : resolvedChildren
+  const childArray = React.Children.toArray(unwrapped)
 
   const isCanvasSlot = (child: React.ReactNode): child is React.ReactElement =>
     React.isValidElement(child) && child.type === BrickBreakerCanvas
