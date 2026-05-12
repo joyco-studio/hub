@@ -21,8 +21,15 @@ import { useBrickBreaker } from './use-brick-breaker'
 import { mergeConfig, resolveCssColor } from './utils'
 import {
   BrickBreakerUIProvider,
-  BrickBreakerDefaultUI,
-  BrickBreakerCanvas,
+  BrickBreakerHUD,
+  BrickBreakerScore,
+  BrickBreakerLevel,
+  BrickBreakerHighScore,
+  BrickBreakerLives,
+  BrickBreakerOverlay,
+  BrickBreakerTitle,
+  BrickBreakerMessage,
+  BrickBreakerHint,
 } from './ui'
 
 /**
@@ -125,8 +132,6 @@ function renderGame(
   const paddleColor = resolveCssColor(config.colors.paddle, canvas)
   const ballColor = resolveCssColor(config.colors.ball, canvas)
   const trailColor = resolveCssColor(config.colors.ballTrail, canvas)
-  const textColor = resolveCssColor(config.colors.text, canvas)
-  const textMutedColor = resolveCssColor(config.colors.textMuted, canvas)
 
   const brickColors: Record<BrickType, string> = {
     normal: resolveCssColor(config.colors.bricks.normal, canvas),
@@ -678,9 +683,17 @@ export function BrickBreaker({
                 (child.props as { className?: string }).className
               )}
             >
-              {canvasElement}
-              {/* Overlay goes inside canvas wrapper for proper positioning */}
-              {overlays}
+              <div
+                className="relative"
+                style={{
+                  width: dimensions.width,
+                  height: dimensions.height,
+                }}
+              >
+                {canvasElement}
+                {/* Overlay goes inside canvas frame for proper positioning */}
+                {overlays}
+              </div>
             </div>
           )
         }
@@ -714,19 +727,45 @@ export function BrickBreaker({
               ref={canvasWrapperRef}
               className="relative flex min-h-0 flex-1 items-center justify-center"
             >
-              {canvasElement}
-              {children}
+              <div
+                className="relative"
+                style={{
+                  width: dimensions.width,
+                  height: dimensions.height,
+                }}
+              >
+                {canvasElement}
+                {children}
+              </div>
             </div>
           </>
         ) : (
           // No children - use default UI
           <>
+            <BrickBreakerHUD>
+              <BrickBreakerScore />
+              <BrickBreakerLevel />
+              <BrickBreakerHighScore />
+            </BrickBreakerHUD>
             <div
               ref={canvasWrapperRef}
               className="relative flex min-h-0 flex-1 items-center justify-center"
             >
-              {canvasElement}
-              <BrickBreakerDefaultUI />
+              <div
+                className="relative"
+                style={{
+                  width: dimensions.width,
+                  height: dimensions.height,
+                }}
+              >
+                {canvasElement}
+                <BrickBreakerLives className="absolute bottom-3 left-3" />
+                <BrickBreakerOverlay>
+                  <BrickBreakerTitle />
+                  <BrickBreakerMessage />
+                  <BrickBreakerHint />
+                </BrickBreakerOverlay>
+              </div>
             </div>
           </>
         )}

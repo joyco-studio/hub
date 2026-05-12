@@ -52,7 +52,7 @@ export function BrickBreakerScore({
   return (
     <div
       data-slot="brick-breaker-score"
-      className={cn('flex flex-col', className)}
+      className={cn('flex items-baseline gap-1.5', className)}
       {...props}
     >
       <span className="text-foreground font-semibold tabular-nums">
@@ -183,7 +183,10 @@ export function BrickBreakerHUD({ children, className, ...props }: HUDProps) {
     <div
       data-slot="brick-breaker-hud"
       className={cn(
-        'flex shrink-0 items-center justify-between p-4 text-sm',
+        'grid shrink-0 grid-cols-3 items-center p-4 text-sm',
+        '[&>*:first-child]:justify-self-start',
+        '[&>*:nth-child(2)]:justify-self-center',
+        '[&>*:last-child]:justify-self-end',
         className
       )}
       {...props}
