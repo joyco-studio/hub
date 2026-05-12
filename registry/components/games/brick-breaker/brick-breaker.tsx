@@ -686,15 +686,27 @@ export function BrickBreaker({
   )
 
   // Replace the canvas slot with the actual canvas frame, rendering the
-  // slot's children inside it. Non-slot children are passed through.
+  // slot's children inside it. Non-slot children (HUD, footers, etc) are
+  // wrapped in a canvas-width container and centered so they visually align
+  // with the canvas frame, even when the outer container is wider.
   const processedChildren = hasCanvasSlot
-    ? childArray.map((child) => {
-        if (!isCanvasSlot(child)) return child
-        const slotProps = child.props as {
-          className?: string
-          children?: React.ReactNode
+    ? childArray.map((child, index) => {
+        if (isCanvasSlot(child)) {
+          const slotProps = child.props as {
+            className?: string
+            children?: React.ReactNode
+          }
+          return renderCanvasFrame(slotProps.children, slotProps.className)
         }
-        return renderCanvasFrame(slotProps.children, slotProps.className)
+        return (
+          <div
+            key={`brick-breaker-hud-frame-${index}`}
+            className="self-center"
+            style={{ width: dimensions.width }}
+          >
+            {child}
+          </div>
+        )
       })
     : null
 
