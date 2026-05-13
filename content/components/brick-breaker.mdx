@@ -1,7 +1,7 @@
 ---
 title: Brick Breaker
 description: A fully-featured brick breaker game with multiple levels, brick types, and proper collision physics.
-maintainers: ['matiasperz', 'JOYBOY-0']
+maintainers: ['matiasperz', 'JOYBOY-0', 'alejopequeno']
 type: game
 ---
 
@@ -89,13 +89,18 @@ const myLevel = createLevelFromPattern(1, 'My Level', `
 
 ## UI Components
 
-Customize the UI with composable components:
+Customize the UI with composable components. Use `BrickBreakerCanvas` as a slot
+to control where the canvas renders — its children render inside the canvas
+frame (use `absolute` positioning for lives, overlays, etc):
 
 ```tsx
 import {
   BrickBreaker,
   BrickBreakerHUD,
   BrickBreakerScore,
+  BrickBreakerLevel,
+  BrickBreakerHighScore,
+  BrickBreakerCanvas,
   BrickBreakerLives,
   BrickBreakerOverlay,
   BrickBreakerTitle,
@@ -104,11 +109,15 @@ import {
 <BrickBreaker>
   <BrickBreakerHUD>
     <BrickBreakerScore />
-    <BrickBreakerLives />
+    <BrickBreakerLevel />
+    <BrickBreakerHighScore />
   </BrickBreakerHUD>
-  <BrickBreakerOverlay>
-    <BrickBreakerTitle />
-  </BrickBreakerOverlay>
+  <BrickBreakerCanvas>
+    <BrickBreakerLives className="absolute bottom-3 left-3" />
+    <BrickBreakerOverlay>
+      <BrickBreakerTitle />
+    </BrickBreakerOverlay>
+  </BrickBreakerCanvas>
 </BrickBreaker>
 ```
 
