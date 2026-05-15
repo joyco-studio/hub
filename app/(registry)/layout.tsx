@@ -26,7 +26,7 @@ const itemMeta: Record<
   }
 > = {
   '/toolbox/atlas-cropper': { badge: 'new' },
-  '/toolbox/skills': { badge: 'new' },
+  '/toolbox/skills': {},
   '/toolbox/ui': { hidden: true },
 }
 
