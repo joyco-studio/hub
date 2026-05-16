@@ -10,9 +10,10 @@ description: "Use when building layouts, creating flex containers, distributing 
 ## Core Rules
 
 1. **Clusters are always transparent** — they never render a background. The `bg` prop sets a CSS variable (`--cluster-bg`) that direct children inherit via a zero-specificity `@layer base` rule.
-2. **Every direct child of a Cluster must be a solid element** — it should have its own visual identity (background, border, etc.). Never place bare text or icons as direct Cluster children.
-3. **Use `<Filler />` for space distribution** — never use `justify-between`, `justify-end`, or `justify-around`. Filler is an invisible `flex-1` spacer with `aria-hidden="true"`.
-4. **Children can override the inherited bg** — since the inheritance rule uses `:where()` (zero specificity) inside `@layer base`, any `bg-*` utility on a child wins naturally.
+2. **Every direct child of a Cluster must be a solid element** — it should have its own visual identity (background color, etc.). Never place bare text or icons as direct Cluster children.
+3. **No borders, no rounded corners** — borders are almost never used in this design system. The only exception is the outline button variant. The theme radius is `0rem` — never add `rounded-*` classes to layout elements. Clusters, Fillers, inputs, and all layout elements rely on background color contrast and spacing for visual separation, not border lines or rounded shapes. Never add `border` or `rounded-*` to Cluster children, Fillers, or layout wrappers.
+4. **Use `<Filler />` for space distribution** — never use `justify-between`, `justify-end`, or `justify-around`. Filler is an invisible `flex-1` spacer with `aria-hidden="true"`.
+5. **Children can override the inherited bg** — since the inheritance rule uses `:where()` (zero specificity) inside `@layer base`, any `bg-*` utility on a child wins naturally.
 
 ## Import
 
@@ -43,7 +44,7 @@ Takes no special props. Renders a `<div>` with `flex-1 min-w-0 self-stretch`. It
 
 ```tsx
 <Cluster>
-  <div className="rounded-md px-3 py-2">
+  <div className="px-3 py-2">
     <span className="text-sm font-medium">Label</span>
   </div>
   <Filler />
@@ -55,11 +56,11 @@ Takes no special props. Renders a `<div>` with `flex-1 min-w-0 self-stretch`. It
 
 ```tsx
 <Cluster direction="col" align="stretch" bg="muted">
-  <div className="rounded-md p-3">
+  <div className="p-3">
     <span className="text-sm font-medium">Header</span>
     <p className="text-muted-foreground text-sm">Description</p>
   </div>
-  <div className="rounded-md p-3">
+  <div className="p-3">
     <Input placeholder="Field" />
   </div>
   <Cluster bg="muted">
@@ -73,7 +74,7 @@ Takes no special props. Renders a `<div>` with `flex-1 min-w-0 self-stretch`. It
 ### Input-like solid child (sidebar search pattern)
 
 ```tsx
-<div className="bg-muted focus-within:bg-accent/70 flex h-10 items-center gap-3 rounded-md px-3">
+<div className="bg-muted focus-within:bg-accent/70 flex h-10 items-center gap-3 px-3">
   <SearchIcon className="text-muted-foreground size-4 shrink-0" />
   <input
     type="text"
@@ -138,13 +139,23 @@ Inner Clusters set their own `--cluster-bg` scope:
 </Cluster>
 
 // WRONG: Card wrapper with bg + padding
-<div className="bg-card p-6 rounded-lg">
+<div className="bg-card p-6">
   <div>Content</div>
 </div>
 
+// WRONG: using borders for visual separation
+<Cluster>
+  <div className="border px-3 py-2">Content</div>
+</Cluster>
+
+// WRONG: using rounded corners (theme radius is 0rem)
+<Cluster>
+  <div className="rounded-md px-3 py-2">Content</div>
+</Cluster>
+
 // CORRECT alternatives:
 <Cluster>
-  <div className="rounded-md px-3 py-2">
+  <div className="px-3 py-2">
     <span>Label</span>
   </div>
   <Filler />

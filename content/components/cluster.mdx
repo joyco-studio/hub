@@ -4,6 +4,10 @@ description: A transparent flex container that distributes its design-system gap
 maintainers: ['justkahdri']
 ---
 
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+<ComponentPreview name="cluster-demo" />
+
 ## Installation
 
 ```bash
@@ -26,7 +30,7 @@ import { Cluster, Filler } from '@/components/ui/cluster'
 
 ```tsx
 <Cluster>
-  <div className="rounded-md px-3 py-2">
+  <div className="px-3 py-2">
     <span className="text-sm font-medium">Label</span>
   </div>
   <Filler />
@@ -40,11 +44,11 @@ Children inherit `bg-muted` by default. The `<Filler />` pushes the badge to the
 
 ```tsx
 <Cluster direction="col" align="stretch" bg="muted">
-  <div className="rounded-md p-3">
+  <div className="p-3">
     <span className="text-sm font-medium">Header</span>
     <p className="text-muted-foreground text-sm">Description</p>
   </div>
-  <div className="rounded-md p-3">
+  <div className="p-3">
     <Input placeholder="Field" />
   </div>
   <Cluster bg="muted">
@@ -101,6 +105,6 @@ Use `<Filler />` between children to distribute space. Never use `justify-betwee
 ## Design Principles
 
 1. **Clusters are transparent** — they never have a visible background
-2. **Children are solid** — every direct child should have its own visual identity (bg, border, etc.)
+2. **Children are solid** — every direct child should have its own visual identity (background color, etc.) but **never borders or rounded corners**. Borders are almost never used in this design system — the only exception is the outline button variant. The theme radius is `0rem`. Clusters, Fillers, inputs, and all layout elements rely on background color contrast and spacing to create visual separation, not border lines or rounded shapes.
 3. **Filler over justify** — use `<Filler />` for space distribution, never `justify-between`
 4. **bg cascades down** — the `bg` prop sets a CSS variable that children inherit at zero specificity, overridable with any `bg-*` class

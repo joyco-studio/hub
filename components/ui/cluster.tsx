@@ -4,7 +4,7 @@ import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@/lib/utils'
 
-const clusterVariants = cva('gap-gap', {
+const clusterVariants = cva('gap-gap bg-transparent', {
   variants: {
     display: {
       flex: 'flex',
