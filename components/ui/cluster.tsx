@@ -75,7 +75,7 @@ function Filler({ className, ...props }: FillerProps) {
       data-slot="cluster-filler"
       role="presentation"
       aria-hidden="true"
-      className={cn('min-w-0 flex-1 self-stretch bg-(--cluster-bg)', className)}
+      className={cn('min-w-0 flex-1 self-stretch', className)}
       {...props}
     />
   )

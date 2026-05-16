@@ -117,6 +117,12 @@
   }
 }
 
+@layer base {
+  :where([data-slot='cluster'] > *) {
+    background-color: var(--cluster-bg, transparent);
+  }
+}
+
 :root {
   --gap: 0.25rem;
   --aside-width: 4rem;

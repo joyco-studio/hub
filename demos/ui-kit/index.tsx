@@ -349,7 +349,7 @@ export default function UIKit() {
       <Section title="Cluster" registryName="cluster">
         <SubSection title="Row with Filler">
           <Cluster className="max-w-sm items-stretch">
-            <div className="flex items-center gap-2 rounded-md bg-(--cluster-bg) px-3 py-2">
+            <div className="flex items-center gap-2 rounded-md px-3 py-2">
               <span className="text-sm font-medium">Project Setup</span>
             </div>
             <div className="bg-fd-background flex flex-1 items-center justify-end px-3">
@@ -365,13 +365,13 @@ export default function UIKit() {
             className="max-w-sm"
             bg="muted"
           >
-            <div className="rounded-md bg-(--cluster-bg) p-3 pt-2">
+            <div className="rounded-md p-3 pt-2">
               <span className="text-sm font-medium">Project Setup</span>
               <p className="text-muted-foreground text-sm">
                 Configure your project settings and preferences.
               </p>
             </div>
-            <label className="focus-within:bg-accent/70 flex items-center gap-3 rounded-md bg-(--cluster-bg) p-3">
+            <label className="focus-within:bg-accent/70 flex items-center gap-3 rounded-md p-3">
               <PresentationIcon className="text-muted-foreground size-4 shrink-0" />
               <input
                 placeholder="Project name"

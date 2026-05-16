@@ -707,7 +707,14 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": ["@radix-ui/react-slot", "class-variance-authority"]
+      "dependencies": ["@radix-ui/react-slot", "class-variance-authority"],
+      "css": {
+        "@layer base": {
+          ":where([data-slot='cluster'] > *)": {
+            "background-color": "var(--cluster-bg, transparent)"
+          }
+        }
+      }
     },
     {
       "name": "joyco-theme",
