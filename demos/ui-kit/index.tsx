@@ -7,6 +7,7 @@ import {
   CopyIcon,
   ItalicIcon,
   MailIcon,
+  PresentationIcon,
   PlusIcon,
   SearchIcon,
   SendIcon,
@@ -31,14 +32,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
 import { Slider } from '@/components/ui/slider'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-} from '@/components/ui/card'
+import { Cluster, Filler } from '@/components/ui/cluster'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import {
   Tooltip,
@@ -351,34 +345,46 @@ export default function UIKit() {
         </div>
       </Section>
 
-      {/* ── Card ── */}
-      <Section title="Card" registryName="card">
-        <Card className="max-w-sm">
-          <CardHeader>
-            <CardTitle>Project Setup</CardTitle>
-            <CardDescription>
-              Configure your project settings and preferences.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col gap-3">
-              <Input placeholder="Project name" />
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Framework" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="next">Next.js</SelectItem>
-                  <SelectItem value="remix">Remix</SelectItem>
-                </SelectContent>
-              </Select>
+      {/* ── Cluster ── */}
+      <Section title="Cluster" registryName="cluster">
+        <SubSection title="Row with Filler">
+          <Cluster className="max-w-sm items-stretch">
+            <div className="flex items-center gap-2 rounded-md bg-(--cluster-bg) px-3 py-2">
+              <span className="text-sm font-medium">Project Setup</span>
             </div>
-          </CardContent>
-          <CardFooter className="justify-end gap-2">
-            <Button variant="outline">Cancel</Button>
-            <Button>Create</Button>
-          </CardFooter>
-        </Card>
+            <div className="bg-fd-background flex flex-1 items-center justify-end px-3">
+              <Badge variant="accent">Draft</Badge>
+            </div>
+          </Cluster>
+        </SubSection>
+
+        <SubSection title="Column layout">
+          <Cluster
+            direction="col"
+            align="stretch"
+            className="max-w-sm"
+            bg="muted"
+          >
+            <div className="rounded-md bg-(--cluster-bg) p-3 pt-2">
+              <span className="text-sm font-medium">Project Setup</span>
+              <p className="text-muted-foreground text-sm">
+                Configure your project settings and preferences.
+              </p>
+            </div>
+            <label className="focus-within:bg-accent/70 flex items-center gap-3 rounded-md bg-(--cluster-bg) p-3">
+              <PresentationIcon className="text-muted-foreground size-4 shrink-0" />
+              <input
+                placeholder="Project name"
+                className="min-w-0 text-sm outline-none"
+              />
+            </label>
+            <Cluster bg="muted">
+              <Filler />
+              <Button variant="secondary">Cancel</Button>
+              <Button>Create</Button>
+            </Cluster>
+          </Cluster>
+        </SubSection>
       </Section>
 
       {/* ── Avatar ── */}
@@ -432,7 +438,9 @@ export default function UIKit() {
       <Section title="Popover" registryName="popover">
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="mx-auto">Open Popover</Button>
+            <Button variant="outline" className="mx-auto">
+              Open Popover
+            </Button>
           </PopoverTrigger>
           <PopoverContent>
             <div className="flex flex-col gap-2">
@@ -450,7 +458,9 @@ export default function UIKit() {
       <Section title="Dropdown Menu" registryName="dropdown-menu">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="mx-auto">Open Menu</Button>
+            <Button variant="outline" className="mx-auto">
+              Open Menu
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuLabel>My Account</DropdownMenuLabel>

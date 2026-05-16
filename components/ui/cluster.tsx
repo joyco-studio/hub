@@ -4,8 +4,12 @@ import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@/lib/utils'
 
-const clusterVariants = cva('flex gap-gap', {
+const clusterVariants = cva('gap-gap', {
   variants: {
+    display: {
+      flex: 'flex',
+      'inline-flex': 'inline-flex',
+    },
     direction: {
       row: 'flex-row',
       col: 'flex-col',
@@ -21,16 +25,17 @@ const clusterVariants = cva('flex gap-gap', {
       true: 'flex-wrap',
       false: '',
     },
-    inline: {
-      true: 'inline-flex',
-      false: '',
+    bg: {
+      muted: '[--cluster-bg:var(--color-muted)]',
+      accent: '[--cluster-bg:var(--color-accent)]',
     },
   },
   defaultVariants: {
+    display: 'flex',
     direction: 'row',
     align: 'center',
+    bg: 'muted',
     wrap: false,
-    inline: false,
   },
 })
 
@@ -40,10 +45,11 @@ type ClusterProps = React.ComponentProps<'div'> & {
 
 function Cluster({
   className,
+  display,
   direction,
   align,
   wrap,
-  inline,
+  bg,
   asChild = false,
   ...props
 }: ClusterProps) {
@@ -53,7 +59,7 @@ function Cluster({
     <Comp
       data-slot="cluster"
       className={cn(
-        clusterVariants({ direction, align, wrap, inline }),
+        clusterVariants({ display, direction, align, wrap, bg }),
         className
       )}
       {...props}
@@ -61,20 +67,19 @@ function Cluster({
   )
 }
 
-function Filler({
-  className,
-  ...props
-}: Omit<React.ComponentProps<'div'>, 'role' | 'aria-hidden'>) {
+type FillerProps = Omit<React.ComponentProps<'div'>, 'role' | 'aria-hidden'>
+
+function Filler({ className, ...props }: FillerProps) {
   return (
     <div
       data-slot="cluster-filler"
       role="presentation"
       aria-hidden="true"
-      className={cn('min-w-0 flex-1 self-stretch', className)}
+      className={cn('min-w-0 flex-1 self-stretch bg-(--cluster-bg)', className)}
       {...props}
     />
   )
 }
 
 export { Cluster, Filler, clusterVariants }
-export type { ClusterProps }
+export type { ClusterProps, FillerProps }
