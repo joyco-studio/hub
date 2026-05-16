@@ -714,6 +714,10 @@
             "background-color": "var(--cluster-bg, transparent)"
           }
         }
+      },
+      "docs": "Cluster is a transparent flex container — it never has a visible background. Use the `bg` prop to set `--cluster-bg` which direct children inherit. Use `<Filler />` for space distribution instead of justify-between. Every direct child must be a solid element with its own bg. See https://hub.joyco.studio/components/cluster for full docs.",
+      "meta": {
+        "llms": "Cluster & Filler are layout primitives. Rules: (1) Clusters are transparent, bg prop sets --cluster-bg inherited by children via @layer base :where() rule. (2) Every direct Cluster child must be a solid element with its own visual identity. (3) Use <Filler /> (flex-1, aria-hidden) for space distribution — never justify-between/end/around. (4) Children override inherited bg with any bg-* class. Props: display (flex|inline-flex), direction (row|col), align (start|center|end|stretch|baseline), wrap (bool), bg (muted|accent), asChild (bool). For inline contexts use asChild with <span>. Requires CSS: @layer base { :where([data-slot='cluster'] > *) { background-color: var(--cluster-bg, transparent); } }"
       }
     },
     {
