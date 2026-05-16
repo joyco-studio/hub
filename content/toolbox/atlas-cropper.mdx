@@ -33,7 +33,7 @@ The canvas is infinite. Middle-click drag to pan, `Ctrl+scroll` to zoom (cursor-
 
 ### 2. Layout Arrangement
 
-Position your defined crops in 2D space. Each crop has `x`, `y`, and `z-index` coordinates. This is where you define how the crops relate to each other spatially — useful when your atlas regions need to be reassembled or composited in a specific arrangement.
+Position your defined crops in 2D space. Each crop has `x` and `y` coordinates relative to a bounding box — either dynamically calculated from the area created by all crop positions and sizes, or constrained to the atlas image dimensions. This is where you define how the crops relate to each other spatially — useful when your atlas regions need to be reassembled or composited in a specific arrangement.
 
 Features carry over from the crop editor (snapping, pan/zoom, keyboard shortcuts), plus:
 
@@ -117,7 +117,7 @@ Load the atlas (3880 × 5043) and draw crops around each region. Each crop isola
 
 ### 2. Layout Arrangement
 
-Position each crop relative to a shared origin. The coordinates you define here are what a renderer consumes directly — no guesswork, no manual offset calculations.
+Position each crop relative to a shared origin. Here the bounding box is constrained to the atlas image dimensions, so each crop's position maps directly to atlas-space coordinates a renderer can consume — no guesswork, no manual offset calculations.
 
 <Figure src="/atlas-cropper-entry/layout-arrangement.png" alt="Layout tab showing four crops positioned in object space with origin at center" width={1456} height={816} />
 
