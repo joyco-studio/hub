@@ -52,13 +52,19 @@ function Cluster({
   return (
     <Comp
       data-slot="cluster"
-      className={cn(clusterVariants({ direction, align, wrap, inline }), className)}
+      className={cn(
+        clusterVariants({ direction, align, wrap, inline }),
+        className
+      )}
       {...props}
     />
   )
 }
 
-function Filler({ className, ...props }: React.ComponentProps<'div'>) {
+function Filler({
+  className,
+  ...props
+}: Omit<React.ComponentProps<'div'>, 'role' | 'aria-hidden'>) {
   return (
     <div
       data-slot="cluster-filler"
