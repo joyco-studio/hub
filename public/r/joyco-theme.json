@@ -6,6 +6,8 @@
   "description": "JOYCO brand theme with light and dark mode color tokens.",
   "cssVars": {
     "theme": {
+      "gap": "0.25rem",
+      "spacing-gap": "var(--gap)",
       "radius": "0rem",
       "font-sans": "var(--font-public-sans)",
       "font-mono": "var(--font-roboto-mono)",

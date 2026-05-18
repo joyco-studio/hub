@@ -1,0 +1,35 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "cluster",
+  "type": "registry:ui",
+  "title": "Cluster",
+  "description": "A flex container with the design system gap and an optional filler for space distribution.",
+  "dependencies": [
+    "@radix-ui/react-slot",
+    "class-variance-authority"
+  ],
+  "files": [
+    {
+      "path": "components/ui/cluster.tsx",
+      "content": "import * as React from 'react'\nimport { Slot } from '@radix-ui/react-slot'\nimport { cva, type VariantProps } from 'class-variance-authority'\n\nimport { cn } from '@/lib/utils'\n\nconst clusterVariants = cva('gap-gap bg-transparent', {\n  variants: {\n    display: {\n      flex: 'flex',\n      'inline-flex': 'inline-flex',\n    },\n    direction: {\n      row: 'flex-row',\n      col: 'flex-col',\n    },\n    align: {\n      start: 'items-start',\n      center: 'items-center',\n      end: 'items-end',\n      stretch: 'items-stretch',\n      baseline: 'items-baseline',\n    },\n    wrap: {\n      true: 'flex-wrap',\n      false: '',\n    },\n    bg: {\n      muted: '[--cluster-bg:var(--color-muted)]',\n      accent: '[--cluster-bg:var(--color-accent)]',\n    },\n  },\n  defaultVariants: {\n    display: 'flex',\n    direction: 'row',\n    align: 'center',\n    bg: 'muted',\n    wrap: false,\n  },\n})\n\ntype ClusterProps = React.ComponentProps<'div'> & {\n  asChild?: boolean\n} & VariantProps<typeof clusterVariants>\n\nfunction Cluster({\n  className,\n  display,\n  direction,\n  align,\n  wrap,\n  bg,\n  asChild = false,\n  ...props\n}: ClusterProps) {\n  const Comp = asChild ? Slot : 'div'\n\n  return (\n    <Comp\n      data-slot=\"cluster\"\n      className={cn(\n        clusterVariants({ display, direction, align, wrap, bg }),\n        className\n      )}\n      {...props}\n    />\n  )\n}\n\ntype FillerProps = Omit<React.ComponentProps<'div'>, 'role' | 'aria-hidden'>\n\nfunction Filler({ className, ...props }: FillerProps) {\n  return (\n    <div\n      data-slot=\"cluster-filler\"\n      role=\"presentation\"\n      aria-hidden=\"true\"\n      className={cn('min-w-0 flex-1 self-stretch', className)}\n      {...props}\n    />\n  )\n}\n\nexport { Cluster, Filler, clusterVariants }\nexport type { ClusterProps, FillerProps }\n",
+      "type": "registry:ui"
+    }
+  ],
+  "cssVars": {
+    "theme": {
+      "gap": "0.25rem",
+      "spacing-gap": "var(--gap)"
+    }
+  },
+  "css": {
+    "@layer base": {
+      ":where([data-slot='cluster'] > *)": {
+        "background-color": "var(--cluster-bg, transparent)"
+      }
+    }
+  },
+  "meta": {
+    "llms": "Cluster & Filler are layout primitives. Rules: (1) Clusters are transparent, bg prop sets --cluster-bg inherited by children via @layer base :where() rule. (2) Every direct Cluster child must be a solid element with its own visual identity. (3) Use <Filler /> (flex-1, aria-hidden) for space distribution — never justify-between/end/around. (4) Children override inherited bg with any bg-* class. Props: display (flex|inline-flex), direction (row|col), align (start|center|end|stretch|baseline), wrap (bool), bg (muted|accent), asChild (bool). For inline contexts use asChild with <span>. Requires CSS: @layer base { :where([data-slot='cluster'] > *) { background-color: var(--cluster-bg, transparent); } }"
+  },
+  "docs": "Cluster is a transparent flex container — it never has a visible background. Use the `bg` prop to set `--cluster-bg` which direct children inherit. Use `<Filler />` for space distribution instead of justify-between. Every direct child must be a solid element with its own bg. See https://hub.joyco.studio/components/cluster for full docs."
+}

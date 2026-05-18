@@ -697,6 +697,36 @@
       "dependencies": ["@radix-ui/react-tooltip"]
     },
     {
+      "name": "cluster",
+      "type": "registry:ui",
+      "title": "Cluster",
+      "description": "A flex container with the design system gap and an optional filler for space distribution.",
+      "files": [
+        {
+          "path": "components/ui/cluster.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["@radix-ui/react-slot", "class-variance-authority"],
+      "cssVars": {
+        "theme": {
+          "gap": "0.25rem",
+          "spacing-gap": "var(--gap)"
+        }
+      },
+      "css": {
+        "@layer base": {
+          ":where([data-slot='cluster'] > *)": {
+            "background-color": "var(--cluster-bg, transparent)"
+          }
+        }
+      },
+      "docs": "Cluster is a transparent flex container — it never has a visible background. Use the `bg` prop to set `--cluster-bg` which direct children inherit. Use `<Filler />` for space distribution instead of justify-between. Every direct child must be a solid element with its own bg. See https://hub.joyco.studio/components/cluster for full docs.",
+      "meta": {
+        "llms": "Cluster & Filler are layout primitives. Rules: (1) Clusters are transparent, bg prop sets --cluster-bg inherited by children via @layer base :where() rule. (2) Every direct Cluster child must be a solid element with its own visual identity. (3) Use <Filler /> (flex-1, aria-hidden) for space distribution — never justify-between/end/around. (4) Children override inherited bg with any bg-* class. Props: display (flex|inline-flex), direction (row|col), align (start|center|end|stretch|baseline), wrap (bool), bg (muted|accent), asChild (bool). For inline contexts use asChild with <span>. Requires CSS: @layer base { :where([data-slot='cluster'] > *) { background-color: var(--cluster-bg, transparent); } }"
+      }
+    },
+    {
       "name": "joyco-theme",
       "type": "registry:theme",
       "title": "JOYCO Theme",
@@ -738,6 +768,8 @@
       },
       "cssVars": {
         "theme": {
+          "gap": "0.25rem",
+          "spacing-gap": "var(--gap)",
           "radius": "0rem",
           "font-sans": "var(--font-public-sans)",
           "font-mono": "var(--font-roboto-mono)",
@@ -879,6 +911,8 @@
       },
       "cssVars": {
         "theme": {
+          "gap": "0.25rem",
+          "spacing-gap": "var(--gap)",
           "radius": "0rem",
           "font-sans": "var(--font-public-sans)",
           "font-mono": "var(--font-roboto-mono)",
@@ -971,7 +1005,6 @@
         "@joyco/badge",
         "@joyco/button",
         "@joyco/button-group",
-        "@joyco/card",
         "@joyco/chart",
         "@joyco/collapsible",
         "@joyco/dropdown-menu",
@@ -987,7 +1020,8 @@
         "@joyco/switch",
         "@joyco/tabs",
         "@joyco/textarea",
-        "@joyco/tooltip"
+        "@joyco/tooltip",
+        "@joyco/cluster"
       ]
     }
   ]

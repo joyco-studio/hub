@@ -1,0 +1,110 @@
+---
+title: Cluster
+description: A transparent flex container that distributes its design-system gap to children. Replaces cards, justify-between, and other opaque wrappers.
+maintainers: ['justkahdri']
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+<ComponentPreview name="cluster-demo" />
+
+## Installation
+
+```bash
+npx shadcn@latest add @joyco/cluster
+```
+
+## Core Concept
+
+A Cluster is an **invisible layout scaffold**. It has no background — it only provides `gap` and flex behavior. Its direct children automatically receive the Cluster's `bg` color via a zero-specificity CSS rule, which any utility class on the child can override.
+
+This replaces the traditional "Card" pattern (wrapper with bg + padding). In JOYCO's design system, **containers are transparent — children own their own backgrounds**.
+
+## Usage
+
+```tsx
+import { Cluster, Filler } from '@/components/ui/cluster'
+```
+
+### Basic row
+
+```tsx
+<Cluster>
+  <div className="px-3 py-2">
+    <span className="text-sm font-medium">Label</span>
+  </div>
+  <Filler />
+  <Badge variant="accent">Status</Badge>
+</Cluster>
+```
+
+Children inherit `bg-muted` by default. The `<Filler />` pushes the badge to the end — **never use `justify-between`**, always use Filler for space distribution.
+
+### Column layout
+
+```tsx
+<Cluster direction="col" align="stretch" bg="muted">
+  <div className="p-3">
+    <span className="text-sm font-medium">Header</span>
+    <p className="text-muted-foreground text-sm">Description</p>
+  </div>
+  <div className="p-3">
+    <Input placeholder="Field" />
+  </div>
+  <Cluster bg="muted">
+    <Filler />
+    <Button variant="secondary">Cancel</Button>
+    <Button>Create</Button>
+  </Cluster>
+</Cluster>
+```
+
+### Override child background
+
+Children can override the inherited bg with any utility class:
+
+```tsx
+<Cluster>
+  <div className="px-3 py-2">Uses inherited bg-muted</div>
+  <div className="bg-fd-background px-3 py-2">Overrides to bg-fd-background</div>
+</Cluster>
+```
+
+### Inline display
+
+Use `asChild` with a `<span>` for inline contexts:
+
+```tsx
+<Cluster display="inline-flex" asChild>
+  <span>
+    <Badge>Active</Badge>
+    <Badge variant="muted">3 tasks</Badge>
+  </span>
+</Cluster>
+```
+
+## API
+
+### Cluster
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `display` | `'flex' \| 'inline-flex'` | `'flex'` | Display mode |
+| `direction` | `'row' \| 'col'` | `'row'` | Flex direction |
+| `align` | `'start' \| 'center' \| 'end' \| 'stretch' \| 'baseline'` | `'center'` | Cross-axis alignment |
+| `wrap` | `boolean` | `false` | Enable flex wrap |
+| `bg` | `'muted' \| 'accent'` | `'muted'` | Background color inherited by direct children |
+| `asChild` | `boolean` | `false` | Render as child element via Radix Slot |
+
+### Filler
+
+A presentational spacer that fills available space along the main axis. Renders as `flex-1` with `aria-hidden="true"`.
+
+Use `<Filler />` between children to distribute space. Never use `justify-between` or `justify-end`.
+
+## Design Principles
+
+1. **Clusters are transparent** — they never have a visible background
+2. **Children are solid** — every direct child should have its own visual identity (background color, etc.) but **never borders or rounded corners**. Borders are almost never used in this design system — the only exception is the outline button variant. The theme radius is `0rem`. Clusters, Fillers, inputs, and all layout elements rely on background color contrast and spacing to create visual separation, not border lines or rounded shapes.
+3. **Filler over justify** — use `<Filler />` for space distribution, never `justify-between`
+4. **bg cascades down** — the `bg` prop sets a CSS variable that children inherit at zero specificity, overridable with any `bg-*` class

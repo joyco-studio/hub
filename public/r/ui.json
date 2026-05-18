@@ -10,7 +10,6 @@
     "@joyco/badge",
     "@joyco/button",
     "@joyco/button-group",
-    "@joyco/card",
     "@joyco/chart",
     "@joyco/collapsible",
     "@joyco/dropdown-menu",
@@ -26,10 +25,13 @@
     "@joyco/switch",
     "@joyco/tabs",
     "@joyco/textarea",
-    "@joyco/tooltip"
+    "@joyco/tooltip",
+    "@joyco/cluster"
   ],
   "cssVars": {
     "theme": {
+      "gap": "0.25rem",
+      "spacing-gap": "var(--gap)",
       "radius": "0rem",
       "font-sans": "var(--font-public-sans)",
       "font-mono": "var(--font-roboto-mono)",
