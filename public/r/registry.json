@@ -708,6 +708,12 @@
         }
       ],
       "dependencies": ["@radix-ui/react-slot", "class-variance-authority"],
+      "cssVars": {
+        "theme": {
+          "gap": "0.25rem",
+          "spacing-gap": "var(--gap)"
+        }
+      },
       "css": {
         "@layer base": {
           ":where([data-slot='cluster'] > *)": {
