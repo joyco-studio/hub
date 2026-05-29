@@ -15,10 +15,10 @@ interface MorphPathProps {
 
 function MorphPath({ paths, duration, fill, step }: MorphPathProps) {
   const safeStep = Math.max(0, Math.min(step, paths.length - 1))
-  const initialPath = paths[safeStep] ?? ''
+  const targetPath = paths[safeStep] ?? ''
 
   const progress = useMotionValue(0)
-  const currentPathRef = useRef(initialPath)
+  const currentPathRef = useRef(targetPath)
   const interpolatorRef = useRef<FlubberInterpolator | null>(null)
 
   const d = useTransform(progress, (v: number) => {
@@ -27,7 +27,6 @@ function MorphPath({ paths, duration, fill, step }: MorphPathProps) {
   })
 
   useEffect(() => {
-    const targetPath = paths[safeStep]
     if (!targetPath || targetPath === currentPathRef.current) return
 
     const p = progress.get()
@@ -52,7 +51,7 @@ function MorphPath({ paths, duration, fill, step }: MorphPathProps) {
     })
 
     return () => animation.stop()
-  }, [safeStep, duration, progress, paths])
+  }, [safeStep, duration, progress, targetPath])
 
   if (paths.length === 0) return null
 
