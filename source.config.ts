@@ -21,7 +21,9 @@ export const docs = defineDocs({
     schema: frontmatterSchema.extend({
       author: z.string().optional(),
       maintainers: z.array(z.string()).default([]),
-      type: z.enum(['component', 'game', 'effect', 'canvas', 'library']).default('component'),
+      type: z
+        .enum(['component', 'game', 'effect', 'canvas', 'library', 'lib'])
+        .default('component'),
       repo: z.string().optional(),
       docLinks: z
         .array(

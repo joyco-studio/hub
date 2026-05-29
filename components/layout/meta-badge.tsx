@@ -1,5 +1,12 @@
 import { cn } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
 import type { SidebarItemMeta } from './sidebar/section'
+
+const variantMap = {
+  new: 'default',
+  updated: 'card',
+  internal: 'muted',
+} as const
 
 type MetaBadgeProps = {
   type: NonNullable<SidebarItemMeta['badge']>
@@ -8,16 +15,8 @@ type MetaBadgeProps = {
 
 export function MetaBadge({ type, className }: MetaBadgeProps) {
   return (
-    <span
-      className={cn(
-        'shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase',
-        type === 'new' && 'bg-primary text-primary-foreground',
-        type === 'updated' && 'bg-card text-card-foreground',
-        type === 'internal' && 'bg-muted text-muted-foreground',
-        className
-      )}
-    >
+    <Badge variant={variantMap[type]} size="sm" className={className}>
       {type}
-    </span>
+    </Badge>
   )
 }

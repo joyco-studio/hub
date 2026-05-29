@@ -1,14 +1,14 @@
 import type { DownloadStats } from '@/components/layout/weekly-downloads'
 
-const JOYCO_WORKER_SECRET = process.env.JOYCO_WORKER_SECRET || ''
+const JOYCO_WORKERS_HUB_TOKEN = process.env.JOYCO_WORKERS_HUB_TOKEN || ''
 const BASE_URL = 'https://workers.joyco.studio'
 
 export async function getComponentDownloadStats(
   slug: string
 ): Promise<DownloadStats | null> {
-  if (!JOYCO_WORKER_SECRET) return null
+  if (!JOYCO_WORKERS_HUB_TOKEN) return null
 
-  const headers = { Authorization: `Bearer ${JOYCO_WORKER_SECRET}` }
+  const headers = { Authorization: `Bearer ${JOYCO_WORKERS_HUB_TOKEN}` }
   const now = new Date()
   const to = new Date(now)
   const from = new Date(now)
@@ -31,10 +31,9 @@ export async function getComponentDownloadStats(
   try {
     const [countRes, timeseriesRes] = await Promise.all([
       fetch(`${BASE_URL}/analytics/count?${countParams}`, { headers }),
-      fetch(
-        `${BASE_URL}/analytics/timeseries?${timeseriesParams}`,
-        { headers }
-      ),
+      fetch(`${BASE_URL}/analytics/timeseries?${timeseriesParams}`, {
+        headers,
+      }),
     ])
 
     if (!countRes.ok || !timeseriesRes.ok) return null
@@ -46,24 +45,24 @@ export async function getComponentDownloadStats(
 
     return {
       total: countJson.data.count,
-      weekly: timeseriesJson.data.map(
-        (t: { key: string; count: number }) => ({
-          day: t.key,
-          count: t.count,
-        })
-      ),
+      weekly: timeseriesJson.data.map((t: { key: string; count: number }) => ({
+        day: t.key,
+        count: t.count,
+      })),
     }
-  } catch {
+  } catch (error) {
+    console.error(
+      `[Stats] Failed to fetch download stats for ${slug}:`,
+      error instanceof Error ? error.message : String(error)
+    )
     return null
   }
 }
 
-export async function getPageViews(
-  pagePath: string
-): Promise<number | null> {
-  if (!JOYCO_WORKER_SECRET) return null
+export async function getPageViews(pagePath: string): Promise<number | null> {
+  if (!JOYCO_WORKERS_HUB_TOKEN) return null
 
-  const headers = { Authorization: `Bearer ${JOYCO_WORKER_SECRET}` }
+  const headers = { Authorization: `Bearer ${JOYCO_WORKERS_HUB_TOKEN}` }
   const params = new URLSearchParams({
     path: pagePath,
   })
@@ -79,7 +78,11 @@ export async function getPageViews(
     if (!json.success) return null
 
     return json.data.count
-  } catch {
+  } catch (error) {
+    console.error(
+      `[Stats] Failed to fetch page views for ${pagePath}:`,
+      error instanceof Error ? error.message : String(error)
+    )
     return null
   }
 }

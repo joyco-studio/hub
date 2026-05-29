@@ -25,9 +25,7 @@ export function ExperimentIframe({
     try {
       const url = new URL(src)
       url.searchParams.set('lab', 'true')
-      if (debug) {
-        url.searchParams.set('debug', 'true')
-      }
+      url.searchParams.set('debug', String(debug)) // 'true'/'false' string
       return url.toString()
     } catch {
       return src

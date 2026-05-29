@@ -52,7 +52,7 @@ export function BrickBreakerScore({
   return (
     <div
       data-slot="brick-breaker-score"
-      className={cn('flex flex-col', className)}
+      className={cn('flex items-baseline gap-1.5', className)}
       {...props}
     >
       <span className="text-foreground font-semibold tabular-nums">
@@ -157,17 +157,15 @@ export interface BrickBreakerCanvasProps extends React.HTMLAttributes<HTMLDivEle
 
 /**
  * Slot component that marks where the game canvas should be rendered.
- * Use this to control canvas placement within your layout.
- * Props are passed to the canvas wrapper div.
+ * Children are rendered inside the canvas frame (use `absolute` positioning
+ * for overlays, lives, etc).
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function BrickBreakerCanvas(props: BrickBreakerCanvasProps) {
-  // This is a marker component - actual canvas is rendered by BrickBreaker
-  // The props are read by BrickBreaker and applied to the canvas wrapper
+export function BrickBreakerCanvas(_props: BrickBreakerCanvasProps) {
+  // Marker component - actual canvas + children are rendered by BrickBreaker.
   return null
 }
 
-// Internal marker to identify canvas slot
 BrickBreakerCanvas.displayName = 'BrickBreakerCanvas'
 
 // ============================================================================
@@ -183,7 +181,9 @@ export function BrickBreakerHUD({ children, className, ...props }: HUDProps) {
     <div
       data-slot="brick-breaker-hud"
       className={cn(
-        'flex shrink-0 items-center justify-between p-4 text-sm',
+        'grid shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-4 p-4 text-sm',
+        '[&>:first-child]:justify-self-start',
+        '[&>:last-child]:justify-self-end',
         className
       )}
       {...props}
@@ -421,14 +421,14 @@ export function BrickBreakerDefaultUI() {
         <BrickBreakerLevel />
         <BrickBreakerHighScore />
       </BrickBreakerHUD>
-
-      <BrickBreakerLives className="absolute bottom-4 left-4" />
-
-      <BrickBreakerOverlay>
-        <BrickBreakerTitle />
-        <BrickBreakerMessage />
-        <BrickBreakerHint />
-      </BrickBreakerOverlay>
+      <BrickBreakerCanvas>
+        <BrickBreakerLives className="absolute bottom-3 left-3" />
+        <BrickBreakerOverlay>
+          <BrickBreakerTitle />
+          <BrickBreakerMessage />
+          <BrickBreakerHint />
+        </BrickBreakerOverlay>
+      </BrickBreakerCanvas>
     </>
   )
 }

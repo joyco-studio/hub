@@ -215,6 +215,7 @@ type SidebarSectionProps = {
   effectSlugs?: string[]
   canvasSlugs?: string[]
   librarySlugs?: string[]
+  libSlugs?: string[]
 }
 
 /**
@@ -229,6 +230,7 @@ export function SidebarSection({
   effectSlugs = [],
   canvasSlugs = [],
   librarySlugs = [],
+  libSlugs = [],
 }: SidebarSectionProps) {
   const [isOpen, setIsOpen] = React.useState(defaultOpen)
   const pathname = usePathname()
@@ -244,11 +246,19 @@ export function SidebarSection({
   // For components section, split into UI, Canvas, Effects, and Games
   if (
     sectionId === 'components' &&
-    (gameSlugs.length > 0 || effectSlugs.length > 0 || canvasSlugs.length > 0)
+    (gameSlugs.length > 0 ||
+      effectSlugs.length > 0 ||
+      canvasSlugs.length > 0 ||
+      libSlugs.length > 0)
   ) {
     const isGame = (url: string) => {
       const slug = url.split('/').pop() ?? ''
       return gameSlugs.includes(slug)
+    }
+
+    const isLib = (url: string) => {
+      const slug = url.split('/').pop() ?? ''
+      return libSlugs.includes(slug)
     }
 
     const isEffect = (url: string) => {
@@ -265,11 +275,16 @@ export function SidebarSection({
       (child): child is PageTree.Item => child.type === 'page'
     )
     const uiPages = pages.filter(
-      (page) => !isGame(page.url) && !isEffect(page.url) && !isCanvas(page.url)
+      (page) =>
+        !isGame(page.url) &&
+        !isEffect(page.url) &&
+        !isCanvas(page.url) &&
+        !isLib(page.url)
     )
     const canvasPages = pages.filter((page) => isCanvas(page.url))
     const effectPages = pages.filter((page) => isEffect(page.url))
     const gamePages = pages.filter((page) => isGame(page.url))
+    const libPages = pages.filter((page) => isLib(page.url))
 
     return (
       <div className="flex flex-col">
@@ -303,6 +318,15 @@ export function SidebarSection({
             name="Games"
             icon={GamepadIcon}
             pages={gamePages}
+            meta={meta}
+            defaultOpen
+          />
+        )}
+        {libPages.length > 0 && (
+          <CollapsibleSubSection
+            name="Lib"
+            icon={Library}
+            pages={libPages}
             meta={meta}
             defaultOpen
           />

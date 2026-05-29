@@ -5,6 +5,7 @@
     "brick-breaker",
     "canvas-2d",
     "chat",
+    "cluster",
     "debug",
     "debug-canvas",
     "file-button",
@@ -23,6 +24,7 @@
     "snake-game",
     "spritesheet-sequencer",
     "svg-morph",
+    "typed-emitter",
     "typewriter"
   ]
 }

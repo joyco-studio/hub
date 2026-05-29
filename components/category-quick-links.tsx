@@ -9,6 +9,7 @@ import {
 } from '@/components/category-card-link'
 import { CanvasSequence } from '@/registry/components/image-sequence'
 import { useRegistryMeta } from '@/components/registry-meta'
+import { useCycleIndex } from '@/hooks/use-cycle-index'
 import CubeIcon from './icons/3d-cube'
 import TerminalWithCursorIcon from './icons/terminal-w-cursor'
 import FileIcon from './icons/file'
@@ -38,18 +39,29 @@ const sequences = [
 
 export function CategoryQuickLinks() {
   const { counts } = useRegistryMeta()
-  const [activeIndex, setActiveIndex] = useState<number>(-1)
+  const [isHovering, setIsHovering] = useState(false)
+  const [activeIndex, setActiveIndex] = useCycleIndex({
+    count: sequences.length,
+    delayMs: 2000,
+    paused: isHovering,
+  })
   const isMd = useMediaQuery('(min-width: 768px)')
+
+  const handleEnter = (i: number) => {
+    setIsHovering(true)
+    setActiveIndex(i)
+  }
+  const handleLeave = () => setIsHovering(false)
 
   return (
     <div className="not-prose @container">
       <div className="grid grid-cols-1 gap-2 @md:gap-4 @xl:grid-cols-2 @3xl:grid-cols-3">
         <CategoryCardLink
           href="/components"
-          onMouseEnter={() => setActiveIndex(0)}
-          onMouseLeave={() => setActiveIndex(-1)}
-          onFocus={() => setActiveIndex(0)}
-          onBlur={() => setActiveIndex(-1)}
+          onMouseEnter={() => handleEnter(0)}
+          onMouseLeave={handleLeave}
+          onFocus={() => handleEnter(0)}
+          onBlur={handleLeave}
           className="overflow-visible"
         >
           <CategoryCardLinkHeader
@@ -81,10 +93,10 @@ export function CategoryQuickLinks() {
 
         <CategoryCardLink
           href="/toolbox"
-          onMouseEnter={() => setActiveIndex(1)}
-          onMouseLeave={() => setActiveIndex(-1)}
-          onFocus={() => setActiveIndex(1)}
-          onBlur={() => setActiveIndex(-1)}
+          onMouseEnter={() => handleEnter(1)}
+          onMouseLeave={handleLeave}
+          onFocus={() => handleEnter(1)}
+          onBlur={handleLeave}
           className="overflow-visible"
         >
           <CategoryCardLinkHeader
@@ -116,10 +128,10 @@ export function CategoryQuickLinks() {
 
         <CategoryCardLink
           href="/logs"
-          onMouseEnter={() => setActiveIndex(2)}
-          onMouseLeave={() => setActiveIndex(-1)}
-          onFocus={() => setActiveIndex(2)}
-          onBlur={() => setActiveIndex(-1)}
+          onMouseEnter={() => handleEnter(2)}
+          onMouseLeave={handleLeave}
+          onFocus={() => handleEnter(2)}
+          onBlur={handleLeave}
           className="overflow-visible"
         >
           <CategoryCardLinkHeader

@@ -88,6 +88,7 @@
   --color-mint-green: oklch(0.8836 0.0989 147.16);
 
   /* Spacing */
+  --spacing-gap: var(--gap);
   --spacing-heading-height: 64px;
   --spacing-aside-width: var(--aside-width);
   --spacing-sidebar-width: var(--sidebar-width);
@@ -116,7 +117,14 @@
   }
 }
 
+@layer base {
+  :where([data-slot='cluster'] > *) {
+    background-color: var(--cluster-bg, transparent);
+  }
+}
+
 :root {
+  --gap: 0.25rem;
   --aside-width: 4rem;
   --sidebar-width: 268px;
   --mobile-header-height: 3rem;

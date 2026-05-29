@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { APP_BASE_URL } from './constants';
 
-const JOYCO_WORKER_SECRET = process.env.JOYCO_WORKER_SECRET || ''
+const JOYCO_WORKERS_HUB_TOKEN = process.env.JOYCO_WORKERS_HUB_TOKEN || ''
 const DEDUP_TTL = 10_000 // 10 seconds
 const memoryDownloads = new Map<string, number>()
 
@@ -12,7 +12,7 @@ function getClientIp(request: NextRequest): string {
 }
 
 async function trackDownload(path: string, countryCode: string | null) {
-  if (!JOYCO_WORKER_SECRET) {
+  if (!JOYCO_WORKERS_HUB_TOKEN) {
     console.error(`[Registry Download] No worker secret found`)
     return
   }
@@ -24,7 +24,7 @@ async function trackDownload(path: string, countryCode: string | null) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${JOYCO_WORKER_SECRET}`,
+        Authorization: `Bearer ${JOYCO_WORKERS_HUB_TOKEN}`,
       },
       body: JSON.stringify({
         event_type: 'download',

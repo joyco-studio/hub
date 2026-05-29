@@ -21,8 +21,8 @@ import { useBrickBreaker } from './use-brick-breaker'
 import { mergeConfig, resolveCssColor } from './utils'
 import {
   BrickBreakerUIProvider,
-  BrickBreakerDefaultUI,
   BrickBreakerCanvas,
+  BrickBreakerDefaultUI,
 } from './ui'
 
 /**
@@ -125,8 +125,6 @@ function renderGame(
   const paddleColor = resolveCssColor(config.colors.paddle, canvas)
   const ballColor = resolveCssColor(config.colors.ball, canvas)
   const trailColor = resolveCssColor(config.colors.ballTrail, canvas)
-  const textColor = resolveCssColor(config.colors.text, canvas)
-  const textMutedColor = resolveCssColor(config.colors.textMuted, canvas)
 
   const brickColors: Record<BrickType, string> = {
     normal: resolveCssColor(config.colors.bricks.normal, canvas),
@@ -645,54 +643,70 @@ export function BrickBreaker({
     />
   )
 
-  // Check if children contain a BrickBreakerCanvas slot
-  const childArray = React.Children.toArray(children)
-  const hasCanvasSlot = childArray.some(
-    (child) =>
-      React.isValidElement(child) &&
-      (child.type as React.ComponentType)?.displayName === 'BrickBreakerCanvas'
+  // Resolve children, falling back to the default UI when none provided.
+  // The default UI is called as a function so we can inspect its children;
+  // React.Children.toArray does not flatten a top-level Fragment, so unwrap
+  // it explicitly before flattening so the canvas slot is detected.
+  const resolvedChildren = children ?? BrickBreakerDefaultUI()
+  const unwrapped =
+    React.isValidElement(resolvedChildren) &&
+    resolvedChildren.type === React.Fragment
+      ? (resolvedChildren.props as { children?: React.ReactNode }).children
+      : resolvedChildren
+  const childArray = React.Children.toArray(unwrapped)
+
+  const isCanvasSlot = (child: React.ReactNode): child is React.ReactElement =>
+    React.isValidElement(child) && child.type === BrickBreakerCanvas
+
+  const hasCanvasSlot = childArray.some(isCanvasSlot)
+
+  // Renders the canvas + an inner relative frame sized to the canvas, so
+  // absolutely-positioned overlays (lives, state overlay) anchor to the
+  // canvas instead of the wider flex wrapper.
+  const renderCanvasFrame = (
+    extras: React.ReactNode,
+    wrapperClassName?: string
+  ) => (
+    <div
+      key="canvas-wrapper"
+      ref={canvasWrapperRef}
+      className={cn(
+        'relative flex min-h-0 flex-1 items-center justify-center',
+        wrapperClassName
+      )}
+    >
+      <div
+        className="relative"
+        style={{ width: dimensions.width, height: dimensions.height }}
+      >
+        {canvasElement}
+        {extras}
+      </div>
+    </div>
   )
 
-  // Find overlay components
-  const overlays = childArray.filter(
-    (child) =>
-      React.isValidElement(child) &&
-      (child.type as React.ComponentType)?.displayName === 'BrickBreakerOverlay'
-  )
-
-  // Process children - replace canvas slot with actual canvas
+  // Replace the canvas slot with the actual canvas frame, rendering the
+  // slot's children inside it. Non-slot children (HUD, footers, etc) are
+  // wrapped in a canvas-width container and centered so they visually align
+  // with the canvas frame, even when the outer container is wider.
   const processedChildren = hasCanvasSlot
-    ? childArray.map((child) => {
-        if (
-          React.isValidElement(child) &&
-          (child.type as React.ComponentType)?.displayName ===
-            'BrickBreakerCanvas'
-        ) {
-          // Replace slot with canvas wrapper that takes flex-1
-          return (
-            <div
-              key="canvas-wrapper"
-              ref={canvasWrapperRef}
-              className={cn(
-                'relative flex min-h-0 flex-1 items-center justify-center',
-                (child.props as { className?: string }).className
-              )}
-            >
-              {canvasElement}
-              {/* Overlay goes inside canvas wrapper for proper positioning */}
-              {overlays}
-            </div>
-          )
+    ? childArray.map((child, index) => {
+        if (isCanvasSlot(child)) {
+          const slotProps = child.props as {
+            className?: string
+            children?: React.ReactNode
+          }
+          return renderCanvasFrame(slotProps.children, slotProps.className)
         }
-        // Filter out overlays since they're rendered inside canvas wrapper
-        if (
-          React.isValidElement(child) &&
-          (child.type as React.ComponentType)?.displayName ===
-            'BrickBreakerOverlay'
-        ) {
-          return null
-        }
-        return child
+        return (
+          <div
+            key={`brick-breaker-hud-frame-${index}`}
+            className="self-center"
+            style={{ width: dimensions.width }}
+          >
+            {child}
+          </div>
+        )
       })
     : null
 
@@ -704,32 +718,11 @@ export function BrickBreaker({
         data-state={snapshot.state}
         className={cn('relative flex flex-col', className)}
       >
-        {hasCanvasSlot ? (
-          // User specified layout with canvas slot
-          processedChildren
-        ) : children ? (
-          // User provided children but no canvas slot - canvas first, then children overlay
-          <>
-            <div
-              ref={canvasWrapperRef}
-              className="relative flex min-h-0 flex-1 items-center justify-center"
-            >
-              {canvasElement}
-              {children}
-            </div>
-          </>
-        ) : (
-          // No children - use default UI
-          <>
-            <div
-              ref={canvasWrapperRef}
-              className="relative flex min-h-0 flex-1 items-center justify-center"
-            >
-              {canvasElement}
-              <BrickBreakerDefaultUI />
-            </div>
-          </>
-        )}
+        {hasCanvasSlot
+          ? processedChildren
+          : // Legacy fallback: children provided without a canvas slot.
+            // Children render inside the canvas frame as overlays.
+            renderCanvasFrame(childArray)}
 
         <div className="sr-only" aria-live="polite" aria-atomic="true">
           {snapshot.state === 'won' &&
