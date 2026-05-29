@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <!-- Center everything on the canvas -->
+  <g transform="translate(200 200)">
+
+    <!-- OUTER group: spins around the vertical axis (in-plane rotation) -->
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="0" to="360" dur="12s" repeatCount="indefinite"/>
+
+      <!-- INNER group: bakes the isometric projection.
+           rotate(30) skewX(-30) scaleY(0.864) turns a flat square
+           into a true isometric top face. -->
+      <g transform="rotate(30) skewX(-30) scale(1 0.864)">
+
+        <!-- the plane -->
+        <rect x="-100" y="-100" width="200" height="200"
+              fill="#6366f1" fill-opacity="0.15"
+              stroke="#6366f1" stroke-width="1.5"/>
+
+        <!-- grid lines -->
+        <g stroke="#6366f1" stroke-width="1" stroke-opacity="0.5">
+          <line x1="-50" y1="-100" x2="-50" y2="100"/>
+          <line x1="0"   y1="-100" x2="0"   y2="100"/>
+          <line x1="50"  y1="-100" x2="50"  y2="100"/>
+          <line x1="-100" y1="-50" x2="100" y2="-50"/>
+          <line x1="-100" y1="0"   x2="100" y2="0"/>
+          <line x1="-100" y1="50"  x2="100" y2="50"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
