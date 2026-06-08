@@ -194,7 +194,7 @@ function respawnPlayer(player: Player, config: FlyPlaneConfig): void {
 // ---- Bullets -------------------------------------------------------------
 
 /** Advances bullets and returns the list with off-screen bullets removed. Mutates positions. */
-function updateBullets(bullets: Bullet[], dt: number, config: FlyPlaneConfig): Bullet[] {
+function updateBullets(bullets: Bullet[], dt: number): Bullet[] {
   for (const b of bullets) {
     b.x += b.vx * dt
     b.y += b.vy * dt
@@ -524,7 +524,7 @@ export function stepWorld(world: World, input: InputState, dt: number, config: F
   }
 
   // Move + cull off-screen bullets.
-  world.bullets = updateBullets(world.bullets, dt, config)
+  world.bullets = updateBullets(world.bullets, dt)
 
   // Player bullets vs enemies (each bullet damages at most one enemy).
   const spentBullets = new Set<Bullet>()
