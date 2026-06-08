@@ -305,6 +305,51 @@
       "registryDependencies": ["@joyco/button", "@joyco/kbd"]
     },
     {
+      "name": "fly-plane",
+      "type": "registry:component",
+      "title": "Fly Plane",
+      "description": "A vertical-scrolling shoot-'em-up with enemy waves, a scaling boss (REBEL CRUSHER), pause, and highscore persistence.",
+      "files": [
+        {
+          "path": "registry/components/games/fly-plane/index.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/fly-plane/fly-plane.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/fly-plane/ui.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/fly-plane/use-fly-plane.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/fly-plane/engine.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/fly-plane/render.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/fly-plane/types.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/fly-plane/config.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/components/games/fly-plane/utils.ts",
+          "type": "registry:component"
+        }
+      ],
+      "registryDependencies": ["@joyco/button", "@joyco/kbd"]
+    },
+    {
       "name": "typed-emitter",
       "type": "registry:lib",
       "title": "Typed Emitter",
