@@ -1,0 +1,75 @@
+---
+title: Fly Plane
+description: A vertical-scrolling shoot-'em-up with enemy waves, a scaling boss (REBEL CRUSHER), pause, and highscore persistence.
+maintainers: ['alejopequeno']
+type: game
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+<ComponentPreview name="fly-plane-demo" />
+
+## Installation
+
+```bash
+npx shadcn@latest add https://r.joyco.studio/fly-plane.json
+```
+
+## Usage
+
+```tsx
+import { FlyPlane } from '@/components/games/fly-plane'
+
+<FlyPlane className="w-full max-w-sm" />
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `config` | `DeepPartial<FlyPlaneConfig>` | `{}` | Configuration overrides (colors, speeds, boss, spawn…) |
+| `showControls` | `boolean` | `true` | Show the controls/status bar |
+| `onScoreChange` | `(score) => void` | - | Called when the score changes |
+| `onStateChange` | `(state) => void` | - | Called on `idle`/`playing`/`paused`/`gameOver` |
+| `onGameEnd` | `({ score, level }) => void` | - | Called when the run ends |
+| `className` | `string` | - | Container className |
+
+## Theming
+
+Colors default to your theme's CSS variables and adapt to light/dark automatically:
+
+```tsx
+<FlyPlane
+  config={{
+    colors: {
+      player: 'var(--foreground)',
+      playerBullet: 'var(--primary)',
+      enemyBullet: 'var(--destructive)',
+      enemy: 'var(--muted-foreground)',
+      background: 'var(--muted)',
+    },
+  }}
+/>
+```
+
+## Controls
+
+| Key | Action |
+|-----|--------|
+| ↑↓←→ / WASD | Move |
+| Space | Fire (hold to auto-fire) |
+| P / Esc | Pause |
+
+## Gameplay
+
+Waves of enemies descend and fire back. Every 10th level is a boss fight against
+**REBEL CRUSHER**, which scales in health and fire-rate each time (REBEL CRUSHER,
+II, III…). One hit costs a life; defeating a boss grants a bonus and an extra life.
+
+## Hook
+
+For full control, drive the engine yourself:
+
+```tsx
+import { useFlyPlane, DEFAULT_CONFIG } from '@/components/games/fly-plane'
+```
