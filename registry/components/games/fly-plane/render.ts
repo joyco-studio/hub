@@ -182,16 +182,17 @@ function drawBoss(
   const color = boss.hitFlash > 0 ? colors.bossHit : colors.boss
   drawSprite(ctx, bossSprite, boss.x, boss.y, boss.width, boss.height, color)
 
-  // Health bar, placed below the HUD row so the two never overlap.
+  // Health bar, placed clearly below the HUD row so the two never overlap.
   const margin = 24
   const barWidth = CANVAS.width - margin * 2
-  const barHeight = 12
-  const barY = 64
+  const barHeight = 14
+  const barY = 96
 
+  // Boss name — large and bold so it reads clearly.
   ctx.fillStyle = colors.bossHit
-  ctx.font = "11px ui-monospace, monospace"
+  ctx.font = "700 20px ui-monospace, monospace"
   ctx.textBaseline = 'alphabetic'
-  ctx.fillText(name, margin, barY - 5)
+  ctx.fillText(name, margin, barY - 10)
 
   ctx.fillStyle = colors.enemy
   ctx.globalAlpha = 0.25
