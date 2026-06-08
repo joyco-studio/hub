@@ -105,7 +105,7 @@ export function FlyPlane({
         />
 
         {hud.phase !== 'idle' && (
-          <div className="text-muted-foreground pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between gap-2 px-3 pt-2 font-mono text-[11px] uppercase tracking-wider">
+          <div className="text-muted-foreground pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between gap-1.5 px-2.5 pt-2 font-mono text-[10px] whitespace-nowrap uppercase">
             <span>
               <span className="text-muted-foreground/40">[ </span>
               <span className="text-foreground">Lives</span> {'▲'.repeat(Math.max(0, hud.lives))}
