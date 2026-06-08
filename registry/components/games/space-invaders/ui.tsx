@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Kbd } from '@/components/ui/kbd'
 import type { GameState } from './types'
 
-interface FlyPlaneUIProps {
+interface SpaceInvadersUIProps {
   state: GameState
   score: number
   onStart: () => void
@@ -19,10 +19,10 @@ const MOVE_KEYS: ReadonlyArray<{ desktop: string; mobile: string }> = [
   { desktop: 'D', mobile: '→' },
 ]
 
-export function FlyPlaneUI({ state, score, onStart, onResume }: FlyPlaneUIProps): React.ReactElement {
+export function SpaceInvadersUI({ state, score, onStart, onResume }: SpaceInvadersUIProps): React.ReactElement {
   return (
     <div
-      data-slot="fly-plane-controls"
+      data-slot="space-invaders-controls"
       className="text-muted-foreground border-background flex w-full items-center justify-center border-t-4 font-mono text-xs"
     >
       {state === 'gameOver' ? (

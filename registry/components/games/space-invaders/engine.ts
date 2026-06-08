@@ -4,7 +4,7 @@ import type {
   Bullet,
   Enemy,
   EnemyKind,
-  FlyPlaneConfig,
+  SpaceInvadersConfig,
   InputState,
   Particle,
   Player,
@@ -99,16 +99,16 @@ export function startLoop(
 
 // ---- Spawner -------------------------------------------------------------
 
-function enemiesForLevel(level: number, config: FlyPlaneConfig): number {
+function enemiesForLevel(level: number, config: SpaceInvadersConfig): number {
   return config.spawn.baseEnemies + (level - 1) * config.spawn.enemiesPerLevel
 }
 
-function spawnIntervalForLevel(level: number, config: FlyPlaneConfig): number {
+function spawnIntervalForLevel(level: number, config: SpaceInvadersConfig): number {
   const interval = config.spawn.baseInterval - (level - 1) * config.spawn.rampPerLevel
   return Math.max(config.spawn.minInterval, interval)
 }
 
-function enemyFireInterval(level: number, config: FlyPlaneConfig): number {
+function enemyFireInterval(level: number, config: SpaceInvadersConfig): number {
   const interval = config.enemy.fireIntervalBase - (level - 1) * config.enemy.fireIntervalRamp
   return Math.max(config.enemy.fireIntervalMin, interval)
 }
@@ -132,7 +132,7 @@ function pickEnemyKind(level: number, indexInWave: number): EnemyKind {
 
 // ---- Player --------------------------------------------------------------
 
-function createPlayer(config: FlyPlaneConfig): Player {
+function createPlayer(config: SpaceInvadersConfig): Player {
   return {
     x: config.player.startX,
     y: config.player.startY,
@@ -145,7 +145,7 @@ function createPlayer(config: FlyPlaneConfig): Player {
 }
 
 /** Advances the player and returns any bullets fired this step. Mutates `player`. */
-function updatePlayer(player: Player, input: InputState, dt: number, config: FlyPlaneConfig): Bullet[] {
+function updatePlayer(player: Player, input: InputState, dt: number, config: SpaceInvadersConfig): Bullet[] {
   const dx = (input.right ? 1 : 0) - (input.left ? 1 : 0)
   const dy = (input.down ? 1 : 0) - (input.up ? 1 : 0)
   player.x += dx * config.player.speed * dt
@@ -184,7 +184,7 @@ function updatePlayer(player: Player, input: InputState, dt: number, config: Fly
 }
 
 /** Resets position and grants invincibility after losing a life. Mutates `player`. */
-function respawnPlayer(player: Player, config: FlyPlaneConfig): void {
+function respawnPlayer(player: Player, config: SpaceInvadersConfig): void {
   player.x = config.player.startX
   player.y = config.player.startY
   player.fireCooldown = 0
@@ -214,7 +214,7 @@ function updateBullets(bullets: Bullet[], dt: number): Bullet[] {
 
 function statsFor(
   kind: EnemyKind,
-  config: FlyPlaneConfig,
+  config: SpaceInvadersConfig,
 ): { width: number; height: number; hp: number; speedY: number } {
   switch (kind) {
     case 'weaver':
@@ -227,7 +227,7 @@ function statsFor(
   }
 }
 
-function createEnemy(kind: EnemyKind, spawnX: number, level: number, config: FlyPlaneConfig): Enemy {
+function createEnemy(kind: EnemyKind, spawnX: number, level: number, config: SpaceInvadersConfig): Enemy {
   const stats = statsFor(kind, config)
   return {
     kind,
@@ -249,7 +249,7 @@ function updateEnemy(
   player: Player,
   level: number,
   dt: number,
-  config: FlyPlaneConfig,
+  config: SpaceInvadersConfig,
 ): Bullet | null {
   enemy.age += dt
   enemy.y += enemy.speedY * dt
@@ -283,7 +283,7 @@ function updateEnemy(
 
 // ---- Particles -----------------------------------------------------------
 
-function createExplosion(x: number, y: number, config: FlyPlaneConfig): Particle[] {
+function createExplosion(x: number, y: number, config: SpaceInvadersConfig): Particle[] {
   const count = config.particle.countPerExplosion
   const sizeRange = config.particle.sizeMax - config.particle.sizeMin
   const particles: Particle[] = []
@@ -325,7 +325,7 @@ export function tierForLevel(level: number): number {
   return Math.max(1, Math.floor(level / GAME_CONSTANTS.bossEveryLevels))
 }
 
-export function createBoss(level: number, config: FlyPlaneConfig): Boss {
+export function createBoss(level: number, config: SpaceInvadersConfig): Boss {
   const tier = tierForLevel(level)
   const maxHp = config.boss.baseHp + (tier - 1) * config.boss.hpPerTier
   const fireInterval = Math.max(
@@ -349,7 +349,7 @@ export function createBoss(level: number, config: FlyPlaneConfig): Boss {
   }
 }
 
-function bullet(x: number, y: number, vx: number, vy: number, config: FlyPlaneConfig): Bullet {
+function bullet(x: number, y: number, vx: number, vy: number, config: SpaceInvadersConfig): Bullet {
   return {
     x,
     y,
@@ -361,7 +361,7 @@ function bullet(x: number, y: number, vx: number, vy: number, config: FlyPlaneCo
   }
 }
 
-function aimedVolley(boss: Boss, player: Player, config: FlyPlaneConfig): Bullet[] {
+function aimedVolley(boss: Boss, player: Player, config: SpaceInvadersConfig): Bullet[] {
   const muzzleY = boss.y + boss.height / 2
   const dx = player.x - boss.x
   const dy = player.y - muzzleY
@@ -377,7 +377,7 @@ function aimedVolley(boss: Boss, player: Player, config: FlyPlaneConfig): Bullet
   return bullets
 }
 
-function radialVolley(boss: Boss, config: FlyPlaneConfig): Bullet[] {
+function radialVolley(boss: Boss, config: SpaceInvadersConfig): Bullet[] {
   const muzzleY = boss.y + boss.height / 2
   const { radialCount, bulletSpeed } = config.boss
   const bullets: Bullet[] = []
@@ -389,7 +389,7 @@ function radialVolley(boss: Boss, config: FlyPlaneConfig): Bullet[] {
 }
 
 /** Advances the boss and returns any bullets fired this step. Mutates `boss`. */
-function updateBoss(boss: Boss, player: Player, dt: number, config: FlyPlaneConfig): Bullet[] {
+function updateBoss(boss: Boss, player: Player, dt: number, config: SpaceInvadersConfig): Bullet[] {
   boss.age += dt
   if (boss.hitFlash > 0) {
     boss.hitFlash = Math.max(0, boss.hitFlash - dt)
@@ -425,7 +425,7 @@ function updateBoss(boss: Boss, player: Player, dt: number, config: FlyPlaneConf
 
 // ---- World ---------------------------------------------------------------
 
-function scoreForKind(kind: EnemyKind, config: FlyPlaneConfig): number {
+function scoreForKind(kind: EnemyKind, config: SpaceInvadersConfig): number {
   switch (kind) {
     case 'weaver':
       return config.enemy.weaver.score
@@ -438,7 +438,7 @@ function scoreForKind(kind: EnemyKind, config: FlyPlaneConfig): number {
 }
 
 /** Configures `world` for `level`: a boss-only level or a normal wave. Mutates `world`. */
-function startLevel(world: World, level: number, config: FlyPlaneConfig): void {
+function startLevel(world: World, level: number, config: SpaceInvadersConfig): void {
   world.level = level
   if (level % GAME_CONSTANTS.bossEveryLevels === 0) {
     world.boss = createBoss(level, config)
@@ -452,7 +452,7 @@ function startLevel(world: World, level: number, config: FlyPlaneConfig): void {
 }
 
 /** Debug helper: clears the field and jumps to the next level immediately. Mutates `world`. */
-export function skipToNextLevel(world: World, config: FlyPlaneConfig): void {
+export function skipToNextLevel(world: World, config: SpaceInvadersConfig): void {
   if (world.phase !== 'playing') return
   world.enemies = []
   world.boss = null
@@ -460,7 +460,7 @@ export function skipToNextLevel(world: World, config: FlyPlaneConfig): void {
   startLevel(world, world.level + 1, config)
 }
 
-export function createWorld(highScore: number, config: FlyPlaneConfig): World {
+export function createWorld(highScore: number, config: SpaceInvadersConfig): World {
   const world: World = {
     phase: 'playing',
     player: createPlayer(config),
@@ -488,7 +488,7 @@ function spawnX(level: number, index: number): number {
   return margin + t * span
 }
 
-function loseLife(world: World, config: FlyPlaneConfig): void {
+function loseLife(world: World, config: SpaceInvadersConfig): void {
   world.lives -= 1
   world.particles.push(...createExplosion(world.player.x, world.player.y, config))
   if (world.lives <= 0) {
@@ -502,7 +502,7 @@ function loseLife(world: World, config: FlyPlaneConfig): void {
 }
 
 /** Advances the world by one fixed step. Mutates `world`. */
-export function stepWorld(world: World, input: InputState, dt: number, config: FlyPlaneConfig): void {
+export function stepWorld(world: World, input: InputState, dt: number, config: SpaceInvadersConfig): void {
   if (world.phase !== 'playing') {
     return
   }

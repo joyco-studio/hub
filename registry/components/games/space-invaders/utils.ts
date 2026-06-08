@@ -1,11 +1,11 @@
-import type { DeepPartial, FlyPlaneConfig } from './types'
+import type { DeepPartial, SpaceInvadersConfig } from './types'
 import { GAME_CONSTANTS } from './config'
 
 /** Deep-merge config overrides onto a base config (one level per section). */
 export function mergeConfig(
-  base: FlyPlaneConfig,
-  overrides?: DeepPartial<FlyPlaneConfig>
-): FlyPlaneConfig {
+  base: SpaceInvadersConfig,
+  overrides?: DeepPartial<SpaceInvadersConfig>
+): SpaceInvadersConfig {
   if (!overrides) return base
   const exhaustOverride = overrides.colors?.exhaust
   return {

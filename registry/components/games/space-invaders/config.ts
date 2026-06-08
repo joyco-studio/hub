@@ -1,10 +1,10 @@
-import type { FlyPlaneColors, FlyPlaneConfig } from './types'
+import type { SpaceInvadersColors, SpaceInvadersConfig } from './types'
 
 /** Logical canvas resolution (scaled responsively by CSS). 3:4 portrait. */
 export const CANVAS = { width: 720, height: 960 } as const
 
 /** Theme-aware default colors using shadcn CSS variables. */
-export const DEFAULT_COLORS: FlyPlaneColors = {
+export const DEFAULT_COLORS: SpaceInvadersColors = {
   background: 'var(--muted)',
   player: 'var(--foreground)',
   playerBullet: 'var(--primary)',
@@ -16,7 +16,7 @@ export const DEFAULT_COLORS: FlyPlaneColors = {
   exhaust: ['#fde047', '#fb923c', '#ef4444'],
 }
 
-export const DEFAULT_CONFIG: FlyPlaneConfig = {
+export const DEFAULT_CONFIG: SpaceInvadersConfig = {
   colors: DEFAULT_COLORS,
   player: {
     width: 36,
@@ -78,7 +78,7 @@ export const GAME_CONSTANTS = {
   exhaustCells: 5,
   /** 3:4 portrait. */
   aspectRatio: CANVAS.width / CANVAS.height,
-  storageKey: 'fly-plane-highscore',
+  storageKey: 'space-invaders-highscore',
 } as const
 
 /** Keyboard bindings (event.code). */
