@@ -4,12 +4,12 @@ import * as React from 'react'
 import { cn } from '@/lib/utils'
 import { CANVAS, DEFAULT_CONFIG } from './config'
 import { mergeConfig, resolveCssColor, formatScore } from './utils'
-import { useFlyPlane } from './use-fly-plane'
-import { FlyPlaneUI } from './ui'
+import { useSpaceInvaders } from './use-space-invaders'
+import { SpaceInvadersUI } from './ui'
 import type { ResolvedColors } from './render'
-import type { FlyPlaneConfig, FlyPlaneProps } from './types'
+import type { SpaceInvadersConfig, SpaceInvadersProps } from './types'
 
-function resolveColors(config: FlyPlaneConfig, el: HTMLElement): ResolvedColors {
+function resolveColors(config: SpaceInvadersConfig, el: HTMLElement): ResolvedColors {
   const c = config.colors
   return {
     background: resolveCssColor(c.background, el),
@@ -40,19 +40,19 @@ const FALLBACK_COLORS: ResolvedColors = {
   exhaust: ['#fde047', '#fb923c', '#ef4444'],
 }
 
-export function FlyPlane({
+export function SpaceInvaders({
   config: configOverrides,
   showControls = true,
   onScoreChange,
   onStateChange,
   onGameEnd,
   className,
-}: FlyPlaneProps): React.ReactElement {
+}: SpaceInvadersProps): React.ReactElement {
   const canvasRef = React.useRef<HTMLCanvasElement>(null)
   const colorsRef = React.useRef<ResolvedColors>(FALLBACK_COLORS)
   const [theme, setTheme] = React.useState('')
 
-  const config = React.useMemo<FlyPlaneConfig>(
+  const config = React.useMemo<SpaceInvadersConfig>(
     () => mergeConfig(DEFAULT_CONFIG, configOverrides),
     [configOverrides]
   )
@@ -72,7 +72,7 @@ export function FlyPlane({
 
   const getColors = React.useCallback(() => colorsRef.current, [])
 
-  const { hud, start, togglePause, attachCanvas } = useFlyPlane({
+  const { hud, start, togglePause, attachCanvas } = useSpaceInvaders({
     config,
     getColors,
     onScoreChange,
@@ -89,7 +89,7 @@ export function FlyPlane({
 
   return (
     <div
-      data-slot="fly-plane"
+      data-slot="space-invaders"
       data-state={hud.phase}
       className={cn('bg-background flex w-full flex-col items-center', className)}
     >
@@ -101,7 +101,7 @@ export function FlyPlane({
           className="block size-full"
           style={{ imageRendering: 'pixelated' }}
           role="img"
-          aria-label={`Fly Plane — ${hud.phase === 'playing' ? `score ${hud.score}` : hud.phase}`}
+          aria-label={`Space Invaders — ${hud.phase === 'playing' ? `score ${hud.score}` : hud.phase}`}
         />
 
         {hud.phase !== 'idle' && (
@@ -150,7 +150,7 @@ export function FlyPlane({
       </div>
 
       {showControls && (
-        <FlyPlaneUI state={hud.phase} score={hud.score} onStart={start} onResume={togglePause} />
+        <SpaceInvadersUI state={hud.phase} score={hud.score} onStart={start} onResume={togglePause} />
       )}
     </div>
   )

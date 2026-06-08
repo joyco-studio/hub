@@ -305,45 +305,45 @@
       "registryDependencies": ["@joyco/button", "@joyco/kbd"]
     },
     {
-      "name": "fly-plane",
+      "name": "space-invaders",
       "type": "registry:component",
-      "title": "Fly Plane",
+      "title": "Space Invaders",
       "description": "A vertical-scrolling shoot-'em-up with enemy waves, a scaling boss (REBEL CRUSHER), pause, and highscore persistence.",
       "files": [
         {
-          "path": "registry/components/games/fly-plane/index.ts",
+          "path": "registry/components/games/space-invaders/index.ts",
           "type": "registry:component"
         },
         {
-          "path": "registry/components/games/fly-plane/fly-plane.tsx",
+          "path": "registry/components/games/space-invaders/space-invaders.tsx",
           "type": "registry:component"
         },
         {
-          "path": "registry/components/games/fly-plane/ui.tsx",
+          "path": "registry/components/games/space-invaders/ui.tsx",
           "type": "registry:component"
         },
         {
-          "path": "registry/components/games/fly-plane/use-fly-plane.ts",
+          "path": "registry/components/games/space-invaders/use-space-invaders.ts",
           "type": "registry:component"
         },
         {
-          "path": "registry/components/games/fly-plane/engine.ts",
+          "path": "registry/components/games/space-invaders/engine.ts",
           "type": "registry:component"
         },
         {
-          "path": "registry/components/games/fly-plane/render.ts",
+          "path": "registry/components/games/space-invaders/render.ts",
           "type": "registry:component"
         },
         {
-          "path": "registry/components/games/fly-plane/types.ts",
+          "path": "registry/components/games/space-invaders/types.ts",
           "type": "registry:component"
         },
         {
-          "path": "registry/components/games/fly-plane/config.ts",
+          "path": "registry/components/games/space-invaders/config.ts",
           "type": "registry:component"
         },
         {
-          "path": "registry/components/games/fly-plane/utils.ts",
+          "path": "registry/components/games/space-invaders/utils.ts",
           "type": "registry:component"
         }
       ],

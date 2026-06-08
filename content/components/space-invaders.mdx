@@ -1,5 +1,5 @@
 ---
-title: Fly Plane
+title: Space Invaders
 description: A vertical-scrolling shoot-'em-up with enemy waves, a scaling boss (REBEL CRUSHER), pause, and highscore persistence.
 maintainers: ['alejopequeno']
 type: game
@@ -7,27 +7,27 @@ type: game
 
 import { ComponentPreview } from '@/components/preview/component-preview'
 
-<ComponentPreview name="fly-plane-demo" />
+<ComponentPreview name="space-invaders-demo" />
 
 ## Installation
 
 ```bash
-npx shadcn@latest add https://r.joyco.studio/fly-plane.json
+npx shadcn@latest add https://r.joyco.studio/space-invaders.json
 ```
 
 ## Usage
 
 ```tsx
-import { FlyPlane } from '@/components/games/fly-plane'
+import { SpaceInvaders } from '@/components/games/space-invaders'
 
-<FlyPlane className="w-full max-w-sm" />
+<SpaceInvaders className="w-full max-w-sm" />
 ```
 
 ## Props
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `config` | `DeepPartial<FlyPlaneConfig>` | `{}` | Configuration overrides (colors, speeds, boss, spawn…) |
+| `config` | `DeepPartial<SpaceInvadersConfig>` | `{}` | Configuration overrides (colors, speeds, boss, spawn…) |
 | `showControls` | `boolean` | `true` | Show the controls/status bar |
 | `onScoreChange` | `(score) => void` | - | Called when the score changes |
 | `onStateChange` | `(state) => void` | - | Called on `idle`/`playing`/`paused`/`gameOver` |
@@ -39,7 +39,7 @@ import { FlyPlane } from '@/components/games/fly-plane'
 Colors default to your theme's CSS variables and adapt to light/dark automatically:
 
 ```tsx
-<FlyPlane
+<SpaceInvaders
   config={{
     colors: {
       player: 'var(--foreground)',
@@ -71,5 +71,5 @@ II, III…). One hit costs a life; defeating a boss grants a bonus and an extra 
 For full control, drive the engine yourself:
 
 ```tsx
-import { useFlyPlane, DEFAULT_CONFIG } from '@/components/games/fly-plane'
+import { useSpaceInvaders, DEFAULT_CONFIG } from '@/components/games/space-invaders'
 ```

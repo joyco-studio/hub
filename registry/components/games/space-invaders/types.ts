@@ -97,7 +97,7 @@ export interface InputState {
 // ---- Configuration -------------------------------------------------------
 
 /** Theme-aware colors (CSS variables or any valid CSS color). */
-export interface FlyPlaneColors {
+export interface SpaceInvadersColors {
   background: string
   player: string
   playerBullet: string
@@ -110,8 +110,8 @@ export interface FlyPlaneColors {
   exhaust: readonly [string, string, string]
 }
 
-export interface FlyPlaneConfig {
-  colors: FlyPlaneColors
+export interface SpaceInvadersConfig {
+  colors: SpaceInvadersColors
   player: {
     width: number
     height: number
@@ -175,8 +175,8 @@ export type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]
 }
 
-export interface FlyPlaneProps {
-  config?: DeepPartial<FlyPlaneConfig>
+export interface SpaceInvadersProps {
+  config?: DeepPartial<SpaceInvadersConfig>
   showControls?: boolean
   onScoreChange?: (score: number) => void
   onStateChange?: (state: GameState) => void

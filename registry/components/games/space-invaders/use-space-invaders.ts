@@ -5,7 +5,7 @@ import { createWorld, skipToNextLevel, startLoop, stepWorld, type LoopHandle } f
 import { renderWorld, type ResolvedColors } from './render'
 import { storage } from './utils'
 import { GAME_CONSTANTS, KEY_BINDINGS } from './config'
-import type { FlyPlaneConfig, GameState, HudState, InputState, World } from './types'
+import type { SpaceInvadersConfig, GameState, HudState, InputState, World } from './types'
 
 function emptyInput(): InputState {
   return { up: false, down: false, left: false, right: false, fire: false }
@@ -21,28 +21,28 @@ function hudFromWorld(world: World): HudState {
   }
 }
 
-interface UseFlyPlaneOptions {
-  config: FlyPlaneConfig
+interface UseSpaceInvadersOptions {
+  config: SpaceInvadersConfig
   getColors: () => ResolvedColors
   onScoreChange?: (score: number) => void
   onStateChange?: (state: GameState) => void
   onGameEnd?: (result: { score: number; level: number }) => void
 }
 
-export interface UseFlyPlaneReturn {
+export interface UseSpaceInvadersReturn {
   hud: HudState
   start: () => void
   togglePause: () => void
   attachCanvas: (canvas: HTMLCanvasElement | null) => void
 }
 
-export function useFlyPlane({
+export function useSpaceInvaders({
   config,
   getColors,
   onScoreChange,
   onStateChange,
   onGameEnd,
-}: UseFlyPlaneOptions): UseFlyPlaneReturn {
+}: UseSpaceInvadersOptions): UseSpaceInvadersReturn {
   const [hud, setHud] = React.useState<HudState>({
     score: 0,
     lives: config.player.startLives,
