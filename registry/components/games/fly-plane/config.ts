@@ -51,7 +51,7 @@ export const DEFAULT_CONFIG: FlyPlaneConfig = {
   boss: {
     width: 180,
     height: 120,
-    marginY: 90,
+    marginY: 135,
     speedX: 110,
     baseHp: 50,
     hpPerTier: 40,
