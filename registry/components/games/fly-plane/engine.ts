@@ -444,6 +444,15 @@ function startLevel(world: World, level: number, config: FlyPlaneConfig): void {
   }
 }
 
+/** Debug helper: clears the field and jumps to the next level immediately. Mutates `world`. */
+export function skipToNextLevel(world: World, config: FlyPlaneConfig): void {
+  if (world.phase !== 'playing') return
+  world.enemies = []
+  world.boss = null
+  world.bullets = world.bullets.filter((b) => b.owner === 'player')
+  startLevel(world, world.level + 1, config)
+}
+
 export function createWorld(highScore: number, config: FlyPlaneConfig): World {
   const world: World = {
     phase: 'playing',

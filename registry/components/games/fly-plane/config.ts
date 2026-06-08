@@ -89,4 +89,5 @@ export const KEY_BINDINGS = {
   right: ['ArrowRight', 'KeyD'],
   fire: ['Space'],
   pause: ['KeyP', 'Escape'],
+  skip: ['KeyN'],
 } as const

@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { createWorld, startLoop, stepWorld, type LoopHandle } from './engine'
+import { createWorld, skipToNextLevel, startLoop, stepWorld, type LoopHandle } from './engine'
 import { renderWorld, type ResolvedColors } from './render'
 import { storage } from './utils'
 import { GAME_CONSTANTS, KEY_BINDINGS } from './config'
@@ -143,6 +143,16 @@ export function useFlyPlane({
     const onKeyDown = (e: KeyboardEvent): void => {
       if (matches(KEY_BINDINGS.pause, e.code)) {
         togglePause()
+        e.preventDefault()
+        return
+      }
+      // Dev-only level skip (stripped from production builds).
+      if (process.env.NODE_ENV === 'development' && matches(KEY_BINDINGS.skip, e.code)) {
+        const world = worldRef.current
+        if (world && world.phase === 'playing') {
+          skipToNextLevel(world, configRef.current)
+          pushHudIfChanged(world)
+        }
         e.preventDefault()
         return
       }
