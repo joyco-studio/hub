@@ -44,7 +44,7 @@ export function FlyPlaneUI({ state, score, onStart, onResume }: FlyPlaneUIProps)
             {MOVE_KEYS.map(({ desktop, mobile }) => (
               <Kbd key={desktop} className="rounded-none text-[10px]">
                 <span className="max-md:hidden">{desktop}</span>
-                <span className="md:hidden">{mobile}</span>
+                <span className="max-md:inline md:hidden">{mobile}</span>
               </Kbd>
             ))}
             <Kbd className="ml-1 rounded-none text-[10px]">Space</Kbd>

@@ -200,7 +200,14 @@ function updateBullets(bullets: Bullet[], dt: number): Bullet[] {
     b.y += b.vy * dt
   }
   const margin = 40
-  return bullets.filter((b) => b.y > -margin && b.y < CANVAS.height + margin)
+  const xMargin = 60
+  return bullets.filter(
+    (b) =>
+      b.y > -margin &&
+      b.y < CANVAS.height + margin &&
+      b.x > -xMargin &&
+      b.x < CANVAS.width + xMargin,
+  )
 }
 
 // ---- Enemies -------------------------------------------------------------

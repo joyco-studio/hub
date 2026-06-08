@@ -37,7 +37,7 @@ export function mergeConfig(
 export function resolveCssColor(color: string, element: HTMLElement): string {
   if (!color.includes('var(')) return color
   const computed = getComputedStyle(element)
-  const match = color.match(/var\((--[^)]+)\)/)
+  const match = color.match(/var\(\s*(--[\w-]+)/)
   if (!match) return color
   const resolved = computed.getPropertyValue(match[1]).trim()
   return resolved || color
