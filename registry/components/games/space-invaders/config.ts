@@ -35,6 +35,7 @@ export const DEFAULT_CONFIG: SpaceInvadersConfig = {
     fireIntervalBase: 1.8,
     fireIntervalRamp: 0.12,
     fireIntervalMin: 0.6,
+    aimSpread: 0.5, // ~±14° cone so aimed shots head toward you but don't track perfectly
     grunt: { width: 42, height: 42, hp: 1, speedY: 110, score: 50 },
     weaver: { width: 50, height: 38, hp: 1, speedY: 90, score: 80, amplitude: 140, frequency: 1.6 },
     tank: { width: 70, height: 54, hp: 4, speedY: 60, score: 150 },
@@ -62,6 +63,7 @@ export const DEFAULT_CONFIG: SpaceInvadersConfig = {
     patternSwitch: 3.5,
     aimedCount: 3,
     aimedSpread: 0.35,
+    aimJitter: 0.4, // random wobble on the aimed volley so it isn't dead-on every time
     radialCount: 16,
     scoreBonus: 1000,
     bonusPerTier: 500,

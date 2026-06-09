@@ -267,16 +267,19 @@ function updateEnemy(
   }
   enemy.fireCooldown = enemyFireInterval(level, config)
 
+  // Aim toward the player, but scatter within a cone so shots head your way
+  // without tracking you perfectly.
   const dx = player.x - enemy.x
   const dy = player.y - enemy.y
-  const len = Math.hypot(dx, dy) || 1
+  const angle = Math.atan2(dy, dx) + (Math.random() - 0.5) * config.enemy.aimSpread
+  const speed = config.enemy.bulletSpeed
   return {
     x: enemy.x,
     y: enemy.y + enemy.height / 2,
     width: config.bullet.width,
     height: config.bullet.height,
-    vx: (dx / len) * config.enemy.bulletSpeed,
-    vy: Math.max(60, (dy / len) * config.enemy.bulletSpeed), // always heads downward
+    vx: Math.cos(angle) * speed,
+    vy: Math.max(60, Math.sin(angle) * speed), // always heads downward
     owner: 'enemy',
   }
 }
@@ -365,7 +368,8 @@ function aimedVolley(boss: Boss, player: Player, config: SpaceInvadersConfig): B
   const muzzleY = boss.y + boss.height / 2
   const dx = player.x - boss.x
   const dy = player.y - muzzleY
-  const baseAngle = Math.atan2(dy, dx) // points toward the player (downward)
+  // Aim at the player with a random wobble so the volley isn't dead-on every time.
+  const baseAngle = Math.atan2(dy, dx) + (Math.random() - 0.5) * config.boss.aimJitter
   const { aimedCount, aimedSpread, bulletSpeed } = config.boss
   const bullets: Bullet[] = []
   const denom = Math.max(1, aimedCount - 1)
