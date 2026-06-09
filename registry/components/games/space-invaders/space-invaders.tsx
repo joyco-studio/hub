@@ -131,11 +131,21 @@ export function SpaceInvaders({
 
         {showOverlay && (
           <div className="bg-background/85 absolute inset-0 flex flex-col items-center justify-center gap-3">
-            {hud.phase === 'idle' && (
-              <p className="text-muted-foreground text-xs uppercase tracking-[0.25em]">
-                Hi {hud.highScore.toLocaleString()}
-              </p>
-            )}
+            {hud.phase === 'idle' &&
+              (hud.highScore > 0 ? (
+                <div className="flex flex-col items-center gap-1.5">
+                  <span className="text-muted-foreground/50 text-[10px] uppercase tracking-[0.35em]">
+                    High Score
+                  </span>
+                  <span className="text-foreground text-3xl tabular-nums tracking-[0.1em]">
+                    {hud.highScore.toLocaleString()}
+                  </span>
+                </div>
+              ) : (
+                <p className="text-muted-foreground/70 text-xs uppercase tracking-[0.2em]">
+                  No highscore record — play now
+                </p>
+              ))}
             {hud.phase === 'paused' && (
               <p className="text-muted-foreground text-xs uppercase tracking-[0.3em]">Paused</p>
             )}
