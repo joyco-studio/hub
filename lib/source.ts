@@ -1,3 +1,5 @@
+import fs from 'fs'
+import path from 'path'
 import { docs } from 'fumadocs-mdx:collections/server'
 import { type InferPageType, loader } from 'fumadocs-core/source'
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons'
@@ -22,6 +24,15 @@ export function getPageImage(page: InferPageType<typeof source>) {
 }
 
 export async function getLLMText(page: InferPageType<typeof source>) {
+  const llmCompanion = path.join(
+    process.cwd(),
+    'llm-overrides',
+    `${page.slugs.join('--')}.md`
+  )
+  if (fs.existsSync(llmCompanion)) {
+    return fs.readFileSync(llmCompanion, 'utf-8')
+  }
+
   const raw = await page.data.getText('raw')
   const processed = processMdxForLLMs(raw)
 
