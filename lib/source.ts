@@ -1,4 +1,4 @@
-import fs from 'fs'
+import { readFile } from 'fs/promises'
 import path from 'path'
 import { docs } from 'fumadocs-mdx:collections/server'
 import { type InferPageType, loader } from 'fumadocs-core/source'
@@ -29,8 +29,10 @@ export async function getLLMText(page: InferPageType<typeof source>) {
     'llm-overrides',
     `${page.slugs.join('--')}.md`
   )
-  if (fs.existsSync(llmCompanion)) {
-    return fs.readFileSync(llmCompanion, 'utf-8')
+  try {
+    return await readFile(llmCompanion, 'utf-8')
+  } catch {
+    // No override file — fall through to auto-generated text
   }
 
   const raw = await page.data.getText('raw')
