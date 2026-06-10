@@ -1,3 +1,5 @@
+import { readFile } from 'fs/promises'
+import path from 'path'
 import { docs } from 'fumadocs-mdx:collections/server'
 import { type InferPageType, loader } from 'fumadocs-core/source'
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons'
@@ -22,6 +24,17 @@ export function getPageImage(page: InferPageType<typeof source>) {
 }
 
 export async function getLLMText(page: InferPageType<typeof source>) {
+  const llmCompanion = path.join(
+    process.cwd(),
+    'llm-overrides',
+    `${page.slugs.join('--')}.md`
+  )
+  try {
+    return await readFile(llmCompanion, 'utf-8')
+  } catch {
+    // No override file — fall through to auto-generated text
+  }
+
   const raw = await page.data.getText('raw')
   const processed = processMdxForLLMs(raw)
 
