@@ -1,0 +1,169 @@
+---
+title: tmux
+description: A themed tmux setup with one session per project and persistence across reboots.
+maintainers: ['alejopequeno']
+docLinks:
+  [
+    {
+      label: 'tmux',
+      href: 'https://github.com/tmux/tmux',
+    },
+    {
+      label: 'TPM',
+      href: 'https://github.com/tmux-plugins/tpm',
+    },
+  ]
+---
+
+## Why tmux?
+
+One terminal, many persistent workspaces. Run a **session per project** with a window per task —
+editor, dev server, logs, git, REPLs — all in the same place. Close the terminal and reattach
+later: everything is exactly where you left it, still running.
+
+The workflow that makes it click:
+
+- **Session per project** — each project gets its own named, self-contained workspace.
+- **Window per task** — one for the dev server, one for git, one for logs, and so on.
+- **Detach, don't kill** — closing the terminal just detaches; processes keep running in the
+  background until you reattach.
+
+A concrete win: keep a long-running CLI like **Claude Code** in its own window and closing the
+terminal won't lose its context. Because detach leaves the process alive, the conversation stays
+exactly where it was — reattach later and pick up mid-thread, no `--resume` needed. (That only
+applies to detach; a full reboot still kills the server — see [Persistence across
+reboots](#persistence-across-reboots) below.)
+
+## Install
+
+```bash
+brew install tmux
+```
+
+## Keybindings
+
+Prefix is remapped to `C-a` (easier to reach than the default `C-b`).
+
+| Action            | Keys                  |
+| ----------------- | --------------------- |
+| Prefix            | `C-a`                 |
+| Reload config     | `prefix` + `r`        |
+| Split vertical    | `prefix` + `\|`       |
+| Split horizontal  | `prefix` + `-`        |
+| Navigate panes    | `prefix` + `h/j/k/l`  |
+| Last window       | `prefix` + `Tab`      |
+| Rename window     | `prefix` + `,`        |
+| Session switcher  | `prefix` + `S` (popup)|
+| Save sessions     | `prefix` + `C-s`      |
+| Restore sessions  | `prefix` + `C-r`      |
+| Install plugins   | `prefix` + `I`        |
+
+## The config
+
+```bash title="~/.tmux.conf"
+# ── Prefix ─────────────────────────────────────────────
+unbind C-b
+set -g prefix C-a
+bind C-a send-prefix
+
+# ── General ────────────────────────────────────────────
+set -g default-terminal "tmux-256color"
+set -ga terminal-overrides ",xterm-256color:Tc,alacritty:Tc,xterm-ghostty:Tc"
+set -g mouse on
+set -g base-index 1
+setw -g pane-base-index 1
+set -g renumber-windows on
+set -g history-limit 50000
+set -g escape-time 0
+set -g focus-events on
+setw -g mode-keys vi
+
+# ── Bindings ───────────────────────────────────────────
+bind | split-window -h -c "#{pane_current_path}"
+bind - split-window -v -c "#{pane_current_path}"
+unbind '"'
+unbind %
+
+bind r source-file ~/.tmux.conf \; display-message "  reloaded"
+
+bind h select-pane -L
+bind j select-pane -D
+bind k select-pane -U
+bind l select-pane -R
+
+bind Tab last-window
+bind S display-popup -E -w 60% -h 60% "tmux choose-tree -Zs"
+
+# vi-mode copy → system clipboard (macOS)
+bind -T copy-mode-vi v send-keys -X begin-selection
+bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "pbcopy"
+
+# ── Status (JOYCO accent #ff8c42) ──────────────────────
+set -g status-position bottom
+set -g status-justify centre
+set -g status-style "bg=default fg=#b0b0b0"
+set -g status-interval 5
+
+set -g status-left-length 40
+set -g status-left "#[fg=#{?client_prefix,#ff8c42,#3a3a3a}]●#[fg=#6a6a6a] #S  "
+
+set -g status-right-length 60
+set -g status-right "#[fg=#6a6a6a]%H:%M #[fg=#3a3a3a]·#[fg=#ff8c42,bold] PEK "
+
+setw -g window-status-format "#[fg=#6a6a6a] #W "
+setw -g window-status-current-format "#[fg=#ff8c42,bold] #W "
+setw -g window-status-separator "#[fg=#3a3a3a]·"
+
+# ── Borders ────────────────────────────────────────────
+set -g pane-border-style "fg=#2a2a2a"
+set -g pane-active-border-style "fg=#5a5a5a"
+set -g pane-border-lines single
+
+# ── Messages & modes ───────────────────────────────────
+set -g message-style "bg=default fg=#ff8c42"
+set -g message-command-style "bg=default fg=#ff8c42"
+set -g mode-style "bg=#3a3a3a fg=#ffffff"
+
+# ── Plugins (TPM) ──────────────────────────────────────
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+set -g @plugin 'tmux-plugins/tmux-continuum'
+
+set -g @resurrect-capture-pane-contents 'on'
+# space-separated list of programs to relaunch on restore
+set -g @resurrect-processes 'nvim vim claude'
+
+set -g @continuum-restore 'on'
+set -g @continuum-save-interval '15'
+
+# keep this line at the very bottom
+run '~/.tmux/plugins/tpm/tpm'
+```
+
+## Persistence across reboots
+
+Detaching keeps sessions alive, but a **shutdown or reboot kills the tmux server** and every
+process in it. [tmux-resurrect](https://github.com/tmux-plugins/tmux-resurrect) +
+[tmux-continuum](https://github.com/tmux-plugins/tmux-continuum) restore your layout
+automatically — sessions, windows, panes, and working directories all come back.
+
+```bash title="Install TPM"
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+```
+
+Then reload tmux and press `prefix` + `I` to install the plugins (already declared in the config
+above). Do one manual save with `prefix` + `C-s` so there's a snapshot to restore from.
+
+<Callout type="info">
+  Restored programs relaunch **fresh** — the layout (sessions, windows, panes, working
+  directories) comes back, but live in-memory state does not. Anything stateful — an editor
+  buffer, a running REPL, a long-lived process — needs its own resume path. Add the programs
+  worth relaunching to `@resurrect-processes`, and rely on each tool's own restore mechanism for
+  the actual state.
+
+  **Example with Claude Code:** add `claude` to `@resurrect-processes` and the pane relaunches
+  the CLI on restore, but with an empty conversation. Run `claude --resume` inside that pane to
+  pick the session back up — history is stored per directory, so when the window is sitting in
+  the project folder it lists exactly that project's conversations. tmux brings back the
+  *window*; `--resume` brings back the *context*.
+</Callout>
