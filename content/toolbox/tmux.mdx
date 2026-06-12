@@ -17,21 +17,21 @@ docLinks:
 
 ## Why tmux?
 
-One terminal, many persistent workspaces. Run a **session per project** with a window per task —
-editor, dev server, logs, git, REPLs — all in the same place. Close the terminal and reattach
+One terminal, many persistent workspaces. Run a **session per project** with a window per task:
+editor, dev server, logs, git, REPLs, all in the same place. Close the terminal and reattach
 later: everything is exactly where you left it, still running.
 
 The workflow that makes it click:
 
-- **Session per project** — each project gets its own named, self-contained workspace.
-- **Window per task** — one for the dev server, one for git, one for logs, and so on.
-- **Detach, don't kill** — closing the terminal just detaches; processes keep running in the
+- **Session per project:** each project gets its own named, self-contained workspace.
+- **Window per task:** one for the dev server, one for git, one for logs, and so on.
+- **Detach, don't kill:** closing the terminal just detaches; processes keep running in the
   background until you reattach.
 
 A concrete win: keep a long-running CLI like **Claude Code** in its own window and closing the
 terminal won't lose its context. Because detach leaves the process alive, the conversation stays
-exactly where it was — reattach later and pick up mid-thread, no `--resume` needed. (That only
-applies to detach; a full reboot still kills the server — see [Persistence across
+exactly where it was; reattach later and pick up mid-thread, no `--resume` needed. (That only
+applies to detach; a full reboot still kills the server. See [Persistence across
 reboots](#persistence-across-reboots) below.)
 
 ## Install
@@ -145,7 +145,7 @@ run '~/.tmux/plugins/tpm/tpm'
 Detaching keeps sessions alive, but a **shutdown or reboot kills the tmux server** and every
 process in it. [tmux-resurrect](https://github.com/tmux-plugins/tmux-resurrect) +
 [tmux-continuum](https://github.com/tmux-plugins/tmux-continuum) restore your layout
-automatically — sessions, windows, panes, and working directories all come back.
+automatically: sessions, windows, panes, and working directories all come back.
 
 ```bash title="Install TPM"
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
@@ -155,15 +155,15 @@ Then reload tmux and press `prefix` + `I` to install the plugins (already declar
 above). Do one manual save with `prefix` + `C-s` so there's a snapshot to restore from.
 
 <Callout type="info">
-  Restored programs relaunch **fresh** — the layout (sessions, windows, panes, working
-  directories) comes back, but live in-memory state does not. Anything stateful — an editor
-  buffer, a running REPL, a long-lived process — needs its own resume path. Add the programs
+  Restored programs relaunch **fresh**: the layout (sessions, windows, panes, working
+  directories) comes back, but live in-memory state does not. Anything stateful, such as an editor
+  buffer, a running REPL, or a long-lived process, needs its own resume path. Add the programs
   worth relaunching to `@resurrect-processes`, and rely on each tool's own restore mechanism for
   the actual state.
 
   **Example with Claude Code:** add `claude` to `@resurrect-processes` and the pane relaunches
   the CLI on restore, but with an empty conversation. Run `claude --resume` inside that pane to
-  pick the session back up — history is stored per directory, so when the window is sitting in
+  pick the session back up; history is stored per directory, so when the window is sitting in
   the project folder it lists exactly that project's conversations. tmux brings back the
   *window*; `--resume` brings back the *context*.
 </Callout>
