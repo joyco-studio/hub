@@ -266,7 +266,6 @@ function updateEnemy(
   }
   enemy.fireCooldown = enemyFireInterval(level, config)
 
-  // Regular enemies fire straight down — only the boss aims at the player.
   return {
     x: enemy.x,
     y: enemy.y + enemy.height / 2,
