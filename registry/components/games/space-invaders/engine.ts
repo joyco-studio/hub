@@ -361,7 +361,6 @@ function aimedVolley(boss: Boss, player: Player, config: SpaceInvadersConfig): B
   const muzzleY = boss.y + boss.height / 2
   const dx = player.x - boss.x
   const dy = player.y - muzzleY
-  // Aim at the player with a random wobble so the volley isn't dead-on every time.
   const baseAngle = Math.atan2(dy, dx) + (Math.random() - 0.5) * config.boss.aimJitter
   const { aimedCount, aimedSpread, bulletSpeed } = config.boss
   const bullets: Bullet[] = []

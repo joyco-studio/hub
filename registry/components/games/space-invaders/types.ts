@@ -164,7 +164,7 @@ export interface SpaceInvadersConfig {
     patternSwitch: number
     aimedCount: number
     aimedSpread: number
-    aimJitter: number // radians: random offset applied to the aimed volley's base angle
+    aimJitter: number
     radialCount: number
     scoreBonus: number
     bonusPerTier: number
