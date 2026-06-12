@@ -129,7 +129,6 @@ export interface SpaceInvadersConfig {
     fireIntervalBase: number
     fireIntervalRamp: number
     fireIntervalMin: number
-    aimSpread: number // radians: random cone around the aim direction (0 = perfectly aimed)
     grunt: { width: number; height: number; hp: number; speedY: number; score: number }
     weaver: {
       width: number

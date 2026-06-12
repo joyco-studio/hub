@@ -246,7 +246,6 @@ function createEnemy(kind: EnemyKind, spawnX: number, level: number, config: Spa
 /** Advances the enemy and returns a fired bullet or null. Mutates `enemy`. */
 function updateEnemy(
   enemy: Enemy,
-  player: Player,
   level: number,
   dt: number,
   config: SpaceInvadersConfig,
@@ -267,19 +266,14 @@ function updateEnemy(
   }
   enemy.fireCooldown = enemyFireInterval(level, config)
 
-  // Aim toward the player, but scatter within a cone so shots head your way
-  // without tracking you perfectly.
-  const dx = player.x - enemy.x
-  const dy = player.y - enemy.y
-  const angle = Math.atan2(dy, dx) + (Math.random() - 0.5) * config.enemy.aimSpread
-  const speed = config.enemy.bulletSpeed
+  // Regular enemies fire straight down — only the boss aims at the player.
   return {
     x: enemy.x,
     y: enemy.y + enemy.height / 2,
     width: config.bullet.width,
     height: config.bullet.height,
-    vx: Math.cos(angle) * speed,
-    vy: Math.max(speed * 0.2, Math.sin(angle) * speed), // always heads downward (~20% of bulletSpeed floor)
+    vx: 0,
+    vy: config.enemy.bulletSpeed,
     owner: 'enemy',
   }
 }
@@ -530,7 +524,7 @@ export function stepWorld(world: World, input: InputState, dt: number, config: S
 
   // Enemies + enemy bullets.
   for (const enemy of world.enemies) {
-    const fired = updateEnemy(enemy, world.player, world.level, dt, config)
+    const fired = updateEnemy(enemy, world.level, dt, config)
     if (fired) {
       world.bullets.push(fired)
     }
