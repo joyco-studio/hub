@@ -64,3 +64,47 @@ Analyze a Chrome DevTools Performance trace JSON file for performance anomalies.
 ```
 
 Runs 13 detection categories in parallel: Long Tasks, Layout Thrashing, Forced Reflows, rAF Ticker Loops, Style Recalc Storms, Paint Storms, GC Pressure, CLS, INP, Network Errors, Redundant Fetches, Script Eval, and Long Animation Frames, then produces a structured audit report with severity classifications and timeline hotspots.
+
+---
+
+### lab-experiment
+
+Automates the full workflow of extracting a self-contained experiment from any codebase and publishing it to the JOYCO Lab: identifies what the experiment does and which template fits (`3d` for Three.js / R3F scenes, `motion` for GSAP / Framer Motion / canvas 2D work), scaffolds it with the matching JOYCO template, ports the code and its dependencies, deploys to Vercel, and opens the registry PR.
+
+Triggers on requests like "isolate this", "publish this to the lab", or "make this an experiment". Requires the `joyco` and `vercel` CLIs plus GitHub auth.
+
+---
+
+### thrash-report-analyzer
+
+Analyze a [`bye-thrash`](https://github.com/joyco-studio/bye-thrash) layout thrashing report and turn it into actionable fixes. Usage:
+
+```bash
+/thrash-report-analyzer <path-to-report.json>
+```
+
+For every thrash entry it parses the captured stack trace, filters out library / React / bundler internals to pinpoint the user-code function responsible, locates the offending style-write → layout-read pair in your source files, and produces a structured fix-suggestion report.
+
+---
+
+### webaudio
+
+Add sound effects, UI audio, and ambient loops to a web app using [`@joycostudio/suno`](https://github.com/joyco-studio/suno). Picks the right entry point for your stack (vanilla vs React, with or without the `Mixer` for fades), writes a typed sound manifest, and wires the unlock gesture so audio actually plays after the browser's autoplay restrictions.
+
+Built around the library's `Voice → AudioSource → effect chain → masterOutput` model: every `play()` spawns an independent voice, so overlapping playback, per-voice control, and effect chains (filter, reverb, delay) come for free. Not meant for music-player UIs, recording, or streaming.
+
+---
+
+### react-ts-debugging
+
+Debug React and TypeScript bugs through a collaborative, log-driven loop instead of read-and-guess. Claude can't see the running app, so it treats every bug as a joint investigation: reproduce, state falsifiable hypotheses, place a few strategic console logs, then stop and hand off. You run the app, paste the console output back, and the evidence — not the source code — drives the next step. Fixes only land once a log has demonstrated the root cause, and every debug log gets cleaned up afterwards.
+
+Triggers on anything from "why is my component re-rendering" to "this works sometimes but not always", even when you just paste a broken component.
+
+---
+
+### resolving-git-conflicts
+
+Diagnose and resolve git conflicts of any kind — merge, rebase, cherry-pick, stash, revert. The core rule is **diagnose before you resolve**: many conflicts (especially in stacked-branch workflows) are phantom artifacts of squash merges or rewritten upstream history, where the correct fix is a different git strategy like `git rebase --onto`, not hand-editing conflict markers.
+
+Works through ordered phases: a safety snapshot (backup branch from `ORIG_HEAD`), identifying the in-progress operation from `.git` state files, mapping the history topology to find the real cause, and only then resolving — with correct handling of the `ours`/`theirs` inversion under rebase. Never force-pushes without asking first.
