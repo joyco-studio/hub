@@ -246,7 +246,6 @@ function createEnemy(kind: EnemyKind, spawnX: number, level: number, config: Spa
 /** Advances the enemy and returns a fired bullet or null. Mutates `enemy`. */
 function updateEnemy(
   enemy: Enemy,
-  player: Player,
   level: number,
   dt: number,
   config: SpaceInvadersConfig,
@@ -267,16 +266,13 @@ function updateEnemy(
   }
   enemy.fireCooldown = enemyFireInterval(level, config)
 
-  const dx = player.x - enemy.x
-  const dy = player.y - enemy.y
-  const len = Math.hypot(dx, dy) || 1
   return {
     x: enemy.x,
     y: enemy.y + enemy.height / 2,
     width: config.bullet.width,
     height: config.bullet.height,
-    vx: (dx / len) * config.enemy.bulletSpeed,
-    vy: Math.max(60, (dy / len) * config.enemy.bulletSpeed), // always heads downward
+    vx: 0,
+    vy: config.enemy.bulletSpeed,
     owner: 'enemy',
   }
 }
@@ -365,7 +361,7 @@ function aimedVolley(boss: Boss, player: Player, config: SpaceInvadersConfig): B
   const muzzleY = boss.y + boss.height / 2
   const dx = player.x - boss.x
   const dy = player.y - muzzleY
-  const baseAngle = Math.atan2(dy, dx) // points toward the player (downward)
+  const baseAngle = Math.atan2(dy, dx) + (Math.random() - 0.5) * config.boss.aimJitter
   const { aimedCount, aimedSpread, bulletSpeed } = config.boss
   const bullets: Bullet[] = []
   const denom = Math.max(1, aimedCount - 1)
@@ -526,7 +522,7 @@ export function stepWorld(world: World, input: InputState, dt: number, config: S
 
   // Enemies + enemy bullets.
   for (const enemy of world.enemies) {
-    const fired = updateEnemy(enemy, world.player, world.level, dt, config)
+    const fired = updateEnemy(enemy, world.level, dt, config)
     if (fired) {
       world.bullets.push(fired)
     }

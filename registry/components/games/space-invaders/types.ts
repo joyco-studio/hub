@@ -164,6 +164,7 @@ export interface SpaceInvadersConfig {
     patternSwitch: number
     aimedCount: number
     aimedSpread: number
+    aimJitter: number
     radialCount: number
     scoreBonus: number
     bonusPerTier: number

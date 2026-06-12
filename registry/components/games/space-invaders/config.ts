@@ -62,6 +62,7 @@ export const DEFAULT_CONFIG: SpaceInvadersConfig = {
     patternSwitch: 3.5,
     aimedCount: 3,
     aimedSpread: 0.35,
+    aimJitter: 0.4,
     radialCount: 16,
     scoreBonus: 1000,
     bonusPerTier: 500,
