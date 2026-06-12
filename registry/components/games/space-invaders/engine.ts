@@ -279,7 +279,7 @@ function updateEnemy(
     width: config.bullet.width,
     height: config.bullet.height,
     vx: Math.cos(angle) * speed,
-    vy: Math.max(60, Math.sin(angle) * speed), // always heads downward
+    vy: Math.max(speed * 0.2, Math.sin(angle) * speed), // always heads downward (~20% of bulletSpeed floor)
     owner: 'enemy',
   }
 }
