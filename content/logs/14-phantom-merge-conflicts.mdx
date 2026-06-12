@@ -12,7 +12,7 @@ The long answer is a story. Let me introduce you to Elvira and Homero.
 
 ## A Thursday like any other
 
-Elvira has been working on the new checkout flow in `elvira/checkout`. Homero needs the checkout API for his receipt page, and he's not going to wait for her PR to land. So he branches off her branch:
+Elvira has been working on the new checkout flow in `elvira/checkout`. Homero needs the checkout API for his receipt page, and he's not going to sit around waiting for Elvira's PR to land. So he branches off her branch:
 
 ```bash
 main ← elvira/checkout ← homero/receipts
@@ -56,11 +56,11 @@ So don't assume the cause, diagnose it. Check whether your own commits ever touc
 git log --oneline elvira/checkout..HEAD -- checkout.ts
 ```
 
-Empty output for a conflicted file is the smoking gun: the "your side" of that conflict came from inherited history, not from work done on this branch.
+Empty output for a conflicted file is the smoking gun: the “your side” of that conflict came from inherited history, not from work done on this branch.
 
 ## Why you shouldn't resolve them by hand
 
-Hand-resolving phantom conflicts re-applies work that already landed, polluting your branch (and later, the PR diff) with someone else's changes behind a bogus merge commit. Worse, it risks resurrecting stale code: if Elvira's PR got tweaks during review (it usually does), the copy in Homero's history is older than what's on `main`, and picking "ours" brings back the pre-review version.
+Hand-resolving phantom conflicts re-applies work that already landed, polluting your branch (and later, the PR diff) with someone else's changes behind a bogus merge commit. Worse, it risks resurrecting stale code: if Elvira's PR got tweaks during review (it usually does), the copy in Homero's history is older than what's on `main`, and picking “ours” brings back the pre-review version.
 
 The conflict is a symptom. The real problem is the duplicated commits, so instead of resolving, you remove them.
 
@@ -72,7 +72,7 @@ Abort whatever operation is in progress (`git merge --abort` or `git rebase --ab
 git rebase --onto main elvira/checkout homero/receipts
 ```
 
-The arguments read as: _take every commit after `elvira/checkout`, up to the tip of `homero/receipts`, and replay them on top of `main`_.
+The arguments read as: _take every commit after `elvira/checkout`, up to the tip of `homero/receipts`, and replay them on top of `main`_. (Elvira deleted her branch, remember? If `elvira/checkout` no longer resolves, point at `origin/elvira/checkout` or grab the raw SHA, gotcha #1 below.)
 
 ```bash
 git rebase --onto <new-base> <old-base> [<branch>]
@@ -100,7 +100,7 @@ Since the rebase rewrites your branch's history, pushing afterwards needs `git p
 
 ## Or let Claude handle it
 
-We turned this whole diagnosis into a Claude Code skill: [`resolving-git-conflicts`](/toolbox/skills#resolving-git-conflicts). It's what saved the real-life Homero in this story: he asked Claude to "fix the conflicts" and, instead of blindly editing markers, the skill walked the history, detected the rewritten base, and ran the `rebase --onto` itself. Diagnose before you resolve, with a safety snapshot first and no force-push without asking.
+We turned this whole diagnosis into a Claude Code skill: [`resolving-git-conflicts`](/toolbox/skills#resolving-git-conflicts). It's what saved the real-life Homero in this story: he asked Claude to “fix the conflicts” and, instead of blindly editing markers, the skill walked the history, detected the rewritten base, and ran the `rebase --onto` itself. Diagnose before you resolve, with a safety snapshot first and no force-push without asking.
 
 ```bash
 pnpx skills add joyco-studio/skills
