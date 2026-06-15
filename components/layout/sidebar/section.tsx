@@ -11,9 +11,10 @@ import FileIcon from '@/components/icons/file'
 import FlaskIcon from '@/components/icons/flask'
 import GamepadIcon from '@/components/icons/gamepad'
 import TextScanIcon from '@/components/icons/text-scan'
-import { Frame, Library, Minus, Plus } from 'lucide-react'
+import { Frame, Library } from 'lucide-react'
 import { getLogNumber, stripLogPrefixFromTitle } from '@/lib/log-utils'
 import { MetaBadge } from '@/components/layout/meta-badge'
+import { CollapsibleSection } from './collapsible-section'
 
 export type SidebarItemMeta = {
   badge?: 'new' | 'updated' | 'internal'
@@ -132,78 +133,55 @@ function CollapsibleSubSection({
   defaultOpen = true,
   sectionId = '',
 }: CollapsibleSubSectionProps) {
-  const [isOpen, setIsOpen] = React.useState(defaultOpen)
   const pathname = usePathname()
 
   const isActive = pages.some((page) => pathname === page.url)
 
   return (
-    <div className="flex flex-col">
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className={cn(
-          'min-h-aside-width flex items-center gap-2 px-4 py-5 text-left transition-colors',
-          'hover:bg-accent',
-          isActive && 'text-foreground/70'
-        )}
-      >
-        <Icon className="size-4" />
-        <span className="font-mono text-sm font-medium tracking-wide uppercase">
-          {name}
-        </span>
-        <span className="ml-auto">
-          {isOpen ? (
-            <Minus className="text-muted-foreground size-3" />
-          ) : (
-            <Plus className="text-muted-foreground size-3" />
-          )}
-        </span>
-      </button>
+    <CollapsibleSection
+      name={name}
+      icon={Icon}
+      defaultOpen={defaultOpen}
+      isActive={isActive}
+    >
+      <div className="border-border ml-4 flex flex-col border-l-2">
+        {pages.map((page) => {
+          const itemMeta = meta[page.url] ?? {}
+          if (itemMeta.hidden) return null
+          const isItemActive = pathname === page.url
+          const displayName = getDisplayName(page, sectionId)
 
-      {isOpen && (
-        <>
-          <div className="border-border ml-4 flex flex-col border-l-2">
-            {pages.map((page) => {
-              const itemMeta = meta[page.url] ?? {}
-              if (itemMeta.hidden) return null
-              const isItemActive = pathname === page.url
-              const displayName = getDisplayName(page, sectionId)
-
-              return (
-                <Link
-                  key={page.url}
-                  href={page.url}
+          return (
+            <Link
+              key={page.url}
+              href={page.url}
+              className={cn(
+                '-ml-[2px] flex items-center gap-2 px-4 py-1.5 font-mono text-sm tracking-wide uppercase transition-colors',
+                isItemActive
+                  ? 'text-foreground border-foreground bg-accent border-l-4 pl-6 font-medium'
+                  : 'text-muted-foreground hover:text-foreground hover:border-foreground/50 border-l-2'
+              )}
+            >
+              {itemMeta.dot && (
+                <span
                   className={cn(
-                    '-ml-[2px] flex items-center gap-2 px-4 py-1.5 font-mono text-sm tracking-wide uppercase transition-colors',
-                    isItemActive
-                      ? 'text-foreground border-foreground bg-accent border-l-4 pl-6 font-medium'
-                      : 'text-muted-foreground hover:text-foreground hover:border-foreground/50 border-l-2'
+                    'size-2 shrink-0 rounded-full',
+                    itemMeta.dot === 'red' && 'bg-red-500',
+                    itemMeta.dot === 'blue' && 'bg-blue-500',
+                    itemMeta.dot === 'green' && 'bg-green-500',
+                    itemMeta.dot === 'yellow' && 'bg-yellow-500'
                   )}
-                >
-                  {itemMeta.dot && (
-                    <span
-                      className={cn(
-                        'size-2 shrink-0 rounded-full',
-                        itemMeta.dot === 'red' && 'bg-red-500',
-                        itemMeta.dot === 'blue' && 'bg-blue-500',
-                        itemMeta.dot === 'green' && 'bg-green-500',
-                        itemMeta.dot === 'yellow' && 'bg-yellow-500'
-                      )}
-                    />
-                  )}
-                  <span className="truncate">{displayName}</span>
-                  {itemMeta.badge && (
-                    <MetaBadge type={itemMeta.badge} className="ml-auto" />
-                  )}
-                </Link>
-              )
-            })}
-          </div>
-          <div className="border-border ml-4 h-3 border-l-2" />
-        </>
-      )}
-    </div>
+                />
+              )}
+              <span className="truncate">{displayName}</span>
+              {itemMeta.badge && (
+                <MetaBadge type={itemMeta.badge} className="ml-auto" />
+              )}
+            </Link>
+          )
+        })}
+      </div>
+    </CollapsibleSection>
   )
 }
 
@@ -232,7 +210,6 @@ export function SidebarSection({
   librarySlugs = [],
   libSlugs = [],
 }: SidebarSectionProps) {
-  const [isOpen, setIsOpen] = React.useState(defaultOpen)
   const pathname = usePathname()
 
   const folderName =
@@ -381,33 +358,14 @@ export function SidebarSection({
     return folder.children
   })()
   return (
-    <div className="flex flex-col">
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className={cn(
-          'min-h-aside-width flex items-center gap-2 px-4 py-5 text-left transition-colors',
-          'hover:bg-accent',
-          isActive && 'text-foreground/70'
-        )}
-      >
-        <Icon className="size-4" />
-        <span className="font-mono text-sm font-medium tracking-wide uppercase">
-          {folder.name}
-        </span>
-        <span className="ml-auto">
-          {isOpen ? (
-            <Minus className="text-muted-foreground size-3" />
-          ) : (
-            <Plus className="text-muted-foreground size-3" />
-          )}
-        </span>
-      </button>
-
-      {isOpen && (
-        <>
-          <div className="border-border ml-4 flex flex-col border-l-2">
-            {sortedLogs.map((child) => {
+    <CollapsibleSection
+      name={folderName}
+      icon={Icon}
+      defaultOpen={defaultOpen}
+      isActive={isActive}
+    >
+      <div className="border-border ml-4 flex flex-col border-l-2">
+        {sortedLogs.map((child) => {
               if (child.type === 'page') {
                 const itemMeta = meta[child.url] ?? {}
                 if (itemMeta.hidden) return null
@@ -443,12 +401,9 @@ export function SidebarSection({
                   </Link>
                 )
               }
-              return null
-            })}
-          </div>
-          <div className="border-border ml-4 h-3 border-l-2" />
-        </>
-      )}
-    </div>
+          return null
+        })}
+      </div>
+    </CollapsibleSection>
   )
 }
