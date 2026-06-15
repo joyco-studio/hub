@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { Command } from 'cmdk'
+import { Command as CommandIcon } from 'lucide-react'
 import SearchIcon from '@/components/icons/search'
 import { Kbd } from '@/components/ui/kbd'
 
@@ -26,7 +27,12 @@ export function SidebarSearch({
           placeholder="Search"
           className="text-foreground placeholder:text-muted-foreground h-full min-w-0 flex-1 bg-transparent focus:bg-transparent active:bg-transparent font-mono text-sm tracking-wide uppercase outline-none focus-visible:outline-none"
         />
-        {!query && <Kbd className="h-[2em] px-2">⌘K</Kbd>}
+        {!query && (
+          <Kbd className="h-[2em] gap-0.5 px-2">
+            <CommandIcon className="size-3.5" />
+            <span className="text-sm leading-none">K</span>
+          </Kbd>
+        )}
       </div>
       {isLoading && (
         <div className="absolute right-0 bottom-0 left-0 h-0.5 overflow-hidden">

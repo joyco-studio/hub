@@ -104,7 +104,7 @@ export function RegistrySidebar({
     // Lab section has its own data source (not from Fumadocs tree)
     if (pathname.startsWith('/lab')) {
       return (
-        <nav className="bg-accent/70 flex flex-col overflow-y-auto">
+        <nav className="bg-accent/70 flex flex-col overflow-x-hidden overflow-y-auto [scrollbar-gutter:stable]">
           <LabSidebarSection experiments={experiments} />
         </nav>
       )
@@ -115,7 +115,7 @@ export function RegistrySidebar({
     if (!folder) return null
 
     return (
-      <nav className="bg-accent/70 flex flex-col overflow-y-auto">
+      <nav className="bg-accent/70 flex flex-col overflow-x-hidden overflow-y-auto [scrollbar-gutter:stable]">
         <SidebarSection
           folder={folder}
           defaultOpen
