@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { source } from '@/lib/source'
 import { CategoryIndexBadge } from './category-index-badge'
 import { PreviewCard } from '@/components/cards'
+import { GltfIcon, SunoIcon } from '@/components/icons'
 import { ItemType } from '@/lib/item-types'
 import { RegistryCounts } from './registry-meta'
 import { getLogNumber, stripLogPrefixFromTitle } from '@/lib/log-utils'
@@ -49,6 +50,27 @@ export async function CategoryIndex({
   }
 
   if (category === 'logs') pages.reverse()
+
+  // Toolbox: pull libraries out to highlight as cards, and order the remaining
+  // tools alphabetically by title.
+  const isToolbox = category === 'toolbox'
+  // Libraries we don't want highlighted as cards — they still appear in the
+  // regular tools list below.
+  const excludeFromHighlight = new Set(['susano'])
+  const isHighlightedLibrary = (page: (typeof pages)[number]) =>
+    page.data.type === 'library' &&
+    !excludeFromHighlight.has(page.slugs[page.slugs.length - 1])
+  const libraryPages = isToolbox ? pages.filter(isHighlightedLibrary) : []
+  const listPages = isToolbox
+    ? pages.filter((page) => !isHighlightedLibrary(page))
+    : pages
+  if (isToolbox) {
+    const byTitle = (a: (typeof pages)[number], b: (typeof pages)[number]) =>
+      a.data.title.localeCompare(b.data.title)
+    libraryPages.sort(byTitle)
+    listPages.sort(byTitle)
+  }
+
   const typeMap: Record<keyof RegistryCounts, ItemType> = {
     components: 'component',
     toolbox: 'toolbox',
@@ -88,6 +110,33 @@ export async function CategoryIndex({
           />
         </h3>
       )}
+      {isToolbox && libraryPages.length > 0 && (
+        <div className="mb-10">
+          <h3 className="mb-6 text-2xl font-semibold">Libraries</h3>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {libraryPages.map((page) => {
+              const slug = page.slugs[page.slugs.length - 1]
+              return (
+                <PreviewCard
+                  key={page.url}
+                  name={slug}
+                  title={page.data.title}
+                  type={type}
+                  href={page.url}
+                  showBadge={false}
+                  icon={
+                    slug === 'suno' ? (
+                      <SunoIcon className="text-primary-foreground size-8" />
+                    ) : slug === 'gltf' ? (
+                      <GltfIcon className="text-primary-foreground h-8 w-auto" />
+                    ) : undefined
+                  }
+                />
+              )
+            })}
+          </div>
+        </div>
+      )}
       {useGrid ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {pages.map((page) => (
@@ -103,7 +152,7 @@ export async function CategoryIndex({
         </div>
       ) : (
         <div className="-mx-3 flex w-[calc(100%+1.5rem)] flex-col">
-          {pages.map((page) => {
+          {listPages.map((page) => {
             const logNumber = getLogNumber(page.slugs)
             const displayTitle =
               type === 'log'
