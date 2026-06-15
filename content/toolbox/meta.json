@@ -15,6 +15,10 @@
     "scripts",
     "metri",
     "suno",
-    "susano"
+    "susano",
+    "md",
+    "gltf",
+    "atlas",
+    "audio"
   ]
 }
