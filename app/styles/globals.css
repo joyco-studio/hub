@@ -21,6 +21,8 @@
 
   --animate-caret-blink: caret-blink 1s steps(1) infinite;
   --animate-loading-bar: loading-bar 0.75s ease-in-out infinite;
+  --animate-collapsible-open: collapsible-open 0.22s ease-out;
+  --animate-collapsible-close: collapsible-close 0.16s ease-in;
 
   --default-font-family: var(--font-sans);
   --default-font-family-mono: var(--font-mono);
@@ -113,6 +115,31 @@
     }
     100% {
       transform: translateX(400%);
+    }
+  }
+
+  /* Sidebar collapsible reveal — height tween (via Radix's measured
+   * --radix-collapsible-content-height) so siblings reflow smoothly, paired
+   * with an opacity fade. */
+  @keyframes collapsible-open {
+    from {
+      height: 0;
+      opacity: 0;
+    }
+    to {
+      height: var(--radix-collapsible-content-height);
+      opacity: 1;
+    }
+  }
+
+  @keyframes collapsible-close {
+    from {
+      height: var(--radix-collapsible-content-height);
+      opacity: 1;
+    }
+    to {
+      height: 0;
+      opacity: 0;
     }
   }
 }

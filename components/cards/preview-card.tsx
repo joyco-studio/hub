@@ -13,6 +13,12 @@ interface PreviewCardProps extends React.ComponentProps<'a'> {
   type: ItemType
   href: string
   showBadge?: boolean
+  /**
+   * Override the default type icon shown when there's no preview image.
+   * Pass a rendered element (not a component) so it can cross the
+   * server/client boundary.
+   */
+  icon?: React.ReactNode
 }
 
 export function PreviewCard({
@@ -21,6 +27,7 @@ export function PreviewCard({
   type,
   href,
   showBadge = true,
+  icon,
   className,
   ...props
 }: PreviewCardProps) {
@@ -61,7 +68,7 @@ export function PreviewCard({
           />
         ) : (
           <div className="bg-primary flex h-full w-full items-center justify-center">
-            <Icon className="text-primary-foreground size-8" />
+            {icon ?? <Icon className="text-primary-foreground size-8" />}
           </div>
         )}
       </div>
