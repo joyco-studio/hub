@@ -130,26 +130,6 @@ export function RegistrySidebar({
     )
   }
 
-  const fillerRef = React.useRef<HTMLDivElement | null>(null)
-
-  React.useEffect(() => {
-    const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        if (entry.contentRect.height) {
-          entry.target.classList.remove('-my-0.5')
-        } else {
-          entry.target.classList.add('-my-0.5')
-        }
-      }
-    })
-
-    fillerRef.current && observer.observe(fillerRef.current)
-
-    return () => {
-      observer.disconnect()
-    }
-  }, [])
-
   return (
     <div className="sticky top-0 hidden h-screen shrink-0 gap-1 [grid-area:sidebar] md:flex">
       <NavAside />
@@ -166,7 +146,11 @@ export function RegistrySidebar({
           isLoading={isLoading}
         />
         {renderContent()}
-        <div ref={fillerRef} className="bg-muted flex-1" />
+        {/* -mt-1 cancels the top `gap-1` seam (negative margin combines with
+            flex gap). This keeps a single 4px seam above the social row whether
+            the filler has height (short pages) or collapses to 0 (tall pages),
+            computed at render time — so there's no post-paint reflow. */}
+        <div className="bg-muted -mt-1 flex-1" />
         <SocialLinks />
       </Command>
     </div>

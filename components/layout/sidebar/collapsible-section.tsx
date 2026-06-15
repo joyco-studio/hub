@@ -41,11 +41,14 @@ type CollapsibleSectionProps = {
  * Lab). Built on Radix `Collapsible` for accessibility (aria-expanded,
  * keyboard handling, managed mount/unmount).
  *
- * The reveal is driven off Radix's `data-state` and animates `opacity` + a
- * small `transform` slide only — both compositor-friendly. We deliberately do
- * NOT animate height: Radix keeps the content mounted for the duration of the
- * `collapsible-close` keyframe (it detects the running CSS animation) and then
- * unmounts it, so the panel frees its layout space without a height tween.
+ * The reveal animates off Radix's `data-state` via the `collapsible-open` /
+ * `collapsible-close` keyframes (see globals.css): height (using Radix's
+ * measured `--radix-collapsible-content-height`) plus an opacity fade, so
+ * sibling panels reflow smoothly. Radix keeps the content mounted for the
+ * duration of the close keyframe, then unmounts it.
+ *
+ * The animation is gated behind `animate` so panels that start open don't
+ * replay the keyframe on initial mount (which would flash on every reload).
  */
 export function CollapsibleSection({
   name,

@@ -2,7 +2,15 @@ import Link from 'next/link'
 import { source } from '@/lib/source'
 import { CategoryIndexBadge } from './category-index-badge'
 import { PreviewCard } from '@/components/cards'
-import { GltfIcon, SunoIcon } from '@/components/icons'
+import { GltfIcon, MetriIcon, SunoIcon } from '@/components/icons'
+
+// Per-library brand logos shown on the highlighted toolbox cards. Slugs not
+// listed here fall back to the default toolbox icon.
+const libraryIcons: Record<string, React.ReactNode> = {
+  suno: <SunoIcon className="text-primary-foreground size-12" />,
+  gltf: <GltfIcon className="text-primary-foreground size-12" />,
+  metri: <MetriIcon className="text-primary-foreground size-12" />,
+}
 import { ItemType } from '@/lib/item-types'
 import { RegistryCounts } from './registry-meta'
 import { getLogNumber, stripLogPrefixFromTitle } from '@/lib/log-utils'
@@ -124,13 +132,7 @@ export async function CategoryIndex({
                   type={type}
                   href={page.url}
                   showBadge={false}
-                  icon={
-                    slug === 'suno' ? (
-                      <SunoIcon className="text-primary-foreground size-8" />
-                    ) : slug === 'gltf' ? (
-                      <GltfIcon className="text-primary-foreground h-8 w-auto" />
-                    ) : undefined
-                  }
+                  icon={libraryIcons[slug]}
                 />
               )
             })}
