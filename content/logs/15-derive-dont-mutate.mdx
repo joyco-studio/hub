@@ -33,11 +33,6 @@ The fix is to stop letting sources *command* the value and let them *declare int
  * `value` resolves them through `combine` at one point, with no last-write-wins, no
  * ordering bugs. Resolution is pull (on read), so callers never care who wrote
  * last.
- *
- *   const blur = new Derived(0, maxOf)
- *   blur.set('inspect', 1)   // game state owns this slot
- *   blur.set('loader', 0)    // the loader owns this one
- *   pass.amount = blur.value // resolved max, here and only here
  */
 export class Derived<T> {
   private slots = new Map<string, T>()
@@ -61,6 +56,26 @@ export const maxOf = (vals: number[], fallback: number) => Math.max(fallback, ..
 ```
 
 That's the whole thing. About twenty lines, and it removes an entire category of bug.
+
+Here's it in use. Say you need to lock body scroll, and several surfaces want that at once: a modal, a slide-out cart, a fullscreen menu. With a plain boolean, closing the modal while the cart is still open flips scroll back on and breaks the cart. Give each surface a slot instead:
+
+```ts showLineNumbers
+/** Combinator: locked if any source wants it locked. */
+const anyOf = (vals: boolean[], fallback: boolean) => fallback || vals.some(Boolean)
+
+const scrollLock = new Derived(false, anyOf)
+
+modal.onOpen = () => scrollLock.set('modal', true)
+modal.onClose = () => scrollLock.clear('modal')
+cart.onOpen = () => scrollLock.set('cart', true)
+cart.onClose = () => scrollLock.clear('cart')
+
+// Resolved at one point: the body stays locked while anyone still wants it,
+// and frees only when the last surface lets go.
+document.body.style.overflow = scrollLock.value ? 'hidden' : ''
+```
+
+Now close order doesn't matter. Scroll unlocks exactly when the last open surface clears its slot, never a moment sooner.
 
 ## Why it works
 
