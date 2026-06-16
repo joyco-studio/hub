@@ -1,0 +1,88 @@
+---
+title: 15 - Derive, Don't Mutate
+description: When one value has many writers, last-write-wins quietly corrupts your output. Give each source its own slot and resolve them at one point instead.
+author: 'matiasperz'
+---
+
+Sooner or later you hit a value that more than one part of your app wants to control. A loading overlay, a debug flag, an audio duck, the strength of a postprocessing pass. Each system has a legitimate opinion about it, and each one reaches for the same field and sets it.
+
+That's where the fight starts.
+
+## The multiple writers problem
+
+The setup is innocent. You have one mutable field and a handful of places that write to it:
+
+```ts showLineNumbers
+pass.amount = 1   // inspector turns the blur up
+pass.amount = 0   // loader finishes, turns it off
+pass.amount = 0.5 // a transition fades it
+```
+
+Each line is correct on its own. The bug is that they share one slot, so the value you actually see is whoever wrote **last**. Now your output depends on call order, on timing, on which effect happened to fire this frame. Toggle the inspector while the loader is running and the blur sticks — or doesn't — and you can't tell why, because the answer isn't in any single place. It's smeared across every call site that touches the field.
+
+This is last-write-wins, and it's the default behavior of a plain variable. No one designed it. It's just what you get when N writers point at one mutable thing.
+
+## Derive, don't mutate
+
+The fix is to stop letting sources *command* the value and let them *declare intent* instead. Nobody writes the output. Each source writes its own keyed slot, and the output is **resolved** from all the slots at one point, through logic you own.
+
+```ts showLineNumbers
+/**
+ * A value owned by N independent sources instead of one mutable field. Each
+ * source writes its own keyed slot, so writers can't clobber each other, and
+ * `value` resolves them through `combine` at one point — no last-write-wins, no
+ * ordering bugs. Resolution is pull (on read), so callers never care who wrote
+ * last.
+ *
+ *   const blur = new Derived(0, maxOf)
+ *   blur.set('inspect', 1)   // game state owns this slot
+ *   blur.set('loader', 0)    // the loader owns this one
+ *   pass.amount = blur.value // resolved max, here and only here
+ */
+export class Derived<T> {
+  private slots = new Map<string, T>()
+  constructor(
+    private readonly fallback: T,
+    private readonly combine: (slots: T[], fallback: T) => T
+  ) {}
+  set(key: string, value: T): void {
+    this.slots.set(key, value)
+  }
+  clear(key: string): void {
+    this.slots.delete(key)
+  }
+  get value(): T {
+    return this.combine([...this.slots.values()], this.fallback)
+  }
+}
+
+/** Combinator: anyone can raise it; the value is the max over all sources. */
+export const maxOf = (vals: number[], fallback: number) => Math.max(fallback, ...vals)
+```
+
+That's the whole thing. About twenty lines, and it removes an entire category of bug.
+
+## Why it works
+
+Three properties do all the work.
+
+**Owned slots.** A source can only ever touch its own key. The worst a buggy system can do is declare a wrong intent *for itself* — it can't corrupt the output and it can't stomp another source. There's no shared mutable field left to fight over.
+
+**One resolution point.** The conflict logic isn't scattered anymore. It lives in `combine`, in one place you can read, test, and reason about in isolation. "What happens when the inspector and the loader disagree?" has an actual answer now, and it's a function.
+
+**Pull, not push.** `value` resolves on read, so the slots are just *current desires* with no temporal coupling. Order of mutation stops mattering — there's no "last write," only "what does everyone currently want," evaluated fresh every time you read. Set things in any order across any number of frames; the output is always the same function of the same state.
+
+## The combinator is the semantics
+
+`Derived` doesn't decide how conflicts resolve — `combine` does. That's deliberate. The same container expresses very different policies depending on what you pass:
+
+- `maxOf` — anyone can raise it. Good for "loudest wins" / "most blur wins."
+- a `min` — anyone can dim it.
+- a product — independent modulators that compose: `quality * fade * userSetting`.
+- a priority pick over `{ value, priority }` — an override stack, where debug or a cutscene wins over everything else.
+
+Pick the combinator that matches the rule you actually want, and the rule becomes explicit instead of emergent.
+
+## When not to reach for it
+
+If your writers are really mutually-exclusive *modes* — editing vs preview vs cutscene — that's not a fight, it's a state machine. Map each mode to a full config and model it as such. `Derived` is for when multiple independent sources each hold a genuine, simultaneous stake in one value. That's the case it's built for, and inside that case it quietly makes the state fight impossible.
