@@ -2,12 +2,15 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useCopyToClipboard } from '@/components/copy-button'
+import {
+  useCopyToClipboard,
+  useCopyRichTextToClipboard,
+} from '@/components/copy-button'
 import {
   ActionHintEmitter,
   useActionHint,
 } from '@/registry/components/action-hint'
-import { ChevronDown, Check, Code } from 'lucide-react'
+import { ChevronDown, Check, Code, FileText } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -153,7 +156,15 @@ function PageActionsDropdown({
 }) {
   const { emit } = useActionHint()
   const [open, setOpen] = useState(false)
+  const { hasCopied: hasCopiedRichText, copy: copyRichText } =
+    useCopyRichTextToClipboard()
   const getLlmPageUrl = () => `${window.location.origin}${llmUrl}`
+
+  // Copy the rendered article body as rich text (WYSIWYG)
+  const copyPageRichText = useCallback(() => {
+    const prose = document.querySelector<HTMLElement>('#nd-page .prose')
+    copyRichText(prose)
+  }, [copyRichText])
 
   useEffect(() => {
     if (!showShortcuts) return
@@ -230,6 +241,16 @@ function PageActionsDropdown({
         className="text-medium font-mono uppercase"
         align="end"
       >
+        <DropdownMenuItem
+          className="text-xs"
+          onSelect={(e) => {
+            e.preventDefault()
+            copyPageRichText()
+          }}
+        >
+          <FileText className="size-4" />
+          {hasCopiedRichText ? 'Copied!' : 'Copy Rich Text'}
+        </DropdownMenuItem>
         {componentSource && (
           <DropdownMenuItem
             className="text-xs"

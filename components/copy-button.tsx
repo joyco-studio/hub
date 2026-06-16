@@ -24,6 +24,54 @@ export function useCopyToClipboard(timeout = 2000) {
   return { hasCopied, copy }
 }
 
+/**
+ * Copy rendered content to the clipboard as rich text (WYSIWYG).
+ *
+ * Writes both `text/html` and a `text/plain` fallback so pasting into a
+ * rich-text editor (Google Docs, Notion, email, …) preserves formatting,
+ * while plain-text targets still receive readable text.
+ */
+export function useCopyRichTextToClipboard(timeout = 2000) {
+  const [hasCopied, setHasCopied] = React.useState(false)
+
+  React.useEffect(() => {
+    if (hasCopied) {
+      const timer = setTimeout(() => setHasCopied(false), timeout)
+      return () => clearTimeout(timer)
+    }
+  }, [hasCopied, timeout])
+
+  const copy = React.useCallback((element: HTMLElement | null) => {
+    if (!element) return
+
+    const html = element.innerHTML
+    const plain = element.innerText
+
+    const canWriteRichText =
+      typeof ClipboardItem !== 'undefined' &&
+      typeof navigator.clipboard?.write === 'function'
+
+    if (canWriteRichText) {
+      const item = new ClipboardItem({
+        'text/html': new Blob([html], { type: 'text/html' }),
+        'text/plain': new Blob([plain], { type: 'text/plain' }),
+      })
+      navigator.clipboard
+        .write([item])
+        .then(() => setHasCopied(true))
+        .catch(() => {
+          navigator.clipboard.writeText(plain)
+          setHasCopied(true)
+        })
+    } else {
+      navigator.clipboard.writeText(plain)
+      setHasCopied(true)
+    }
+  }, [])
+
+  return { hasCopied, copy }
+}
+
 export function CopyButton({
   value,
   className,
