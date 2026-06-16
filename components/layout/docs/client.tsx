@@ -7,7 +7,7 @@ import {
   use,
   useMemo,
 } from 'react'
-import { cn } from '../../../lib/cn'
+import { cn } from '@/lib/utils'
 import { usePathname } from 'fumadocs-core/framework'
 import Link from 'fumadocs-core/link'
 import type { SidebarTab } from '../sidebar/tabs'

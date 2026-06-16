@@ -103,9 +103,9 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
     isLibrary ? getLibraryReadme(page.data.repo!) : null,
   ])
   const componentSource = await getComponentSource(componentSlug)
-  const docLinks = [...page.data.docLinks]
+  const links = [...page.data.links]
   if (isLibrary) {
-    docLinks.unshift({
+    links.unshift({
       label: 'GitHub',
       href: `https://github.com/${page.data.repo}`,
     })
@@ -181,10 +181,10 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
           {/* Doc links */}
           <div
             className={cn('flex items-start justify-between gap-8', {
-              'lg:hidden': docLinks.length === 0,
+              'lg:hidden': links.length === 0,
             })}
           >
-            <DocLinks links={docLinks}>
+            <DocLinks links={links}>
               <PageGithubLinkButton className="lg:hidden" path={page.path} />
             </DocLinks>
             <PageActions

@@ -25,7 +25,6 @@ const itemMeta: Record<
     hidden?: boolean
   }
 > = {
-  '/toolbox/skills': { badge: 'new' },
   '/toolbox/ui': { hidden: true },
 }
 

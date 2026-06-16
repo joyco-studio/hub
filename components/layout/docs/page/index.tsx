@@ -1,5 +1,5 @@
 import type { ComponentProps, ReactNode } from 'react'
-import { cn } from '../../../../lib/cn'
+import { cn } from '@/lib/utils'
 import { buttonVariants } from '../../../ui/button'
 import { Edit } from 'lucide-react'
 import TextScanIcon from '@/components/icons/text-scan'

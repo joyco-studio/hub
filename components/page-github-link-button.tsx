@@ -25,7 +25,7 @@ export function PageGithubLinkButton({
         rel="noopener noreferrer"
       >
         <GithubIcon className="size-4" />
-        See on GitHub
+        Open in GitHub
         <ArrowUpRight className="size-3" />
       </Link>
     </Button>

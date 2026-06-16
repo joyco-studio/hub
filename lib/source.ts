@@ -14,6 +14,37 @@ export const source = loader({
   plugins: [lucideIconsPlugin()],
 })
 
+// Order each section's pages by creation date, newest first. The `created` date
+// is baked into page data at build time by the `created` plugin (see
+// `source.config.ts`). The `logs` section keeps its own filename-based order.
+sortPageTreeByCreated()
+
+function sortPageTreeByCreated() {
+  const createdByUrl = new Map<string, number>()
+  for (const page of source.getPages()) {
+    const created = (page.data as { created?: Date | string }).created
+    if (created) createdByUrl.set(page.url, new Date(created).getTime())
+  }
+
+  const createdRank = (node: PageTreeNode) =>
+    node.type === 'page' && node.url
+      ? (createdByUrl.get(node.url) ?? -Infinity)
+      : -Infinity
+
+  const sortChildren = (node: PageTreeNode) => {
+    if (!node.children) return
+    // Logs keep their numeric-filename order (reversed in the sidebar).
+    if (node.type === 'folder' && node.$id?.split(':')[1] === 'logs') return
+
+    node.children.sort((a, b) => createdRank(b) - createdRank(a))
+    node.children.forEach(sortChildren)
+  }
+
+  source.pageTree.children.forEach((child) =>
+    sortChildren(child as PageTreeNode)
+  )
+}
+
 export function getPageImage(page: InferPageType<typeof source>) {
   const segments = [...page.slugs]
 
@@ -60,6 +91,7 @@ export type RelatedItem = {
 type PageTreeNode = {
   type?: string
   $id?: string
+  url?: string
   children?: PageTreeNode[]
 }
 

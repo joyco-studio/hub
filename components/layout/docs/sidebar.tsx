@@ -1,6 +1,6 @@
 'use client'
 import * as Base from '../sidebar/base'
-import { cn } from '../../../lib/cn'
+import { cn } from '@/lib/utils'
 import { type ComponentProps, useRef } from 'react'
 import { cva } from 'class-variance-authority'
 import { createPageTreeRenderer } from '../sidebar/page-tree'
