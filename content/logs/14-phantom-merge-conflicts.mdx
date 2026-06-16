@@ -1,0 +1,113 @@
+---
+title: 14 - Phantom Merge Conflicts
+description: Why git shows conflicts in files you never touched when the history under your branch gets rewritten, and how git rebase --onto fixes them without resolving a single marker.
+author: 'justkahdri'
+---
+
+I'm sure you at least once came across a git merge conflict that showed you conflicts in a file you're pretty sure you never touched. Why is that? How do you fix it?
+
+The short answer: **the history underneath your branch got rewritten**. Someone squash-merged the branch you were stacked on, or rebased it, or amended a commit and force-pushed. The exact ceremony doesn't matter, what matters is that the commits your branch is built on now exist on the target branch under different hashes, and git has no idea they're the same work.
+
+The long answer is a story. Let me introduce you to Elvira and Homero.
+
+## A Thursday like any other
+
+Elvira has been working on the new checkout flow in `elvira/checkout`. Homero needs the checkout API for his receipt page, and he's not going to sit around waiting for Elvira's PR to land. So he branches off her branch:
+
+```bash
+main ← elvira/checkout ← homero/receipts
+```
+
+A stacked branch. Totally normal, this is how parallel work on dependent features should happen.
+
+Thursday afternoon, Elvira's PR gets approved. She **squash-merges** it into `main` (the big green button's default), deletes her branch, and goes for a coffee. Homero sees the merge notification and does the responsible thing:
+
+```bash
+git pull origin main
+```
+
+And git explodes. Conflicts in `checkout.ts`. Conflicts in `payment-client.ts`. Files Homero has _never opened_. And that's exactly the clue.
+
+## What git actually saw
+
+**Git identifies commits by hash, not by content.** Two commits that introduce the exact same changes are, as far as git's history model is concerned, complete strangers.
+
+The squash merge took all of Elvira's commits and produced **one brand-new commit** on `main` with the combined diff. Same changes, new hash, no ancestry link back to the originals, which still live inside Homero's branch, because that's where he branched from:
+
+```bash
+main:              A ── B ───────── S        (S = squash of elvira/checkout)
+                          \
+homero/receipts:           e1 ── e2 ── h1 ── h2
+                          └ Elvira's ┘└ Homero's ┘
+                             commits      commits
+```
+
+To merge, git walks back to the **merge base**, the most recent common ancestor of both sides: `B`. The squash `S` is not an ancestor of Homero's branch, so from `B`'s point of view both sides changed the same files: `main` via `S`, `homero/receipts` via `e1` and `e2`. Git can't tell these are the same changes. It just sees two unrelated edits to the same lines and flags a conflict. The conflicts land in Elvira's files because that's where the duplicated work lives.
+
+These are **phantom conflicts**: no real disagreement between the two sides, just the same work wearing two different hashes.
+
+## It's not just squash merges
+
+Any rewrite of the base you're standing on produces the same effect: Elvira rebasing her branch onto latest `main` and force-pushing, an amended commit after review feedback, even a force-pushed `main`. The common denominator is always the same: _your branch contains commits that the target branch now has under a different identity_.
+
+So don't assume the cause, diagnose it. Check whether your own commits ever touched the conflicted files:
+
+```bash
+git log --oneline elvira/checkout..HEAD -- checkout.ts
+```
+
+Empty output for a conflicted file is the smoking gun: the “your side” of that conflict came from inherited history, not from work done on this branch.
+
+## Why you shouldn't resolve them by hand
+
+Hand-resolving phantom conflicts re-applies work that already landed, polluting your branch (and later, the PR diff) with someone else's changes behind a bogus merge commit. Worse, it risks resurrecting stale code: if Elvira's PR got tweaks during review (it usually does), the copy in Homero's history is older than what's on `main`, and picking “ours” brings back the pre-review version.
+
+The conflict is a symptom. The real problem is the duplicated commits, so instead of resolving, you remove them.
+
+## The fix: `git rebase --onto`
+
+Abort whatever operation is in progress (`git merge --abort` or `git rebase --abort`), then transplant **only your own commits** onto the new `main`:
+
+```bash
+git rebase --onto main elvira/checkout homero/receipts
+```
+
+The arguments read as: _take every commit after `elvira/checkout`, up to the tip of `homero/receipts`, and replay them on top of `main`_. (Elvira deleted her branch, remember? If `elvira/checkout` no longer resolves, point at `origin/elvira/checkout` or grab the raw SHA, gotcha #1 below.)
+
+```bash
+git rebase --onto <new-base> <old-base> [<branch>]
+                      │           │         │
+                      │           │         └─ what to move (defaults to the branch you're on)
+                      │           └─ where your own work starts (exclusive)
+                      └─ where it should land
+```
+
+Elvira's commits fall outside the `<old-base>..<branch>` range, so they're simply left behind. Only `h1` and `h2` get replayed, and since they never touched Elvira's files, the rebase completes with **zero conflicts**:
+
+```bash
+main:              A ── B ── S
+                                 \
+homero/receipts:                  h1' ── h2'
+```
+
+A few gotchas worth knowing:
+
+1. **If the parent branch was deleted after merging** (GitHub loves doing this), find the old base in `git log --oneline main..your-branch`: the boundary where the commits stop being yours. Or if you know you have N commits of your own: `git rebase --onto main HEAD~N`.
+2. **If the base was force-pushed instead of squashed**, the pre-rewrite tip lives in the remote-tracking reflog: `git rebase --onto origin/elvira/checkout 'origin/elvira/checkout@{1}'`.
+3. **Don't use `git merge-base main your-branch` as the old base.** It returns `B`, below the parent's commits, and would replay Elvira's work all over again.
+
+Since the rebase rewrites your branch's history, pushing afterwards needs `git push --force-with-lease` (never bare `--force`, the lease aborts if someone else pushed in the meantime).
+
+## Or let Claude handle it
+
+We turned this whole diagnosis into a Claude Code skill: [`resolving-git-conflicts`](/toolbox/skills#resolving-git-conflicts). It's what saved the real-life Homero in this story: he asked Claude to “fix the conflicts” and, instead of blindly editing markers, the skill walked the history, detected the rewritten base, and ran the `rebase --onto` itself. Diagnose before you resolve, with a safety snapshot first and no force-push without asking.
+
+```bash
+pnpx skills add joyco-studio/skills
+```
+
+## Links
+
+- [resolving-git-conflicts skill](/toolbox/skills#resolving-git-conflicts)
+- [`joyco-studio/skills` on GitHub](https://github.com/joyco-studio/skills)
+- [git rebase --onto docs](https://git-scm.com/docs/git-rebase)
