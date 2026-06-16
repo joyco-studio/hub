@@ -1,6 +1,6 @@
 ---
 title: 12 - The Render Pipeline
-description: Deep dive into each stage of the browser rendering pipeline — what runs on main vs compositor thread and what makes each step slow.
+description: Deep dive into each stage of the browser rendering pipeline: what runs on main vs compositor thread and what makes each step slow.
 author: 'matiasperz'
 ---
 
@@ -250,15 +250,15 @@ clip-path: polygon(...); /* complex geometry clipping */
 - **`will-change` on off-screen elements.** Promoted layers stay in GPU memory and get composited even when off-screen. If you promote 200 list items but only 10 are visible, you're paying for 200 layers.
 
 ```css
-/* The browser can cull this — content is clipped to the container */
+/* The browser can cull this: content is clipped to the container */
 .scroll-container {
   overflow: hidden; /* or auto/scroll */
   contain: paint;   /* explicitly tells the browser nothing paints outside */
 }
 
-/* The browser CANNOT cull children here — they might overflow into view */
+/* The browser CANNOT cull children here: they might overflow into view */
 .container {
-  overflow: visible; /* default — no clip boundary */
+  overflow: visible; /* default, no clip boundary */
 }
 ```
 
@@ -271,9 +271,9 @@ clip-path: polygon(...); /* complex geometry clipping */
 }
 ```
 
-This is especially effective for long pages with many sections or cards — the browser only pays the paint (and layout) cost for what's actually near the viewport.
+This is especially effective for long pages with many sections or cards: the browser only pays the paint (and layout) cost for what's actually near the viewport.
 
-**`contain: paint`** is lighter — it doesn't skip layout, but it tells the browser that nothing inside this element paints outside its bounds, which lets the compositor cull the layer when it scrolls out of view:
+**`contain: paint`** is lighter; it doesn't skip layout, but it tells the browser that nothing inside this element paints outside its bounds, which lets the compositor cull the layer when it scrolls out of view:
 
 ```css
 .widget {
@@ -355,13 +355,13 @@ Fix: use `z-index` to keep promoted elements on top, so nothing needs to be impl
 The cost scales with the **area of the element** × the **blur radius**. A small frosted chip sliding around is fine. A full-viewport `backdrop-filter: blur(20px)` panel animating its position will tank your frame rate.
 
 ```css
-/* Fine — small element, compositor handles it easily */
+/* Fine: small element, compositor handles it easily */
 .tooltip {
   backdrop-filter: blur(12px);
   transition: transform 0.2s ease;
 }
 
-/* Expensive — large area means the GPU re-samples a huge region every frame */
+/* Expensive: large area means the GPU re-samples a huge region every frame */
 .fullscreen-overlay {
   backdrop-filter: blur(20px);
   width: 100vw;
