@@ -30,29 +30,6 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
   },
-  icons: {
-    icon: [
-      // SVG with embedded CSS handles dark/light automatically via prefers-color-scheme
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-        sizes: 'any',
-      },
-      // PNG fallbacks for browsers without SVG favicon support
-      {
-        url: '/icon-32x32.png',
-        type: 'image/png',
-        sizes: '32x32',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon-light.png',
-        type: 'image/png',
-        sizes: '32x32',
-        media: '(prefers-color-scheme: light)',
-      },
-    ],
-  },
 }
 
 export const viewport: Viewport = {
