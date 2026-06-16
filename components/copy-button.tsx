@@ -6,20 +6,31 @@ import { Check } from 'lucide-react'
 import CopyIcon from '@/components/icons/copy'
 import { cn } from '@/lib/utils'
 
-export function useCopyToClipboard(timeout = 2000) {
+/**
+ * `hasCopied` flag that auto-resets after `timeout`, shared by the copy hooks.
+ */
+function useCopiedFlag(timeout = 2000) {
   const [hasCopied, setHasCopied] = React.useState(false)
 
   React.useEffect(() => {
-    if (hasCopied) {
-      const timer = setTimeout(() => setHasCopied(false), timeout)
-      return () => clearTimeout(timer)
-    }
+    if (!hasCopied) return
+    const timer = setTimeout(() => setHasCopied(false), timeout)
+    return () => clearTimeout(timer)
   }, [hasCopied, timeout])
 
-  const copy = React.useCallback((value: string) => {
-    navigator.clipboard.writeText(value)
-    setHasCopied(true)
-  }, [])
+  return [hasCopied, setHasCopied] as const
+}
+
+export function useCopyToClipboard(timeout = 2000) {
+  const [hasCopied, setHasCopied] = useCopiedFlag(timeout)
+
+  const copy = React.useCallback(
+    (value: string) => {
+      navigator.clipboard.writeText(value)
+      setHasCopied(true)
+    },
+    [setHasCopied]
+  )
 
   return { hasCopied, copy }
 }
@@ -81,42 +92,38 @@ function serializeRichTextHtml(element: HTMLElement): string {
  * receive readable text.
  */
 export function useCopyRichTextToClipboard(timeout = 2000) {
-  const [hasCopied, setHasCopied] = React.useState(false)
+  const [hasCopied, setHasCopied] = useCopiedFlag(timeout)
 
-  React.useEffect(() => {
-    if (hasCopied) {
-      const timer = setTimeout(() => setHasCopied(false), timeout)
-      return () => clearTimeout(timer)
-    }
-  }, [hasCopied, timeout])
+  const copy = React.useCallback(
+    (element: HTMLElement | null) => {
+      if (!element) return
 
-  const copy = React.useCallback((element: HTMLElement | null) => {
-    if (!element) return
+      const html = serializeRichTextHtml(element)
+      const plain = element.innerText
 
-    const html = serializeRichTextHtml(element)
-    const plain = element.innerText
+      const canWriteRichText =
+        typeof ClipboardItem !== 'undefined' &&
+        typeof navigator.clipboard?.write === 'function'
 
-    const canWriteRichText =
-      typeof ClipboardItem !== 'undefined' &&
-      typeof navigator.clipboard?.write === 'function'
-
-    if (canWriteRichText) {
-      const item = new ClipboardItem({
-        'text/html': new Blob([html], { type: 'text/html' }),
-        'text/plain': new Blob([plain], { type: 'text/plain' }),
-      })
-      navigator.clipboard
-        .write([item])
-        .then(() => setHasCopied(true))
-        .catch(() => {
-          navigator.clipboard.writeText(plain)
-          setHasCopied(true)
+      if (canWriteRichText) {
+        const item = new ClipboardItem({
+          'text/html': new Blob([html], { type: 'text/html' }),
+          'text/plain': new Blob([plain], { type: 'text/plain' }),
         })
-    } else {
-      navigator.clipboard.writeText(plain)
-      setHasCopied(true)
-    }
-  }, [])
+        navigator.clipboard
+          .write([item])
+          .then(() => setHasCopied(true))
+          .catch(() => {
+            navigator.clipboard.writeText(plain)
+            setHasCopied(true)
+          })
+      } else {
+        navigator.clipboard.writeText(plain)
+        setHasCopied(true)
+      }
+    },
+    [setHasCopied]
+  )
 
   return { hasCopied, copy }
 }
