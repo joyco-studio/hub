@@ -25,11 +25,60 @@ export function useCopyToClipboard(timeout = 2000) {
 }
 
 /**
+ * Build clean rich-text HTML from a rendered content element.
+ *
+ * The on-page DOM carries things that don't belong in pasted content:
+ * interactive chrome (copy / download buttons) and syntax-highlighted code
+ * blocks whose per-line `<span data-line>` structure and `--shiki-*` colors
+ * collapse the moment a WYSIWYG target (e.g. x.com articles) strips classes
+ * and CSS. We clone, drop the chrome, and rebuild every code block as a plain
+ * `<pre><code>` with real newlines so it survives as an actual code block.
+ */
+function serializeRichTextHtml(element: HTMLElement): string {
+  const clone = element.cloneNode(true) as HTMLElement
+
+  // Drop interactive chrome (copy buttons, download buttons, …) — it should
+  // never end up in the pasted output.
+  clone.querySelectorAll('button, [data-slot="copy-button"]').forEach((el) => {
+    el.remove()
+  })
+
+  // Flatten highlighted code blocks into plain <pre><code> with real newlines.
+  clone.querySelectorAll('pre').forEach((pre) => {
+    const lines = pre.querySelectorAll('[data-line], .line')
+    const code =
+      lines.length > 0
+        ? Array.from(lines)
+            .map((line) => line.textContent ?? '')
+            .join('\n')
+        : (pre.textContent ?? '')
+
+    const newPre = document.createElement('pre')
+    const newCode = document.createElement('code')
+    newCode.textContent = code
+    newPre.appendChild(newCode)
+    pre.replaceWith(newPre)
+  })
+
+  // Resolve relative links/images to absolute so they still work once pasted
+  // off-site.
+  clone.querySelectorAll('a[href]').forEach((a) => {
+    a.setAttribute('href', (a as HTMLAnchorElement).href)
+  })
+  clone.querySelectorAll('img[src]').forEach((img) => {
+    img.setAttribute('src', (img as HTMLImageElement).src)
+  })
+
+  return clone.innerHTML
+}
+
+/**
  * Copy rendered content to the clipboard as rich text (WYSIWYG).
  *
- * Writes both `text/html` and a `text/plain` fallback so pasting into a
- * rich-text editor (Google Docs, Notion, email, …) preserves formatting,
- * while plain-text targets still receive readable text.
+ * Writes both a sanitized `text/html` payload and a `text/plain` fallback so
+ * pasting into a rich-text editor (x.com articles, Google Docs, Notion, email,
+ * …) preserves formatting and code blocks, while plain-text targets still
+ * receive readable text.
  */
 export function useCopyRichTextToClipboard(timeout = 2000) {
   const [hasCopied, setHasCopied] = React.useState(false)
@@ -44,7 +93,7 @@ export function useCopyRichTextToClipboard(timeout = 2000) {
   const copy = React.useCallback((element: HTMLElement | null) => {
     if (!element) return
 
-    const html = element.innerHTML
+    const html = serializeRichTextHtml(element)
     const plain = element.innerText
 
     const canWriteRichText =
