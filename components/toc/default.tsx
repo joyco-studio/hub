@@ -1,6 +1,6 @@
 'use client'
 import { useI18n } from 'fumadocs-ui/contexts/i18n'
-import { cn } from '../../lib/cn'
+import { cn } from '@/lib/utils'
 import { type ComponentProps, useRef } from 'react'
 import { mergeRefs } from '../../lib/merge-refs'
 import { TocThumb, useTOCItems } from './index'

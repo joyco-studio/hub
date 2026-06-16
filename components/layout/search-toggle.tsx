@@ -5,7 +5,7 @@ import type { VariantProps } from 'class-variance-authority'
 import { Search } from 'lucide-react'
 import { useSearchContext } from 'fumadocs-ui/contexts/search'
 import { useI18n } from 'fumadocs-ui/contexts/i18n'
-import { cn } from '../../lib/cn'
+import { cn } from '@/lib/utils'
 import { buttonVariants } from '../ui/button'
 
 interface SearchToggleProps

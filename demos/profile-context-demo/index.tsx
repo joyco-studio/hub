@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { cn } from '@/lib/cn'
+import { cn } from '@/lib/utils'
 import { ProfileProvider, useProfileContext } from './profile-context'
 import type { CurrentUser, UserProfile } from './types'
 import { EyeIcon } from 'lucide-react'

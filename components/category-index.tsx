@@ -4,9 +4,9 @@ import { CategoryIndexBadge } from './category-index-badge'
 import { PreviewCard } from '@/components/cards'
 import { GltfIcon, MetriIcon, SunoIcon } from '@/components/icons'
 
-// Per-library brand logos shown on the highlighted toolbox cards. Slugs not
-// listed here fall back to the default toolbox icon.
-const libraryIcons: Record<string, React.ReactNode> = {
+// Brand logos shown on the featured toolbox cards. Slugs not listed here fall
+// back to the default toolbox icon.
+const featuredIcons: Record<string, React.ReactNode> = {
   suno: <SunoIcon className="text-primary-foreground size-12" />,
   gltf: <GltfIcon className="text-primary-foreground size-12" />,
   metri: <MetriIcon className="text-primary-foreground size-12" />,
@@ -18,6 +18,7 @@ import { getPageViews } from '@/lib/stats'
 import { Badge } from './ui/badge'
 import { EyeIcon } from 'lucide-react'
 import { Fragment } from 'react'
+import { cn } from '@/lib/utils'
 
 type PageTreeNode = {
   type?: string
@@ -59,25 +60,15 @@ export async function CategoryIndex({
 
   if (category === 'logs') pages.reverse()
 
-  // Toolbox: pull libraries out to highlight as cards, and order the remaining
-  // tools alphabetically by title.
+  // Toolbox: pull featured tools out to highlight as cards. Both groups keep the
+  // page-tree order (creation date, newest first).
   const isToolbox = category === 'toolbox'
-  // Libraries we don't want highlighted as cards — they still appear in the
-  // regular tools list below.
-  const excludeFromHighlight = new Set(['susano'])
-  const isHighlightedLibrary = (page: (typeof pages)[number]) =>
-    page.data.type === 'library' &&
-    !excludeFromHighlight.has(page.slugs[page.slugs.length - 1])
-  const libraryPages = isToolbox ? pages.filter(isHighlightedLibrary) : []
+  const featuredPages = isToolbox
+    ? pages.filter((page) => page.data.featured)
+    : []
   const listPages = isToolbox
-    ? pages.filter((page) => !isHighlightedLibrary(page))
+    ? pages.filter((page) => !page.data.featured)
     : pages
-  if (isToolbox) {
-    const byTitle = (a: (typeof pages)[number], b: (typeof pages)[number]) =>
-      a.data.title.localeCompare(b.data.title)
-    libraryPages.sort(byTitle)
-    listPages.sort(byTitle)
-  }
 
   const typeMap: Record<keyof RegistryCounts, ItemType> = {
     components: 'component',
@@ -106,10 +97,12 @@ export async function CategoryIndex({
         )
       : null
 
+  const headingClassName = 'mb-6 text-2xl font-semibold text-foreground'
+
   return (
     <div className="not-prose">
       {category === 'components' && (
-        <h3 className="mb-6 flex items-center gap-4 text-2xl font-semibold">
+        <h3 className={cn('flex items-center gap-4', headingClassName)}>
           All {label}{' '}
           <CategoryIndexBadge
             variant="secondary"
@@ -118,11 +111,11 @@ export async function CategoryIndex({
           />
         </h3>
       )}
-      {isToolbox && libraryPages.length > 0 && (
+      {isToolbox && featuredPages.length > 0 && (
         <div className="mb-10">
-          <h3 className="mb-6 text-2xl font-semibold">Libraries</h3>
+          <h3 className={headingClassName}>Featured</h3>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {libraryPages.map((page) => {
+            {featuredPages.map((page) => {
               const slug = page.slugs[page.slugs.length - 1]
               return (
                 <PreviewCard
@@ -132,7 +125,7 @@ export async function CategoryIndex({
                   type={type}
                   href={page.url}
                   showBadge={false}
-                  icon={libraryIcons[slug]}
+                  icon={featuredIcons[slug]}
                 />
               )
             })}

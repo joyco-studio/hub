@@ -1,4 +1,5 @@
 import lastModified from 'fumadocs-mdx/plugins/last-modified'
+import created from './lib/plugins/created'
 import rehypePrettyCode from 'rehype-pretty-code'
 import type { Element } from 'hast'
 import { z } from 'zod'
@@ -11,7 +12,7 @@ import {
 import { remarkMdxMermaid } from 'fumadocs-core/mdx-plugins'
 
 import { transformers } from './lib/mdx'
-import { cn } from './lib/utils'
+import { cn } from '@/lib/utils'
 
 // You can customise Zod schemas for frontmatter and `meta.json` here
 // see https://fumadocs.dev/docs/mdx/collections
@@ -24,8 +25,10 @@ export const docs = defineDocs({
       type: z
         .enum(['component', 'game', 'effect', 'canvas', 'library', 'lib'])
         .default('component'),
+      /** Surface this page in the section's "Featured" group. */
+      featured: z.boolean().default(false),
       repo: z.string().optional(),
-      docLinks: z
+      links: z
         .array(
           z.object({
             label: z.string(),
@@ -78,5 +81,5 @@ export default defineConfig({
       return plugins
     },
   },
-  plugins: [lastModified()],
+  plugins: [lastModified(), created()],
 })
