@@ -57,7 +57,7 @@ export const maxOf = (vals: number[], fallback: number) => Math.max(fallback, ..
 
 That's the whole thing. About twenty lines, and it removes an entire category of bug.
 
-Here's it in use. Say you need to lock body scroll, and several surfaces want that at once — a modal, a slide-out cart, a fullscreen menu. With a plain boolean, closing the modal while the cart is still open flips scroll back on and breaks the cart. Give each surface a slot instead:
+Here's it in use. Say you need to lock body scroll, and several surfaces want that at once: a modal, a slide-out cart, a fullscreen menu. With a plain boolean, closing the modal while the cart is still open flips scroll back on and breaks the cart. Give each surface a slot instead:
 
 ```ts showLineNumbers
 /** Combinator: locked if any source wants it locked. */
