@@ -32,5 +32,5 @@ cards. The `Chat` component never had to learn any of this.
 
 `app/api/chat/route.ts` runs `streamText` with a single `searchComponents` tool
 that queries the registry's own pages, then returns
-`result.toUIMessageStreamResponse()`. The model is Google Gemini (free tier) via
-`@ai-sdk/google` — swap one line to change providers or models.
+`result.toUIMessageStreamResponse()`. The model is Groq (free tier) via
+`@ai-sdk/groq` — swap one line to change providers or models.

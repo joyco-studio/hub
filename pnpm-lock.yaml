@@ -8,9 +8,9 @@ importers:
 
   .:
     dependencies:
-      '@ai-sdk/google':
-        specifier: ^3.0.83
-        version: 3.0.83(zod@4.1.13)
+      '@ai-sdk/groq':
+        specifier: ^3.0.42
+        version: 3.0.42(zod@4.1.13)
       '@ai-sdk/react':
         specifier: ^3.0.209
         version: 3.0.209(react@19.2.0)(zod@4.1.13)
@@ -249,8 +249,8 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/google@3.0.83':
-    resolution: {integrity: sha512-Pz7aCX0dy+5x+r4K/37HbLZNaPtPL4q2NduzJW64VffLv5sI9Nb478wAd7PlH2r2asiypJsz/Jerf9draTciUA==}
+  '@ai-sdk/groq@3.0.42':
+    resolution: {integrity: sha512-3qJSxYTSxCLIxArQSP5hvaRmo4DkqNrFatDzyosCTSCqzWBGP7Xu3zeYzf+HkGuY0gxI9f6C2aHoUXvUmTqEkA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -5688,7 +5688,7 @@ snapshots:
       '@vercel/oidc': 3.2.0
       zod: 4.1.13
 
-  '@ai-sdk/google@3.0.83(zod@4.1.13)':
+  '@ai-sdk/groq@3.0.42(zod@4.1.13)':
     dependencies:
       '@ai-sdk/provider': 3.0.10
       '@ai-sdk/provider-utils': 4.0.30(zod@4.1.13)

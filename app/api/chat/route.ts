@@ -1,12 +1,12 @@
 import { convertToModelMessages, streamText, stepCountIs, tool } from 'ai'
-import { google } from '@ai-sdk/google'
+import { groq } from '@ai-sdk/groq'
 import { z } from 'zod'
 import { searchRegistryComponents } from '@/lib/registry-search'
 import type { RegistryChatUIMessage } from '@/demos/ai-sdk-chat/types'
 
 export const maxDuration = 30
 
-const REGISTRY_CHAT_MODEL = 'gemini-2.0-flash'
+const REGISTRY_CHAT_MODEL = 'llama-3.3-70b-versatile'
 
 const MAX_MESSAGES = 20
 const MAX_CHARS_PER_MESSAGE = 4000
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
   if (tooLong) return new Response('Message too long', { status: 400 })
 
   const result = streamText({
-    model: google(REGISTRY_CHAT_MODEL),
+    model: groq(REGISTRY_CHAT_MODEL),
     system: SYSTEM_PROMPT,
     messages: await convertToModelMessages(messages),
     stopWhen: stepCountIs(2),
