@@ -20,6 +20,26 @@ A Cluster is an **invisible layout scaffold**. It has no background — it only 
 
 This replaces the traditional "Card" pattern (wrapper with bg + padding). In JOYCO's design system, **containers are transparent — children own their own backgrounds**.
 
+### The gap
+
+The gap between cluster children is the design-system token `--gap: 0.25rem` (4px), applied via the `gap-gap` Tailwind utility (the base class on every Cluster). This tight spacing is what produces the bento/console look: children read as adjacent panels separated by a hairline of background, not as loosely spaced elements.
+
+### The bg cascade
+
+The cascade is wired through three identifiers:
+
+1. The Cluster carries `data-slot="cluster"`.
+2. The `bg` prop sets the `--cluster-bg` CSS variable on the Cluster (e.g. `[--cluster-bg:var(--color-muted)]`).
+3. A single global, zero-specificity rule applies that variable to every direct child:
+
+```css
+:where([data-slot='cluster'] > *) {
+  background-color: var(--cluster-bg, transparent);
+}
+```
+
+Because the selector uses `:where()`, it has zero specificity, so any `bg-*` utility on a child overrides it without a fight. Target `[data-slot='cluster']` or `--cluster-bg` if you need to extend or override this mechanism.
+
 ## Usage
 
 ```tsx
