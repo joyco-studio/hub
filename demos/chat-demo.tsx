@@ -79,7 +79,7 @@ const initialChat: Chat[] = [
     avatar: PEK_AVATAR,
     fallback: 'P',
     name: 'Pek',
-    content: "Bro that's 100% AI-generated 💀",
+    content: 'lmao __JOYBOY__ vibe-coded the whole thing 😭',
     role: 'peer',
     timestamp: new Date('2025-12-26T01:02:00.000Z'),
   },
