@@ -30,7 +30,12 @@ export function CardLink({
       className="group/card-title hocus:bg-accent/50 hocus:border-accent transition-colors"
       asChild
     >
-      <Link className="not-prose contents" href={href} target={target} rel={rel}>
+      <Link
+        className="not-prose contents"
+        href={href}
+        target={target}
+        rel={rel}
+      >
         <CardHeader>
           <CardTitle className="flex items-center gap-1 [&>svg]:size-4 [&>svg]:stroke-3">
             {title}

@@ -98,7 +98,7 @@ export function AiSdkChatDemo() {
             ))}
             {status === 'error' && error && (
               <div aria-live="polite" className="px-3 py-2">
-                <p className="text-sm text-destructive">
+                <p className="text-destructive text-sm">
                   Something went wrong. Try sending that again.
                 </p>
               </div>
