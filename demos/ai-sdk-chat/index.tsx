@@ -20,7 +20,7 @@ import { ResultCards } from './result-cards'
 
 export function AiSdkChatDemo() {
   const [input, setInput] = React.useState('')
-  const { messages, sendMessage, status, stop } =
+  const { messages, sendMessage, status, stop, error } =
     useChat<RegistryChatUIMessage>({
       transport: new DefaultChatTransport({ api: '/api/chat' }),
     })
@@ -90,6 +90,13 @@ export function AiSdkChatDemo() {
                 })}
               </React.Fragment>
             ))}
+            {status === 'error' && error && (
+              <div aria-live="polite" className="px-3 py-2">
+                <p className="text-sm text-destructive">
+                  Something went wrong. Try sending that again.
+                </p>
+              </div>
+            )}
           </ChatMessages>
         </ChatViewport>
 
