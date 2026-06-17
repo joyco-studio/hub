@@ -54,6 +54,63 @@ export function getPageImage(page: InferPageType<typeof source>) {
   }
 }
 
+/**
+ * Resolve a category's pages in the same order the `CategoryIndex` component
+ * renders them, so the LLM/raw markdown matches what a browser sees.
+ */
+function getCategoryPages(category: string) {
+  const pages = source
+    .getPages()
+    .filter((page) => page.slugs[0] === category && page.slugs.length > 1)
+
+  // Match the page-tree (meta.json / creation-date) order used in the sidebar.
+  const folder = getTopLevelFolder(category)
+  const order = (folder?.children ?? [])
+    .filter((child) => child.type === 'page' && child.url)
+    .map((child) => child.url!)
+
+  if (order.length > 0) {
+    const orderMap = new Map(order.map((url, i) => [url, i]))
+    pages.sort(
+      (a, b) =>
+        (orderMap.get(a.url) ?? Infinity) - (orderMap.get(b.url) ?? Infinity)
+    )
+  }
+
+  if (category === 'logs') pages.reverse()
+
+  return pages
+}
+
+/**
+ * Render a `<CategoryIndex category="..." />` MDX tag as a plain markdown list,
+ * one line per entry, so non-browser consumers (LLMs, curl, scripts) can scan
+ * titles and links without executing the React component.
+ */
+const escapeMarkdownLinkText = (text: string) =>
+  text.replace(/[[\]()]/g, '\\$&')
+
+function renderCategoryIndexAsMarkdown(category: string): string {
+  const pages = getCategoryPages(category)
+
+  return pages
+    .map((page) => {
+      const logNumber = getLogNumber(page.slugs)
+      const rawTitle = logNumber
+        ? stripLogPrefixFromTitle(page.data.title, logNumber)
+        : page.data.title
+      const title = escapeMarkdownLinkText(rawTitle)
+      const description = page.data.description
+        ? ` — ${escapeMarkdownLinkText(page.data.description)}`
+        : ''
+      return `- [${title}](${page.url})${description}`
+    })
+    .join('\n')
+}
+
+const categoryIndexRegex =
+  /<CategoryIndex[\s\S]*?category="([^"]+)"[\s\S]*?(?:\/>|<\/CategoryIndex>)/g
+
 export async function getLLMText(page: InferPageType<typeof source>) {
   const llmCompanion = path.join(
     process.cwd(),
@@ -67,7 +124,13 @@ export async function getLLMText(page: InferPageType<typeof source>) {
   }
 
   const raw = await page.data.getText('raw')
-  const processed = processMdxForLLMs(raw)
+  let processed = processMdxForLLMs(raw)
+
+  // Expand `<CategoryIndex category="..." />` into a real markdown list so the
+  // raw/.md representation lists every entry instead of an opaque JSX tag.
+  processed = processed.replace(categoryIndexRegex, (_match, category) =>
+    renderCategoryIndexAsMarkdown(category)
+  )
 
   let libraryBody = ''
   if (page.data.type === 'library' && page.data.repo) {
