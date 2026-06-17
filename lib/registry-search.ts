@@ -1,63 +1,90 @@
 import { source } from '@/lib/source'
+import { getExperiments } from '@/lib/lab'
 
-export type RegistryComponentResult = {
+export type RegistryResultType = 'component' | 'toolbox' | 'log' | 'experiment'
+
+export type RegistrySearchResult = {
   name: string
   title: string
   description: string
   href: string
+  type: RegistryResultType
 }
 
-const DEFAULT_LIMIT = 12
+// Doc sections we expose (slug[0] -> result type).
+const SECTION_TYPE: Record<string, RegistryResultType> = {
+  components: 'component',
+  toolbox: 'toolbox',
+  logs: 'log',
+}
 
-// Component docs live under the `components` section. Their fumadocs `page.url`
-// is the canonical href; the last slug segment is the component name.
-function componentPages() {
+// Extra words folded into each item's search text so category-style queries
+// ("a tool", "a log", "a lab") match the right kind of item.
+const TYPE_SYNONYMS: Record<RegistryResultType, string> = {
+  component: 'component',
+  toolbox: 'toolbox tool tooling utility',
+  log: 'log article blog post writeup',
+  experiment: 'lab experiment demo',
+}
+
+const DEFAULT_LIMIT = 8
+
+type IndexedItem = { result: RegistrySearchResult; haystack: string }
+
+function docItems(): IndexedItem[] {
   return source
     .getPages()
-    .filter((page) => page.slugs[0] === 'components' && page.slugs.length > 1)
+    .filter((page) => page.slugs.length > 1 && SECTION_TYPE[page.slugs[0]])
+    .map((page) => {
+      const type = SECTION_TYPE[page.slugs[0]]
+      const name = page.slugs[page.slugs.length - 1]
+      const title = page.data.title ?? name
+      const description = page.data.description ?? ''
+      return {
+        result: { name, title, description, href: page.url, type },
+        haystack:
+          `${name} ${title} ${description} ${TYPE_SYNONYMS[type]}`.toLowerCase(),
+      }
+    })
 }
 
-type ComponentPage = ReturnType<typeof componentPages>[number]
-
-function toResult(page: ComponentPage): RegistryComponentResult {
-  const name = page.slugs[page.slugs.length - 1]
-  return {
-    name,
-    title: page.data.title ?? name,
-    description: page.data.description ?? '',
-    href: page.url,
-  }
+async function labItems(): Promise<IndexedItem[]> {
+  const { experiments } = await getExperiments()
+  return experiments.map((experiment) => ({
+    result: {
+      name: experiment.slug,
+      title: experiment.title,
+      description: experiment.description,
+      href: `/lab/${experiment.slug}`,
+      type: 'experiment' as const,
+    },
+    haystack:
+      `${experiment.slug} ${experiment.title} ${experiment.description} ${(experiment.tags ?? []).join(' ')} ${TYPE_SYNONYMS.experiment}`.toLowerCase(),
+  }))
 }
 
-export function searchRegistryComponents(
+// Searches the whole registry — components, toolbox tools, logs, and lab
+// experiments — so the assistant can surface whatever the user asks for.
+export async function searchRegistry(
   query: string,
   limit: number = DEFAULT_LIMIT
-): RegistryComponentResult[] {
-  const pages = componentPages()
+): Promise<RegistrySearchResult[]> {
   const normalized = query.trim().toLowerCase()
+  if (!normalized) return []
 
-  // Generic / empty queries ("list the components") return the full set.
-  if (!normalized) return pages.slice(0, limit).map(toResult)
-
+  const items = [...docItems(), ...(await labItems())]
   const terms = normalized.split(/\s+/)
-  const scored = pages
-    .map((page) => {
-      const name = page.slugs[page.slugs.length - 1]
-      const haystack =
-        `${name} ${page.data.title ?? ''} ${page.data.description ?? ''}`.toLowerCase()
-      const score = terms.reduce(
-        (acc, term) => acc + (haystack.includes(term) ? 1 : 0),
+
+  return items
+    .map((item) => ({
+      item,
+      score: terms.reduce(
+        (acc, term) => acc + (item.haystack.includes(term) ? 1 : 0),
         0
-      )
-      return { page, score }
-    })
+      ),
+    }))
     .filter((entry) => entry.score > 0)
     .sort((a, b) => b.score - a.score)
-
-  // Fall back to the full set so the UI always has cards to render.
-  const top = scored.length
-    ? scored.slice(0, limit).map((entry) => entry.page)
-    : pages.slice(0, limit)
-
-  return top.map(toResult)
+    .slice(0, limit)
+    .map((entry) => entry.item.result)
 }
