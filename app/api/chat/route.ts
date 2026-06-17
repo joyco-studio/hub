@@ -11,6 +11,21 @@ const REGISTRY_CHAT_MODEL = 'openai/gpt-oss-120b'
 const MAX_MESSAGES = 20
 const MAX_CHARS_PER_MESSAGE = 4000
 
+const RATE_LIMIT = 20
+const RATE_WINDOW_MS = 60_000
+const rateHits = new Map<string, { count: number; resetAt: number }>()
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now()
+  const entry = rateHits.get(ip)
+  if (!entry || now > entry.resetAt) {
+    rateHits.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS })
+    return false
+  }
+  entry.count += 1
+  return entry.count > RATE_LIMIT
+}
+
 const SYSTEM_PROMPT = [
   'You are the JOYCO registry assistant.',
   'Help users find anything in the JOYCO registry: components, toolbox tools, engineering logs, and lab experiments.',
@@ -27,6 +42,12 @@ const bodySchema = z.object({
 })
 
 export async function POST(req: Request) {
+  const ip =
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
+  if (isRateLimited(ip)) {
+    return new Response('Too many requests', { status: 429 })
+  }
+
   const json = await req.json().catch(() => null)
   const parsed = bodySchema.safeParse(json)
 
@@ -55,12 +76,9 @@ export async function POST(req: Request) {
         inputSchema: z.object({
           query: z.string().describe('What the user is looking for'),
         }),
-        execute: async ({ query }) => {
-          // Demo-only: Groq resolves near-instantly, so pause briefly to let the
-          // "Searching the registry…" shimmer be visible before the cards render.
-          await new Promise((resolve) => setTimeout(resolve, 2000))
-          return { results: await searchRegistry(query) }
-        },
+        execute: async ({ query }) => ({
+          results: await searchRegistry(query),
+        }),
       }),
     },
   })

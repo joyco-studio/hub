@@ -16,8 +16,7 @@ import {
   ChatMessageAvatar,
 } from '@/registry/components/chat'
 import type { RegistryChatUIMessage } from './types'
-import { ShimmerRow } from './shimmer-row'
-import { ResultCards } from './result-cards'
+import { SearchTool } from './search-tool'
 import { ThinkingRow } from './thinking-row'
 
 const AGENT_AVATAR = '/static/c/scrap.webp'
@@ -31,8 +30,6 @@ export function AiSdkChatDemo() {
 
   const isStreaming = status === 'submitted' || status === 'streaming'
 
-  // Show the "thinking" indicator while the assistant is working but hasn't
-  // produced a visible part yet (e.g. still reasoning, before the shimmer/text).
   const lastMessage = messages[messages.length - 1]
   const assistantStarted =
     lastMessage?.role === 'assistant' &&
@@ -90,39 +87,13 @@ export function AiSdkChatDemo() {
                   }
 
                   if (part.type === 'tool-searchComponents') {
-                    switch (part.state) {
-                      case 'input-streaming':
-                      case 'input-available':
-                        return (
-                          <ShimmerRow
-                            key={key}
-                            label="Searching the registry…"
-                          />
-                        )
-                      case 'output-available':
-                        return (
-                          <ResultCards
-                            key={key}
-                            results={part.output.results}
-                          />
-                        )
-                      case 'output-error':
-                        return (
-                          <ChatMessageRow key={key} variant="peer">
-                            <ChatMessageAvatar
-                              src={AGENT_AVATAR}
-                              alt="JOYCO assistant"
-                              fallback="J"
-                            />
-                            <ChatMessageBubble>
-                              Couldn&apos;t search the registry just now — try
-                              again?
-                            </ChatMessageBubble>
-                          </ChatMessageRow>
-                        )
-                      default:
-                        return null
-                    }
+                    return (
+                      <SearchTool
+                        key={key}
+                        part={part}
+                        avatarSrc={AGENT_AVATAR}
+                      />
+                    )
                   }
 
                   return null
