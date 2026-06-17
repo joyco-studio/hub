@@ -9,6 +9,8 @@
 @import './theming.css' layer(base);
 @import './utilities.css';
 
+@source '../../node_modules/streamdown/dist/index.js';
+
 @custom-variant hocus (&:is(:hover, :focus-visible));
 @custom-variant dark (&:where(.dark, .dark *));
 @custom-variant radio (&:where(.radio, .radio *));

@@ -67,6 +67,7 @@
     "shadcn": "^3.5.0",
     "shiki": "^3.23.0",
     "stats-gl": "^4.1.0",
+    "streamdown": "^2.5.0",
     "tailwind-merge": "^3.4.0",
     "tailwindcss-better-gradient": "^0.0.9",
     "three": "^0.183.2",

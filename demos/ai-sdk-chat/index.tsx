@@ -4,6 +4,7 @@ import * as React from 'react'
 import { ArrowUpIcon, Square } from 'lucide-react'
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
+import { Streamdown } from 'streamdown'
 import {
   Chat,
   ChatInputArea,
@@ -81,7 +82,13 @@ export function AiSdkChatDemo() {
                             fallback="J"
                           />
                         )}
-                        <ChatMessageBubble>{part.text}</ChatMessageBubble>
+                        <ChatMessageBubble>
+                          {message.role === 'user' ? (
+                            part.text
+                          ) : (
+                            <Streamdown>{part.text}</Streamdown>
+                          )}
+                        </ChatMessageBubble>
                       </ChatMessageRow>
                     ) : null
                   }
