@@ -13,10 +13,13 @@ import {
   ChatMessages,
   ChatMessageRow,
   ChatMessageBubble,
+  ChatMessageAvatar,
 } from '@/registry/components/chat'
 import type { RegistryChatUIMessage } from './types'
 import { ShimmerRow } from './shimmer-row'
 import { ResultCards } from './result-cards'
+
+const AGENT_AVATAR = '/static/c/scrap.webp'
 
 export function AiSdkChatDemo() {
   const [input, setInput] = React.useState('')
@@ -40,6 +43,11 @@ export function AiSdkChatDemo() {
         <ChatViewport className="h-96">
           <ChatMessages className="w-full py-3">
             <ChatMessageRow variant="peer">
+              <ChatMessageAvatar
+                src={AGENT_AVATAR}
+                alt="JOYCO assistant"
+                fallback="J"
+              />
               <ChatMessageBubble>
                 Hi! I&apos;m the registry assistant. Tell me what you&apos;re
                 building and I&apos;ll find components for you.
@@ -56,6 +64,13 @@ export function AiSdkChatDemo() {
                         key={key}
                         variant={message.role === 'user' ? 'self' : 'peer'}
                       >
+                        {message.role !== 'user' && (
+                          <ChatMessageAvatar
+                            src={AGENT_AVATAR}
+                            alt="JOYCO assistant"
+                            fallback="J"
+                          />
+                        )}
                         <ChatMessageBubble>{part.text}</ChatMessageBubble>
                       </ChatMessageRow>
                     ) : null
@@ -81,6 +96,11 @@ export function AiSdkChatDemo() {
                       case 'output-error':
                         return (
                           <ChatMessageRow key={key} variant="peer">
+                            <ChatMessageAvatar
+                              src={AGENT_AVATAR}
+                              alt="JOYCO assistant"
+                              fallback="J"
+                            />
                             <ChatMessageBubble>
                               Couldn&apos;t search the registry just now — try
                               again?
