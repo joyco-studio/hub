@@ -6,7 +6,7 @@ import type { RegistryChatUIMessage } from '@/demos/ai-sdk-chat/types'
 
 export const maxDuration = 30
 
-const REGISTRY_CHAT_MODEL = 'llama-3.3-70b-versatile'
+const REGISTRY_CHAT_MODEL = 'openai/gpt-oss-120b'
 
 const MAX_MESSAGES = 20
 const MAX_CHARS_PER_MESSAGE = 4000
@@ -59,5 +59,10 @@ export async function POST(req: Request) {
     },
   })
 
-  return result.toUIMessageStreamResponse()
+  return result.toUIMessageStreamResponse({
+    onError: (error) => {
+      console.error('[api/chat]', error)
+      return 'An error occurred.'
+    },
+  })
 }
