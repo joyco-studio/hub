@@ -87,17 +87,21 @@ function getCategoryPages(category: string) {
  * one line per entry, so non-browser consumers (LLMs, curl, scripts) can scan
  * titles and links without executing the React component.
  */
+const escapeMarkdownLinkText = (text: string) =>
+  text.replace(/[[\]()]/g, '\\$&')
+
 function renderCategoryIndexAsMarkdown(category: string): string {
   const pages = getCategoryPages(category)
 
   return pages
     .map((page) => {
       const logNumber = getLogNumber(page.slugs)
-      const title = logNumber
+      const rawTitle = logNumber
         ? stripLogPrefixFromTitle(page.data.title, logNumber)
         : page.data.title
+      const title = escapeMarkdownLinkText(rawTitle)
       const description = page.data.description
-        ? ` — ${page.data.description}`
+        ? ` — ${escapeMarkdownLinkText(page.data.description)}`
         : ''
       return `- [${title}](${page.url})${description}`
     })
