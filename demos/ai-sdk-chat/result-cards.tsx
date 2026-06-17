@@ -1,6 +1,14 @@
 'use client'
 
-import { CardLink, CardLinkGrid } from '@/components/card-link'
+import Link from 'next/link'
+import { ArrowRightIcon } from 'lucide-react'
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { CardLinkGrid } from '@/components/card-link'
 import type { RegistryComponentResult } from '@/lib/registry-search'
 
 export function ResultCards({
@@ -38,19 +46,27 @@ export function ResultCards({
       }</style>
       <CardLinkGrid>
         {results.map((result, i) => (
-          <div
+          <Link
             key={result.name}
             data-card
+            href={result.href}
+            target="_blank"
+            rel="noopener noreferrer"
             style={{ animationDelay: `${i * 50}ms` }}
+            className="not-prose group/card-title block h-full"
           >
-            <CardLink
-              href={result.href}
-              title={result.title}
-              description={result.description}
-              target="_blank"
-              rel="noopener noreferrer"
-            />
-          </div>
+            <Card className="hocus:bg-accent/50 hocus:border-accent h-full transition-colors">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-1 [&>svg]:size-4 [&>svg]:stroke-3">
+                  {result.title}
+                  <ArrowRightIcon className="group-hocus/card-title:translate-x-1 transition-transform" />
+                </CardTitle>
+                <CardDescription className="line-clamp-2">
+                  {result.description}
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
         ))}
       </CardLinkGrid>
     </div>
