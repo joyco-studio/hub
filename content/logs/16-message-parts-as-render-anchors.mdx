@@ -1,0 +1,36 @@
+---
+title: 16 - Message Parts as Render Anchors
+description: Wiring the headless Chat component to the AI SDK, where each tool call carries its own data so rich UI renders from the message instead of a shared global.
+author: 'alejopequeno'
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+Our `Chat` component is headless on purpose: it knows about viewport, scroll, and
+input, and nothing about where messages come from. That makes it a clean target
+for the Vercel AI SDK, whose `useChat` reduces a stream into `messages[].parts[]`.
+
+<ComponentPreview name="ai-sdk-chat" iframe height={560} />
+
+## The pattern
+
+Every assistant message is an ordered list of parts. A text part is a bubble. A
+tool call is its own part — `tool-searchComponents` — and it carries its **own**
+input and output. The card grid renders from `part.output`, not from a shared
+piece of component state. That single decision removes a whole class of bug: when
+two tool calls happen in one conversation, each renders the data it was created
+with, instead of every card reading the last value some global was set to.
+
+## Mapping parts onto the headless Chat
+
+`useChat` gives you messages; you decide how each part renders. Text parts become
+`ChatMessageRow` + `ChatMessageBubble`. The tool part switches on its lifecycle:
+`input-streaming`/`input-available` show a shimmer, `output-available` shows the
+cards. The `Chat` component never had to learn any of this.
+
+## The backend is one route
+
+`app/api/chat/route.ts` runs `streamText` with a single `searchComponents` tool
+that queries the registry's own pages, then returns
+`result.toUIMessageStreamResponse()`. The model is a string routed through the
+Vercel AI Gateway — swap one line to change models.
