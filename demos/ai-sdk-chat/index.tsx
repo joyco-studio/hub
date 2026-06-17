@@ -18,6 +18,7 @@ import {
 import type { RegistryChatUIMessage } from './types'
 import { ShimmerRow } from './shimmer-row'
 import { ResultCards } from './result-cards'
+import { ThinkingRow } from './thinking-row'
 
 const AGENT_AVATAR = '/static/c/scrap.webp'
 
@@ -29,6 +30,18 @@ export function AiSdkChatDemo() {
     })
 
   const isStreaming = status === 'submitted' || status === 'streaming'
+
+  // Show the "thinking" indicator while the assistant is working but hasn't
+  // produced a visible part yet (e.g. still reasoning, before the shimmer/text).
+  const lastMessage = messages[messages.length - 1]
+  const assistantStarted =
+    lastMessage?.role === 'assistant' &&
+    lastMessage.parts.some(
+      (part) =>
+        (part.type === 'text' && part.text.trim() !== '') ||
+        part.type === 'tool-searchComponents'
+    )
+  const showThinking = isStreaming && !assistantStarted
 
   const handleSubmit = () => {
     const text = input.trim()
@@ -116,6 +129,7 @@ export function AiSdkChatDemo() {
                 })}
               </React.Fragment>
             ))}
+            {showThinking && <ThinkingRow avatarSrc={AGENT_AVATAR} />}
             {status === 'error' && error && (
               <div aria-live="polite" className="px-3 py-2">
                 <p className="text-destructive text-sm">
