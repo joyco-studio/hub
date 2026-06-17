@@ -52,9 +52,12 @@ export async function POST(req: Request) {
         inputSchema: z.object({
           query: z.string().describe('What the user is looking for'),
         }),
-        execute: async ({ query }) => ({
-          results: searchRegistryComponents(query),
-        }),
+        execute: async ({ query }) => {
+          // Demo-only: Groq resolves near-instantly, so pause briefly to let the
+          // "Searching the registry…" shimmer be visible before the cards render.
+          await new Promise((resolve) => setTimeout(resolve, 700))
+          return { results: searchRegistryComponents(query) }
+        },
       }),
     },
   })
