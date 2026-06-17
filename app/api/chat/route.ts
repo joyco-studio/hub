@@ -37,8 +37,14 @@ const SYSTEM_PROMPT = [
   'If nothing matches, say so plainly and suggest a different phrasing.',
 ].join(' ')
 
+const uiMessageSchema = z.object({
+  id: z.string(),
+  role: z.enum(['user', 'assistant']),
+  parts: z.array(z.unknown()).default([]),
+})
+
 const bodySchema = z.object({
-  messages: z.array(z.unknown()).min(1).max(MAX_MESSAGES),
+  messages: z.array(uiMessageSchema).min(1).max(MAX_MESSAGES),
 })
 
 export async function POST(req: Request) {
