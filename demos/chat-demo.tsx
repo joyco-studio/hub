@@ -20,6 +20,7 @@ const MTPRZ_AVATAR = '/static/c/matiasperz.webp'
 const JOYCO_AVATAR = '/static/c/joyco.webp'
 const JOYBOY_AVATAR = '/static/c/joyboy.webp'
 const FABROOS_AVATAR = '/static/c/fabroos.webp'
+const PEK_AVATAR = '/static/c/pek.JPG'
 
 const ANSW_SET = [
   "Processing your request... beep boop... just kidding, I'm way more sophisticated than that. Probably.",
@@ -71,6 +72,16 @@ const initialChat: Chat[] = [
     content: 'Why is it all full of comments and emojis?!',
     role: 'peer',
     timestamp: new Date('2025-12-26T01:01:00.000Z'),
+  },
+  {
+    type: 'message',
+    id: 'pek',
+    avatar: PEK_AVATAR,
+    fallback: 'P',
+    name: 'Pek',
+    content: "Bro that's 100% AI-generated 💀",
+    role: 'peer',
+    timestamp: new Date('2025-12-26T01:02:00.000Z'),
   },
   {
     type: 'message',
