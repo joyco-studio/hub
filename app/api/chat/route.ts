@@ -14,6 +14,7 @@ const MAX_CHARS_PER_MESSAGE = 4000
 const SYSTEM_PROMPT = [
   'You are the JOYCO registry assistant.',
   'Help users find components in the registry.',
+  'Always reply in the same language the user writes in (e.g. Spanish in, Spanish out).',
   'When a user describes what they need, call the searchComponents tool with a concise query.',
   'After the tool returns, briefly summarize the matches in one sentence. Do not list them — the UI renders cards.',
   'If nothing matches, say so plainly and suggest a different phrasing.',
@@ -55,7 +56,7 @@ export async function POST(req: Request) {
         execute: async ({ query }) => {
           // Demo-only: Groq resolves near-instantly, so pause briefly to let the
           // "Searching the registry…" shimmer be visible before the cards render.
-          await new Promise((resolve) => setTimeout(resolve, 700))
+          await new Promise((resolve) => setTimeout(resolve, 2000))
           return { results: searchRegistryComponents(query) }
         },
       }),
