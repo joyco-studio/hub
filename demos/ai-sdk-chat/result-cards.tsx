@@ -18,7 +18,7 @@ export function ResultCards({
   }
 
   return (
-    <div className="my-4 ml-2" data-slot="ai-sdk-chat-results">
+    <div className="my-4 mr-10 ml-2" data-slot="ai-sdk-chat-results">
       <style>{
         /* css */ `
           @keyframes ai-chat-card-in {
