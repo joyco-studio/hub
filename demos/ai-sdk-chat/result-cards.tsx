@@ -47,6 +47,8 @@ export function ResultCards({
               href={result.href}
               title={result.title}
               description={result.description}
+              target="_blank"
+              rel="noopener noreferrer"
             />
           </div>
         ))}

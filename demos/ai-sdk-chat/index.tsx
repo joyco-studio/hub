@@ -39,6 +39,12 @@ export function AiSdkChatDemo() {
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-6">
         <ChatViewport className="h-96">
           <ChatMessages className="w-full py-3">
+            <ChatMessageRow variant="peer">
+              <ChatMessageBubble>
+                Hi! I&apos;m the registry assistant. Tell me what you&apos;re
+                building and I&apos;ll find components for you.
+              </ChatMessageBubble>
+            </ChatMessageRow>
             {messages.map((message) => (
               <React.Fragment key={message.id}>
                 {message.parts.map((part, index) => {

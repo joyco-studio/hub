@@ -16,17 +16,21 @@ export function CardLink({
   href,
   title,
   description,
+  target,
+  rel,
 }: {
   href: string
   title: React.ReactNode
   description: React.ReactNode
+  target?: string
+  rel?: string
 }) {
   return (
     <Card
       className="group/card-title hocus:bg-accent/50 hocus:border-accent transition-colors"
       asChild
     >
-      <Link className="not-prose contents" href={href}>
+      <Link className="not-prose contents" href={href} target={target} rel={rel}>
         <CardHeader>
           <CardTitle className="flex items-center gap-1 [&>svg]:size-4 [&>svg]:stroke-3">
             {title}
