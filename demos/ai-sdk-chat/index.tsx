@@ -15,6 +15,8 @@ import {
   ChatMessageBubble,
 } from '@/registry/components/chat'
 import type { RegistryChatUIMessage } from './types'
+import { ShimmerRow } from './shimmer-row'
+import { ResultCards } from './result-cards'
 
 export function AiSdkChatDemo() {
   const [input, setInput] = React.useState('')
@@ -39,16 +41,53 @@ export function AiSdkChatDemo() {
           <ChatMessages className="w-full py-3">
             {messages.map((message) => (
               <React.Fragment key={message.id}>
-                {message.parts.map((part, index) =>
-                  part.type === 'text' && part.text.trim() ? (
-                    <ChatMessageRow
-                      key={`${message.id}-${index}`}
-                      variant={message.role === 'user' ? 'self' : 'peer'}
-                    >
-                      <ChatMessageBubble>{part.text}</ChatMessageBubble>
-                    </ChatMessageRow>
-                  ) : null
-                )}
+                {message.parts.map((part, index) => {
+                  const key = `${message.id}-${index}`
+
+                  if (part.type === 'text') {
+                    return part.text.trim() ? (
+                      <ChatMessageRow
+                        key={key}
+                        variant={message.role === 'user' ? 'self' : 'peer'}
+                      >
+                        <ChatMessageBubble>{part.text}</ChatMessageBubble>
+                      </ChatMessageRow>
+                    ) : null
+                  }
+
+                  if (part.type === 'tool-searchComponents') {
+                    switch (part.state) {
+                      case 'input-streaming':
+                      case 'input-available':
+                        return (
+                          <ShimmerRow
+                            key={key}
+                            label="Searching the registry…"
+                          />
+                        )
+                      case 'output-available':
+                        return (
+                          <ResultCards
+                            key={key}
+                            results={part.output.results}
+                          />
+                        )
+                      case 'output-error':
+                        return (
+                          <ChatMessageRow key={key} variant="peer">
+                            <ChatMessageBubble>
+                              Couldn&apos;t search the registry just now — try
+                              again?
+                            </ChatMessageBubble>
+                          </ChatMessageRow>
+                        )
+                      default:
+                        return null
+                    }
+                  }
+
+                  return null
+                })}
               </React.Fragment>
             ))}
           </ChatMessages>
