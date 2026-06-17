@@ -11,15 +11,12 @@ export type RegistrySearchResult = {
   type: RegistryResultType
 }
 
-// Doc sections we expose (slug[0] -> result type).
 const SECTION_TYPE: Record<string, RegistryResultType> = {
   components: 'component',
   toolbox: 'toolbox',
   logs: 'log',
 }
 
-// Extra words folded into each item's search text so category-style queries
-// ("a tool", "a log", "a lab") match the right kind of item.
 const TYPE_SYNONYMS: Record<RegistryResultType, string> = {
   component: 'component',
   toolbox: 'toolbox tool tooling utility',
@@ -63,8 +60,6 @@ async function labItems(): Promise<IndexedItem[]> {
   }))
 }
 
-// Searches the whole registry — components, toolbox tools, logs, and lab
-// experiments — so the assistant can surface whatever the user asks for.
 export async function searchRegistry(
   query: string,
   limit: number = DEFAULT_LIMIT
