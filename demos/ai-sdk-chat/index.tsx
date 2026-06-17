@@ -86,7 +86,17 @@ export function AiSdkChatDemo() {
                           {message.role === 'user' ? (
                             part.text
                           ) : (
-                            <Streamdown>{part.text}</Streamdown>
+                            <Streamdown
+                              animated={{
+                                animation: 'blurIn', // "fadeIn" | "blurIn" | "slideUp" | custom string
+                                duration: 200, // milliseconds (default: 150)
+                                easing: 'ease-out', // CSS timing function (default: "ease")
+                                sep: 'word', // "word" | "char" (default: "word")
+                              }}
+                              isAnimating={isStreaming}
+                            >
+                              {part.text}
+                            </Streamdown>
                           )}
                         </ChatMessageBubble>
                       </ChatMessageRow>

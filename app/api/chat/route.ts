@@ -1,4 +1,10 @@
-import { convertToModelMessages, streamText, stepCountIs, tool } from 'ai'
+import {
+  convertToModelMessages,
+  streamText,
+  stepCountIs,
+  tool,
+  smoothStream,
+} from 'ai'
 import { groq } from '@ai-sdk/groq'
 import { z } from 'zod'
 import { searchRegistry } from '@/lib/registry-search'
@@ -74,6 +80,7 @@ export async function POST(req: Request) {
     model: groq(REGISTRY_CHAT_MODEL),
     system: SYSTEM_PROMPT,
     messages: await convertToModelMessages(messages),
+    experimental_transform: smoothStream({ delayInMs: 20, chunking: 'word' }),
     stopWhen: stepCountIs(2),
     tools: {
       searchComponents: tool({
