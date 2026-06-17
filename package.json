@@ -14,7 +14,7 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@ai-sdk/gateway": "^3.0.133",
+    "@ai-sdk/google": "^3.0.83",
     "@ai-sdk/react": "^3.0.209",
     "@diceui/mention": "^0.8.0",
     "@gsap/react": "^2.1.2",
