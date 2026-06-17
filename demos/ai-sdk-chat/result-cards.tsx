@@ -1,6 +1,7 @@
 'use client'
 
-import { CardLink, CardLinkGrid } from '@/components/card-link'
+import { PreviewCard } from '@/components/cards'
+import { CardLinkGrid } from '@/components/card-link'
 import type { RegistryComponentResult } from '@/lib/registry-search'
 
 export function ResultCards({
@@ -17,7 +18,7 @@ export function ResultCards({
   }
 
   return (
-    <div className="my-4 mr-10 ml-2" data-slot="ai-sdk-chat-results">
+    <div className="my-4 mr-40 ml-2" data-slot="ai-sdk-chat-results">
       <style>{
         /* css */ `
           @keyframes ai-chat-card-in {
@@ -38,19 +39,18 @@ export function ResultCards({
       }</style>
       <CardLinkGrid>
         {results.map((result, i) => (
-          <div
+          <PreviewCard
             key={result.name}
             data-card
+            name={result.name}
+            title={result.title}
+            type="component"
+            href={result.href}
+            showBadge={false}
+            target="_blank"
+            rel="noopener noreferrer"
             style={{ animationDelay: `${i * 50}ms` }}
-          >
-            <CardLink
-              href={result.href}
-              title={result.title}
-              description={result.description}
-              target="_blank"
-              rel="noopener noreferrer"
-            />
-          </div>
+          />
         ))}
       </CardLinkGrid>
     </div>
