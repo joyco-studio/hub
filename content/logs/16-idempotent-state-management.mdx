@@ -142,49 +142,38 @@ Don't recompute locally what the server already knows. Let it be the source of t
 
 ## State machines get it for free
 
-For async flows, you don't have to bolt idempotency on — a state machine has it built in. A transition from state A on event X always lands in state B, no matter how many X's you throw at it.
+For anything with distinct modes — a media player, a wizard, a dialog — you don't have to bolt idempotency on. A state machine has it built in: a transition from state A on event X always lands in state B, no matter how many X's you throw at it.
 
 ```mermaid
 stateDiagram-v2
     direction LR
     [*] --> idle
-    idle --> loading : FETCH
-    loading --> loading : FETCH (no-op)
-    loading --> success : RESOLVE
-    loading --> error : REJECT
+    idle --> playing : PLAY
+    playing --> playing : PLAY (no-op)
+    playing --> paused : PAUSE
+    paused --> playing : RESUME
 ```
 
-Notice the self-loop: `FETCH` while already in `loading` just keeps you in `loading`. No double request, no piled-up side effects. The machine guards itself. (`success` and `error` can kick off a fresh `FETCH` too — the reducer below handles that — but the point is that duplicates of the *current* event go nowhere.)
+Notice the self-loop: `PLAY` while already `playing` just keeps you `playing`. Hammer the play button, fire the event off a key repeat, replay it from a restored session — the machine stays put. No double playback, no stacked side effects. It guards itself.
 
 ```ts
-type OrderState = 'idle' | 'loading' | 'success' | 'error'
+type PlayerState = 'idle' | 'playing' | 'paused'
 
-type OrderAction =
-  | { type: 'FETCH' }
-  | { type: 'RESOLVE'; data: Order }
-  | { type: 'REJECT'; error: string }
+type PlayerAction = { type: 'PLAY' } | { type: 'PAUSE' } | { type: 'RESUME' }
 
-function orderReducer(
-  state: { status: OrderState; data: Order | null; error: string | null },
-  action: OrderAction
-) {
+function playerReducer(state: { status: PlayerState }, action: PlayerAction) {
   switch (state.status) {
     case 'idle':
-    case 'success':
-    case 'error':
-      if (action.type === 'FETCH') {
-        return { status: 'loading' as const, data: null, error: null }
-      }
-      return state // anything else here is a no-op
+      if (action.type === 'PLAY') return { status: 'playing' as const }
+      return state // nothing else means anything from idle
 
-    case 'loading':
-      if (action.type === 'RESOLVE') {
-        return { status: 'success' as const, data: action.data, error: null }
-      }
-      if (action.type === 'REJECT') {
-        return { status: 'error' as const, data: null, error: action.error }
-      }
-      return state // FETCH while loading? no-op
+    case 'playing':
+      if (action.type === 'PAUSE') return { status: 'paused' as const }
+      return state // PLAY again while playing? no-op
+
+    case 'paused':
+      if (action.type === 'RESUME') return { status: 'playing' as const }
+      return state
   }
 }
 ```
@@ -299,7 +288,7 @@ Replay any of these as many times as you want — same input, same state. That's
 | **Key everything by unique id** | Maps and Sets deduplicate on their own. Arrays don't. |
 | **Set absolute values, not deltas** | `SET_COUNT(5)` is idempotent. `INCREMENT(1)` is not. |
 | **Replace toggles with explicit intent** | `SET_FAVORITE` / `UNSET_FAVORITE` over `TOGGLE_FAVORITE`. |
-| **Use state machines for async flows** | Impossible states become unrepresentable; duplicate events become no-ops. |
+| **Use state machines for mode-based flows** | Impossible states become unrepresentable; duplicate events become no-ops. |
 | **Send idempotency keys with mutations** | The server can safely deduplicate retries. |
 | **Trust the server for derived values** | Don't locally compute what it already knows. |
 
