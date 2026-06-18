@@ -146,16 +146,15 @@ For async flows, you don't have to bolt idempotency on — a state machine has i
 
 ```mermaid
 stateDiagram-v2
+    direction LR
     [*] --> idle
     idle --> loading : FETCH
-    loading --> loading : FETCH
+    loading --> loading : FETCH (no-op)
     loading --> success : RESOLVE
     loading --> error : REJECT
-    success --> loading : FETCH
-    error --> loading : FETCH
 ```
 
-Notice `FETCH` while already in `loading` just keeps you in `loading`. No double request, no piled-up side effects. The machine guards itself.
+Notice the self-loop: `FETCH` while already in `loading` just keeps you in `loading`. No double request, no piled-up side effects. The machine guards itself. (`success` and `error` can kick off a fresh `FETCH` too — the reducer below handles that — but the point is that duplicates of the *current* event go nowhere.)
 
 ```ts
 type OrderState = 'idle' | 'loading' | 'success' | 'error'
