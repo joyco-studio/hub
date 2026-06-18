@@ -202,7 +202,7 @@ sequenceDiagram
     Note over C,S: No duplicate order created
 ```
 
-The one thing that matters: generate the key **once**, before the request, and reuse it across retries. A fresh key per attempt defeats the whole point.
+The one thing that matters on the client: generate the key **once**, before the request, and reuse it across retries. A fresh key per attempt defeats the whole point.
 
 ```ts
 async function placeOrder(cart: Cart) {
@@ -215,6 +215,56 @@ async function placeOrder(cart: Cart) {
   })
 }
 ```
+
+### What the server actually does
+
+The client side is the easy half. The dedup happens on the server, and it's worth being precise about how, because the obvious implementation has a race in it.
+
+The server keeps a small store — a database table or a Redis entry — keyed by the idempotency key. Each record tracks the status of that operation and, once it finishes, the response to replay:
+
+```ts
+type KeyRecord = {
+  key: string // the Idempotency-Key header
+  status: 'running' | 'done'
+  response?: { status: number; body: unknown } // filled in once the work completes
+}
+```
+
+The handler then does three things in order: claim the key, do the work, save the response.
+
+```ts showLineNumbers
+async function handleOrder(req: Request) {
+  const key = req.headers['idempotency-key']
+
+  // 1. Claim the key atomically. The insert fails if the key already exists,
+  //    so exactly one request ever gets to be the "first" one.
+  const claimed = await db.insertIfAbsent({ key, status: 'running' })
+
+  if (!claimed) {
+    // Someone already holds this key. Either it finished (replay the response)
+    // or it's a near-simultaneous retry still in flight (tell the client to wait).
+    const existing = await db.get(key)
+    return existing.status === 'done'
+      ? existing.response
+      : { status: 409, body: { error: 'request already in progress' } }
+  }
+
+  // 2. We won the claim, so we do the work — exactly once.
+  const order = await createOrder(req.body)
+  const response = { status: 201, body: order }
+
+  // 3. Save the response against the key so every retry replays it.
+  await db.update(key, { status: 'done', response })
+  return response
+}
+```
+
+The whole thing hinges on step 1 being **atomic**. A plain "check if the key exists, then insert if not" has a gap between the check and the insert where two retries both see nothing and both create an order — the exact duplicate you were trying to kill. So you don't check-then-write; you push the check _into_ the write and let the database be the referee: a unique constraint on the key column, `INSERT ... ON CONFLICT DO NOTHING`, or Redis `SET key … NX`. One writer wins, everyone else falls through to the replay path.
+
+Two refinements real implementations add:
+
+- **A TTL on the key.** Records don't live forever — Stripe expires theirs after 24 hours, say. Long enough to outlast any retry, short enough that the store doesn't grow without bound.
+- **A request fingerprint.** Store a hash of the request body next to the key. If the same key shows up with a _different_ body, that's a client bug — a key reused for a new operation — so you reject it instead of silently replaying the wrong response.
 
 ## Putting it together
 
