@@ -1,6 +1,6 @@
 ---
 title: 16 - Idempotent State Management
-description: Why a state update that runs twice should land in the same place as running once, and the patterns that get you there — keyed sets, absolute values, state machines, and idempotency keys.
+description: Why a state update that runs twice should land in the same place as running once, and the client-side patterns that get you there — keyed sets, absolute values, and state machines.
 author: 'matiasperz'
 ---
 
@@ -180,91 +180,9 @@ function playerReducer(state: { status: PlayerState }, action: PlayerAction) {
 
 The trick is the `return state` lines: events that don't fit the current state are ignored. Duplicates literally can't do anything.
 
-## Carry it through to the API
+## It doesn't stop at the client
 
-Idempotency doesn't stop at the client. The moment an action becomes a network mutation, the same retry problem shows up — a `POST /orders` that times out and retries can create two orders. The fix is an **idempotency key**: a unique id minted on the client, sent with the request, that the server uses to recognize a repeat and replay the original response instead of doing the work again.
-
-```mermaid
-sequenceDiagram
-    participant C as Client
-    participant S as Server
-
-    C->>S: POST /orders (idempotency-key: abc-123)
-    S->>S: Create order
-    S-->>C: 201 Created
-
-    Note over C: Network timeout, client retries
-
-    C->>S: POST /orders (idempotency-key: abc-123)
-    S->>S: Key exists, return cached response
-    S-->>C: 201 Created (same response)
-
-    Note over C,S: No duplicate order created
-```
-
-The one thing that matters on the client: generate the key **once**, before the request, and reuse it across retries. A fresh key per attempt defeats the whole point.
-
-```ts
-async function placeOrder(cart: Cart) {
-  const idempotencyKey = crypto.randomUUID()
-
-  return fetchWithRetry('/api/orders', {
-    method: 'POST',
-    headers: { 'Idempotency-Key': idempotencyKey },
-    body: JSON.stringify(cart),
-  })
-}
-```
-
-### What the server actually does
-
-The client side is the easy half. The dedup happens on the server, and it's worth being precise about how, because the obvious implementation has a race in it.
-
-The server keeps a small store — a database table or a Redis entry — keyed by the idempotency key. Each record tracks the status of that operation and, once it finishes, the response to replay:
-
-```ts
-type KeyRecord = {
-  key: string // the Idempotency-Key header
-  status: 'running' | 'done'
-  response?: { status: number; body: unknown } // filled in once the work completes
-}
-```
-
-The handler then does three things in order: claim the key, do the work, save the response.
-
-```ts showLineNumbers
-async function handleOrder(req: Request) {
-  const key = req.headers['idempotency-key']
-
-  // 1. Claim the key atomically. The insert fails if the key already exists,
-  //    so exactly one request ever gets to be the "first" one.
-  const claimed = await db.insertIfAbsent({ key, status: 'running' })
-
-  if (!claimed) {
-    // Someone already holds this key. Either it finished (replay the response)
-    // or it's a near-simultaneous retry still in flight (tell the client to wait).
-    const existing = await db.get(key)
-    return existing.status === 'done'
-      ? existing.response
-      : { status: 409, body: { error: 'request already in progress' } }
-  }
-
-  // 2. We won the claim, so we do the work — exactly once.
-  const order = await createOrder(req.body)
-  const response = { status: 201, body: order }
-
-  // 3. Save the response against the key so every retry replays it.
-  await db.update(key, { status: 'done', response })
-  return response
-}
-```
-
-The whole thing hinges on step 1 being **atomic**. A plain "check if the key exists, then insert if not" has a gap between the check and the insert where two retries both see nothing and both create an order — the exact duplicate you were trying to kill. So you don't check-then-write; you push the check _into_ the write and let the database be the referee: a unique constraint on the key column, `INSERT ... ON CONFLICT DO NOTHING`, or Redis `SET key … NX`. One writer wins, everyone else falls through to the replay path.
-
-Two refinements real implementations add:
-
-- **A TTL on the key.** Records don't live forever — Stripe expires theirs after 24 hours, say. Long enough to outlast any retry, short enough that the store doesn't grow without bound.
-- **A request fingerprint.** Store a hash of the request body next to the key. If the same key shows up with a _different_ body, that's a client bug — a key reused for a new operation — so you reject it instead of silently replaying the wrong response.
+The same principle travels past the browser. Anywhere a write can run more than once — a backend handler behind a retrying client, a queue consumer redelivering a message, a webhook that fires twice — wants the exact property we've been chasing: run it again, land in the same place. Servers have their own machinery for getting there, but the mental model doesn't change from the one you'd use in a reducer — describe the destination, key by identity, let repeats be no-ops. Worth knowing it's a shared concern so both sides agree on what "done" means. The leverage for a frontend dev, though, is almost always in the client state itself — so that's where we'll keep our attention.
 
 ## Putting it together
 
@@ -339,7 +257,6 @@ Replay any of these as many times as you want — same input, same state. That's
 | **Set absolute values, not deltas** | `SET_COUNT(5)` is idempotent. `INCREMENT(1)` is not. |
 | **Replace toggles with explicit intent** | `SET_FAVORITE` / `UNSET_FAVORITE` over `TOGGLE_FAVORITE`. |
 | **Use state machines for mode-based flows** | Impossible states become unrepresentable; duplicate events become no-ops. |
-| **Send idempotency keys with mutations** | The server can safely deduplicate retries. |
 | **Trust the server for derived values** | Don't locally compute what it already knows. |
 
 The shortcut for all of it: if you can answer *"what should the state be?"* instead of *"how should the state change?"*, you're writing idempotent code. Worth doing anytime an update can fire more than once — clicks, effects, sockets, retries, optimistic updates. Less worth the ceremony when you're rendering pure UI from props or just mirroring a single source of truth with no local mutation.
