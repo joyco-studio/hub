@@ -24,7 +24,7 @@ This is last-write-wins, and it's the default behavior of a plain variable. No o
 
 ## Derive, don't mutate
 
-The fix is to stop letting sources *command* the value and let them *declare intent* instead. Nobody writes the output. Each source writes its own keyed slot, and the output is **resolved** from all the slots at one point, through logic you own.
+The fix is to flip the model. Stop letting sources *push* the value imperatively, and *derive* it from their state instead. An imperative push is the opposite of a value derived from state: one commands the output, the other declares an intent and lets the output resolve from everyone's intent at once. Nobody writes the output. Each source writes its own keyed slot, and the output is **resolved** from all the slots at one point, through logic you own.
 
 ```ts showLineNumbers
 /**
@@ -85,7 +85,7 @@ Three properties do all the work.
 
 **One resolution point.** The conflict logic isn't scattered anymore. It lives in `combine`, in one place you can read, test, and reason about in isolation. "What happens when the inspector and the loader disagree?" has an actual answer now, and it's a function.
 
-**Pull, not push.** `value` resolves on read, so the slots are just *current desires* with no temporal coupling. Order of mutation stops mattering: there's no "last write," only "what does everyone currently want," evaluated fresh every time you read. Set things in any order across any number of frames; the output is always the same function of the same state.
+**Pull, not push.** An imperative push commits the value the moment it fires, so the output carries the order things happened in. Deriving from state inverts that: `value` resolves on read, so the slots are just *current desires* with no temporal coupling. Order of mutation stops mattering: there's no "last write," only "what does everyone currently want," evaluated fresh every time you read. Set things in any order across any number of frames; the output is always the same function of the same state.
 
 ## The combinator is the semantics
 
