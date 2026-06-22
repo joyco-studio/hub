@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Image Sequence",
   "description": "A canvas-based image sequence player with binary progressive loading for smooth playback.",
+  "registryDependencies": [
+    "@joyco/utils"
+  ],
   "files": [
     {
       "path": "registry/components/image-sequence.tsx",

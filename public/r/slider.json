@@ -7,6 +7,9 @@
   "dependencies": [
     "@radix-ui/react-slider"
   ],
+  "registryDependencies": [
+    "@joyco/utils"
+  ],
   "files": [
     {
       "path": "components/ui/slider.tsx",

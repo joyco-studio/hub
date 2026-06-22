@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Canvas 2D",
   "description": "A DPR-aware 2D canvas component and hook that handles sizing, pixel ratio, and context setup automatically.",
+  "registryDependencies": [
+    "@joyco/utils"
+  ],
   "files": [
     {
       "path": "registry/components/canvas-2d.tsx",

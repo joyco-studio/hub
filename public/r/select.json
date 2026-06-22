@@ -8,6 +8,9 @@
     "@radix-ui/react-select",
     "lucide-react"
   ],
+  "registryDependencies": [
+    "@joyco/utils"
+  ],
   "files": [
     {
       "path": "registry/ui/select.tsx",

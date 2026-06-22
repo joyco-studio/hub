@@ -7,6 +7,9 @@
   "dependencies": [
     "radix-ui"
   ],
+  "registryDependencies": [
+    "@joyco/utils"
+  ],
   "files": [
     {
       "path": "components/ui/switch.tsx",

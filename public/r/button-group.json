@@ -9,7 +9,8 @@
     "class-variance-authority"
   ],
   "registryDependencies": [
-    "@joyco/separator"
+    "@joyco/separator",
+    "@joyco/utils"
   ],
   "files": [
     {

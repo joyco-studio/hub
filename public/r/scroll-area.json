@@ -7,6 +7,9 @@
   "dependencies": [
     "@radix-ui/react-presence"
   ],
+  "registryDependencies": [
+    "@joyco/utils"
+  ],
   "files": [
     {
       "path": "registry/components/scroll-area.tsx",

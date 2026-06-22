@@ -10,7 +10,8 @@
   ],
   "registryDependencies": [
     "@joyco/input-group",
-    "@joyco/avatar"
+    "@joyco/avatar",
+    "@joyco/utils"
   ],
   "files": [
     {
