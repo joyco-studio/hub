@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Input",
   "description": "Displays a form input field.",
+  "registryDependencies": [
+    "@joyco/utils"
+  ],
   "files": [
     {
       "path": "components/ui/input.tsx",

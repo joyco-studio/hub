@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Action Hint",
   "description": "A particle emitter for showing ephemeral action feedback hints that fade out.",
+  "registryDependencies": [
+    "@joyco/utils"
+  ],
   "files": [
     {
       "path": "registry/components/action-hint.tsx",

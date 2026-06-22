@@ -7,6 +7,9 @@
   "dependencies": [
     "@radix-ui/react-tabs"
   ],
+  "registryDependencies": [
+    "@joyco/utils"
+  ],
   "files": [
     {
       "path": "components/ui/tabs.tsx",

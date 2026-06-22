@@ -6,7 +6,8 @@
   "description": "A vertical-scrolling shoot-'em-up with enemy waves, a scaling boss (REBEL CRUSHER), pause, and highscore persistence.",
   "registryDependencies": [
     "@joyco/button",
-    "@joyco/kbd"
+    "@joyco/kbd",
+    "@joyco/utils"
   ],
   "files": [
     {
