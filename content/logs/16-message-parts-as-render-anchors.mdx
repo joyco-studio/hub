@@ -17,21 +17,23 @@ input, and nothing about where messages come from. Wiring it to the Vercel AI SD
 the lesson that paid off was the opposite of that instinct. You don't lift
 anything. The message is already structured state, and you render straight from it.
 
-<ComponentPreview name="ai-sdk-chat" iframe height={560} />
+<ComponentPreview name="ai-sdk-chat" height={560} />
 
 ## Who owns the conversation
 
-The client does. `useChat` holds the `messages` array, and the server keeps no
-session. Every time you call `sendMessage`, the hook posts the whole conversation
-to `/api/chat`, the route streams a response back, and `useChat` folds that stream
-into the same `messages` array. The backend is a pure function of the messages you
-hand it: refresh the page and the conversation is gone, because nothing on the
-server ever remembered it.
+In this demo, the client. `useChat` holds the `messages` array, and our route keeps
+no session. By default `DefaultChatTransport` ships the whole conversation on every
+turn: call `sendMessage` and the POST body is `{ id, messages, trigger, messageId }`,
+with the full `messages` array inside. The route reads `messages`, streams a response
+back, and `useChat` folds that stream into the same array. Refresh the page and the
+conversation is gone, because our backend never stored it.
 
-That is the part worth internalizing. The request body is the state. There is no
-chat id, no server store, no "load history" call. On the route,
-`convertToModelMessages(messages)` turns the client's UI messages into the shape
-the model wants, and that handoff is the entire contract between the two sides.
+That last part is a choice, not a rule. The SDK gives you a
+`prepareSendMessagesRequest` hook to send only the latest message plus the `id`,
+persist history server-side, and rebuild the thread from your own store. We just had
+nothing to persist, so the route stays stateless. Either way the contract is the
+same: `convertToModelMessages(messages)` turns whatever UI messages the route
+receives into the shape the model wants.
 
 ## What comes over the wire
 
@@ -113,22 +115,29 @@ is one walk over `parts`: switch on `part.type`, and for the tool part switch ag
 on `part.state`.
 
 ```tsx showLineNumbers
-{message.parts.map((part, i) => {
-  switch (part.type) {
-    case 'text':
-      return <ChatMessageBubble key={i}>{part.text}</ChatMessageBubble>
+{
+  message.parts.map((part, i) => {
+    switch (part.type) {
+      case 'text':
+        return <ChatMessageBubble key={i}>{part.text}</ChatMessageBubble>
 
-    case 'tool-searchComponents':
-      switch (part.state) {
-        case 'output-available':
-          return <ResultCards key={i} results={part.output.results} />
-        case 'output-error':
-          return <RetryRow key={i} />
-        default:
-          return <ShimmerRow key={i} label={`Searching for “${part.input?.query ?? ''}”`} />
-      }
-  }
-})}
+      case 'tool-searchComponents':
+        switch (part.state) {
+          case 'output-available':
+            return <ResultCards key={i} results={part.output.results} />
+          case 'output-error':
+            return <RetryRow key={i} />
+          default:
+            return (
+              <ShimmerRow
+                key={i}
+                label={`Searching for “${part.input?.query ?? ''}”`}
+              />
+            )
+        }
+    }
+  })
+}
 ```
 
 A text part becomes a bubble. The tool part shows a shimmer while its input is still
