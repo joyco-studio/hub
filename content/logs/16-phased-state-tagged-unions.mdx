@@ -62,7 +62,7 @@ A `switch` over `phase` with no `default` forces you to handle every variant. Ad
 
 ### 4. Transitions become the unit of meaning (edge detection)
 
-This is the deepest payoff. Because the whole machine is one value that gets replaced, you can diff **old vs new** and react to the **transition**, not the state. `InspectManager.sync` keeps the previous id and branches on the edge:
+This is the deepest payoff. Because the whole machine is one value that gets replaced, you can diff **old vs new** and react to the **transition**, not the state. The change itself becomes *first-class*: a real value you can hold in a variable, compare, and branch on, instead of an event you have to reconstruct from a pile of flags after the fact. `InspectManager.sync` keeps the previous id and branches on the edge:
 
 ```ts
 const next = inspectedId(state.ctx)
