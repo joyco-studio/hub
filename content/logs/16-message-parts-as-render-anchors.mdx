@@ -1,63 +1,125 @@
 ---
 title: 16 - Message Parts as Render Anchors
-description: Wiring the headless Chat component to the AI SDK, where the client owns the conversation and each tool call carries its own data so rich UI renders straight from the message.
+description: Wiring a streaming LLM to a real UI, the instinct is to lift tool results into component state. Don't. The message already is the state, and each tool call carries its own data, so the UI renders straight from the part.
 author: 'alejopequeno'
 ---
 
 import { ComponentPreview } from '@/components/preview/component-preview'
 
+The first time you wire a streaming LLM into a real UI, the instinct is to lift the
+interesting bits into component state. A `useState` for the search results, an
+effect that fills it when the tool call resolves, a grid that reads from it. It
+works. It also leaves you owning a copy of data the SDK already handed you, plus an
+effect whose only job is to keep the copy in sync with its source.
+
 Our `Chat` component is headless on purpose: it knows about viewport, scroll, and
-input, and nothing about where messages come from. That makes it a clean target
-for the Vercel AI SDK, whose `useChat` reduces a stream into `messages[].parts[]`.
+input, and nothing about where messages come from. Wiring it to the Vercel AI SDK,
+the lesson that paid off was the opposite of that instinct. You don't lift
+anything. The message is already structured state, and you render straight from it.
 
 <ComponentPreview name="ai-sdk-chat" iframe height={560} />
 
-## Who owns the chat state
+## Who owns the conversation
 
 The client does. `useChat` holds the `messages` array, and the server keeps no
 session. Every time you call `sendMessage`, the hook posts the whole conversation
 to `/api/chat`, the route streams a response back, and `useChat` folds that stream
 into the same `messages` array. The backend is a pure function of the messages you
 hand it: refresh the page and the conversation is gone, because nothing on the
-server remembered it.
+server ever remembered it.
 
-That is the part worth internalizing: the request body is the state. There is no
+That is the part worth internalizing. The request body is the state. There is no
 chat id, no server store, no "load history" call. On the route,
 `convertToModelMessages(messages)` turns the client's UI messages into the shape
-the model wants, and that is the entire handoff.
+the model wants, and that handoff is the entire contract between the two sides.
 
-## How the stream reaches the client
+## What comes over the wire
 
 `streamText` does not return a string. It returns a stream, and
-`result.toUIMessageStreamResponse()` serializes it as a sequence of typed events:
-text deltas, a tool's input as the model assembles it, then the tool's output once
-it resolves. `useChat` consumes those events and rebuilds them into structured
-parts, in order, as they arrive.
+`result.toUIMessageStreamResponse()` serializes it as Server-Sent Events: one
+`data:` line per chunk. Ask the assistant for "a plane game" and the raw response
+reads like this (trimmed):
 
-So the model emits events, the route forwards them, and the hook reduces them. You
-never parse the stream yourself. By the time it reaches your render function it is
-already `messages[].parts[]`, typed against the tools declared in `types.ts`.
+```text
+data: {"type":"start"}
+data: {"type":"start-step"}
+data: {"type":"tool-input-start","toolCallId":"call_a1","toolName":"searchComponents"}
+data: {"type":"tool-input-delta","toolCallId":"call_a1","inputTextDelta":"plane game"}
+data: {"type":"tool-input-available","toolCallId":"call_a1","toolName":"searchComponents","input":{"query":"plane game"}}
+data: {"type":"tool-output-available","toolCallId":"call_a1","output":{"results":[{"title":"Plane","href":"/components/plane"}]}}
+data: {"type":"finish-step"}
+data: {"type":"start-step"}
+data: {"type":"text-start","id":"txt-0"}
+data: {"type":"text-delta","id":"txt-0","delta":"Found "}
+data: {"type":"text-delta","id":"txt-0","delta":"one "}
+data: {"type":"text-delta","id":"txt-0","delta":"for you."}
+data: {"type":"text-end","id":"txt-0"}
+data: {"type":"finish-step"}
+data: {"type":"finish","finishReason":"stop"}
+data: [DONE]
+```
 
-## The pattern: parts as render anchors
+Two things stand out. Every piece is its own event with a stable id: the tool call
+streams its `input` as it is assembled, arrives complete as `tool-input-available`,
+and its result lands separately as `tool-output-available`. And the text comes one
+word per event, which looks absurdly chatty for a single sentence. That is not the
+model. It is `smoothStream({ chunking: 'word' })` in the route, re-chunking the
+stream so the UI can animate word by word. Drop it and you get the model's raw,
+lumpier token bursts; the protocol is identical, the deltas are just bigger. (The
+model streams its private `reasoning-*` events through here too; this demo simply
+doesn't render that part type.)
 
-Every assistant message is an ordered list of parts. A text part is a bubble. A
-tool call is its own part, `tool-searchComponents`, and it carries its **own**
-input and output. The card grid renders from `part.output`, not from a shared
-piece of component state. Each part is the single source of truth for what it
-shows, so rendering stays a straight read of the message: no extra state to keep
-in sync, no effect copying `part.output` into a local `useState`.
+## From events to parts
+
+You never parse any of that yourself. `useChat` consumes the events and folds them,
+in order, into one structure: an assistant message whose `parts` array mirrors what
+just streamed in.
+
+```ts showLineNumbers
+{
+  id: 'msg_1',
+  role: 'assistant',
+  parts: [
+    {
+      type: 'tool-searchComponents', // tool name, prefixed with `tool-`
+      toolCallId: 'call_a1',
+      state: 'output-available', // input-streaming → input-available → output-available
+      input: { query: 'plane game' },
+      output: { results: [{ title: 'Plane', href: '/components/plane' }] },
+    },
+    { type: 'text', text: 'Found one for you.' },
+  ],
+}
+```
+
+Dozens of `data:` lines collapse into two parts, each typed against the tools you
+declared in `types.ts`. A text part is a bubble, a tool call is its own part, and
+each carries its own input and output. That object is what you render, not the
+stream.
+
+## Parts are the render anchors
+
+This is where the opening instinct dies for good. The card grid renders from
+`part.output`, not from a `useState` you filled in an effect. The part is the data.
+There is no copy to drift, no effect to keep in sync, no question of "is my state
+stale", because the render is a plain read of the message. Add a second tool to the
+route tomorrow and the rule does not change: it arrives as its own part, with its
+own output, and you render it the same way.
 
 ## Mapping parts onto the headless Chat
 
-`useChat` gives you messages; you decide how each part renders. Text parts become
-`ChatMessageRow` + `ChatMessageBubble`. The tool part switches on its lifecycle:
-`input-streaming` and `input-available` show a shimmer, `output-available` shows
-the cards, `output-error` shows a retry line. The `Chat` component never had to
-learn any of this.
+`useChat` gives you the messages; you decide how each part renders. Text parts
+become `ChatMessageRow` + `ChatMessageBubble`. The tool part switches on its
+lifecycle: `input-streaming` and `input-available` show a shimmer,
+`output-available` shows the cards, `output-error` shows a retry line. The `Chat`
+component never had to learn a single thing about tools, or Groq, or search. It
+renders parts, and the parts know what they are.
 
 ## The backend is one route
 
 `app/api/chat/route.ts` runs `streamText` with a single `searchComponents` tool
 that queries the registry's own pages, then returns
-`result.toUIMessageStreamResponse()`. The model is Groq (free tier) via
-`@ai-sdk/groq`, so you swap one line to change providers or models.
+`result.toUIMessageStreamResponse()`. Which provider and model sit behind it is
+your call and a one-line swap; this example happens to run on Groq's free tier, but
+the pattern is identical whether the tokens come from Groq, OpenAI, or Anthropic.
+The route stays a thin, stateless seam, and all the structure lives in the parts.
