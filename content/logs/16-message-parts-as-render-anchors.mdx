@@ -1,6 +1,6 @@
 ---
 title: 16 - Message Parts as Render Anchors
-description: Wiring the headless Chat component to the AI SDK, where each tool call carries its own data so rich UI renders from the message instead of a shared global.
+description: Wiring the headless Chat component to the AI SDK, where the client owns the conversation and each tool call carries its own data so rich UI renders straight from the message.
 author: 'alejopequeno'
 ---
 
@@ -12,25 +12,52 @@ for the Vercel AI SDK, whose `useChat` reduces a stream into `messages[].parts[]
 
 <ComponentPreview name="ai-sdk-chat" iframe height={560} />
 
-## The pattern
+## Who owns the chat state
+
+The client does. `useChat` holds the `messages` array, and the server keeps no
+session. Every time you call `sendMessage`, the hook posts the whole conversation
+to `/api/chat`, the route streams a response back, and `useChat` folds that stream
+into the same `messages` array. The backend is a pure function of the messages you
+hand it: refresh the page and the conversation is gone, because nothing on the
+server remembered it.
+
+That is the part worth internalizing: the request body is the state. There is no
+chat id, no server store, no "load history" call. On the route,
+`convertToModelMessages(messages)` turns the client's UI messages into the shape
+the model wants, and that is the entire handoff.
+
+## How the stream reaches the client
+
+`streamText` does not return a string. It returns a stream, and
+`result.toUIMessageStreamResponse()` serializes it as a sequence of typed events:
+text deltas, a tool's input as the model assembles it, then the tool's output once
+it resolves. `useChat` consumes those events and rebuilds them into structured
+parts, in order, as they arrive.
+
+So the model emits events, the route forwards them, and the hook reduces them. You
+never parse the stream yourself. By the time it reaches your render function it is
+already `messages[].parts[]`, typed against the tools declared in `types.ts`.
+
+## The pattern: parts as render anchors
 
 Every assistant message is an ordered list of parts. A text part is a bubble. A
-tool call is its own part — `tool-searchComponents` — and it carries its **own**
+tool call is its own part, `tool-searchComponents`, and it carries its **own**
 input and output. The card grid renders from `part.output`, not from a shared
-piece of component state. That single decision removes a whole class of bug: when
-two tool calls happen in one conversation, each renders the data it was created
-with, instead of every card reading the last value some global was set to.
+piece of component state. Each part is the single source of truth for what it
+shows, so rendering stays a straight read of the message: no extra state to keep
+in sync, no effect copying `part.output` into a local `useState`.
 
 ## Mapping parts onto the headless Chat
 
 `useChat` gives you messages; you decide how each part renders. Text parts become
 `ChatMessageRow` + `ChatMessageBubble`. The tool part switches on its lifecycle:
-`input-streaming`/`input-available` show a shimmer, `output-available` shows the
-cards. The `Chat` component never had to learn any of this.
+`input-streaming` and `input-available` show a shimmer, `output-available` shows
+the cards, `output-error` shows a retry line. The `Chat` component never had to
+learn any of this.
 
 ## The backend is one route
 
 `app/api/chat/route.ts` runs `streamText` with a single `searchComponents` tool
 that queries the registry's own pages, then returns
 `result.toUIMessageStreamResponse()`. The model is Groq (free tier) via
-`@ai-sdk/groq` — swap one line to change providers or models.
+`@ai-sdk/groq`, so you swap one line to change providers or models.

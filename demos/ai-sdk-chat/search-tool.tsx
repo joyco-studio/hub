@@ -42,7 +42,7 @@ export function SearchTool({
       <ChatMessageRow variant="peer">
         <ChatMessageAvatar src={avatarSrc} alt="JOYCO assistant" fallback="J" />
         <ChatMessageBubble>
-          Couldn&apos;t search the registry just now — try again?
+          Couldn&apos;t search the registry just now. Try again?
         </ChatMessageBubble>
       </ChatMessageRow>
     )
