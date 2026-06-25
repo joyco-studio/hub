@@ -108,12 +108,38 @@ own output, and you render it the same way.
 
 ## Mapping parts onto the headless Chat
 
-`useChat` gives you the messages; you decide how each part renders. Text parts
-become `ChatMessageRow` + `ChatMessageBubble`. The tool part switches on its
-lifecycle: `input-streaming` and `input-available` show a shimmer,
-`output-available` shows the cards, `output-error` shows a retry line. The `Chat`
-component never had to learn a single thing about tools, or Groq, or search. It
-renders parts, and the parts know what they are.
+`useChat` gives you the messages; you decide how each part renders. The whole render
+is one walk over `parts`: switch on `part.type`, and for the tool part switch again
+on `part.state`.
+
+```tsx showLineNumbers
+{message.parts.map((part, i) => {
+  switch (part.type) {
+    case 'text':
+      return <ChatMessageBubble key={i}>{part.text}</ChatMessageBubble>
+
+    case 'tool-searchComponents':
+      switch (part.state) {
+        case 'output-available':
+          return <ResultCards key={i} results={part.output.results} />
+        case 'output-error':
+          return <RetryRow key={i} />
+        default:
+          return <ShimmerRow key={i} label={`Searching for “${part.input?.query ?? ''}”`} />
+      }
+  }
+})}
+```
+
+A text part becomes a bubble. The tool part shows a shimmer while its input is still
+streaming, the result cards once the output resolves, and a retry line if it errors.
+Notice the shimmer label is not a constant: the query streams in as `part.input`,
+so even the loading state reads from the part rather than from some `isSearching`
+flag you set on the side. And because the part is typed from `types.ts`,
+`part.input.query` is a string and `part.output.results` is known to be search
+results inside their branches and nothing else. The `Chat` component never had to
+learn a single thing about tools, or Groq, or search. It renders parts, and the
+parts know what they are.
 
 ## The backend is one route
 

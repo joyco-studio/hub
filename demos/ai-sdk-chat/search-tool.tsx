@@ -52,5 +52,10 @@ export function SearchTool({
     return <ResultCards results={part.output.results} />
   }
 
-  return <ShimmerRow label="Searching the registry…" />
+  const query = part.input?.query
+  return (
+    <ShimmerRow
+      label={query ? `Searching for “${query}”` : 'Searching the registry…'}
+    />
+  )
 }
