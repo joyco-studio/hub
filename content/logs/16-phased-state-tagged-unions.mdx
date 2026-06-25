@@ -6,7 +6,7 @@ author: 'matiasperz'
 
 A **phase** is a named mode a thing can be in, where the data that exists, and the operations that make sense, depend on which mode you're in. You model it as a **discriminated union**: one variant per phase, each carrying exactly the fields that phase needs and nothing it doesn't.
 
-The inspect lifecycle from our game code is the canonical example. Here's the union:
+Imagine the item-inspection code for a game: you pick something up, hold it, look it over, then put it down. That lifecycle is the canonical example. Here's the union:
 
 ```ts
 type Inspect =
