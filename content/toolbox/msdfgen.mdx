@@ -42,20 +42,23 @@ See the snippet at the bottom for how the GPU reconstructs the edge.
 
 ## Installation
 
-The repo ships a CMake build and Vcpkg/Homebrew packages. The quickest paths:
+There's no Homebrew formula. The two supported paths are the Vcpkg package or a from-source
+CMake build.
 
-```bash title="macOS (Homebrew)"
-brew install msdfgen
+```bash title="Vcpkg"
+vcpkg install msdfgen
 ```
 
-```bash title="From source (CMake + Vcpkg)"
+```bash title="From source (CMake)"
 git clone https://github.com/Chlumsky/msdfgen
 cd msdfgen
 cmake -B build -DCMAKE_TOOLCHAIN_FILE=<vcpkg>/scripts/buildsystems/vcpkg.cmake
 cmake --build build
 ```
 
-Once installed you should have the `msdfgen` binary on your `PATH`. Verify with `msdfgen --help`.
+The from-source build pulls its dependencies (FreeType, and optionally the SVG/PNG libraries)
+through Vcpkg, so point `-DCMAKE_TOOLCHAIN_FILE` at your Vcpkg checkout. Once built you'll have the
+`msdfgen` binary; verify with `msdfgen --help`.
 
 ## The merge step (gotcha)
 
