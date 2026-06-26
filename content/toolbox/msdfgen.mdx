@@ -121,17 +121,6 @@ rm MSDF-merged.svg
 | `-scale`      | `1`       | 1:1 mapping, so 1 SVG unit = 1 pixel. **Do not use `-autoframe`**: it rescales and adds padding, shifting UVs and breaking the shader's crop rects         |
 | `-translate`  | `0 0`     | No offset. msdfgen handles the SVG y-down to image y-down conversion correctly when reading from an SVG                                                     |
 
-### Verify the output
-
-Open the PNG and confirm:
-
-- The shapes are positioned where the SVG placed them.
-- There's **distinct red/green/blue fringing** around every edge, the MSDF signature.
-- The background is solid black where no shape exists.
-
-It won't look "clean" to the naked eye, and that's expected. The fragment shader reconstructs
-crisp edges by taking the **median** of the RGB channels.
-
 ## How a fragment shader renders msdf
 
 ```glsl
