@@ -33,18 +33,18 @@ shader effects like outlines, glows, and animated fills essentially for free.
 <Image
   src="https://r2.joyco.studio/hub/images/msdf-svg-comp.png"
   alt="Side-by-side comparison of a shape rendered from a plain raster versus an MSDF texture, showing the MSDF staying crisp where the raster breaks down."
-  width={1786}
-  height={992}
+  width={1828}
+  height={1028}
 />
 
 We use it to bake the text + logo atlas that the Three.js scene samples in its fragment shader.
 See the snippet at the bottom for how the GPU reconstructs the edge.
 
 <Image
-  src=""
-  alt="The generated MSDF PNG itself: a shape rendered with the characteristic red/green/blue fringing around every edge on a black background. Show that it looks 'wrong' to the eye but encodes the distance data."
-  width={1024}
-  height={1024}
+  src="https://r2.joyco.studio/hub/images/joyco-msdf.svg"
+  alt="The JOYCO logo rendered from its MSDF texture."
+  width={208}
+  height={208}
 />
 
 ## Installation
