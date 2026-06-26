@@ -58,7 +58,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
       </figure>
     ),
     Image: ({ alt, ...props }: React.ComponentProps<typeof Image>) => (
-      <Image alt={alt} {...props} />
+      <Image alt={alt} unoptimized {...props} />
     ),
     ImageCols: ({
       className,
