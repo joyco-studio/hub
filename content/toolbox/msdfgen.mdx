@@ -23,6 +23,13 @@ SDFs.
 The payoff: one small texture renders crisp text, logos, or icons at any zoom level, with cheap
 shader effects like outlines, glows, and animated fills essentially for free.
 
+<Callout type="info">
+  Generating an atlas for a **whole font** rather than a single shape? Skip the CLI and use
+  [msdf-font-generator.leomouraire.com](https://msdf-font-generator.leomouraire.com), a web tool
+  that bakes the MSDF atlas and emits the JSON manifest (glyph metrics + UVs) in the browser. The
+  rest of this page covers the CLI flow we use for the custom text + logo texture.
+</Callout>
+
 <Image
   src=""
   alt="Side-by-side comparison of the same glyph rendered from a regular bitmap (blurry when scaled up) versus an MSDF texture (crisp edges at the same zoom). Make the scaling artifacts on the bitmap obvious."
