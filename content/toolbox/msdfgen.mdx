@@ -15,7 +15,7 @@ links:
 [msdfgen](https://github.com/Chlumsky/msdfgen) turns a vector shape (an SVG path, a glyph, a
 font) into a **multi-channel signed distance field** texture. A regular bitmap stores color per
 pixel, so it blurs the moment you scale it up. An SDF instead stores, per pixel, the *distance*
-to the nearest edge of the shape — which a shader can resolve back into a razor-sharp outline at
+to the nearest edge of the shape, which a shader can resolve back into a razor-sharp outline at
 any size. The "multi-channel" part packs three distance fields into the RGB channels so that
 **sharp corners survive** instead of getting rounded off, which is the weak spot of single-channel
 SDFs.
@@ -30,8 +30,8 @@ shader effects like outlines, glows, and animated fills essentially for free.
   height={1000}
 />
 
-We use it to bake the text + logo atlas that the Three.js scene samples in its fragment shader —
-see the snippet at the bottom for how the GPU reconstructs the edge.
+We use it to bake the text + logo atlas that the Three.js scene samples in its fragment shader.
+See the snippet at the bottom for how the GPU reconstructs the edge.
 
 <Image
   src=""
@@ -102,21 +102,21 @@ rm MSDF-merged.svg
 
 | Flag          | Value     | Why                                                                                                                                                       |
 | ------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `msdf`        | mode      | Multi-channel SDF — preserves sharp corners via RGB channel separation                                                                                     |
+| `msdf`        | mode      | Multi-channel SDF. Preserves sharp corners via RGB channel separation                                                                                      |
 | `-dimensions` | `512 512` | Matches the SVG viewBox and existing texture size                                                                                                          |
-| `-pxrange`    | `8`       | Pixel range of the distance gradient. Higher = more room for shader effects (outline, glow). `8` works well for the glyph density in this texture          |
-| `-scale`      | `1`       | 1:1 mapping — 1 SVG unit = 1 pixel. **Do not use `-autoframe`**: it rescales and adds padding, shifting UVs and breaking the shader's crop rects           |
-| `-translate`  | `0 0`     | No offset. msdfgen handles the SVG y-down → image y-down conversion correctly when reading from an SVG                                                      |
+| `-pxrange`    | `8`       | Pixel range of the distance gradient. Higher means more room for shader effects (outline, glow). `8` works well for the glyph density in this texture      |
+| `-scale`      | `1`       | 1:1 mapping, so 1 SVG unit = 1 pixel. **Do not use `-autoframe`**: it rescales and adds padding, shifting UVs and breaking the shader's crop rects         |
+| `-translate`  | `0 0`     | No offset. msdfgen handles the SVG y-down to image y-down conversion correctly when reading from an SVG                                                     |
 
 ### Verify the output
 
 Open the PNG and confirm:
 
 - The shapes are positioned where the SVG placed them.
-- There's **distinct red/green/blue fringing** around every edge — the MSDF signature.
+- There's **distinct red/green/blue fringing** around every edge, the MSDF signature.
 - The background is solid black where no shape exists.
 
-It won't look "clean" to the naked eye, and that's expected — the fragment shader reconstructs
+It won't look "clean" to the naked eye, and that's expected. The fragment shader reconstructs
 crisp edges by taking the **median** of the RGB channels.
 
 ## How the shader uses it
