@@ -1,0 +1,131 @@
+---
+title: msdfgen
+description: A CLI for generating multi-channel signed distance field (MSDF) textures from vector shapes.
+links:
+  [
+    {
+      label: 'GitHub',
+      href: 'https://github.com/Chlumsky/msdfgen',
+    },
+  ]
+---
+
+## What is msdfgen?
+
+[msdfgen](https://github.com/Chlumsky/msdfgen) turns a vector shape (an SVG path, a glyph, a
+font) into a **multi-channel signed distance field** texture. A regular bitmap stores color per
+pixel, so it blurs the moment you scale it up. An SDF instead stores, per pixel, the *distance*
+to the nearest edge of the shape — which a shader can resolve back into a razor-sharp outline at
+any size. The "multi-channel" part packs three distance fields into the RGB channels so that
+**sharp corners survive** instead of getting rounded off, which is the weak spot of single-channel
+SDFs.
+
+The payoff: one small texture renders crisp text, logos, or icons at any zoom level, with cheap
+shader effects like outlines, glows, and animated fills essentially for free.
+
+<Image
+  src=""
+  alt="Side-by-side comparison of the same glyph rendered from a regular bitmap (blurry when scaled up) versus an MSDF texture (crisp edges at the same zoom). Make the scaling artifacts on the bitmap obvious."
+  width={1800}
+  height={1000}
+/>
+
+We use it to bake the text + logo atlas that the Three.js scene samples in its fragment shader —
+see the snippet at the bottom for how the GPU reconstructs the edge.
+
+<Image
+  src=""
+  alt="The generated MSDF PNG itself: a shape rendered with the characteristic red/green/blue fringing around every edge on a black background. Show that it looks 'wrong' to the eye but encodes the distance data."
+  width={1024}
+  height={1024}
+/>
+
+## Installation
+
+The repo ships a CMake build and Vcpkg/Homebrew packages. The quickest paths:
+
+```bash title="macOS (Homebrew)"
+brew install msdfgen
+```
+
+```bash title="From source (CMake + Vcpkg)"
+git clone https://github.com/Chlumsky/msdfgen
+cd msdfgen
+cmake -B build -DCMAKE_TOOLCHAIN_FILE=<vcpkg>/scripts/buildsystems/vcpkg.cmake
+cmake --build build
+```
+
+Once installed you should have the `msdfgen` binary on your `PATH`. Verify with `msdfgen --help`.
+
+## The merge step (gotcha)
+
+`msdfgen` only reads the **last** `<path>` element from an SVG. Design tools (Figma, Illustrator)
+export each glyph or shape as its own `<path>`, so before generating you have to concatenate all
+the `d` attributes into a single `<path>`, separated by spaces.
+
+```xml
+<!-- Before: N paths (typical Figma/Illustrator export) -->
+<path d="M30.59..." fill="white"/>
+<path d="M50.11..." fill="white"/>
+<path d="M25.51..." fill="white"/>
+
+<!-- After: 1 path (required for msdfgen) -->
+<path d="M30.59... M50.11... M25.51..." fill="white"/>
+```
+
+A small script does it for you:
+
+```bash title="merge-paths.sh"
+python3 -c "
+import re
+with open('MSDF.svg') as f: svg = f.read()
+paths = re.findall(r'd=\"([^\"]+)\"', svg)
+merged = ' '.join(paths)
+out = f'<svg width=\"512\" height=\"512\" viewBox=\"0 0 512 512\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<path d=\"{merged}\" fill=\"white\"/>\n</svg>'
+with open('MSDF-merged.svg', 'w') as f: f.write(out)
+print(f'Merged {len(paths)} paths')
+"
+```
+
+<Callout type="warn">
+  Always merge **before** exporting. If you re-export the SVG from a design tool, the paths split
+  again and you have to merge a second time.
+</Callout>
+
+## Recommended generation flow
+
+```bash
+cd public/textures
+msdfgen msdf -svg MSDF-merged.svg -o msdf.png -dimensions 512 512 -pxrange 8 -scale 1 -translate 0 0
+rm MSDF-merged.svg
+```
+
+| Flag          | Value     | Why                                                                                                                                                       |
+| ------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `msdf`        | mode      | Multi-channel SDF — preserves sharp corners via RGB channel separation                                                                                     |
+| `-dimensions` | `512 512` | Matches the SVG viewBox and existing texture size                                                                                                          |
+| `-pxrange`    | `8`       | Pixel range of the distance gradient. Higher = more room for shader effects (outline, glow). `8` works well for the glyph density in this texture          |
+| `-scale`      | `1`       | 1:1 mapping — 1 SVG unit = 1 pixel. **Do not use `-autoframe`**: it rescales and adds padding, shifting UVs and breaking the shader's crop rects           |
+| `-translate`  | `0 0`     | No offset. msdfgen handles the SVG y-down → image y-down conversion correctly when reading from an SVG                                                      |
+
+### Verify the output
+
+Open the PNG and confirm:
+
+- The shapes are positioned where the SVG placed them.
+- There's **distinct red/green/blue fringing** around every edge — the MSDF signature.
+- The background is solid black where no shape exists.
+
+It won't look "clean" to the naked eye, and that's expected — the fragment shader reconstructs
+crisp edges by taking the **median** of the RGB channels.
+
+## How the shader uses it
+
+```glsl
+vec3 s = texture2D(uMSDF, vUv).rgb;
+float dist = median(s.r, s.g, s.b);
+float fill = smoothstep(0.5 - fwidth(dist), 0.5 + fwidth(dist), dist);
+```
+
+The `median` of the three channels recovers the true signed distance, and `smoothstep` at the
+`0.5` threshold produces a pixel-perfect edge at any scale.
