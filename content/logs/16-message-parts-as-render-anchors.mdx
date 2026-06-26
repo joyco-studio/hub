@@ -21,19 +21,36 @@ anything. The message is already structured state, and you render straight from 
 
 ## Who owns the conversation
 
-In this demo, the client. `useChat` holds the `messages` array, and our route keeps
-no session. By default `DefaultChatTransport` ships the whole conversation on every
-turn: call `sendMessage` and the POST body is `{ id, messages, trigger, messageId }`,
-with the full `messages` array inside. The route reads `messages`, streams a response
-back, and `useChat` folds that stream into the same array. Refresh the page and the
-conversation is gone, because our backend never stored it.
+The server owns the durable copy; the client owns a live one. Getting that split
+right is the whole game, so it is worth walking end to end.
 
-That last part is a choice, not a rule. The SDK gives you a
-`prepareSendMessagesRequest` hook to send only the latest message plus the `id`,
-persist history server-side, and rebuild the thread from your own store. We just had
-nothing to persist, so the route stays stateless. Either way the contract is the
-same: `convertToModelMessages(messages)` turns whatever UI messages the route
-receives into the shape the model wants.
+On load, the client asks the server for the thread and gets back `messages[]`, the
+persisted snapshot. From there the conversation belongs to the client: `useChat`
+holds it and renders from it. When you send, you do **not** ship the array back. You
+send only the new message plus the chat `id` (`prepareSendMessagesRequest` is the
+transport hook for that). The server loads the prior messages from its own store,
+appends yours, hands them to `convertToModelMessages`, runs the model, and streams
+back **events**, never a fresh list. The client reduces those events into its copy
+with the same logic the server used to assemble them, so both sides land on the
+identical `parts` without the client ever re-fetching anything.
+
+The durable copy is written once, cleanly.
+`toUIMessageStreamResponse({ originalMessages, onFinish })` hands the `onFinish`
+callback the complete `messages` array with the new assistant reply already folded
+into parts, so persisting is a straight write, no reconstruction:
+
+```ts
+onFinish: ({ messages }) => saveChat({ chatId, messages })
+```
+
+What lands in the database is exactly the assembled `UIMessage[]` the client renders
+from (the same `parts` shape shown a couple of sections down). One structure is both
+the live source on the client and the durable source on the server.
+
+This demo is the stateless slice of that picture: no store, so it skips the load,
+ships the whole array each turn (`{ id, messages, trigger, messageId }`), and forgets
+the thread on refresh. The machinery in between is identical; production just adds the
+snapshot on the way in and the `onFinish` write on the way out.
 
 ## What comes over the wire
 
