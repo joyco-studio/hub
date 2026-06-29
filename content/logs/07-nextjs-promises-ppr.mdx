@@ -32,10 +32,10 @@ export default async function RootLayout({ children }) {
 
 <Diagram title="Blocking await chain">{`flow TD
 A(["Request arrives"]):primary
-B["await getCart()<br/>200ms"]:bad
-C["await getFlags()<br/>150ms"]:bad
+B["await getCart()<br/>200ms"]:error
+C["await getFlags()<br/>150ms"]:error
 D["Render HTML"]
-E["Send response<br/>350ms+ later"]:bad
+E["Send response<br/>350ms+ later"]:error
 A --- B
 B --- C
 C --- D
@@ -71,8 +71,8 @@ The layout returns immediately. The promises are in-flight. Client components re
 
 <Diagram title="Forward promises, render shell immediately">{`flow TD
 A(["Request arrives"]):primary
-B["getCart() started"]:good
-C["getFlags() started"]:good
+B["getCart() started"]:success
+C["getFlags() started"]:success
 D["Render HTML shell immediately<br/>(Suspense fallbacks)"]:primary
 E["Stream resolved data<br/>as promises settle"]:streamed
 A --- B
@@ -342,10 +342,10 @@ With **Partial Prerendering** (PPR), enabled via `cacheComponents: true` in Next
 <Diagram title="The static shell: built at build time, served from CDN">{`flow TD
 shell(["Static Shell — built at build time, served from CDN"])
 nav["<nav> Store </nav>"]:primary
-skeleton1["CartTotal skeleton"]:pending
-skeleton2["CartCount skeleton"]:pending
+skeleton1["CartTotal skeleton"]:warning
+skeleton2["CartCount skeleton"]:warning
 main["<main> Featured Products"]:primary
-fallback["Checkout button fallback"]:pending
+fallback["Checkout button fallback"]:warning
 shell --- nav
 nav --- skeleton1
 nav --- skeleton2
@@ -357,12 +357,12 @@ When a request comes in, the static shell is **instantly** served. Then the dyna
 
 <Diagram title="Shell served instantly, dynamic parts stream in">{`flow TD
 A(["Static shell served<br/>0ms"]):primary
-S["UI renders with<br/>Suspense fallbacks instantly"]:pending
-B["getFlags resolves<br/>80ms"]:good
-C["getCart resolves<br/>120ms"]:good
+S["UI renders with<br/>Suspense fallbacks instantly"]:warning
+B["getFlags resolves<br/>80ms"]:success
+C["getCart resolves<br/>120ms"]:success
 D["CheckoutButton renders<br/>Checkout with Express Pay"]:streamed
 E["CartCount: 3<br/>CartTotal: $149.97"]:streamed
-F(["Page fully interactive<br/>~120ms"]):good
+F(["Page fully interactive<br/>~120ms"]):success
 A --- S
 S --- B
 S --- C
@@ -419,7 +419,7 @@ B2 --- B3
 end
 subgraph request ["REQUEST TIME"]
 R1["CDN serves static shell"]
-R2["Browser paints immediately"]:good
+R2["Browser paints immediately"]:success
 R3["Server executes layout"]
 R4["getCart(): fetch in flight"]
 R5["getFlags(): fetch in flight"]

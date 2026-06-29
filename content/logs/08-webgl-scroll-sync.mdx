@@ -26,8 +26,8 @@ When the user scrolls, the input event goes to the **compositor first**. The com
 <Diagram title="Scroll input reaches the compositor first">{`flow LR
 A["User scrolls<br/>(wheel / touch)"]
 B["Compositor thread<br/>receives input"]:primary
-C["GPU shifts pixel tiles<br/>instantly"]:good
-D["Main thread notified<br/>asynchronously"]:bad
+C["GPU shifts pixel tiles<br/>instantly"]:success
+D["Main thread notified<br/>asynchronously"]:error
 A --- B
 B --- C
 B --- D`}</Diagram>
@@ -49,13 +49,13 @@ L --- PP
 PP --- P
 end
 subgraph commit ["Commit"]
-CO["Copy layer tree +<br/>property trees to impl thread<br/>(main thread blocked)"]:pending
+CO["Copy layer tree +<br/>property trees to impl thread<br/>(main thread blocked)"]:warning
 end
 subgraph impl ["Compositor Thread (impl)"]
-LY["Layerize"]:good
-R["Raster<br/>(worker threads → GPU tiles)"]:good
-AC["Activate"]:good
-DR["Draw compositor frame"]:good
+LY["Layerize"]:success
+R["Raster<br/>(worker threads → GPU tiles)"]:success
+AC["Activate"]:success
+DR["Draw compositor frame"]:success
 LY --- R
 R --- AC
 AC --- DR
@@ -74,7 +74,7 @@ subgraph main ["Main Thread"]
 LTH["LayerTreeHost<br/>owns main-thread tree"]:primary
 end
 subgraph impl ["Impl Thread"]
-LTHI["LayerTreeHostImpl<br/>owns impl-thread tree"]:good
+LTHI["LayerTreeHostImpl<br/>owns impl-thread tree"]:success
 end
 LTH <==>|"commit (sync) / scroll deltas (async)"| LTHI`}</Diagram>
 
@@ -135,7 +135,7 @@ CANVAS["Canvas<br/>(fixed to window)"]:streamed
 VIEW["Viewport<br/>(what user sees)"]:primary
 end
 subgraph page ["Page (P)"]
-CONTENT["DOM content"]:good
+CONTENT["DOM content"]:success
 end
 VIEW ===|"D (delta) — JS animates scrollTop, reads it back for canvas"| CONTENT`}</Diagram>
 
@@ -202,7 +202,7 @@ VIEW["Viewport<br/>(what user sees)"]:primary
 end
 subgraph page ["Page (P)"]
 CANVAS["Canvas<br/>(absolute, in page flow)"]:streamed
-DOM["DOM elements"]:good
+DOM["DOM elements"]:success
 end
 VIEW ===|"D (delta) — JS reads scrollY, applies transform to reposition canvas"| CANVAS`}</Diagram>
 
@@ -265,14 +265,14 @@ Edge clipping during fast scroll is solved by rendering the canvas larger than t
 
 <Diagram title="Padding absorbs the stale-transform shift">{`flow TD
 subgraph canvas ["Canvas (150% viewport height)"]
-PAD_TOP["25% padding (top)<br/>Extra rendered area"]:good
+PAD_TOP["25% padding (top)<br/>Extra rendered area"]:success
 VP["100% viewport area<br/>What the user actually sees"]:primary
-PAD_BOT["25% padding (bottom)<br/>Extra rendered area"]:good
+PAD_BOT["25% padding (bottom)<br/>Extra rendered area"]:success
 PAD_TOP --- VP
 VP --- PAD_BOT
 end
 SCROLL["During fast scroll,<br/>stale transform shifts canvas<br/>a few pixels"]
-NOTE["Padding absorbs the shift<br/>→ no visible clipping"]:good
+NOTE["Padding absorbs the shift<br/>→ no visible clipping"]:success
 SCROLL --- VP
 NOTE --- VP`}</Diagram>
 
@@ -306,16 +306,16 @@ When all your WebGL content scrolls with the page: background effects, image tre
 
 <Diagram title="Choosing a scroll-sync approach">{`flow TD
 ROOT["WebGL canvas needs to<br/>stay in sync with DOM during scroll"]
-PROBLEM["Compositor scrolls instantly (GPU)<br/>JS reads scrollY 1+ frames late"]:pending
+PROBLEM["Compositor scrolls instantly (GPU)<br/>JS reads scrollY 1+ frames late"]:warning
 Q{"Where does<br/>the canvas live?"}:primary
 FIXED["Window side (fixed)"]:primary
-ABS["Page side (absolute)"]:good
+ABS["Page side (absolute)"]:success
 FIX_HOW["JS-driven scroll (Lenis):<br/>JS animates scrollTop<br/>Canvas reads it back"]
-FIX_PRO["Zero drift between<br/>DOM and canvas"]:good
-FIX_CON["Main-thread scrolling<br/>Can drop frames on mobile"]:bad
+FIX_PRO["Zero drift between<br/>DOM and canvas"]:success
+FIX_CON["Main-thread scrolling<br/>Can drop frames on mobile"]:error
 ABS_HOW["Keep native scroll:<br/>Canvas moves with page<br/>Transform corrects position"]
-ABS_PRO["Native scroll preserved<br/>Content stays aligned"]:good
-ABS_CON["Edge clipping (fix with padding)<br/>Viewport-fixed WebGL elements drift"]:bad
+ABS_PRO["Native scroll preserved<br/>Content stays aligned"]:success
+ABS_CON["Edge clipping (fix with padding)<br/>Viewport-fixed WebGL elements drift"]:error
 ROOT --- PROBLEM
 PROBLEM --- Q
 Q --- FIXED
