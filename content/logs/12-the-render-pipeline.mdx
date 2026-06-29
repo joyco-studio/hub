@@ -10,7 +10,22 @@ In [the layout thrashing post](/logs/11-wtf-is-layout-thrashing) we skimmed the 
 
 Every frame the browser produces follows this sequence:
 
-<Figure src="https://r2.joyco.studio/hTyqgeONsgOA.jpg" alt="Browser rendering pipeline" width={1903} height={520} />
+<Diagram title="Full Frame Window — 60fps = 16ms / 120fps = 8ms">{`
+flow LR
+subgraph main ["Main Thread"]
+js["JS"]:warning
+style["Style"]:streamed
+layout["Layout"]:primary
+paint["Paint"]:success
+js --- style
+style --- layout
+layout --- paint
+end
+subgraph compositor ["Compositor Thread"]
+composite["Composite"]:error
+end
+paint === composite
+`}</Diagram>
 
 The first four run on the **main thread** (the same thread your JS runs on). The last one, Composite, runs on the **compositor thread**, a separate thread on the GPU side. This distinction is the single most important thing to internalize: anything on the main thread competes with your JS for render time. Anything on the compositor thread is *cheap*, not free. Layer explosion, implicit promotion, and `backdrop-filter` re-sampling can all make compositing expensive (more on that in [Composite](#5-composite)).
 
