@@ -24,8 +24,8 @@ importers:
         specifier: ^0.0.12
         version: 0.0.12(react@19.2.0)
       '@joycostudio/trazo':
-        specifier: ^0.2.0
-        version: 0.2.0(eslint@9.39.1(jiti@2.6.1))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        specifier: ^0.3.0
+        version: 0.3.0(eslint@9.39.1(jiti@2.6.1))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@radix-ui/react-avatar':
         specifier: ^1.1.11
         version: 1.1.11(@types/react-dom@19.2.3(@types/react@19.2.5))(@types/react@19.2.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -919,8 +919,8 @@ packages:
     peerDependencies:
       react: '>=16.8.0'
 
-  '@joycostudio/trazo@0.2.0':
-    resolution: {integrity: sha512-LvT3Ie54qkCt8HGs5z8yZvBDsuM9ulYV/dc93kYV52uCn08tSGGSh5zBNhyj5N6+XpCUnP7gzgYNHQQ6dCrEdA==}
+  '@joycostudio/trazo@0.3.0':
+    resolution: {integrity: sha512-HBS3xx+NnzxouFBtMyhMPiHPdKQId4TW1NhacP0IpEaNJ+vD8wW/1ivUljUzuQmMVOPf7sKYIo4fzM+aQVjQuQ==}
     peerDependencies:
       eslint: '>=9'
       react: '>=18'
@@ -6356,7 +6356,7 @@ snapshots:
     dependencies:
       react: 19.2.0
 
-  '@joycostudio/trazo@0.2.0(eslint@9.39.1(jiti@2.6.1))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
+  '@joycostudio/trazo@0.3.0(eslint@9.39.1(jiti@2.6.1))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
     optionalDependencies:
       eslint: 9.39.1(jiti@2.6.1)
       react: 19.2.0
