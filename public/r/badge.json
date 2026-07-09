@@ -8,6 +8,9 @@
     "@radix-ui/react-slot",
     "class-variance-authority"
   ],
+  "registryDependencies": [
+    "@joyco/utils"
+  ],
   "files": [
     {
       "path": "components/ui/badge.tsx",

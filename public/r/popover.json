@@ -7,6 +7,9 @@
   "dependencies": [
     "@radix-ui/react-popover"
   ],
+  "registryDependencies": [
+    "@joyco/utils"
+  ],
   "files": [
     {
       "path": "components/ui/popover.tsx",

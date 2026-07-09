@@ -1,0 +1,123 @@
+---
+title: '16 - Phased State: Modes as Tagged Unions'
+description: Model a thing's modes as a tagged union instead of a bag of booleans, so illegal states can't exist and you can react to what just changed.
+author: 'matiasperz'
+---
+
+A **phase** is a named mode a thing can be in, where the data that exists, and the operations that make sense, depend on which mode you're in. You model it as a **discriminated union**: one variant per phase, each carrying exactly the fields that phase needs and nothing it doesn't.
+
+Imagine the item-inspection code for a game: you pick something up, hold it, look it over, then put it down. That lifecycle is the canonical example. Here's the union:
+
+```ts
+type Inspect =
+  | { phase: 'idle' }                                       // nothing held
+  | { phase: 'inspecting'; element: ElementId }             // manual hold
+  | { phase: 'revealing';  element: ElementId }             // first-pickup reveal
+  | { phase: 'exiting';    element: ElementId; reveal: boolean } // teardown
+```
+
+The `phase` string is the **discriminant**. Once you've narrowed on it, the type of the rest of the object is known. `idle` has no `element`, and that is the point: there is no element when nothing is held, so the field does not exist in that branch.
+
+## What it replaces: the anti-pattern
+
+The naive version is a bag of independent fields:
+
+```ts
+// DON'T
+interface Inspect {
+  isInspecting: boolean
+  isRevealing: boolean
+  isExiting: boolean
+  element: ElementId | null
+  reveal: boolean
+}
+```
+
+Five booleans/nullables = 32 representable combinations, but only **4** are legal. I call this the "Bag-of-booleans". What does `{ isInspecting: true, isExiting: true, element: null }` mean? Nothing, but the type permits it, so every reader has to defend against it and every writer can accidentally produce it. The bug surface is exactly the gap between *representable* states and *valid* states.
+
+The tagged union closes that gap: **illegal states are unrepresentable.** You cannot construct an `exiting` value without an `element`, and you cannot read `element` off an `idle` value. The compiler enforces the state chart.
+
+## The five things it buys you
+
+### 1. Data is scoped to the phase that owns it
+
+`reveal: boolean` exists only on `exiting`, because "was this a discovery reveal?" is only a meaningful question while tearing one down. You never carry a field that is `null`/irrelevant most of the time. The shape documents itself: read the union and you know the lifecycle.
+
+### 2. One source of truth, queried through derived accessors
+
+Consumers never poke at raw phases. They read a **selector** that collapses the machine into the question they care about:
+
+```ts
+// a derived selector over the state
+export const inspectedId = (ctx) =>
+  ctx.inspect.phase === 'inspecting' || ctx.inspect.phase === 'revealing'
+    ? ctx.inspect.element : null
+```
+
+"Which element is the user actively looking at?" Two phases answer yes; the rest answer `null`. The crucial part: **the encoding can change without touching callers.** Split `inspecting` into `inspecting`/`zooming` later and you edit this one function, and every consumer stays correct. The phases are an implementation detail behind a stable derived API.
+
+### 3. Exhaustiveness: the compiler finds your missing cases
+
+A `switch` over `phase` with no `default` forces you to handle every variant. Add a new phase and every unhandled `switch` becomes a compile error pointing at the code that forgot it. The state chart and the code that drives it cannot silently drift apart.
+
+### 4. Transitions become the unit of meaning (edge detection)
+
+This is the deepest payoff. Because the whole machine is one value that gets replaced, you can diff **old vs new** and react to the **transition**, not the state. The change itself becomes *first-class*: a real value you can hold in a variable, compare, and branch on, instead of an event you have to reconstruct from a pile of flags after the fact. A small sync loop keeps the previous id and branches on the edge:
+
+```ts
+const next = inspectedId(state.ctx)
+if (next === this.lastInspecting) return   // no edge → nothing to do
+const was = this.lastInspecting
+this.lastInspecting = next
+// ... branch on the (was → next) edge
+```
+
+Three transitions, three behaviors:
+
+| Edge              | Meaning              | Behavior          |
+| ----------------- | -------------------- | ----------------- |
+| `null → X`        | fresh open           | approach (fly-in) |
+| `X → null`        | close                | ease back         |
+| `X → Y`           | swap without closing | instant in place  |
+
+The "instant swap" behavior fell out of this for free. `was != null && next != null` is a *watertight* signal for "swapped without closing," because the machine can only produce that edge one way: a new item opened while one was already held. You are not tracking a separate `isSwapping` flag that can desync; the flag is **implied by the shape of the transition**. Bag-of-booleans state cannot do this, because there is no single value to diff, so "what just changed?" is not answerable.
+
+### 5. Phases gate which operations are even legal
+
+A pointer-down handler starts a drag only when `phase === 'inspecting'` (not during a `revealing` showcase spin, not while `exiting`). The phase *is* the guard. Instead of scattering `if (isInspecting && !isExiting && !isRevealing)` everywhere, the answer is one discriminant check. Operations attach to the phases where they make sense.
+
+## A generic template
+
+The pattern recurs wherever a thing has a lifecycle. Each gives you: no illegal combos, phase-scoped data, exhaustive handling, and, if you keep the previous value, transition detection.
+
+```ts
+// async data
+type Resource<T> =
+  | { phase: 'idle' }
+  | { phase: 'loading' }
+  | { phase: 'success'; data: T }
+  | { phase: 'error'; message: string }   // no `data` here, can't render stale data by accident
+
+// a media player
+type Playback =
+  | { phase: 'stopped' }
+  | { phase: 'playing'; trackId: string; startedAt: number }
+  | { phase: 'paused';  trackId: string; positionMs: number }   // position only matters when paused
+
+// a wizard / checkout
+type Checkout =
+  | { phase: 'cart' }
+  | { phase: 'shipping'; cart: Cart }
+  | { phase: 'payment';  cart: Cart; address: Address }   // address exists only once collected
+  | { phase: 'done';     orderId: string }
+```
+
+## When *not* to reach for it
+
+It is overkill when fields are genuinely independent: a settings record (`volume`, `theme`, `language`) has no field that constrains another, so it is just a record. The pattern earns its keep when **the presence of one field depends on the value of another**, or when **the modes are mutually exclusive** and you keep writing `if (a && !b && !c)`. That `&&`-soup is the smell that says "these booleans are secretly one phase."
+
+This is also the other half of [Derive, Don't Mutate](/logs/15-derive-dont-mutate). That post handles N independent sources each holding a simultaneous stake in one value; the moment those "sources" turn out to be mutually-exclusive *modes*, you're no longer resolving a fight, you're modeling a state machine, and this is the shape it wants.
+
+## The rule
+
+> Model mutually-exclusive modes as a discriminated union keyed on a `phase` tag, expose it through derived selectors, and drive behavior off old→new transitions, so illegal states can't exist, data lives only where it's meaningful, and "what just changed" becomes a first-class, diffable question.

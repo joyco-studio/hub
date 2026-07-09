@@ -9,6 +9,9 @@
     "@radix-ui/react-slot",
     "react-remove-scroll"
   ],
+  "registryDependencies": [
+    "@joyco/utils"
+  ],
   "files": [
     {
       "path": "registry/components/mobile-menu.tsx",

@@ -6,7 +6,8 @@
   "description": "A minimal, themeable snake game component with highscore persistence.",
   "registryDependencies": [
     "@joyco/button",
-    "@joyco/kbd"
+    "@joyco/kbd",
+    "@joyco/utils"
   ],
   "files": [
     {

@@ -7,6 +7,9 @@
   "dependencies": [
     "@diceui/mention"
   ],
+  "registryDependencies": [
+    "@joyco/utils"
+  ],
   "files": [
     {
       "path": "components/ui/mention.tsx",

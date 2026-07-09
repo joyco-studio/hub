@@ -10,7 +10,8 @@
   "registryDependencies": [
     "@joyco/button",
     "@joyco/input",
-    "@joyco/textarea"
+    "@joyco/textarea",
+    "@joyco/utils"
   ],
   "files": [
     {

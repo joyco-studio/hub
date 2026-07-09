@@ -26,7 +26,9 @@
           "type": "registry:component"
         }
       ],
-      "dependencies": ["@joycostudio/marquee"]
+      "dependencies": [
+        "@joycostudio/marquee"
+      ]
     },
     {
       "name": "file-button",
@@ -43,7 +45,9 @@
           "type": "registry:hook"
         }
       ],
-      "registryDependencies": ["@joyco/button"]
+      "registryDependencies": [
+        "@joyco/button"
+      ]
     },
     {
       "name": "file-dropzone",
@@ -60,7 +64,9 @@
           "type": "registry:hook"
         }
       ],
-      "registryDependencies": ["@joyco/button"]
+      "registryDependencies": [
+        "@joyco/button"
+      ]
     },
     {
       "name": "mobile-menu",
@@ -77,6 +83,9 @@
         "@radix-ui/react-dialog",
         "@radix-ui/react-slot",
         "react-remove-scroll"
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
       ]
     },
     {
@@ -90,7 +99,12 @@
           "type": "registry:component"
         }
       ],
-      "dependencies": ["@radix-ui/react-presence"]
+      "dependencies": [
+        "@radix-ui/react-presence"
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
+      ]
     },
     {
       "name": "chat",
@@ -111,8 +125,15 @@
           "type": "registry:lib"
         }
       ],
-      "dependencies": ["debounce", "react-use-measure"],
-      "registryDependencies": ["@joyco/input-group", "@joyco/avatar"]
+      "dependencies": [
+        "debounce",
+        "react-use-measure"
+      ],
+      "registryDependencies": [
+        "@joyco/input-group",
+        "@joyco/avatar",
+        "@joyco/utils"
+      ]
     },
     {
       "name": "hls-video-player",
@@ -129,7 +150,9 @@
           "type": "registry:lib"
         }
       ],
-      "dependencies": ["hls.js"]
+      "dependencies": [
+        "hls.js"
+      ]
     },
     {
       "name": "action-hint",
@@ -141,6 +164,9 @@
           "path": "registry/components/action-hint.tsx",
           "type": "registry:component"
         }
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
       ]
     },
     {
@@ -153,6 +179,9 @@
           "path": "registry/components/image-sequence.tsx",
           "type": "registry:component"
         }
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
       ]
     },
     {
@@ -169,6 +198,9 @@
           "path": "hooks/use-typewriter.ts",
           "type": "registry:hook"
         }
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
       ]
     },
     {
@@ -181,6 +213,9 @@
           "path": "registry/components/spritesheet-sequencer.tsx",
           "type": "registry:component"
         }
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
       ]
     },
     {
@@ -198,7 +233,12 @@
           "type": "registry:lib"
         }
       ],
-      "dependencies": ["@radix-ui/react-slot"]
+      "dependencies": [
+        "@radix-ui/react-slot"
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
+      ]
     },
     {
       "name": "scramble",
@@ -211,7 +251,9 @@
           "type": "registry:lib"
         }
       ],
-      "dependencies": ["gsap"]
+      "dependencies": [
+        "gsap"
+      ]
     },
     {
       "name": "scramble-button",
@@ -224,8 +266,13 @@
           "type": "registry:component"
         }
       ],
-      "dependencies": ["gsap"],
-      "registryDependencies": ["@joyco/scramble", "@joyco/button"]
+      "dependencies": [
+        "gsap"
+      ],
+      "registryDependencies": [
+        "@joyco/scramble",
+        "@joyco/button"
+      ]
     },
     {
       "name": "brick-breaker",
@@ -265,6 +312,9 @@
           "path": "registry/components/games/brick-breaker/use-brick-breaker.ts",
           "type": "registry:component"
         }
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
       ]
     },
     {
@@ -302,7 +352,11 @@
           "type": "registry:hook"
         }
       ],
-      "registryDependencies": ["@joyco/button", "@joyco/kbd"]
+      "registryDependencies": [
+        "@joyco/button",
+        "@joyco/kbd",
+        "@joyco/utils"
+      ]
     },
     {
       "name": "space-invaders",
@@ -347,7 +401,11 @@
           "type": "registry:component"
         }
       ],
-      "registryDependencies": ["@joyco/button", "@joyco/kbd"]
+      "registryDependencies": [
+        "@joyco/button",
+        "@joyco/kbd",
+        "@joyco/utils"
+      ]
     },
     {
       "name": "typed-emitter",
@@ -360,7 +418,9 @@
           "type": "registry:lib"
         }
       ],
-      "dependencies": ["tiny-emitter"]
+      "dependencies": [
+        "tiny-emitter"
+      ]
     },
     {
       "name": "canvas-2d",
@@ -372,13 +432,16 @@
           "path": "registry/components/canvas-2d.tsx",
           "type": "registry:component"
         }
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
       ]
     },
     {
       "name": "debug-canvas",
       "type": "registry:component",
       "title": "r3f Canvas",
-      "description": "An enhanced R3F Canvas with built-in debug helpers — orbit/fly controls (mutually exclusive), grid, camera monitor, and performance stats — all toggled via a shared tweakpane folder.",
+      "description": "An enhanced R3F Canvas with built-in debug helpers \u2014 orbit/fly controls (mutually exclusive), grid, camera monitor, and performance stats \u2014 all toggled via a shared tweakpane folder.",
       "files": [
         {
           "path": "registry/components/debug-canvas/index.ts",
@@ -405,8 +468,13 @@
           "type": "registry:component"
         }
       ],
-      "dependencies": ["stats-gl", "@react-three/drei"],
-      "registryDependencies": ["@joyco/debug"]
+      "dependencies": [
+        "stats-gl",
+        "@react-three/drei"
+      ],
+      "registryDependencies": [
+        "@joyco/debug"
+      ]
     },
     {
       "name": "debug",
@@ -458,7 +526,12 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": ["@radix-ui/react-avatar"]
+      "dependencies": [
+        "@radix-ui/react-avatar"
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
+      ]
     },
     {
       "name": "badge",
@@ -471,7 +544,13 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": ["@radix-ui/react-slot", "class-variance-authority"]
+      "dependencies": [
+        "@radix-ui/react-slot",
+        "class-variance-authority"
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
+      ]
     },
     {
       "name": "button",
@@ -484,7 +563,13 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": ["@radix-ui/react-slot", "class-variance-authority"]
+      "dependencies": [
+        "@radix-ui/react-slot",
+        "class-variance-authority"
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
+      ]
     },
     {
       "name": "button-group",
@@ -497,8 +582,14 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": ["@radix-ui/react-slot", "class-variance-authority"],
-      "registryDependencies": ["@joyco/separator"]
+      "dependencies": [
+        "@radix-ui/react-slot",
+        "class-variance-authority"
+      ],
+      "registryDependencies": [
+        "@joyco/separator",
+        "@joyco/utils"
+      ]
     },
     {
       "name": "card",
@@ -510,6 +601,9 @@
           "path": "components/ui/card.tsx",
           "type": "registry:ui"
         }
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
       ]
     },
     {
@@ -523,7 +617,12 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": ["recharts"]
+      "dependencies": [
+        "recharts"
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
+      ]
     },
     {
       "name": "collapsible",
@@ -536,7 +635,12 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": ["@radix-ui/react-collapsible"]
+      "dependencies": [
+        "@radix-ui/react-collapsible"
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
+      ]
     },
     {
       "name": "dropdown-menu",
@@ -549,7 +653,13 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": ["@radix-ui/react-dropdown-menu", "lucide-react"]
+      "dependencies": [
+        "@radix-ui/react-dropdown-menu",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
+      ]
     },
     {
       "name": "input",
@@ -561,6 +671,9 @@
           "path": "components/ui/input.tsx",
           "type": "registry:ui"
         }
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
       ]
     },
     {
@@ -574,11 +687,14 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": ["class-variance-authority"],
+      "dependencies": [
+        "class-variance-authority"
+      ],
       "registryDependencies": [
         "@joyco/button",
         "@joyco/input",
-        "@joyco/textarea"
+        "@joyco/textarea",
+        "@joyco/utils"
       ]
     },
     {
@@ -591,6 +707,9 @@
           "path": "components/ui/kbd.tsx",
           "type": "registry:ui"
         }
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
       ]
     },
     {
@@ -622,7 +741,8 @@
         "@joyco/badge",
         "@joyco/button",
         "@joyco/dropdown-menu",
-        "@joyco/tooltip"
+        "@joyco/tooltip",
+        "@joyco/utils"
       ]
     },
     {
@@ -636,7 +756,12 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": ["@diceui/mention"]
+      "dependencies": [
+        "@diceui/mention"
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
+      ]
     },
     {
       "name": "popover",
@@ -649,7 +774,12 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": ["@radix-ui/react-popover"]
+      "dependencies": [
+        "@radix-ui/react-popover"
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
+      ]
     },
     {
       "name": "select",
@@ -662,7 +792,13 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": ["@radix-ui/react-select", "lucide-react"]
+      "dependencies": [
+        "@radix-ui/react-select",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
+      ]
     },
     {
       "name": "separator",
@@ -675,7 +811,13 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": ["@radix-ui/react-separator", "class-variance-authority"]
+      "dependencies": [
+        "@radix-ui/react-separator",
+        "class-variance-authority"
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
+      ]
     },
     {
       "name": "slider",
@@ -688,7 +830,12 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": ["@radix-ui/react-slider"]
+      "dependencies": [
+        "@radix-ui/react-slider"
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
+      ]
     },
     {
       "name": "switch",
@@ -701,7 +848,12 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": ["radix-ui"]
+      "dependencies": [
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
+      ]
     },
     {
       "name": "tabs",
@@ -714,7 +866,12 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": ["@radix-ui/react-tabs"]
+      "dependencies": [
+        "@radix-ui/react-tabs"
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
+      ]
     },
     {
       "name": "textarea",
@@ -726,6 +883,9 @@
           "path": "components/ui/textarea.tsx",
           "type": "registry:ui"
         }
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
       ]
     },
     {
@@ -739,7 +899,12 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": ["@radix-ui/react-tooltip"]
+      "dependencies": [
+        "@radix-ui/react-tooltip"
+      ],
+      "registryDependencies": [
+        "@joyco/utils"
+      ]
     },
     {
       "name": "cluster",
@@ -752,7 +917,10 @@
           "type": "registry:ui"
         }
       ],
-      "dependencies": ["@radix-ui/react-slot", "class-variance-authority"],
+      "dependencies": [
+        "@radix-ui/react-slot",
+        "class-variance-authority"
+      ],
       "cssVars": {
         "theme": {
           "gap": "0.25rem",
@@ -766,10 +934,13 @@
           }
         }
       },
-      "docs": "Cluster is a transparent flex container — it never has a visible background. Use the `bg` prop to set `--cluster-bg` which direct children inherit. Use `<Filler />` for space distribution instead of justify-between. Every direct child must be a solid element with its own bg. See https://hub.joyco.studio/components/cluster for full docs.",
+      "docs": "Cluster is a transparent flex container \u2014 it never has a visible background. Use the `bg` prop to set `--cluster-bg` which direct children inherit. Use `<Filler />` for space distribution instead of justify-between. Every direct child must be a solid element with its own bg. See https://hub.joyco.studio/components/cluster for full docs.",
       "meta": {
-        "llms": "Cluster & Filler are layout primitives. Rules: (1) Clusters are transparent, bg prop sets --cluster-bg inherited by children via @layer base :where() rule. (2) Every direct Cluster child must be a solid element with its own visual identity. (3) Use <Filler /> (flex-1, aria-hidden) for space distribution — never justify-between/end/around. (4) Children override inherited bg with any bg-* class. Props: display (flex|inline-flex), direction (row|col), align (start|center|end|stretch|baseline), wrap (bool), bg (muted|accent), asChild (bool). For inline contexts use asChild with <span>. Requires CSS: @layer base { :where([data-slot='cluster'] > *) { background-color: var(--cluster-bg, transparent); } }"
-      }
+        "llms": "Cluster & Filler are layout primitives. Rules: (1) Clusters are transparent, bg prop sets --cluster-bg inherited by children via @layer base :where() rule. (2) Every direct Cluster child must be a solid element with its own visual identity. (3) Use <Filler /> (flex-1, aria-hidden) for space distribution \u2014 never justify-between/end/around. (4) Children override inherited bg with any bg-* class. Props: display (flex|inline-flex), direction (row|col), align (start|center|end|stretch|baseline), wrap (bool), bg (muted|accent), asChild (bool). For inline contexts use asChild with <span>. Requires CSS: @layer base { :where([data-slot='cluster'] > *) { background-color: var(--cluster-bg, transparent); } }"
+      },
+      "registryDependencies": [
+        "@joyco/utils"
+      ]
     },
     {
       "name": "joyco-theme",
@@ -915,10 +1086,27 @@
       ]
     },
     {
+      "name": "utils",
+      "type": "registry:lib",
+      "title": "Utils",
+      "description": "The cn class-merge helper used by every JOYCO UI component.",
+      "files": [
+        {
+          "path": "lib/utils.ts",
+          "type": "registry:lib",
+          "target": "lib/utils.ts"
+        }
+      ],
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ]
+    },
+    {
       "name": "ui",
       "type": "registry:style",
       "title": "JOYCO UI",
-      "description": "The full JOYCO UI kit — all components and brand theming.",
+      "description": "The full JOYCO UI kit \u2014 all components and brand theming.",
       "css": {
         "@custom-variant hocus (&:is(:hover, :focus-visible))": {},
         "@custom-variant dark (&:where(.dark, .dark *))": {},
@@ -1066,7 +1254,8 @@
         "@joyco/tabs",
         "@joyco/textarea",
         "@joyco/tooltip",
-        "@joyco/cluster"
+        "@joyco/cluster",
+        "@joyco/utils"
       ]
     }
   ]
