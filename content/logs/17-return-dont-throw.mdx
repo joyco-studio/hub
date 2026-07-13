@@ -13,7 +13,7 @@ return Response.json({ error: 'unauthenticated' }, { status: 401 })
 and the helpers underneath spell it another:
 
 ```ts
-return { ok: false, status: 409, error: 'game_over' }
+return { ok: false, status: 409, error: 'out_of_stock' }
 ```
 
 Same fact ("this didn't work, here's why, here's the status"), hand-written at every site, in whatever shape that site happened to reach for. We had both dialects, nineteen routes deep, before standardizing on one.
@@ -25,23 +25,24 @@ The naive version scatters the failure contract across every function that can f
 ```ts
 // DON'T: every site invents the sentence again
 export async function POST(request: Request) {
-  const player = await getSessionPlayer()
-  if (!player) {
+  const user = await getSessionUser()
+  if (!user) {
     return Response.json({ error: 'unauthenticated' }, { status: 401 })
   }
-  const result = await submitAttempt(player, group, gameSlug, score, opts)
+  const { items } = await request.json()
+  const result = await placeOrder(user, items)
   if (!result.ok) {
     return Response.json({ error: result.error }, { status: result.status })
   }
-  return Response.json({ attempt: result.attempt, triesLeft: result.triesLeft })
+  return Response.json({ order: result.order, remaining: result.remaining })
 }
 ```
 
 Call this the "hand-rolled wire". Three problems compound:
 
 1. **The failure shape is a convention, not a type.** Nothing stops one helper from returning `{ message }` instead of `{ error }`, or forgetting the status. Consistency is enforced by diligence, which is to say it drifts.
-2. **Every helper mints its own union.** `SubmitResult`, `MintResult`, `RedeemResult`: each declared its `ok: false` branch by hand, each slightly different, and each route re-translated them to HTTP one field at a time.
-3. **Expected failure and genuine breakage share a channel.** If helpers throw for "no tries left", then `catch` blocks must sort player mistakes from real bugs, and sooner or later a bug gets caught, translated to a polite 400, and silenced.
+2. **Every helper mints its own union.** `PlaceOrderResult`, `ApplyCouponResult`, `RefundResult`: each declared its `ok: false` branch by hand, each slightly different, and each route re-translated them to HTTP one field at a time.
+3. **Expected failure and genuine breakage share a channel.** If helpers throw for "out of stock", then `catch` blocks must sort user mistakes from real bugs, and sooner or later a bug gets caught, translated to a polite 400, and silenced.
 
 ## The shape
 
@@ -72,15 +73,15 @@ This is [Phased State](/logs/16-phased-state-tagged-unions) applied to a functio
 Helpers with expected failure modes return it and **never throw for them**:
 
 ```ts
-if (balance < SPIN_COST_POINTS) return error('insufficient_points', 403)
+if (stock < item.qty) return error('out_of_stock', 409)
 // ...
-return success({ bonus, pointsBalance, mintsLeft })
+return success({ order, remaining })
 ```
 
 The caller narrows once and both branches fall out fully typed:
 
 ```ts
-const result = await spinWheel(player)
+const result = await applyCoupon(user, code)
 if (!result.ok) {
   return Response.json({ error: result.error }, { status: result.status })
 }
@@ -91,11 +92,11 @@ return Response.json(result.data)
 
 ### 1. One vocabulary instead of N conventions
 
-`success()`/`error()` are the only way a failure gets built, so every fallible helper speaks the same sentence. The per-helper unions (`SubmitResult`, `MintResult`, …) collapse into `Result<T>` with different `T`s, and routes stop re-translating bespoke shapes field by field: the `!result.ok` branch is identical everywhere, mechanical enough to copy without thinking. It's also mechanical enough to centralize into a boundary wrapper eventually, but that's its own log; the union earns its keep before any wrapper exists.
+`success()`/`error()` are the only way a failure gets built, so every fallible helper speaks the same sentence. The per-helper unions (`PlaceOrderResult`, `ApplyCouponResult`, …) collapse into `Result<T>` with different `T`s, and routes stop re-translating bespoke shapes field by field: the `!result.ok` branch is identical everywhere, mechanical enough to copy without thinking. It's also mechanical enough to centralize into a boundary wrapper eventually, but that's its own log; the union earns its keep before any wrapper exists.
 
 ### 2. Expected failure is a value; throwing means a bug
 
-"Insufficient points" is not exceptional; it's a Tuesday. When helpers return it, control flow reads top-to-bottom with no invisible exits, and the exception channel regains its meaning: anything that actually throws is a genuine defect and surfaces as a loud 500 in the logs, never accidentally laundered into a polite client error by a well-meaning `catch`.
+"Out of stock" is not exceptional; it's a Tuesday. When helpers return it, control flow reads top-to-bottom with no invisible exits, and the exception channel regains its meaning: anything that actually throws is a genuine defect and surfaces as a loud 500 in the logs, never accidentally laundered into a polite client error by a well-meaning `catch`.
 
 ### 3. The compiler makes every caller look
 
@@ -107,7 +108,7 @@ Because every layer speaks the same union, a helper that calls another helper ca
 
 ## When not to reach for it
 
-Don't wrap what can't fail: a function with no expected failure modes returns `T`, not `Result<T>`; reserving the union for real refusal keeps `ok` checks meaningful. And don't return what isn't expected: out-of-invariant conditions ("this row must exist by now") should throw and page you, not come back as a tidy 500-shaped value. The line is expectation, not severity. A player being out of tries is expected; a corrupt game state is not.
+Don't wrap what can't fail: a function with no expected failure modes returns `T`, not `Result<T>`; reserving the union for real refusal keeps `ok` checks meaningful. And don't return what isn't expected: out-of-invariant conditions ("this row must exist by now") should throw and page you, not come back as a tidy 500-shaped value. The line is expectation, not severity. A sold-out item is expected; an order with a negative total is not.
 
 ## The rule
 
