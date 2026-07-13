@@ -24,16 +24,10 @@ export function SearchTool({
   part: SearchToolPart
   avatarSrc: string
 }) {
-  const startRef = React.useRef(Date.now())
   const [minElapsed, setMinElapsed] = React.useState(false)
 
   React.useEffect(() => {
-    const remaining = MIN_SHIMMER_MS - (Date.now() - startRef.current)
-    if (remaining <= 0) {
-      setMinElapsed(true)
-      return
-    }
-    const id = setTimeout(() => setMinElapsed(true), remaining)
+    const id = setTimeout(() => setMinElapsed(true), MIN_SHIMMER_MS)
     return () => clearTimeout(id)
   }, [])
 

@@ -4,6 +4,7 @@ import {
   stepCountIs,
   tool,
   smoothStream,
+  safeValidateUIMessages,
 } from 'ai'
 import { groq } from '@ai-sdk/groq'
 import { z } from 'zod'
@@ -43,15 +44,22 @@ const SYSTEM_PROMPT = [
   'If nothing matches, say so plainly and suggest a different phrasing.',
 ].join(' ')
 
-const uiMessageSchema = z.object({
-  id: z.string(),
-  role: z.enum(['user', 'assistant']),
-  parts: z.array(z.unknown()).default([]),
+const bodySchema = z.object({
+  messages: z.array(z.unknown()).min(1).max(MAX_MESSAGES),
 })
 
-const bodySchema = z.object({
-  messages: z.array(uiMessageSchema).min(1).max(MAX_MESSAGES),
-})
+const tools = {
+  searchComponents: tool({
+    description:
+      'Search the JOYCO registry (components, toolbox tools, logs, lab experiments) for a natural-language query.',
+    inputSchema: z.object({
+      query: z.string().describe('What the user is looking for'),
+    }),
+    execute: async ({ query }) => ({
+      results: await searchRegistry(query),
+    }),
+  }),
+}
 
 export async function POST(req: Request) {
   const ip =
@@ -67,10 +75,17 @@ export async function POST(req: Request) {
     return new Response('Invalid request body', { status: 400 })
   }
 
-  const messages = parsed.data.messages as RegistryChatUIMessage[]
+  const validated = await safeValidateUIMessages<RegistryChatUIMessage>({
+    messages: parsed.data.messages,
+    tools,
+  })
+  if (!validated.success || validated.data.some((m) => m.role === 'system')) {
+    return new Response('Invalid request body', { status: 400 })
+  }
+  const messages = validated.data
 
   const tooLong = messages.some((m) =>
-    m.parts?.some(
+    m.parts.some(
       (p) => p.type === 'text' && p.text.length > MAX_CHARS_PER_MESSAGE
     )
   )
@@ -82,18 +97,7 @@ export async function POST(req: Request) {
     messages: await convertToModelMessages(messages),
     experimental_transform: smoothStream({ delayInMs: 20, chunking: 'word' }),
     stopWhen: stepCountIs(2),
-    tools: {
-      searchComponents: tool({
-        description:
-          'Search the JOYCO registry (components, toolbox tools, logs, lab experiments) for a natural-language query.',
-        inputSchema: z.object({
-          query: z.string().describe('What the user is looking for'),
-        }),
-        execute: async ({ query }) => ({
-          results: await searchRegistry(query),
-        }),
-      }),
-    },
+    tools,
   })
 
   return result.toUIMessageStreamResponse({

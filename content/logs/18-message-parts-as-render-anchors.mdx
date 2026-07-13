@@ -1,6 +1,6 @@
 ---
-title: 16 - Message Parts as Render Anchors
-description: Wiring a streaming LLM to a real UI, the instinct is to lift tool results into component state. Don't. The message already is the state, and each tool call carries its own data, so the UI renders straight from the part.
+title: 18 - Understanding the Agentic Chat Model
+description: How the Vercel AI SDK chat model actually fits together, who owns the conversation between server and client, what the server-sent event stream looks like on the wire, how useChat folds those events into typed message parts, and why you render tool calls straight from the parts instead of lifting them into component state.
 author: 'alejopequeno'
 ---
 
@@ -111,10 +111,26 @@ just streamed in.
 }
 ```
 
-Dozens of `data:` lines collapse into two parts, each typed against the tools you
-declared in `types.ts`. A text part is a bubble, a tool call is its own part, and
-each carries its own input and output. That object is what you render, not the
-stream.
+Dozens of `data:` lines collapse into two parts. The typing is not inferred from
+the stream, you declare it. `types.ts` spells out each tool's `input` and `output`
+shape and plugs that map into the tools slot of the `UIMessage` generic:
+
+```ts showLineNumbers
+export type RegistryChatTools = {
+  searchComponents: {
+    input: { query: string }
+    output: { results: RegistrySearchResult[] }
+  }
+}
+
+export type RegistryChatUIMessage = UIMessage<never, NoDataParts, RegistryChatTools>
+```
+
+Pass that to the hook, `useChat<RegistryChatUIMessage>()`, and every message it
+returns has `parts` typed as a discriminated union: the `searchComponents` entry
+becomes the `tool-searchComponents` part type, carrying exactly those input and
+output shapes. A text part is a bubble, a tool call is its own part, and each
+carries its own input and output. That object is what you render, not the stream.
 
 ## Parts are the render anchors
 
