@@ -1,0 +1,144 @@
+---
+title: 17 - Return, Don't Throw
+description: Return expected failures as one shared Result union built by two constructors, serialized to the wire in a single place, so throwing only ever means a bug.
+author: 'matiasperz'
+---
+
+Every API surface eventually grows two dialects for the same sentence. The route layer spells a refusal one way:
+
+```ts
+return Response.json({ error: 'unauthenticated' }, { status: 401 })
+```
+
+and the helpers underneath spell it another:
+
+```ts
+return { ok: false, status: 409, error: 'game_over' }
+```
+
+Same fact ("this didn't work, here's why, here's the status"), hand-written at every site, in whatever shape that site happened to reach for. We had both dialects, nineteen routes deep, before standardizing on one.
+
+## What it replaces: the anti-pattern
+
+The naive version scatters the response contract across every function that can fail:
+
+```ts
+// DON'T: every site invents the sentence again
+export async function POST(request: Request) {
+  const player = await getSessionPlayer()
+  if (!player) {
+    return Response.json({ error: 'unauthenticated' }, { status: 401 })
+  }
+  const result = await submitAttempt(player, group, gameSlug, score, opts)
+  if (!result.ok) {
+    return Response.json({ error: result.error }, { status: result.status })
+  }
+  return Response.json({ attempt: result.attempt, triesLeft: result.triesLeft })
+}
+```
+
+Call this the "hand-rolled wire". Three problems compound:
+
+1. **The wire shape is a convention, not a type.** Nothing stops one route from returning `{ message }` instead of `{ error }`, or forgetting the status. Consistency is enforced by diligence, which is to say it drifts.
+2. **Every helper mints its own union.** `SubmitResult`, `MintResult`, `RedeemResult`: each declared its `ok: false` branch by hand, each slightly different, and each route re-translated them to HTTP one field at a time.
+3. **Expected failure and genuine breakage share a channel.** If helpers throw for "no tries left", then `catch` blocks must sort player mistakes from real bugs, and sooner or later a bug gets caught, translated to a polite 400, and silenced.
+
+## The shape
+
+One discriminated union, two constructors, and nobody writes the literals again:
+
+```ts showLineNumbers
+export type Success<T> = { ok: true; data: T }
+
+export type Failure = {
+  ok: false
+  error: string // snake_case wire code
+  status: number
+}
+
+export type Result<T> = Success<T> | Failure
+
+export const success = <T>(data: T): Success<T> => ({ ok: true, data })
+
+export const error = (code: string, status = 400): Failure => ({
+  ok: false,
+  error: code,
+  status,
+})
+```
+
+This is [Phased State](/logs/16-phased-state-tagged-unions) applied to a function's outcome. A call has exactly two phases (it worked or it didn't) and each branch carries only what that phase means: `data` doesn't exist on a failure, `status` doesn't exist on a success. The bag-of-fields alternative (`{ data?, error?, status? }`) permits `data` and `error` set at once, and every reader has to defend against it. The union closes the gap: **you cannot touch `data` until you've looked at `ok`**, and the compiler is the one checking.
+
+Helpers with expected failure modes return it and **never throw for them**:
+
+```ts
+if (balance < SPIN_COST_POINTS) return error('insufficient_points', 403)
+// ...
+return success({ bonus, pointsBalance, mintsLeft })
+```
+
+Routes return the same union, and a wrapper at the boundary is the only code in the app that knows what the wire looks like:
+
+```ts showLineNumbers
+export function api<Args extends unknown[]>(
+  handler: (...args: Args) => Promise<Result<unknown> | Response>
+): (...args: Args) => Promise<Response> {
+  return async (...args) => {
+    let result: Result<unknown> | Response
+    try {
+      result = await handler(...args)
+    } catch (err) {
+      if (err instanceof ApiError) return err.toResponse()
+      throw err // real bugs keep bubbling to the 500
+    }
+    if (result instanceof Response) return result
+    return result.ok ? Response.json(result.data) : failureResponse(result)
+  }
+}
+```
+
+A handler now reads as what it decides, not how HTTP is spelled:
+
+```ts showLineNumbers
+export const POST = api(async (request: Request) => {
+  const player = await requirePlayer() // 401, thrown
+  const body = await readJsonBody<{ code?: unknown }>(request)
+  if (typeof body.code !== 'string') return error('code_required')
+  const { player: redeemed } = unwrap(await redeemCode(body.code))
+  return success({ player: pick(redeemed) })
+})
+```
+
+## What it buys you
+
+### 1. One vocabulary, one serializer
+
+`success()`/`error()` are the entire response API. The wire shape (`data` as the body, `{ error }` plus status) is decided in one function, so changing it (an envelope, an error `code`/`message` split, whatever) is a one-file edit. And because serialization strips the discriminant, `ok` never reaches the client; it exists for the type system, not the wire.
+
+### 2. Expected failure is a value; throwing means a bug
+
+"Insufficient points" is not exceptional; it's a Tuesday. When helpers return it, control flow reads top-to-bottom with no invisible exits, and the exception channel regains its meaning: anything that actually throws past the wrapper is a genuine defect and surfaces as a loud 500 in the logs, never accidentally laundered into a polite client error.
+
+### 3. The compiler makes every caller look
+
+`Result<T>` narrows: `if (!result.ok)` is the only door to `status`/`error`, and its absence is the only door to `data`. Callers can't optimistically grab the payload and hope. This is the same "illegal states are unrepresentable" payoff as any tagged union: the type system enforces the reading order the contract needs.
+
+### 4. The throwable twin covers the depth problem
+
+Some refusals are decided too deep to return through: inside a locked transaction that must roll back, or in a guard the handler didn't write. For those there's `ApiError(status, code)`: **the same Failure as a throwable**, nothing more. Guards throw it and the wrapper serializes it identically; a never-throw helper throws it inside its transaction (the throw _is_ the rollback) and catches it at its own boundary into `err.toFailure()`. And `unwrap(result)` bridges the other direction: failure becomes a thrown ApiError, success becomes the narrowed data:
+
+```ts
+const { attempt, triesLeft } = unwrap(
+  await submitAttempt(player, group, slug, score, opts)
+)
+```
+
+The union is the model; throwing is just transport. Both deliveries carry the same two fields and hit the same serializer, so there's still exactly one sentence.
+
+## When not to reach for it
+
+Don't wrap what can't fail: a function with no expected failure modes returns `T`, not `Result<T>`; reserving the union for real refusal keeps `ok` checks meaningful. Don't return what isn't expected: out-of-invariant conditions should throw and page you, not come back as a tidy 500-shaped value. And when a route genuinely needs the raw wire (our tick endpoint returns sweep data _with_ a 500 so cron monitoring flags it), it returns a `Response` and the wrapper passes it through; the escape hatch is explicit, not a second dialect.
+
+## The rule
+
+> Expected failures are values: every fallible boundary returns one shared `Result` union built only by `success()`/`error()`, serialized to the wire at a single point. Throwing is reserved for actual bugs, plus one throwable twin of the failure shape for refusals that must cross a transaction or guard boundary.
