@@ -92,19 +92,46 @@ return Response.json(result.data)
 
 ### 1. One vocabulary instead of N conventions
 
-`success()`/`error()` are the only way a failure gets built, so every fallible helper speaks the same sentence. The per-helper unions (`PlaceOrderResult`, `ApplyCouponResult`, …) collapse into `Result<T>` with different `T`s, and routes stop re-translating bespoke shapes field by field: the `!result.ok` branch is identical everywhere, mechanical enough to copy without thinking. It's also mechanical enough to centralize into a boundary wrapper eventually, but that's its own log; the union earns its keep before any wrapper exists.
+`success()`/`error()` are the only way a failure gets built, so every fallible helper speaks the same sentence. The per-helper unions (`PlaceOrderResult`, `ApplyCouponResult`, …) collapse into one `Result<T>` that only varies in `T`:
+
+```ts
+placeOrder(user, items) // Result<{ order: Order; remaining: number }>
+applyCoupon(user, code) // Result<{ discount: number }>
+refundOrder(orderId) // Result<{ refundId: string }>
+```
+
+Routes stop re-translating bespoke shapes field by field. The `!result.ok` branch is identical everywhere, mechanical enough to copy without thinking. That sameness is also what would let a boundary wrapper absorb it one day, but that's its own log; the union earns its keep before any wrapper exists.
 
 ### 2. Expected failure is a value; throwing means a bug
 
-"Out of stock" is not exceptional; it's a Tuesday. When helpers return it, control flow reads top-to-bottom with no invisible exits, and the exception channel regains its meaning: anything that actually throws is a genuine defect and surfaces as a loud 500 in the logs, never accidentally laundered into a polite client error by a well-meaning `catch`.
+"Out of stock" is not exceptional; it's a Tuesday. When a helper returns it, control flow reads top-to-bottom with no invisible exits.
+
+The quieter win is what happens to the exception channel: it gets its meaning back. Anything that still throws is a genuine defect, and it surfaces as a loud 500 in the logs instead of being laundered into a polite client error by a well-meaning `catch`.
 
 ### 3. The compiler makes every caller look
 
-`Result<T>` narrows: `if (!result.ok)` is the only door to `status`/`error`, and its absence is the only door to `data`. Callers can't optimistically grab the payload and hope. This is the same "illegal states are unrepresentable" payoff as any tagged union: the type system enforces the reading order the contract needs.
+`Result<T>` narrows, and narrowing is the only way in:
+
+```ts
+result.data // type error: might be a Failure
+if (!result.ok) {
+  result.status // fine: narrowed to Failure
+  result.data // type error: failures carry no data
+}
+```
+
+Callers can't optimistically grab the payload and hope. It's the same "illegal states are unrepresentable" payoff as any tagged union: the type system enforces the reading order the contract needs.
 
 ### 4. Failures compose across layers
 
-Because every layer speaks the same union, a helper that calls another helper can forward a refusal untouched: `if (!inner.ok) return inner`. No re-wrapping, no lossy translation from one ad-hoc shape to another; the original code and status travel from the depth where the decision was made to the boundary that reports it.
+Every layer speaks the same union, so a helper that calls another helper forwards a refusal untouched:
+
+```ts
+const reserved = await reserveStock(items)
+if (!reserved.ok) return reserved // code and status travel as-is
+```
+
+No re-wrapping, no lossy translation between ad-hoc shapes. The refusal keeps its original code and status from the depth where it was decided all the way to the boundary that reports it.
 
 ## When not to reach for it
 
