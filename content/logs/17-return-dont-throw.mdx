@@ -91,7 +91,7 @@ return Response.json(result.data)
 
 ### 1. One vocabulary instead of N conventions
 
-`success()`/`error()` are the only way a failure gets built, so every fallible helper speaks the same sentence. The per-helper unions (`SubmitResult`, `MintResult`, ...) collapse into `Result<T>` with different `T`s, and routes stop re-translating bespoke shapes field by field: the `!result.ok` branch is identical everywhere, mechanical enough to copy without thinking. It's also mechanical enough to centralize into a boundary wrapper eventually, but that's its own log; the union earns its keep before any wrapper exists.
+`success()`/`error()` are the only way a failure gets built, so every fallible helper speaks the same sentence. The per-helper unions (`SubmitResult`, `MintResult`, …) collapse into `Result<T>` with different `T`s, and routes stop re-translating bespoke shapes field by field: the `!result.ok` branch is identical everywhere, mechanical enough to copy without thinking. It's also mechanical enough to centralize into a boundary wrapper eventually, but that's its own log; the union earns its keep before any wrapper exists.
 
 ### 2. Expected failure is a value; throwing means a bug
 
