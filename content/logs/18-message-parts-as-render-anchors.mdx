@@ -1,0 +1,193 @@
+---
+title: 18 - Understanding the Agentic Chat Model
+description: How the Vercel AI SDK chat model actually fits together, who owns the conversation between server and client, what the server-sent event stream looks like on the wire, how useChat folds those events into typed message parts, and why you render tool calls straight from the parts instead of lifting them into component state.
+author: 'alejopequeno'
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+The first time you wire a streaming LLM into a real UI, the instinct is to lift the
+interesting bits into component state. A `useState` for the search results, an
+effect that fills it when the tool call resolves, a grid that reads from it. It
+works. It also leaves you owning a copy of data the SDK already handed you, plus an
+effect whose only job is to keep the copy in sync with its source.
+
+Our `Chat` component is headless on purpose: it knows about viewport, scroll, and
+input, and nothing about where messages come from. Wiring it to the Vercel AI SDK,
+the lesson that paid off was the opposite of that instinct. You don't lift
+anything. The message is already structured state, and you render straight from it.
+
+<ComponentPreview name="ai-sdk-chat" height={560} />
+
+## Who owns the conversation
+
+The server owns the durable copy; the client owns a live one. Getting that split
+right is the whole game, so it is worth walking end to end.
+
+On load, the client asks the server for the thread and gets back `messages[]`, the
+persisted snapshot. From there the conversation belongs to the client: `useChat`
+holds it and renders from it. When you send, you do **not** ship the array back. You
+send only the new message plus the chat `id` (`prepareSendMessagesRequest` is the
+transport hook for that). The server loads the prior messages from its own store,
+appends yours, hands them to `convertToModelMessages`, runs the model, and streams
+back **events**, never a fresh list. The client reduces those events into its copy
+with the same logic the server used to assemble them, so both sides land on the
+identical `parts` without the client ever re-fetching anything.
+
+The durable copy is written once, cleanly.
+`toUIMessageStreamResponse({ originalMessages, onFinish })` hands the `onFinish`
+callback the complete `messages` array with the new assistant reply already folded
+into parts, so persisting is a straight write, no reconstruction:
+
+```ts
+onFinish: ({ messages }) => saveChat({ chatId, messages })
+```
+
+What lands in the database is exactly the assembled `UIMessage[]` the client renders
+from (the same `parts` shape shown a couple of sections down). One structure is both
+the live source on the client and the durable source on the server.
+
+This demo is the stateless slice of that picture: no store, so it skips the load,
+ships the whole array each turn (`{ id, messages, trigger, messageId }`), and forgets
+the thread on refresh. The machinery in between is identical; production just adds the
+snapshot on the way in and the `onFinish` write on the way out.
+
+## What comes over the wire
+
+`streamText` does not return a string. It returns a stream, and
+`result.toUIMessageStreamResponse()` serializes it as Server-Sent Events: one
+`data:` line per chunk. Ask the assistant for "a plane game" and the raw response
+reads like this (trimmed):
+
+```text
+data: {"type":"start"}
+data: {"type":"start-step"}
+data: {"type":"tool-input-start","toolCallId":"call_a1","toolName":"searchComponents"}
+data: {"type":"tool-input-delta","toolCallId":"call_a1","inputTextDelta":"plane game"}
+data: {"type":"tool-input-available","toolCallId":"call_a1","toolName":"searchComponents","input":{"query":"plane game"}}
+data: {"type":"tool-output-available","toolCallId":"call_a1","output":{"results":[{"title":"Plane","href":"/components/plane"}]}}
+data: {"type":"finish-step"}
+data: {"type":"start-step"}
+data: {"type":"text-start","id":"txt-0"}
+data: {"type":"text-delta","id":"txt-0","delta":"Found "}
+data: {"type":"text-delta","id":"txt-0","delta":"one "}
+data: {"type":"text-delta","id":"txt-0","delta":"for you."}
+data: {"type":"text-end","id":"txt-0"}
+data: {"type":"finish-step"}
+data: {"type":"finish","finishReason":"stop"}
+data: [DONE]
+```
+
+Two things stand out. Every piece is its own event with a stable id: the tool call
+streams its `input` as it is assembled, arrives complete as `tool-input-available`,
+and its result lands separately as `tool-output-available`. And the text comes one
+word per event, which looks absurdly chatty for a single sentence. That is not the
+model. It is `smoothStream({ chunking: 'word' })` in the route, re-chunking the
+stream so the UI can animate word by word. Drop it and you get the model's raw,
+lumpier token bursts; the protocol is identical, the deltas are just bigger. (The
+model streams its private `reasoning-*` events through here too; this demo simply
+doesn't render that part type.)
+
+## From events to parts
+
+You never parse any of that yourself. `useChat` consumes the events and folds them,
+in order, into one structure: an assistant message whose `parts` array mirrors what
+just streamed in.
+
+```ts showLineNumbers
+{
+  id: 'msg_1',
+  role: 'assistant',
+  parts: [
+    {
+      type: 'tool-searchComponents', // tool name, prefixed with `tool-`
+      toolCallId: 'call_a1',
+      state: 'output-available', // input-streaming → input-available → output-available
+      input: { query: 'plane game' },
+      output: { results: [{ title: 'Plane', href: '/components/plane' }] },
+    },
+    { type: 'text', text: 'Found one for you.' },
+  ],
+}
+```
+
+Dozens of `data:` lines collapse into two parts. The typing is not inferred from
+the stream, you declare it. `types.ts` spells out each tool's `input` and `output`
+shape and plugs that map into the tools slot of the `UIMessage` generic:
+
+```ts showLineNumbers
+export type RegistryChatTools = {
+  searchComponents: {
+    input: { query: string }
+    output: { results: RegistrySearchResult[] }
+  }
+}
+
+export type RegistryChatUIMessage = UIMessage<never, NoDataParts, RegistryChatTools>
+```
+
+Pass that to the hook, `useChat<RegistryChatUIMessage>()`, and every message it
+returns has `parts` typed as a discriminated union: the `searchComponents` entry
+becomes the `tool-searchComponents` part type, carrying exactly those input and
+output shapes. A text part is a bubble, a tool call is its own part, and each
+carries its own input and output. That object is what you render, not the stream.
+
+## Parts are the render anchors
+
+This is where the opening instinct dies for good. The card grid renders from
+`part.output`, not from a `useState` you filled in an effect. The part is the data.
+There is no copy to drift, no effect to keep in sync, no question of "is my state
+stale", because the render is a plain read of the message. Add a second tool to the
+route tomorrow and the rule does not change: it arrives as its own part, with its
+own output, and you render it the same way.
+
+## Mapping parts onto the headless Chat
+
+`useChat` gives you the messages; you decide how each part renders. The whole render
+is one walk over `parts`: switch on `part.type`, and for the tool part switch again
+on `part.state`.
+
+```tsx showLineNumbers
+{
+  message.parts.map((part, i) => {
+    switch (part.type) {
+      case 'text':
+        return <ChatMessageBubble key={i}>{part.text}</ChatMessageBubble>
+
+      case 'tool-searchComponents':
+        switch (part.state) {
+          case 'output-available':
+            return <ResultCards key={i} results={part.output.results} />
+          case 'output-error':
+            return <RetryRow key={i} />
+          default:
+            return (
+              <ShimmerRow
+                key={i}
+                label={`Searching for “${part.input?.query ?? ''}”`}
+              />
+            )
+        }
+    }
+  })
+}
+```
+
+A text part becomes a bubble. The tool part shows a shimmer while its input is still
+streaming, the result cards once the output resolves, and a retry line if it errors.
+Notice the shimmer label is not a constant: the query streams in as `part.input`,
+so even the loading state reads from the part rather than from some `isSearching`
+flag you set on the side. And because the part is typed from `types.ts`,
+`part.input.query` is a string and `part.output.results` is known to be search
+results inside their branches and nothing else. The `Chat` component never had to
+learn a single thing about tools, or Groq, or search. It renders parts, and the
+parts know what they are.
+
+## The backend is one route
+
+`app/api/chat/route.ts` runs `streamText` with a single `searchComponents` tool
+that queries the registry's own pages, then returns
+`result.toUIMessageStreamResponse()`. Which provider and model sit behind it is
+your call and a one-line swap; this example happens to run on Groq's free tier, but
+the pattern is identical whether the tokens come from Groq, OpenAI, or Anthropic.
+The route stays a thin, stateless seam, and all the structure lives in the parts.
