@@ -55,7 +55,7 @@ export function CategoryQuickLinks() {
 
   return (
     <div className="not-prose @container">
-      <div className="grid grid-cols-1 gap-2 @md:gap-4 @xl:grid-cols-2 @3xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2 @md:gap-4 @xl:grid-cols-2 @2xl:grid-cols-3">
         <CategoryCardLink
           href="/components"
           onMouseEnter={() => handleEnter(0)}

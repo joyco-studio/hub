@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Textarea",
   "description": "Displays a form textarea field.",
+  "registryDependencies": [
+    "@joyco/utils"
+  ],
   "files": [
     {
       "path": "components/ui/textarea.tsx",

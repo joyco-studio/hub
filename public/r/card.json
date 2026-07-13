@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Card",
   "description": "Displays a card with header, content, and footer.",
+  "registryDependencies": [
+    "@joyco/utils"
+  ],
   "files": [
     {
       "path": "components/ui/card.tsx",

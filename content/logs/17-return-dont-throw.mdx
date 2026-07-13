@@ -1,0 +1,142 @@
+---
+title: 17 - Return, Don't Throw
+description: Return expected failures as one shared Result union built by success() and error(), so callers must look before touching data and throwing only ever means a bug.
+author: 'matiasperz'
+---
+
+Every API surface eventually grows two dialects for the same sentence. The route layer spells a refusal one way:
+
+```ts
+return Response.json({ error: 'unauthenticated' }, { status: 401 })
+```
+
+and the helpers underneath spell it another:
+
+```ts
+return { ok: false, status: 409, error: 'out_of_stock' }
+```
+
+Same fact ("this didn't work, here's why, here's the status"), hand-written at every site, in whatever shape that site happened to reach for. We had both dialects, nineteen routes deep, before standardizing on one.
+
+## What it replaces: the anti-pattern
+
+The naive version scatters the failure contract across every function that can fail:
+
+```ts
+// DON'T: every site invents the sentence again
+export async function POST(request: Request) {
+  const user = await getSessionUser()
+  if (!user) {
+    return Response.json({ error: 'unauthenticated' }, { status: 401 })
+  }
+  const { items } = await request.json()
+  const result = await placeOrder(user, items)
+  if (!result.ok) {
+    return Response.json({ error: result.error }, { status: result.status })
+  }
+  return Response.json({ order: result.order, remaining: result.remaining })
+}
+```
+
+Call this the "hand-rolled wire". Three problems compound:
+
+1. **The failure shape is a convention, not a type.** Nothing stops one helper from returning `{ message }` instead of `{ error }`, or forgetting the status. Consistency is enforced by diligence, which is to say it drifts.
+2. **Every helper mints its own union.** `PlaceOrderResult`, `ApplyCouponResult`, `RefundResult`: each declared its `ok: false` branch by hand, each slightly different, and each route re-translated them to HTTP one field at a time.
+3. **Expected failure and genuine breakage share a channel.** If helpers throw for "out of stock", then `catch` blocks must sort user mistakes from real bugs, and sooner or later a bug gets caught, translated to a polite 400, and silenced.
+
+## The shape
+
+One discriminated union, two constructors, and nobody writes the literals again:
+
+```ts showLineNumbers
+export type Success<T> = { ok: true; data: T }
+
+export type Failure = {
+  ok: false
+  error: string // snake_case wire code
+  status: number
+}
+
+export type Result<T> = Success<T> | Failure
+
+export const success = <T>(data: T): Success<T> => ({ ok: true, data })
+
+export const error = (code: string, status = 400): Failure => ({
+  ok: false,
+  error: code,
+  status,
+})
+```
+
+This is [Phased State](/logs/16-phased-state-tagged-unions) applied to a function's outcome. A call has exactly two phases (it worked or it didn't) and each branch carries only what that phase means: `data` doesn't exist on a failure, `status` doesn't exist on a success. The bag-of-fields alternative (`{ data?, error?, status? }`) permits `data` and `error` set at once, and every reader has to defend against it. The union closes the gap: **you cannot touch `data` until you've looked at `ok`**, and the compiler is the one checking.
+
+Helpers with expected failure modes return it and **never throw for them**:
+
+```ts
+if (stock < item.qty) return error('out_of_stock', 409)
+// ...
+return success({ order, remaining })
+```
+
+The caller narrows once and both branches fall out fully typed:
+
+```ts
+const result = await applyCoupon(user, code)
+if (!result.ok) {
+  return Response.json({ error: result.error }, { status: result.status })
+}
+return Response.json(result.data)
+```
+
+## What it buys you
+
+### 1. One vocabulary instead of N conventions
+
+`success()`/`error()` are the only way a failure gets built, so every fallible helper speaks the same sentence. The per-helper unions (`PlaceOrderResult`, `ApplyCouponResult`, …) collapse into one `Result<T>` that only varies in `T`:
+
+```ts
+placeOrder(user, items) // Result<{ order: Order; remaining: number }>
+applyCoupon(user, code) // Result<{ discount: number }>
+refundOrder(orderId) // Result<{ refundId: string }>
+```
+
+Routes stop re-translating bespoke shapes field by field. The `!result.ok` branch is identical everywhere, mechanical enough to copy without thinking. That sameness is also what would let a boundary wrapper absorb it one day, but that's its own log; the union earns its keep before any wrapper exists.
+
+### 2. Expected failure is a value; throwing means a bug
+
+"Out of stock" is not exceptional; it's a Tuesday. When a helper returns it, control flow reads top-to-bottom with no invisible exits.
+
+The quieter win is what happens to the exception channel: it gets its meaning back. Anything that still throws is a genuine defect, and it surfaces as a loud 500 in the logs instead of being laundered into a polite client error by a well-meaning `catch`.
+
+### 3. The compiler makes every caller look
+
+`Result<T>` narrows, and narrowing is the only way in:
+
+```ts
+result.data // type error: might be a Failure
+if (!result.ok) {
+  result.status // fine: narrowed to Failure
+  result.data // type error: failures carry no data
+}
+```
+
+Callers can't optimistically grab the payload and hope. It's the same "illegal states are unrepresentable" payoff as any tagged union: the type system enforces the reading order the contract needs.
+
+### 4. Failures compose across layers
+
+Every layer speaks the same union, so a helper that calls another helper forwards a refusal untouched:
+
+```ts
+const reserved = await reserveStock(items)
+if (!reserved.ok) return reserved // code and status travel as-is
+```
+
+No re-wrapping, no lossy translation between ad-hoc shapes. The refusal keeps its original code and status from the depth where it was decided all the way to the boundary that reports it.
+
+## When not to reach for it
+
+Don't wrap what can't fail: a function with no expected failure modes returns `T`, not `Result<T>`; reserving the union for real refusal keeps `ok` checks meaningful. And don't return what isn't expected: out-of-invariant conditions ("this row must exist by now") should throw and page you, not come back as a tidy 500-shaped value. The line is expectation, not severity. A sold-out item is expected; an order with a negative total is not.
+
+## The rule
+
+> Expected failures are values: every fallible helper returns one shared `Result` union built only by `success()`/`error()`, callers narrow on `ok` before touching either branch, and throwing is reserved for actual bugs.

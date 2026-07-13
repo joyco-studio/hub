@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Kbd",
   "description": "Displays a keyboard key or shortcut.",
+  "registryDependencies": [
+    "@joyco/utils"
+  ],
   "files": [
     {
       "path": "components/ui/kbd.tsx",

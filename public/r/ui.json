@@ -26,7 +26,8 @@
     "@joyco/tabs",
     "@joyco/textarea",
     "@joyco/tooltip",
-    "@joyco/cluster"
+    "@joyco/cluster",
+    "@joyco/utils"
   ],
   "cssVars": {
     "theme": {

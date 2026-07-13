@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Typewriter",
   "description": "A lightweight typewriter text component that cycles through phrases with minimal JavaScript.",
+  "registryDependencies": [
+    "@joyco/utils"
+  ],
   "files": [
     {
       "path": "registry/components/typewriter.tsx",

@@ -14,7 +14,8 @@
     "@joyco/badge",
     "@joyco/button",
     "@joyco/dropdown-menu",
-    "@joyco/tooltip"
+    "@joyco/tooltip",
+    "@joyco/utils"
   ],
   "files": [
     {

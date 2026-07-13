@@ -7,6 +7,9 @@
   "dependencies": [
     "@radix-ui/react-slot"
   ],
+  "registryDependencies": [
+    "@joyco/utils"
+  ],
   "files": [
     {
       "path": "registry/components/magnetic.tsx",

@@ -1,0 +1,10 @@
+{
+  "customContext": {
+    "rules": [
+      {
+        "rule": "Do not use em dashes (—) in prose, frontmatter descriptions, headings, or code comments. Replace them with a colon, semicolon, comma, parentheses, or by splitting into separate sentences, whichever reads most naturally. This keeps the writing in our own voice and avoids the em dash 'AI tell'. Regular hyphens (-) in compound words, slugs, and ranges are fine.",
+        "scope": ["content/**/*.mdx", "content/**/*.md", "**/*.mdx", "**/*.md"]
+      }
+    ]
+  }
+}
