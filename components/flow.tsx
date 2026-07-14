@@ -16,6 +16,7 @@ import {
 } from '@joycostudio/trazo'
 import { Graph } from '@joycostudio/trazo/react'
 import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 
 // The full-width frame draws its own textured canvas + border, so the graph's
 // own canvas backdrop is turned off to avoid a doubled texture rectangle.
@@ -30,6 +31,20 @@ const graphTheme: TrazoTheme = {
   ...joycoTheme,
   background: 'none',
   tokens: { ...joycoTheme.tokens, bg: 'var(--card)' },
+}
+
+// Git branches map onto lane-1, lane-2, … in commit order. This app's --chart-*
+// palette is all one blue family, so trazo's default lane pair (lane-1 → --primary,
+// lane-2 → --chart-1) reads as nearly the same color and the branches blur together.
+// Give the git timeline its own lane pair, separated in lightness AND hue so `main`
+// and a feature branch are unmistakably distinct.
+const gitTheme: TrazoTheme = {
+  ...graphTheme,
+  tokens: {
+    ...graphTheme.tokens,
+    'lane-1': 'var(--primary)',
+    'lane-2': 'var(--chart-2)',
+  },
 }
 
 type DiagramLang = 'flow' | 'sequence' | 'block' | 'git'
@@ -64,7 +79,14 @@ function layoutFor(lang: DiagramLang, source: string, theme: TrazoTheme): Positi
     case 'git': {
       const { graph, error } = parseGit(source)
       if (error) throw new Error(`trazo git DSL line ${error.line}: ${error.message}`)
-      return layoutGit(graph, themeGitOptions(theme))
+      // Horizontal orientation reads like a real `git log --graph` timeline
+      // (commits left→right, branches as rows) instead of trazo's default
+      // vertical lane, which crams every commit label into one narrow column.
+      // labelSide 'left' places commit labels ABOVE the lane in a horizontal chart.
+      return layoutGit(
+        graph,
+        themeGitOptions(theme, { orientation: 'horizontal', labelSide: 'left' })
+      )
     }
     default: {
       const { graph, error } = parseFlow(source)
@@ -80,15 +102,22 @@ export function Diagram({
   index,
   articleNumber,
   className,
+  ascii = false,
 }: {
   children: string
   title?: string
   index?: number
   articleNumber?: string
   className?: string
+  // Render the children verbatim as a monospace ASCII figure instead of a trazo
+  // graph. Used where a hand-drawn text diagram reads clearer than a rendered
+  // one — e.g. git commit graphs whose commits the prose refers to by letter.
+  ascii?: boolean
 }) {
   const source = String(children).trim()
-  const graph = layoutFor(detectLang(source), source, graphTheme)
+  const lang = ascii ? undefined : detectLang(source)
+  const theme = lang === 'git' ? gitTheme : graphTheme
+  const graph = lang ? layoutFor(lang, source, theme) : null
 
   // The corner tag reads `N{article}-{illustration}` (e.g. N07-01): the log's
   // number, injected per-page, paired with this diagram's order in the article.
@@ -129,9 +158,22 @@ export function Diagram({
           {tag}
         </Badge>
       )}
-      <div className="relative flex justify-center px-6 py-12 [&_svg]:max-w-full">
-        <Graph graph={graph} title={title} className={className} theme={graphTheme} />
-      </div>
+      {graph ? (
+        <div className="relative flex justify-center px-6 py-12 [&_svg]:max-w-full">
+          <Graph graph={graph} title={title} className={className} theme={theme} />
+        </div>
+      ) : (
+        <div className="relative overflow-x-auto px-6 py-12">
+          <pre
+            className={cn(
+              'text-foreground/90 w-fit min-w-full font-mono text-[13px] leading-relaxed whitespace-pre',
+              className
+            )}
+          >
+            {source}
+          </pre>
+        </div>
+      )}
     </figure>
   )
 }
