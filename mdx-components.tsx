@@ -22,7 +22,7 @@ export function getMDXComponents(
     ...defaultMdxComponents,
     Mermaid,
     Diagram: (props: React.ComponentProps<typeof Diagram>) => (
-      <Diagram articleNumber={articleNumber} {...props} />
+      <Diagram {...props} articleNumber={articleNumber} />
     ),
     CodeTabs: CodeTabs,
     FileCodeblock: FileCodeblock,
