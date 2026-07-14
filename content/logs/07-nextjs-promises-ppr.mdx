@@ -30,7 +30,7 @@ export default async function RootLayout({ children }) {
 
 **The problem**: you're `await`-ing at the root. Nothing renders until those fetches resolve. Your entire page is held hostage by the slowest provider.
 
-<Diagram title="Blocking await chain">{`flow TD
+<Diagram index={1} title="Blocking await chain">{`flow TD
 A(["Request arrives"]):primary
 B["await getCart()<br/>200ms"]:error
 C["await getFlags()<br/>150ms"]:error
@@ -69,12 +69,12 @@ export default function RootLayout({ children }) {
 
 The layout returns immediately. The promises are in-flight. Client components resolve them when they're ready, wrapped in `<Suspense>`.
 
-<Diagram title="Forward promises, render shell immediately">{`flow TD
+<Diagram index={2} title="Forward promises, render shell immediately">{`flow TD
 A(["Request arrives"]):primary
 B["getCart() started"]:success
 C["getFlags() started"]:success
 D["Render HTML shell immediately<br/>(Suspense fallbacks)"]:primary
-E["Stream resolved data<br/>as promises settle"]:streamed
+E["Stream resolved data<br/>as promises settle"]:info
 A --- B
 A --- C
 A --- D
@@ -339,7 +339,7 @@ With **Partial Prerendering** (PPR), enabled via `cacheComponents: true` in Next
 1. A **static shell** prerendered at build time (the HTML around your Suspense fallbacks)
 2. **Dynamic holes** that stream at request time (the actual content inside those boundaries)
 
-<Diagram title="The static shell: built at build time, served from CDN">{`flow TD
+<Diagram index={3} title="The static shell: built at build time, served from CDN">{`flow TD
 shell(["Static Shell — built at build time, served from CDN"])
 nav["<nav> Store </nav>"]:primary
 skeleton1["CartTotal skeleton"]:warning
@@ -355,13 +355,13 @@ main --- fallback`}</Diagram>
 
 When a request comes in, the static shell is **instantly** served. Then the dynamic parts stream in:
 
-<Diagram title="Shell served instantly, dynamic parts stream in">{`flow TD
+<Diagram index={4} title="Shell served instantly, dynamic parts stream in">{`flow TD
 A(["Static shell served<br/>0ms"]):primary
 S["UI renders with<br/>Suspense fallbacks instantly"]:warning
 B["getFlags resolves<br/>80ms"]:success
 C["getCart resolves<br/>120ms"]:success
-D["CheckoutButton renders<br/>Checkout with Express Pay"]:streamed
-E["CartCount: 3<br/>CartTotal: $149.97"]:streamed
+D["CheckoutButton renders<br/>Checkout with Express Pay"]:info
+E["CartCount: 3<br/>CartTotal: $149.97"]:info
 F(["Page fully interactive<br/>~120ms"]):success
 A --- S
 S --- B
@@ -377,7 +377,7 @@ Compare this to the traditional approach where nothing renders for 350ms.
 
 ### Without promise forwarding (traditional)
 
-<Diagram title="Traditional: slow TTFB, fast render">{`sequenceDiagram
+<Diagram index={5} title="Traditional: slow TTFB, fast render">{`sequenceDiagram
 participant S[Server]
 participant C[Client]
 note over C: Blank screen…
@@ -391,7 +391,7 @@ note over S,C: Slow TTFB, fast render`}</Diagram>
 
 ### With promise forwarding + PPR
 
-<Diagram title="Promise forwarding + PPR: fast TTFB, progressive render">{`sequenceDiagram
+<Diagram index={6} title="Promise forwarding + PPR: fast TTFB, progressive render">{`sequenceDiagram
 participant S[Server]
 participant C[Client]
 S->>S: Start getCart()
@@ -409,7 +409,7 @@ note over S,C: Fast TTFB, progressive render`}</Diagram>
 
 Here's the complete picture of how a request flows through the system with promise forwarding and PPR:
 
-<Diagram title="Full request flow with promise forwarding + PPR">{`flow TD
+<Diagram index={7} title="Full request flow with promise forwarding + PPR">{`flow TD
 subgraph build ["BUILD TIME"]
 B1["Next.js prerenders the route"]
 B2["Static Shell<br/>html, body, nav, main, footer<br/>Suspense fallbacks<br/>All non-dynamic content"]
@@ -424,8 +424,8 @@ R3["Server executes layout"]
 R4["getCart(): fetch in flight"]
 R5["getFlags(): fetch in flight"]
 R6["Promises forwarded<br/>via RSC payload"]
-R7["flags ready<br/>stream HTML"]:streamed
-R8["cart ready<br/>stream HTML"]:streamed
+R7["flags ready<br/>stream HTML"]:info
+R8["cart ready<br/>stream HTML"]:info
 R1 --- R2
 R3 --- R4
 R3 --- R5

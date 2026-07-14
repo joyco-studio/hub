@@ -203,9 +203,12 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
             )}
           >
             <MDX
-              components={getMDXComponents({
-                a: createRelativeLink(source, page),
-              })}
+              components={getMDXComponents(
+                {
+                  a: createRelativeLink(source, page),
+                },
+                { logNumber }
+              )}
             />
             {libraryReadme && <MDXContent content={libraryReadme.cleaned} />}
           </div>

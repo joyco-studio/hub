@@ -23,7 +23,7 @@ Modern browsers split rendering into two threads:
 
 When the user scrolls, the input event goes to the **compositor first**. The compositor immediately shifts pre-rasterized pixel tiles on the GPU. No layout, no style recalc, no JS. That's why scrolling stays smooth even when the main thread is blocked.
 
-<Diagram title="Scroll input reaches the compositor first">{`flow LR
+<Diagram index={1} title="Scroll input reaches the compositor first">{`flow LR
 A["User scrolls<br/>(wheel / touch)"]
 B["Compositor thread<br/>receives input"]:primary
 C["GPU shifts pixel tiles<br/>instantly"]:success
@@ -38,7 +38,7 @@ The compositor updates what the user sees **immediately**. The main thread gets 
 
 When JS modifies a transform via `requestAnimationFrame`, the change has to travel through Chromium's full pipeline before it reaches the screen:
 
-<Diagram title="The full Chromium render pipeline">{`flow TD
+<Diagram index={2} title="The full Chromium render pipeline">{`flow TD
 subgraph main ["Main Thread"]
 S["Style"]:primary
 L["Layout"]:primary
@@ -69,7 +69,7 @@ For compositor-driven scroll, **Style, Layout, and Paint can be entirely skipped
 
 Chromium maintains two completely isolated layer trees:
 
-<Diagram title="The two layer trees and how they sync">{`flow LR
+<Diagram index={3} title="The two layer trees and how they sync">{`flow LR
 subgraph main ["Main Thread"]
 LTH["LayerTreeHost<br/>owns main-thread tree"]:primary
 end
@@ -129,9 +129,9 @@ The approach used by [Lenis](https://lenis.darkroom.engineering/) and most WebGL
 
 The canvas is `position: fixed`. It lives in **window** space. Lenis takes over scroll by animating `scrollTop` on each frame via `requestAnimationFrame`. The browser sees real scroll events, so browser features (find-in-page, anchors, accessibility) still work. But because JS is setting `scrollTop`, the main thread controls the pace.
 
-<Diagram title="JS-driven scroll: canvas lives on the window side">{`flow LR
+<Diagram index={4} title="JS-driven scroll: canvas lives on the window side">{`flow LR
 subgraph viewport ["Window (W)"]
-CANVAS["Canvas<br/>(fixed to window)"]:streamed
+CANVAS["Canvas<br/>(fixed to window)"]:info
 VIEW["Viewport<br/>(what user sees)"]:primary
 end
 subgraph page ["Page (P)"]
@@ -164,7 +164,7 @@ function animate(time: number) {
 
 JS drives `scrollTop` each frame, so the compositor and JS are always in agreement. There's no race. The DOM scrolls to exactly where JS told it to, and the canvas renders with the same value.
 
-<Diagram title="JS-driven scroll frame sequence">{`sequenceDiagram
+<Diagram index={5} title="JS-driven scroll frame sequence">{`sequenceDiagram
 participant U[User Input]
 participant M[Main Thread (Lenis)]
 participant C[Compositor]
@@ -196,12 +196,12 @@ The approach used by [Lusion's webgl-scroll-sync](https://github.com/lusionltd/W
 
 The canvas is `position: absolute`. It lives in **page** space, inside the scrolling container. It moves with the DOM naturally on the compositor thread. Each frame, JS reads `scrollY` and applies a `transform` to slide the canvas back into the viewport.
 
-<Diagram title="Absolute: canvas lives on the page side">{`flow LR
+<Diagram index={6} title="Absolute: canvas lives on the page side">{`flow LR
 subgraph viewport ["Window (W)"]
 VIEW["Viewport<br/>(what user sees)"]:primary
 end
 subgraph page ["Page (P)"]
-CANVAS["Canvas<br/>(absolute, in page flow)"]:streamed
+CANVAS["Canvas<br/>(absolute, in page flow)"]:info
 DOM["DOM elements"]:success
 end
 VIEW ===|"D (delta) — JS reads scrollY, applies transform to reposition canvas"| CANVAS`}</Diagram>
@@ -237,7 +237,7 @@ function animate() {
 
 The canvas and DOM move together on the compositor, with no content drift. The only stale thing is the `transform` correction that repositions the canvas over the viewport. Here's what a single scroll looks like:
 
-<Diagram title="Absolute approach: edge drift sequence">{`sequenceDiagram
+<Diagram index={7} title="Absolute approach: edge drift sequence">{`sequenceDiagram
 participant C[Compositor]
 participant P[Page (canvas + DOM)]
 participant M[Main Thread]
@@ -263,7 +263,7 @@ The compositor scroll creates a delta between where the canvas sits (page space)
 
 Edge clipping during fast scroll is solved by rendering the canvas larger than the viewport. Add 25% vertical padding top and bottom (canvas = 150% viewport height). Adding this padding buffer lets the translate catch up when the impl layer syncs. Even with a few frames of stale transform, the extra rendered area covers the viewport:
 
-<Diagram title="Padding absorbs the stale-transform shift">{`flow TD
+<Diagram index={8} title="Padding absorbs the stale-transform shift">{`flow TD
 subgraph canvas ["Canvas (150% viewport height)"]
 PAD_TOP["25% padding (top)<br/>Extra rendered area"]:success
 VP["100% viewport area<br/>What the user actually sees"]:primary
@@ -282,7 +282,7 @@ This is the main tradeoff of the absolute approach. The canvas lives on the **P*
 
 To keep a WebGL element fixed on screen, you don't need to translate anything. It would just sit at its viewport position. The problem is that the canvas is on the page side. When the compositor scrolls, it takes the entire canvas with it, including your "fixed" element. That compositor scroll instantly displaces it. JS hasn't caught up yet, so for that frame the element slides with the page when it should have stayed put. That's the jelly. The element gets dragged by the compositor scroll until the next rAF where JS can correct it back.
 
-<Diagram title="The fixed-element jelly sequence">{`sequenceDiagram
+<Diagram index={9} title="The fixed-element jelly sequence">{`sequenceDiagram
 participant C[Compositor]
 participant P[Page (canvas here)]
 participant M[Main Thread]
@@ -304,7 +304,7 @@ When all your WebGL content scrolls with the page: background effects, image tre
 
 ## Summary
 
-<Diagram title="Choosing a scroll-sync approach">{`flow TD
+<Diagram index={10} title="Choosing a scroll-sync approach">{`flow TD
 ROOT["WebGL canvas needs to<br/>stay in sync with DOM during scroll"]
 PROBLEM["Compositor scrolls instantly (GPU)<br/>JS reads scrollY 1+ frames late"]:warning
 Q{"Where does<br/>the canvas live?"}:primary
