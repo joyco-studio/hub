@@ -10,10 +10,10 @@ Layout thrashing is when JavaScript repeatedly writes to the DOM and then reads 
 
 The browser pipeline for a single frame looks like this (and YOU should know this as the palm of your hand):
 
-<Diagram title="Browser rendering pipeline">{`
+<Diagram index={1} title="Browser rendering pipeline">{`
 flow LR
 js["JS"]:warning
-style["Style"]:streamed
+style["Style"]:info
 layout["Layout"]:primary
 paint["Paint"]:success
 composite["Composite"]:error

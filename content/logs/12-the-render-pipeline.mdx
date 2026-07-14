@@ -10,11 +10,11 @@ In [the layout thrashing post](/logs/11-wtf-is-layout-thrashing) we skimmed the 
 
 Every frame the browser produces follows this sequence:
 
-<Diagram title="Full Frame Window — 60fps = 16ms / 120fps = 8ms">{`
+<Diagram index={1} title="Full Frame Window — 60fps = 16ms / 120fps = 8ms">{`
 flow LR
 subgraph main ["Main Thread"]
 js["JS"]:warning
-style["Style"]:streamed
+style["Style"]:info
 layout["Layout"]:primary
 paint["Paint"]:success
 js --- style
