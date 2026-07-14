@@ -1,3 +1,4 @@
+import 'server-only'
 import {
   layoutFlow,
   layoutSequence,
@@ -48,7 +49,7 @@ function detectLang(source: string): DiagramLang {
   return 'flow'
 }
 
-function layoutFor(lang: DiagramLang, source: string): PositionedGraph {
+function layoutFor(lang: DiagramLang, source: string, theme: TrazoTheme): PositionedGraph {
   switch (lang) {
     case 'sequence': {
       const { graph, error } = parseSequence(source)
@@ -63,12 +64,12 @@ function layoutFor(lang: DiagramLang, source: string): PositionedGraph {
     case 'git': {
       const { graph, error } = parseGit(source)
       if (error) throw new Error(`trazo git DSL line ${error.line}: ${error.message}`)
-      return layoutGit(graph, themeGitOptions(joycoTheme))
+      return layoutGit(graph, themeGitOptions(theme))
     }
     default: {
       const { graph, error } = parseFlow(source)
       if (error) throw new Error(`trazo flow DSL line ${error.line}: ${error.message}`)
-      return layoutFlow(graph, themeFlowOptions(joycoTheme))
+      return layoutFlow(graph, themeFlowOptions(theme))
     }
   }
 }
@@ -87,7 +88,7 @@ export function Diagram({
   className?: string
 }) {
   const source = String(children).trim()
-  const graph = layoutFor(detectLang(source), source)
+  const graph = layoutFor(detectLang(source), source, graphTheme)
 
   // The corner tag reads `N{article}-{illustration}` (e.g. N07-01): the log's
   // number, injected per-page, paired with this diagram's order in the article.
@@ -98,14 +99,9 @@ export function Diagram({
 
   return (
     <figure className="not-prose border-border bg-card relative my-8 w-full overflow-hidden border">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage:
-            'repeating-linear-gradient(45deg, color-mix(in oklab, var(--foreground) 4%, transparent) 0 1px, transparent 1px 8px)',
-        }}
-      />
+      {/* figcaption must be the first or last child of <figure> per the HTML content
+          model, so the caption Badge leads; the remaining overlays are absolutely
+          positioned, so DOM order doesn't affect the visual stacking. */}
       {title && (
         <Badge
           asChild
@@ -116,6 +112,14 @@ export function Diagram({
           <figcaption className="truncate">{title}</figcaption>
         </Badge>
       )}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage:
+            'repeating-linear-gradient(45deg, color-mix(in oklab, var(--foreground) 4%, transparent) 0 1px, transparent 1px 8px)',
+        }}
+      />
       {tag && (
         <Badge
           variant="accent"
