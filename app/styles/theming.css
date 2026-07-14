@@ -39,19 +39,20 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 
-  /* trazo diagram label colors — text drawn on each saturated node fill.
-     Picked per fill for AA contrast against the chart/role colors above. */
-  --trazo-primary-foreground: oklch(1 0 0);
-  --trazo-success-foreground: oklch(0.145 0 0);
+  /* trazo diagram label text — one AA-checked color per chart fill. Trazo resolves
+     both the lane slots (lane-2..6 → chart-1..5) and the chart-backed roles
+     (success → chart-2, info → chart-3, warning → chart-4) to these through its
+     token fallback, so every saturated node reads legibly. Contrast picked per fill
+     against oklch(0.145) vs white; see chart-N lightness above. */
+  --chart-1-foreground: oklch(1 0 0);
+  --chart-2-foreground: oklch(0.145 0 0);
+  --chart-3-foreground: oklch(1 0 0);
+  --chart-4-foreground: oklch(0.145 0 0);
+  --chart-5-foreground: oklch(1 0 0);
+
+  /* error fills use --destructive, primary/lane-1 use --primary-foreground —
+     neither is a chart color, so pair them explicitly. */
   --trazo-error-foreground: oklch(1 0 0);
-  --trazo-warning-foreground: oklch(0.145 0 0);
-  --trazo-streamed-foreground: oklch(1 0 0);
-  --trazo-lane-1-foreground: oklch(1 0 0);
-  --trazo-lane-2-foreground: oklch(1 0 0);
-  --trazo-lane-3-foreground: oklch(0.145 0 0);
-  --trazo-lane-4-foreground: oklch(1 0 0);
-  --trazo-lane-5-foreground: oklch(0.145 0 0);
-  --trazo-lane-6-foreground: oklch(1 0 0);
 }
 
 .dark {
@@ -85,17 +86,12 @@
   --chart-4: oklch(0.78 0.10 253);
   --chart-5: oklch(0.63 0.08 273);
 
-  --trazo-primary-foreground: oklch(1 0 0);
-  --trazo-success-foreground: oklch(0.145 0 0);
+  --chart-1-foreground: oklch(0.145 0 0);
+  --chart-2-foreground: oklch(0.145 0 0);
+  --chart-3-foreground: oklch(1 0 0);
+  --chart-4-foreground: oklch(0.145 0 0);
+  --chart-5-foreground: oklch(0.145 0 0);
   --trazo-error-foreground: oklch(0.145 0 0);
-  --trazo-warning-foreground: oklch(0.145 0 0);
-  --trazo-streamed-foreground: oklch(1 0 0);
-  --trazo-lane-1-foreground: oklch(1 0 0);
-  --trazo-lane-2-foreground: oklch(0.145 0 0);
-  --trazo-lane-3-foreground: oklch(0.145 0 0);
-  --trazo-lane-4-foreground: oklch(1 0 0);
-  --trazo-lane-5-foreground: oklch(0.145 0 0);
-  --trazo-lane-6-foreground: oklch(0.145 0 0);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
@@ -139,17 +135,12 @@
   --chart-4: oklch(0.70 0.12 253);
   --chart-5: oklch(0.55 0.10 273);
 
-  --trazo-primary-foreground: oklch(0.145 0 0);
-  --trazo-success-foreground: oklch(0.145 0 0);
+  --chart-1-foreground: oklch(1 0 0);
+  --chart-2-foreground: oklch(0.145 0 0);
+  --chart-3-foreground: oklch(1 0 0);
+  --chart-4-foreground: oklch(0.145 0 0);
+  --chart-5-foreground: oklch(1 0 0);
   --trazo-error-foreground: oklch(1 0 0);
-  --trazo-warning-foreground: oklch(0.145 0 0);
-  --trazo-streamed-foreground: oklch(1 0 0);
-  --trazo-lane-1-foreground: oklch(0.145 0 0);
-  --trazo-lane-2-foreground: oklch(1 0 0);
-  --trazo-lane-3-foreground: oklch(0.145 0 0);
-  --trazo-lane-4-foreground: oklch(1 0 0);
-  --trazo-lane-5-foreground: oklch(0.145 0 0);
-  --trazo-lane-6-foreground: oklch(1 0 0);
   --sidebar: oklch(0.955 0.025 250);
   --sidebar-foreground: oklch(0.145 0.025 250);
   --sidebar-primary: oklch(0.65 0.2 45);
@@ -193,17 +184,12 @@
   --chart-5: oklch(0.75 0.22 140);
 
   /* terminal fills are bright greens — dark text reads on every one. */
-  --trazo-primary-foreground: oklch(0.145 0 0);
-  --trazo-success-foreground: oklch(0.145 0 0);
+  --chart-1-foreground: oklch(0.145 0 0);
+  --chart-2-foreground: oklch(0.145 0 0);
+  --chart-3-foreground: oklch(0.145 0 0);
+  --chart-4-foreground: oklch(0.145 0 0);
+  --chart-5-foreground: oklch(0.145 0 0);
   --trazo-error-foreground: oklch(0.145 0 0);
-  --trazo-warning-foreground: oklch(0.145 0 0);
-  --trazo-streamed-foreground: oklch(0.145 0 0);
-  --trazo-lane-1-foreground: oklch(0.145 0 0);
-  --trazo-lane-2-foreground: oklch(0.145 0 0);
-  --trazo-lane-3-foreground: oklch(0.145 0 0);
-  --trazo-lane-4-foreground: oklch(0.145 0 0);
-  --trazo-lane-5-foreground: oklch(0.145 0 0);
-  --trazo-lane-6-foreground: oklch(0.145 0 0);
   --sidebar: oklch(0.1 0.012 140);
   --sidebar-foreground: oklch(0.85 0.18 145);
   --sidebar-primary: oklch(0.7 0.2 145);
