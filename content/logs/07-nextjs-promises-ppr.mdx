@@ -340,7 +340,7 @@ With **Partial Prerendering** (PPR), enabled via `cacheComponents: true` in Next
 2. **Dynamic holes** that stream at request time (the actual content inside those boundaries)
 
 <Diagram index={3} title="The static shell: built at build time, served from CDN">{`flow TD
-shell(["Static Shell — built at build time, served from CDN"])
+shell(["Static Shell: built at build time, served from CDN"])
 nav["<nav> Store </nav>"]:primary
 skeleton1["CartTotal skeleton"]:warning
 skeleton2["CartCount skeleton"]:warning
@@ -381,8 +381,8 @@ Compare this to the traditional approach where nothing renders for 350ms.
 participant S[Server]
 participant C[Client]
 note over C: Blank screen…
-S->>S: await getCart() — 200ms
-S->>S: await getFlags() — 150ms
+S->>S: await getCart() (200ms)
+S->>S: await getFlags() (150ms)
 S->>S: Render full HTML
 S->>C: Send response (350ms+ later)
 C->>C: Display everything at once
