@@ -17,7 +17,6 @@ export async function GET(
   return new ImageResponse(
     LabOgImage({
       title: experiment.title,
-      description: experiment.description,
       tags: experiment.tags,
       date: experiment.date,
     }),
