@@ -144,7 +144,7 @@ function OgImage({ icon: Icon, label, number, title, meta }: OgImageProps) {
       >
         <div
           style={{
-            fontSize: '80px',
+            fontSize: '72px',
             fontWeight: 400,
             letterSpacing: '-0.8px',
             lineHeight: 1.1,
