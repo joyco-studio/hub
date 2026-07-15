@@ -9,6 +9,7 @@
     "postinstall": "fumadocs-mdx",
     "build:registry": "shadcn build",
     "lint": "eslint",
+    "check:logs": "node scripts/check-log-numbers.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky"

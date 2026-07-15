@@ -1,0 +1,26 @@
+name: Check Logs
+
+on:
+  pull_request:
+    paths:
+      - 'content/logs/**'
+      - 'scripts/check-log-numbers.mjs'
+      - '.github/workflows/check-logs.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'content/logs/**'
+      - 'scripts/check-log-numbers.mjs'
+      - '.github/workflows/check-logs.yml'
+
+jobs:
+  check-log-numbers:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Check log numbering
+        run: node scripts/check-log-numbers.mjs
