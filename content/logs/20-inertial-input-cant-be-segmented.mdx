@@ -1,0 +1,125 @@
+---
+title: "20 - Inertial Input Can't Be Segmented"
+description: A trackpad flick is a physics simulation with a non-monotonic inertia tail, so swipe boundaries aren't in the delta stream. Stop thresholding distance; gate on the onset spike the tail can't fake.
+author: 'justkahdri'
+---
+
+You want a horizontal carousel where **one trackpad swipe advances one slide**. So
+you listen to the scroll deltas, accumulate them, and when the accumulation crosses
+a slide's width you snap. Simple. It works with a mouse wheel. Then someone tries it
+on a Mac trackpad and it advances three slides, or zero, or freezes for a second and
+then lurches. You raise the threshold; now it ignores real swipes. You add a
+debounce; now fast swipes get eaten. Every knob you turn trades one failure for
+another.
+
+The bug isn't your threshold. It's that **you're trying to read discrete intent out
+of a continuous, physics-driven stream, and that information isn't in the stream.**
+
+## What the trackpad actually sends
+
+A mouse wheel emits discrete notches: a few large, well-separated events, then
+silence. Easy to count.
+
+A trackpad emits a **physics simulation**. One flick produces a burst that ramps up,
+peaks, and then (after your fingers have already left the surface) the OS keeps
+firing a long **inertia tail** that decays toward zero over more than a second.
+Capture it and the shape is brutal for segmentation:
+
+- **The tail is non-monotonic.** It doesn't decay cleanly; it wobbles, with small
+  re-climbs on the way down. So "the deltas started growing again" does **not** mean
+  a new swipe; it might just be inertia noise.
+- **There is no gap between swipes.** Do a second flick before the first's inertia
+  dies and the two streams **fuse**. One continuous burst, no quiet moment, ~1.8s
+  long. The boundary you're trying to detect doesn't physically exist in the signal.
+- **A real second swipe and the inertia's re-climb overlap in magnitude.** There's no
+  threshold that puts "genuine new intent" on one side and "leftover momentum" on the
+  other, because their delta profiles literally interleave.
+
+Numbers from a real capture make it concrete. A single slow swipe and a genuine
+double-swipe produced *the same* peak re-climb ratio. Every heuristic keyed on
+"distance accumulated" or "did the deltas climb back up" misclassifies one to get the
+other right. You are trying to recover a bit of information (swipe boundary) that the
+encoding (a decaying force) threw away.
+
+## Two traps you'll hit on the way
+
+**The distance accumulator.** Sum signed deltas, advance when the sum crosses one
+slide. On a trackpad, one swipe + its inertia sums to *many* slides' worth of travel,
+so it advances a fistful at once. Cap it with a "one advance per gesture" lock and you
+hit the second trap.
+
+**The lock that never releases.** "Advance once, then ignore input until the gesture
+ends." But *when does the gesture end?* You reach for "no events for N ms." On a
+trackpad that quiet period only arrives after the **entire** inertia tail dies
+(over a second later) and never arrives at all between two fast swipes (the streams
+fused). So the lock stays stuck for the whole fused burst, and every input after the
+first advance is silently swallowed. The carousel "ignores" you. Worse: this is the
+exact same shape as a [last-write-wins](/logs/15-derive-dont-mutate)
+flag wedge, a piece of state whose *release* condition can silently never fire.
+
+## The fix: gate on the velocity profile, not the distance
+
+Stop trying to find boundaries. A physical flick has one feature the inertia tail
+never reproduces: a **sharp onset**. The tail only ever decays from its peak; it
+cannot manufacture a fresh high-velocity spike. So gate on that, with hysteresis:
+
+```ts showLineNumbers
+// One discrete advance per physical flick, robust to a non-monotonic inertia tail.
+// Armed → a fast-enough event fires once and DISARMS. The decaying tail can never
+// re-cross ONSET, so it can't fire again. We RE-ARM only once the stream drops below
+// a lower threshold (the flick eased off / inertia died): hysteresis, so noise near
+// the line doesn't re-trigger.
+const ONSET = 22  // px/event: a deliberate flick clears this
+const REARM = 10  // px/event: must be < ONSET; the tail decays through this
+
+let armed = true
+
+function onInput(deltaPerEvent: number) {
+  const mag = Math.abs(deltaPerEvent)
+  if (!armed && mag < REARM) armed = true            // tail died → ready again
+  if (armed && mag >= ONSET) {
+    armed = false                                    // consume this flick
+    advance(Math.sign(deltaPerEvent))
+  }
+}
+```
+
+That's the whole idea. One swipe = one advance, because the onset fires once and the
+tail can't re-arm until it has decayed past `REARM`. A *deliberate* second swipe is a
+fresh onset after the dip, so it advances again, exactly the intent you couldn't get
+from accumulation. The two thresholds are a [Schmitt trigger](https://en.wikipedia.org/wiki/Schmitt_trigger):
+the gap between `ONSET` and `REARM` is what absorbs the wobble.
+
+## Let the platform tell you when it settled
+
+You still need a "the gesture is really over now" moment, to snap, to re-enable
+something. Don't reinvent the settle detector on raw deltas; you'll just rebuild the
+broken debounce. Tools that already model input physics expose this. GSAP's
+**`Observer`** has `onStop` (with `onStopDelay`): it restarts its own timer on every
+event, so it fires only after the input **and** the inertia tail have genuinely
+stopped: the signal you couldn't compute by hand. Use it as the source of truth for
+"settled," and keep your own logic to the onset gate above.
+
+## The general shape
+
+This isn't really about carousels. It's a recurring trap whenever **continuous,
+physics-driven input has to be read as discrete commands**: trackpad/wheel paging,
+pen pressure as click intent, joystick flicks, gyroscope "shakes." The reflex is to
+threshold the raw signal. The signal is a decaying force with no clean edges, so the
+threshold fights itself.
+
+Three moves get you out:
+
+- **Don't recover information the encoding destroyed.** Swipe boundaries aren't in the
+  delta stream. Stop trying to segment it.
+- **Gate on a feature the noise can't fake.** A fresh onset spike is structural to a
+  real flick and impossible for a monotone-ish decay. Hysteresis turns that into a
+  clean one-shot.
+- **Trust the platform's settle signal.** "It stopped moving" is a physics question;
+  let the thing that owns the physics (the OS inertia, an input library's `onStop`)
+  answer it, instead of approximating it with a timeout that the inertia tail breaks.
+
+And when you do need to suppress input "until the gesture ends", make the release
+condition something that **cannot silently never fire**. A lock keyed on "a quiet gap
+that the inertia tail prevents" is a wedge waiting to happen. A flag you re-arm on a
+*velocity floor you will always eventually cross* isn't.
