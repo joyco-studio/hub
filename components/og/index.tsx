@@ -149,6 +149,11 @@ function OgImage({ icon: Icon, label, number, title, meta }: OgImageProps) {
             letterSpacing: '-0.8px',
             lineHeight: 1.1,
             color: TITLE_COLOR,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
           }}
         >
           {title}
