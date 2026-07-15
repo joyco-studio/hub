@@ -139,20 +139,17 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
         <article
           id="nd-page"
           className={cn(
-            'px-content-sides mx-auto w-full max-w-3xl 2xl:max-w-[900px] pt-6 pb-14 [grid-area:main] md:pt-8 lg:pb-24 xl:pt-14',
+            'px-content-sides mx-auto w-full max-w-3xl pt-6 pb-14 [grid-area:main] md:pt-8 lg:pb-24 xl:pt-14 2xl:max-w-[900px]',
             'xl:layout:[--fd-toc-width:268px]'
           )}
         >
-          {/* Category badge */}
-          <Badge variant="accent" className="mb-6">
-            {badgeLabel}
-          </Badge>
+          {/* Badge and actions row */}
+          <div className="mb-6 flex items-start justify-between gap-4">
+            {/* Category badge */}
+            <Badge variant="accent">
+              {badgeLabel}
+            </Badge>
 
-          {/* Title and actions row */}
-          <div className="mb-4 flex items-start justify-between gap-4">
-            <h1 className="min-w-0 text-3xl leading-tight font-semibold">
-              {displayTitle}
-            </h1>
             <div
               className={cn(
                 'flex items-center gap-2 max-sm:hidden',
@@ -170,6 +167,10 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
               />
             </div>
           </div>
+
+          <h1 className="min-w-0 text-3xl leading-tight font-semibold">
+            {displayTitle}
+          </h1>
 
           {/* Description */}
           {page.data.description && (
