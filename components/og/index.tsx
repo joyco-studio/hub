@@ -1,6 +1,7 @@
 import { ImageResponseOptions } from 'next/server'
 import { CubeIcon, FileIcon, TerminalWithCursorIcon } from '../icons'
 import FlaskIcon from '../icons/flask'
+import { Logo } from '../logos/logo'
 
 const TYPE_LOGO = {
   components: CubeIcon,
@@ -12,293 +13,221 @@ export const isTypeLogo = (type: string): type is keyof typeof TYPE_LOGO => {
   return type in TYPE_LOGO
 }
 
-interface OgCardProps {
+const CANVAS = '#121212'
+const BOX = '#191919'
+const LINE = 'rgba(255, 255, 255, 0.1)'
+const TITLE_COLOR = '#F1F1F1'
+
+interface OgImageProps {
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
   label: string
+  number?: string
   title: string
-  description?: string
-  subtitle?: string
-  date?: string
-  style?: React.CSSProperties
+  meta: string[]
 }
 
 interface DocsOgImageProps {
   title: string
-  description?: string
   type: keyof typeof TYPE_LOGO
+  number?: string
   author?: string
   date?: string
 }
 
 export function DocsOgImage({
   title,
-  description,
   type,
+  number,
   author,
   date,
 }: DocsOgImageProps) {
   return (
-    <OgImageLayout>
-      <OgCard
-        icon={TYPE_LOGO[type]}
-        label={type}
-        title={title}
-        description={description}
-        subtitle={author}
-        date={date}
-        style={{ height: '100%' }}
-      />
-    </OgImageLayout>
+    <OgImage
+      icon={TYPE_LOGO[type]}
+      label={type}
+      number={number}
+      title={title}
+      meta={[author, date && formatDate(date)].filter(
+        (value): value is string => Boolean(value)
+      )}
+    />
   )
 }
 
 interface LabOgImageProps {
   title: string
-  description?: string
   tags?: string[]
   date?: string
 }
 
-export function LabOgImage({
-  title,
-  description,
-  tags,
-  date,
-}: LabOgImageProps) {
-  const displayTags = tags?.slice(0, 3) ?? []
+export function LabOgImage({ title, tags, date }: LabOgImageProps) {
+  const displayTags = tags?.slice(0, 3).join(' · ')
 
   return (
-    <OgImageLayout>
-      <OgCard
-        icon={FlaskIcon}
-        label="LAB"
-        title={title}
-        description={description}
-        subtitle={displayTags.join(' · ')}
-        date={date}
-        style={{ height: '100%' }}
-      />
-    </OgImageLayout>
+    <OgImage
+      icon={FlaskIcon}
+      label="LAB"
+      title={title}
+      meta={[displayTags, date && formatDate(date)].filter(
+        (value): value is string => Boolean(value)
+      )}
+    />
   )
 }
 
-const OgImageLayout = ({ children }: { children: React.ReactNode }) => {
+function OgImage({ icon: Icon, label, number, title, meta }: OgImageProps) {
   return (
     <div
       style={{
+        position: 'relative',
         width: '1200px',
         height: '630px',
         display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: '5px',
-        background: '#121212',
-      }}
-    >
-      <Col style={{ width: '29.33%' }}>
-        <Box style={{ height: '20%' }} />
-        <Box style={{ height: '45%' }} />
-        <Box style={{ height: '38%' }} />
-      </Col>
-      <Col style={{ width: '39.33%' }}>
-        <Box style={{ height: '15%' }} />
-        <Box style={{ height: '87%', background: 'transparent' }}>
-          {children}
-        </Box>
-        <Box style={{ height: '15%' }} />
-      </Col>
-      <Col style={{ width: '29.33%' }}>
-        <Box style={{ height: '30%' }} />
-        <Box style={{ height: '45%' }} />
-        <Box style={{ height: '25%' }} />
-      </Col>
-    </div>
-  )
-}
-
-const OgCard = ({
-  icon: Icon,
-  label,
-  title,
-  description,
-  subtitle,
-  date,
-  style,
-}: OgCardProps) => {
-  return (
-    <div
-      style={{
+        background: CANVAS,
         fontFamily: 'PublicSans',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '5px',
-        flex: 1,
-        flexGrow: 1,
-        overflow: 'hidden',
-        ...style,
       }}
     >
+      <GridOverlay />
+
       {/* Header */}
       <div
         style={{
+          position: 'absolute',
+          left: '61px',
+          top: '52px',
+          width: '477px',
+          height: '50px',
           display: 'flex',
-          gap: '5px',
-          height: '45px',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          fontFamily: 'RobotoMono',
+          fontSize: '18px',
+          padding: '0 26px',
+          background: BOX,
+          fontWeight: 500,
         }}
       >
-        <div
-          style={{
-            aspectRatio: '1/1',
-            background: '#191919',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '45px',
-          }}
-        >
-          <Icon style={{ color: '#FFFFFF' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Icon width={24} height={24} style={{ color: '#FFFFFF' }} />
+          <span style={labelStyle}>{label}</span>
         </div>
-        <div
-          style={{
-            display: 'flex',
-            gap: '5px',
-            alignItems: 'center',
-            background: '#191919',
-            width: '100%',
-            padding: '14px',
-          }}
-        >
-          <div
-            style={{
-              fontSize: '18px',
-              color: '#FFFFFF',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              fontFamily: 'RobotoMono',
-            }}
-          >
-            {label}
-          </div>
-        </div>
+        {number && <span style={labelStyle}>{number}</span>}
       </div>
-      {/* Body */}
+
+      {/* Brand mark */}
+      <Logo
+        width={65}
+        height={65}
+        style={{
+          position: 'absolute',
+          left: '1093px',
+          top: '44px',
+          color: '#FFFFFF',
+        }}
+      />
+
+      {/* Title + footer */}
       <div
         style={{
+          position: 'absolute',
+          left: '61px',
+          top: '243px',
+          width: '1090px',
+          height: '320px',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'flex-end',
-          padding: '24px',
-          gap: '5px',
-          background: '#0000FF',
-          flexGrow: 1,
-          fontFamily: 'PublicSans',
+          justifyContent: 'space-between',
+          padding: '26px',
+          background: BOX,
+          overflow: 'hidden',
         }}
       >
         <div
           style={{
-            fontSize: '56px',
-            color: '#FFFFFF',
-            fontWeight: '600',
-            lineHeight: 1,
+            fontSize: '80px',
+            fontWeight: 400,
+            letterSpacing: '-0.8px',
+            lineHeight: 1.1,
+            color: TITLE_COLOR,
           }}
         >
           {title}
         </div>
-        {description && (
-          <div
-            style={{
-              marginTop: '12px',
-              fontFamily: 'PublicSans',
-              fontSize: '20px',
-              color: '#FFFFFF',
-              fontWeight: '400',
-              lineHeight: 1.4,
-              overflow: 'hidden',
-              display: 'block',
-              lineClamp: 3,
-            }}
-          >
-            {description}
+        {meta.length > 0 && (
+          <div style={{ display: 'flex', gap: '57px', flexShrink: 0 }}>
+            {meta.map((item, index) => (
+              <span key={index} style={{ ...labelStyle, opacity: 0.5 }}>
+                {item}
+              </span>
+            ))}
           </div>
         )}
-      </div>
-      {/* Footer */}
-      <div
-        style={{
-          display: 'flex',
-          gap: '5px',
-          height: '45px',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            gap: '8px',
-            alignItems: 'center',
-            background: '#191919',
-            width: '100%',
-            padding: '14px',
-            justifyContent: 'space-between',
-          }}
-        >
-          <div
-            style={{
-              fontSize: '14px',
-              color: '#F1F1F1',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              fontFamily: 'RobotoMono',
-              opacity: 0.5,
-            }}
-          >
-            {subtitle}
-          </div>
-          {date && (
-            <div
-              style={{
-                fontSize: '18px',
-                color: '#F1F1F1',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                fontFamily: 'RobotoMono',
-                flexShrink: 0,
-              }}
-            >
-              {formatDate(date)}
-            </div>
-          )}
-        </div>
       </div>
     </div>
   )
 }
 
-const Col = ({ children, style }: React.ComponentProps<'div'>) => {
-  return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '5px',
-        flexGrow: 1,
-        flexShrink: 0,
-        ...style,
-      }}
-    >
-      {children}
-    </div>
-  )
+const labelStyle: React.CSSProperties = {
+  fontFamily: 'RobotoMono',
+  fontSize: '18px',
+  color: '#FFFFFF',
+  textTransform: 'uppercase',
+  whiteSpace: 'nowrap',
+  fontWeight: 500,
 }
-const Box = ({ style, ...props }: React.ComponentProps<'div'>) => {
+
+const GridOverlay = () => {
+  const horizontals = [51, 102, 242, 563]
+  const verticals = [60, 1151]
+  const segments = [
+    { left: 538, top: 0, height: 291 },
+    { left: 538, top: 563, height: 67 },
+    { left: 1099, top: 0, height: 291 },
+    { left: 1026, top: 563, height: 67 },
+  ]
+
   return (
-    <div
-      style={{
-        background: '#191919',
-        display: 'flex',
-        ...style,
-      }}
-      {...props}
-    />
+    <div style={{ position: 'absolute', inset: 0, display: 'flex' }}>
+      {horizontals.map((top) => (
+        <div
+          key={`h-${top}`}
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: `${top}px`,
+            width: '1200px',
+            height: '1px',
+            background: LINE,
+          }}
+        />
+      ))}
+      {verticals.map((left) => (
+        <div
+          key={`v-${left}`}
+          style={{
+            position: 'absolute',
+            left: `${left}px`,
+            top: 0,
+            width: '1px',
+            height: '630px',
+            background: LINE,
+          }}
+        />
+      ))}
+      {segments.map((segment, index) => (
+        <div
+          key={`s-${index}`}
+          style={{
+            position: 'absolute',
+            left: `${segment.left}px`,
+            top: `${segment.top}px`,
+            width: '1px',
+            height: `${segment.height}px`,
+            background: LINE,
+          }}
+        />
+      ))}
+    </div>
   )
 }
 
@@ -338,9 +267,7 @@ export const getFonts = async () => {
 }
 
 const formatDate = (date: string) => {
-  // new Date(date) -> 2026.01.01
+  // new Date(date) -> 28.9.2025
   const d = new Date(date)
-  const month = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${d.getFullYear()}.${month}.${day}`
+  return `${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()}`
 }

@@ -5,6 +5,7 @@ import { ImageResponse } from 'next/og'
 import { readFile } from 'fs/promises'
 import { join } from 'path'
 import { DocsOgImage, getFonts, isTypeLogo } from '@/components/og'
+import { getLogNumber, stripLogPrefixFromTitle } from '@/lib/log-utils'
 
 export const revalidate = false
 
@@ -49,11 +50,18 @@ export async function GET(
   const [mainMaintainer] = page.data.maintainers
   const ogProfile = mainMaintainer ?? page.data.author
 
+  const logNumber = getLogNumber(pageSlug)
+  const paddedLogNumber = logNumber?.padStart(4, '0')
+  const displayTitle = stripLogPrefixFromTitle(
+    page.data.title,
+    logNumber ?? null
+  )
+
   return new ImageResponse(
     DocsOgImage({
-      title: page.data.title,
-      description: page.data.description,
+      title: displayTitle,
       type,
+      number: paddedLogNumber,
       author: ogProfile,
       date: page.data.lastModified?.toISOString(),
     }),
