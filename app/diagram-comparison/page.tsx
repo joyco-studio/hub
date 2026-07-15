@@ -47,8 +47,8 @@ const PAIRS: Pair[] = [
     },
     after: `flow TD
 A(["Request arrives"]):primary
-B["await getCart()<br/>200ms"]:error
-C["await getFlags()<br/>150ms"]:error
+B["await \`getCart()\`<br/>200ms"]:error
+C["await \`getFlags()\`<br/>150ms"]:error
 D["Render HTML"]
 E["Send response<br/>350ms+ later"]:error
 A --- B
@@ -78,9 +78,9 @@ D --- E`,
     },
     after: `flow TD
 A(["Request arrives"]):primary
-B["getCart() started"]:success
-C["getFlags() started"]:success
-D["Render HTML shell immediately<br/>(Suspense fallbacks)"]:primary
+B["\`getCart()\` started"]:success
+C["\`getFlags()\` started"]:success
+D["Render HTML shell immediately<br/>(\`<Suspense>\` fallbacks)"]:primary
 E["Stream resolved data<br/>as promises settle"]:info
 A --- B
 A --- C
@@ -114,11 +114,11 @@ D --- E`,
     },
     after: `flow TD
 shell(["Static Shell: built at build time, served from CDN"])
-nav["<nav> Store </nav>"]:primary
-skeleton1["CartTotal skeleton"]:warning
-skeleton2["CartCount skeleton"]:warning
-main["<main> Featured Products"]:primary
-fallback["Checkout button fallback"]:warning
+nav["\`<nav>\` Store \`</nav>\`"]:primary
+skeleton1["\`CartTotal\` skeleton"]:warning
+skeleton2["\`CartCount\` skeleton"]:warning
+main["\`<main>\` Featured Products"]:primary
+fallback["\`CheckoutButton\` fallback"]:warning
 shell --- nav
 nav --- skeleton1
 nav --- skeleton2
@@ -153,11 +153,11 @@ main --- fallback`,
     },
     after: `flow TD
 A(["Static shell served<br/>0ms"]):primary
-S["UI renders with<br/>Suspense fallbacks instantly"]:warning
-B["getFlags resolves<br/>80ms"]:success
-C["getCart resolves<br/>120ms"]:success
-D["CheckoutButton renders<br/>Checkout with Express Pay"]:info
-E["CartCount: 3<br/>CartTotal: $149.97"]:info
+S["UI renders with<br/>\`<Suspense>\` fallbacks instantly"]:warning
+B["\`getFlags()\` resolves<br/>80ms"]:success
+C["\`getCart()\` resolves<br/>120ms"]:success
+D["\`CheckoutButton\` renders<br/>Checkout with Express Pay"]:info
+E["\`CartCount\`: 3<br/>\`CartTotal\`: $149.97"]:info
 F(["Page fully interactive<br/>~120ms"]):success
 A --- S
 S --- B
@@ -407,7 +407,7 @@ end
 subgraph impl ["Impl Thread"]
 LTHI["LayerTreeHostImpl<br/>owns impl-thread tree"]:success
 end
-LTH <==>|"commit (sync) / scroll deltas (async)"| LTHI`,
+LTH <==>|commit (sync) / scroll deltas (async)| LTHI`,
   },
   {
     article: '08',
@@ -442,7 +442,7 @@ end
 subgraph page ["Page (P)"]
 CONTENT["DOM content"]:success
 end
-VIEW ===|"D (delta): JS animates scrollTop, reads it back for canvas"| CONTENT`,
+VIEW ===|D (delta): JS animates scrollTop, reads it back for canvas| CONTENT`,
   },
   {
     article: '08',
@@ -510,7 +510,7 @@ subgraph page ["Page (P)"]
 CANVAS["Canvas<br/>(absolute, in page flow)"]:info
 DOM["DOM elements"]:success
 end
-VIEW ===|"D (delta): JS reads scrollY, applies transform to reposition canvas"| CANVAS`,
+VIEW ===|D (delta): JS reads scrollY, applies transform to reposition canvas| CANVAS`,
   },
   {
     article: '08',
@@ -687,8 +687,7 @@ js --- style
 style --- layout
 layout --- paint
 paint --- composite
-cry["this one makes fps cry 😢"]:neutral
-cry --> layout`,
+note layout below "this one makes fps cry 😢"`,
   },
   // ── 12 · The render pipeline (was an Excalidraw screenshot) ─────────────
   {
@@ -722,13 +721,9 @@ paint === composite`,
     article: '14',
     index: 1,
     title: 'Stacked branches',
+    ascii: true,
     before: { kind: 'text', text: `main ← elvira/checkout ← homero/receipts` },
-    after: `flow LR
-main["main"]:primary
-elvira["elvira/checkout"]:success
-homero["homero/receipts"]:info
-main ===|"base of"| elvira
-elvira ===|"base of"| homero`,
+    after: `main ◀── based on ── elvira/checkout ◀── based on ── homero/receipts`,
   },
   {
     article: '14',
