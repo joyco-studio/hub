@@ -14,13 +14,8 @@ The long answer is a story. Let me introduce you to Elvira and Homero.
 
 Elvira has been working on the new checkout flow in `elvira/checkout`. Homero needs the checkout API for his receipt page, and he's not going to sit around waiting for Elvira's PR to land. So he branches off her branch:
 
-<Diagram index={1} title="Stacked branches">{`
-flow LR
-main["main"]:primary
-elvira["elvira/checkout"]:success
-homero["homero/receipts"]:info
-main ===|"base of"| elvira
-elvira ===|"base of"| homero
+<Diagram index={1} ascii title="Stacked branches">{`
+main ◀── based on ── elvira/checkout ◀── based on ── homero/receipts
 `}</Diagram>
 
 A stacked branch. Totally normal, this is how parallel work on dependent features should happen.

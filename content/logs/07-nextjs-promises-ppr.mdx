@@ -32,8 +32,8 @@ export default async function RootLayout({ children }) {
 
 <Diagram index={1} title="Blocking await chain">{`flow TD
 A(["Request arrives"]):primary
-B["await getCart()<br/>200ms"]:error
-C["await getFlags()<br/>150ms"]:error
+B["await \`getCart()\`<br/>200ms"]:error
+C["await \`getFlags()\`<br/>150ms"]:error
 D["Render HTML"]
 E["Send response<br/>350ms+ later"]:error
 A --- B
@@ -71,9 +71,9 @@ The layout returns immediately. The promises are in-flight. Client components re
 
 <Diagram index={2} title="Forward promises, render shell immediately">{`flow TD
 A(["Request arrives"]):primary
-B["getCart() started"]:success
-C["getFlags() started"]:success
-D["Render HTML shell immediately<br/>(Suspense fallbacks)"]:primary
+B["\`getCart()\` started"]:success
+C["\`getFlags()\` started"]:success
+D["Render HTML shell immediately<br/>(\`<Suspense>\` fallbacks)"]:primary
 E["Stream resolved data<br/>as promises settle"]:info
 A --- B
 A --- C
@@ -341,11 +341,11 @@ With **Partial Prerendering** (PPR), enabled via `cacheComponents: true` in Next
 
 <Diagram index={3} title="The static shell: built at build time, served from CDN">{`flow TD
 shell(["Static Shell: built at build time, served from CDN"])
-nav["<nav> Store </nav>"]:primary
-skeleton1["CartTotal skeleton"]:warning
-skeleton2["CartCount skeleton"]:warning
-main["<main> Featured Products"]:primary
-fallback["Checkout button fallback"]:warning
+nav["\`<nav>\` Store \`</nav>\`"]:primary
+skeleton1["\`CartTotal\` skeleton"]:warning
+skeleton2["\`CartCount\` skeleton"]:warning
+main["\`<main>\` Featured Products"]:primary
+fallback["\`CheckoutButton\` fallback"]:warning
 shell --- nav
 nav --- skeleton1
 nav --- skeleton2
@@ -357,11 +357,11 @@ When a request comes in, the static shell is **instantly** served. Then the dyna
 
 <Diagram index={4} title="Shell served instantly, dynamic parts stream in">{`flow TD
 A(["Static shell served<br/>0ms"]):primary
-S["UI renders with<br/>Suspense fallbacks instantly"]:warning
-B["getFlags resolves<br/>80ms"]:success
-C["getCart resolves<br/>120ms"]:success
-D["CheckoutButton renders<br/>Checkout with Express Pay"]:info
-E["CartCount: 3<br/>CartTotal: $149.97"]:info
+S["UI renders with<br/>\`<Suspense>\` fallbacks instantly"]:warning
+B["\`getFlags()\` resolves<br/>80ms"]:success
+C["\`getCart()\` resolves<br/>120ms"]:success
+D["\`CheckoutButton\` renders<br/>Checkout with Express Pay"]:info
+E["\`CartCount\`: 3<br/>\`CartTotal\`: $149.97"]:info
 F(["Page fully interactive<br/>~120ms"]):success
 A --- S
 S --- B

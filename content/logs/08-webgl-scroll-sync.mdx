@@ -76,7 +76,7 @@ end
 subgraph impl ["Impl Thread"]
 LTHI["LayerTreeHostImpl<br/>owns impl-thread tree"]:success
 end
-LTH <==>|"commit (sync) / scroll deltas (async)"| LTHI`}</Diagram>
+LTH <==>|commit (sync) / scroll deltas (async)| LTHI`}</Diagram>
 
 The impl tree is a snapshot from the last commit. Between commits, the impl thread scrolls, animates, and draws frames without consulting the main thread. When your rAF fires and reads `window.scrollY`, it's reading the scroll offset from the *last time the impl thread synced*, not the impl thread's current position.
 
@@ -137,7 +137,7 @@ end
 subgraph page ["Page (P)"]
 CONTENT["DOM content"]:success
 end
-VIEW ===|"D (delta): JS animates scrollTop, reads it back for canvas"| CONTENT`}</Diagram>
+VIEW ===|D (delta): JS animates scrollTop, reads it back for canvas| CONTENT`}</Diagram>
 
 JS is the **single source of truth**. On each frame, Lenis lerps toward the target scroll position, sets `scrollTop`, and your rAF callback reads it back for the canvas. Because both the DOM scroll and the WebGL render happen from the same value in the same frame, there's **zero drift** between them.
 
@@ -204,7 +204,7 @@ subgraph page ["Page (P)"]
 CANVAS["Canvas<br/>(absolute, in page flow)"]:info
 DOM["DOM elements"]:success
 end
-VIEW ===|"D (delta): JS reads scrollY, applies transform to reposition canvas"| CANVAS`}</Diagram>
+VIEW ===|D (delta): JS reads scrollY, applies transform to reposition canvas| CANVAS`}</Diagram>
 
 The canvas sits on the **P** side. The compositor moves the page, and the canvas with it, instantly. DOM elements and the canvas move together on the GPU. JS only needs to correct the canvas position and re-render the WebGL scene.
 
