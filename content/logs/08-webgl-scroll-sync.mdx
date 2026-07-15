@@ -76,7 +76,8 @@ end
 subgraph impl ["Impl Thread"]
 LTHI["LayerTreeHostImpl<br/>owns impl-thread tree"]:success
 end
-LTH <==>|commit (sync) / scroll deltas (async)| LTHI`}</Diagram>
+LTH -->|commit (periodic sync)| LTHI
+LTHI -->|scroll deltas (async notify)| LTH`}</Diagram>
 
 The impl tree is a snapshot from the last commit. Between commits, the impl thread scrolls, animates, and draws frames without consulting the main thread. When your rAF fires and reads `window.scrollY`, it's reading the scroll offset from the *last time the impl thread synced*, not the impl thread's current position.
 

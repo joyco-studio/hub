@@ -407,7 +407,8 @@ end
 subgraph impl ["Impl Thread"]
 LTHI["LayerTreeHostImpl<br/>owns impl-thread tree"]:success
 end
-LTH <==>|commit (sync) / scroll deltas (async)| LTHI`,
+LTH -->|commit (periodic sync)| LTHI
+LTHI -->|scroll deltas (async notify)| LTH`,
   },
   {
     article: '08',
@@ -721,9 +722,13 @@ paint === composite`,
     article: '14',
     index: 1,
     title: 'Stacked branches',
-    ascii: true,
     before: { kind: 'text', text: `main ← elvira/checkout ← homero/receipts` },
-    after: `main ◀── based on ── elvira/checkout ◀── based on ── homero/receipts`,
+    after: `flow LR
+main["main"]:primary
+elvira["elvira/checkout"]:success
+homero["homero/receipts"]:info
+main ===|base of| elvira
+elvira ===|base of| homero`,
   },
   {
     article: '14',
