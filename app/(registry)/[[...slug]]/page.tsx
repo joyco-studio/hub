@@ -168,7 +168,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
             </div>
           </div>
 
-          <h1 className="min-w-0 text-3xl leading-tight font-semibold">
+          <h1 className="mb-3 min-w-0 text-3xl leading-tight font-semibold">
             {displayTitle}
           </h1>
 
