@@ -35,6 +35,7 @@ const graphTheme: TrazoTheme = {
     bg: 'var(--card)',
     'neutral-foreground': 'var(--muted)',
     success: 'var(--color-mint-green)',
+    code: 'oklch(1 0 0 / 0.16)',
   },
 }
 
