@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
-import { Diagram } from '@/components/flow'
+import { flow, seq } from '@joycostudio/trazo'
+import { Diagram, type DiagramGraph } from '@/components/flow'
 import { Mermaid } from '@/components/mermaid'
 import { ThemeSwitcher } from './theme-switcher'
 
@@ -24,7 +25,9 @@ type Pair = {
   title: string
   ascii?: boolean
   before: Before
-  after: string
+  // A `flow`/`seq` tagged-template graph (validated at build time), or a raw
+  // string for `ascii` figures.
+  after: string | DiagramGraph
 }
 
 const PAIRS: Pair[] = [
@@ -45,7 +48,7 @@ const PAIRS: Pair[] = [
     style C fill:#fecaca,stroke:#dc2626,color:#000
     style E fill:#fecaca,stroke:#dc2626,color:#000`,
     },
-    after: `flow TD
+    after: flow`flow TD
 A(["Request arrives"]):primary
 B["await \`getCart()\`<br/>200ms"]:error
 C["await \`getFlags()\`<br/>150ms"]:error
@@ -76,7 +79,7 @@ D --- E`,
     style D fill:#bfdbfe,stroke:#2563eb,color:#000
     style E fill:#bfdbfe,stroke:#2563eb,color:#000`,
     },
-    after: `flow TD
+    after: flow`flow TD
 A(["Request arrives"]):primary
 B["\`getCart()\` started"]:success
 C["\`getFlags()\` started"]:success
@@ -112,7 +115,7 @@ D --- E`,
     style skeleton2 fill:#fef9c3,stroke:#ca8a04,color:#000
     style fallback fill:#fef9c3,stroke:#ca8a04,color:#000`,
     },
-    after: `flow TD
+    after: flow`flow TD
 shell(["Static Shell: built at build time, served from CDN"])
 nav["\`<nav>\` Store \`</nav>\`"]:primary
 skeleton1["\`CartTotal\` skeleton"]:warning
@@ -151,7 +154,7 @@ main --- fallback`,
     style E fill:#e9d5ff,stroke:#7c3aed,color:#000
     style F fill:#bbf7d0,stroke:#16a34a,color:#000`,
     },
-    after: `flow TD
+    after: flow`flow TD
 A(["Static shell served<br/>0ms"]):primary
 S["UI renders with<br/>\`<Suspense>\` fallbacks instantly"]:warning
 B["\`getFlags()\` resolves<br/>80ms"]:success
@@ -186,7 +189,7 @@ E --- F`,
     C->>C: Hydrate
     Note over S,C: Slow TTFB, fast render`,
     },
-    after: `sequenceDiagram
+    after: seq`sequenceDiagram
 participant S[Server]:primary
 participant C[Client]:success
 note over C: Blank screen…
@@ -219,7 +222,7 @@ note over S,C: Slow TTFB, fast render`,
     C->>C: CartCount + CartTotal pop in
     Note over S,C: Fast TTFB, progressive render`,
     },
-    after: `sequenceDiagram
+    after: seq`sequenceDiagram
 participant S[Server]:primary
 participant C[Client]:success
 S->>S: Start getCart()
@@ -268,7 +271,7 @@ note over S,C: Fast TTFB, progressive render`,
     style R7 fill:#e9d5ff,stroke:#7c3aed,color:#000
     style R8 fill:#e9d5ff,stroke:#7c3aed,color:#000`,
     },
-    after: `flow TD
+    after: flow`flow TD
 subgraph build ["BUILD TIME"]
 B1["Next.js prerenders the route"]
 B2["Static Shell<br/>html, body, nav, main, footer<br/>Suspense fallbacks<br/>All non-dynamic content"]
@@ -312,7 +315,7 @@ B3 --- R3`,
     style C fill:#bbf7d0,stroke:#16a34a,color:#000
     style D fill:#fecaca,stroke:#dc2626,color:#000`,
     },
-    after: `flow LR
+    after: flow`flow LR
 A["User scrolls<br/>(wheel / touch)"]
 B["Compositor thread<br/>receives input"]:primary
 C["GPU shifts pixel tiles<br/>instantly"]:success
@@ -354,7 +357,7 @@ B --- D`,
     style commit fill:#fef9c3,stroke:#ca8a04,color:#000
     style impl fill:#f0fdf4,stroke:#16a34a,color:#000`,
     },
-    after: `flow TD
+    after: flow`flow TD
 subgraph main ["Main Thread"]
 S["Style"]:primary
 L["Layout"]:primary
@@ -400,7 +403,7 @@ CO --- LY`,
     style main fill:#eff6ff,stroke:#2563eb,color:#000
     style impl fill:#f0fdf4,stroke:#16a34a,color:#000`,
     },
-    after: `flow LR
+    after: flow`flow LR
 subgraph main ["Main Thread"]
 LTH["LayerTreeHost<br/>owns main-thread tree"]:primary
 end
@@ -435,7 +438,7 @@ LTHI -->|scroll deltas (async notify)| LTH`,
     style CANVAS fill:#e9d5ff,stroke:#7c3aed,color:#000
     style CONTENT fill:#dbeafe,stroke:#3b82f6,color:#000`,
     },
-    after: `flow LR
+    after: flow`flow LR
 subgraph viewport ["Window (W)"]
 CANVAS["Canvas<br/>(fixed to window)"]:info
 VIEW["Viewport<br/>(what user sees)"]:primary
@@ -465,7 +468,7 @@ VIEW ===|D (delta): JS animates scrollTop,<br/>reads it back for canvas| CONTENT
     C->>S: Draw frame
     Note over S: DOM and canvas<br/>perfectly in sync`,
     },
-    after: `sequenceDiagram
+    after: seq`sequenceDiagram
 participant U[User Input]:warning
 participant M[Main Thread (Lenis)]:primary
 participant C[Compositor]:success
@@ -503,7 +506,7 @@ note over S: DOM and canvas<br/>perfectly in sync`,
     style CANVAS fill:#e9d5ff,stroke:#7c3aed,color:#000
     style DOM fill:#dbeafe,stroke:#3b82f6,color:#000`,
     },
-    after: `flow LR
+    after: flow`flow LR
 subgraph viewport ["Window (W)"]
 VIEW["Viewport<br/>(what user sees)"]:primary
 end
@@ -534,7 +537,7 @@ VIEW ===|D (delta): JS reads scrollY,<br/>applies transform to reposition canvas
     M->>P: Update transform to translateY(540px)
     Note over P: Transform catches up<br/>Canvas covers viewport again`,
     },
-    after: `sequenceDiagram
+    after: seq`sequenceDiagram
 participant C[Compositor]:success
 participant P[Page (canvas + DOM)]:info
 participant M[Main Thread]:primary
@@ -569,13 +572,11 @@ note over P: Transform catches up<br/>Canvas covers viewport again`,
     style PAD_BOT fill:#f0fdf4,stroke:#16a34a,color:#000
     style NOTE fill:#bbf7d0,stroke:#16a34a,color:#000`,
     },
-    after: `flow TD
-subgraph canvas ["Canvas (150% viewport height)"]
+    after: flow`flow TD
+subgraph canvas ["Canvas (150% viewport height)"]:info
 PAD_TOP["25% padding (top)<br/>Extra rendered area"]:success
 VP["100% viewport area<br/>What the user actually sees"]:primary
 PAD_BOT["25% padding (bottom)<br/>Extra rendered area"]:success
-PAD_TOP --- VP
-VP --- PAD_BOT
 end
 SCROLL["During fast scroll,<br/>stale transform shifts canvas<br/>a few pixels"]
 NOTE["Padding absorbs the shift<br/>→ no visible clipping"]:success
@@ -601,7 +602,7 @@ NOTE --- VP`,
     M->>M: Correct element position back<br/>to where it should be on screen
     Note over P: Element snaps back into place<br/>but for that frame it was wrong → jelly`,
     },
-    after: `sequenceDiagram
+    after: seq`sequenceDiagram
 participant C[Compositor]:success
 participant P[Page (canvas here)]:info
 participant M[Main Thread]:primary
@@ -643,7 +644,7 @@ note over P: Element snaps back into place<br/>but for that frame it was wrong �
     style ABS_PRO fill:#bbf7d0,stroke:#16a34a,color:#000
     style ABS_CON fill:#fecaca,stroke:#dc2626,color:#000`,
     },
-    after: `flow TD
+    after: flow`flow TD
 ROOT["WebGL canvas needs to<br/>stay in sync with DOM during scroll"]
 PROBLEM["Compositor scrolls instantly (GPU)<br/>JS reads scrollY 1+ frames late"]:warning
 Q{"Where does<br/>the canvas live?"}:primary
@@ -678,7 +679,7 @@ ABS_HOW --- ABS_CON`,
       height: 520,
       alt: 'Browser rendering pipeline',
     },
-    after: `flow LR
+    after: flow`flow LR
 js["JS"]:warning
 style["Style"]:info
 layout["Layout"]:primary
@@ -702,7 +703,7 @@ note layout below "this one makes fps cry 😢"`,
       height: 520,
       alt: 'Browser rendering pipeline',
     },
-    after: `flow LR
+    after: flow`flow LR
 subgraph main ["Main Thread"]
 js["JS"]:warning
 style["Style"]:info
@@ -712,7 +713,7 @@ js --- style
 style --- layout
 layout --- paint
 end
-subgraph compositor ["Compositor Thread"]
+subgraph compositor ["Compositor Thread"]:error
 composite["Composite"]:error
 end
 paint === composite`,
@@ -723,7 +724,7 @@ paint === composite`,
     index: 1,
     title: 'Stacked branches',
     before: { kind: 'text', text: `main ← elvira/checkout ← homero/receipts` },
-    after: `flow LR
+    after: flow`flow LR
 main["main"]:primary
 elvira["elvira/checkout"]:success
 homero["homero/receipts"]:info
@@ -771,7 +772,6 @@ function BeforePanel({ before }: { before: Before }) {
   }
   if (before.kind === 'image') {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
       <img
         src={before.src}
         alt={before.alt}

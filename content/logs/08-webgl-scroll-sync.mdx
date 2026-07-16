@@ -265,12 +265,10 @@ The compositor scroll creates a delta between where the canvas sits (page space)
 Edge clipping during fast scroll is solved by rendering the canvas larger than the viewport. Add 25% vertical padding top and bottom (canvas = 150% viewport height). Adding this padding buffer lets the translate catch up when the impl layer syncs. Even with a few frames of stale transform, the extra rendered area covers the viewport:
 
 <Diagram index={8} title="Padding absorbs the stale-transform shift">{`flow TD
-subgraph canvas ["Canvas (150% viewport height)"]
+subgraph canvas ["Canvas (150% viewport height)"]:info
 PAD_TOP["25% padding (top)<br/>Extra rendered area"]:success
 VP["100% viewport area<br/>What the user actually sees"]:primary
 PAD_BOT["25% padding (bottom)<br/>Extra rendered area"]:success
-PAD_TOP --- VP
-VP --- PAD_BOT
 end
 SCROLL["During fast scroll,<br/>stale transform shifts canvas<br/>a few pixels"]
 NOTE["Padding absorbs the shift<br/>→ no visible clipping"]:success
