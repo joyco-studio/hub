@@ -443,7 +443,7 @@ end
 subgraph page ["Page (P)"]
 CONTENT["DOM content"]:success
 end
-VIEW ===|D (delta): JS animates scrollTop, reads it back for canvas| CONTENT`,
+VIEW ===|D (delta): JS animates scrollTop,<br/>reads it back for canvas| CONTENT`,
   },
   {
     article: '08',
@@ -511,7 +511,7 @@ subgraph page ["Page (P)"]
 CANVAS["Canvas<br/>(absolute, in page flow)"]:info
 DOM["DOM elements"]:success
 end
-VIEW ===|D (delta): JS reads scrollY, applies transform to reposition canvas| CANVAS`,
+VIEW ===|D (delta): JS reads scrollY,<br/>applies transform to reposition canvas| CANVAS`,
   },
   {
     article: '08',
@@ -727,8 +727,8 @@ paint === composite`,
 main["main"]:primary
 elvira["elvira/checkout"]:success
 homero["homero/receipts"]:info
-main ===|base of| elvira
-elvira ===|base of| homero`,
+main <==|base of| elvira
+elvira <==|base of| homero`,
   },
   {
     article: '14',

@@ -19,8 +19,8 @@ flow LR
 main["main"]:primary
 elvira["elvira/checkout"]:success
 homero["homero/receipts"]:info
-main ===|base of| elvira
-elvira ===|base of| homero
+main <==|base of| elvira
+elvira <==|base of| homero
 `}</Diagram>
 
 A stacked branch. Totally normal, this is how parallel work on dependent features should happen.
