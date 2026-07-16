@@ -187,8 +187,8 @@ E --- F`,
     Note over S,C: Slow TTFB, fast render`,
     },
     after: `sequenceDiagram
-participant S[Server]
-participant C[Client]
+participant S[Server]:primary
+participant C[Client]:success
 note over C: Blank screen…
 S->>S: await getCart() (200ms)
 S->>S: await getFlags() (150ms)
@@ -220,8 +220,8 @@ note over S,C: Slow TTFB, fast render`,
     Note over S,C: Fast TTFB, progressive render`,
     },
     after: `sequenceDiagram
-participant S[Server]
-participant C[Client]
+participant S[Server]:primary
+participant C[Client]:success
 S->>S: Start getCart()
 S->>S: Start getFlags()
 S->>C: Static shell + fallbacks (instant)
@@ -466,10 +466,10 @@ VIEW ===|D (delta): JS animates scrollTop,<br/>reads it back for canvas| CONTENT
     Note over S: DOM and canvas<br/>perfectly in sync`,
     },
     after: `sequenceDiagram
-participant U[User Input]
-participant M[Main Thread (Lenis)]
-participant C[Compositor]
-participant S[Screen]
+participant U[User Input]:warning
+participant M[Main Thread (Lenis)]:primary
+participant C[Compositor]:success
+participant S[Screen]:info
 note over U: User scrolls
 U->>M: Scroll input
 note over M: rAF callback
@@ -535,9 +535,9 @@ VIEW ===|D (delta): JS reads scrollY,<br/>applies transform to reposition canvas
     Note over P: Transform catches up<br/>Canvas covers viewport again`,
     },
     after: `sequenceDiagram
-participant C[Compositor]
-participant P[Page (canvas + DOM)]
-participant M[Main Thread]
+participant C[Compositor]:success
+participant P[Page (canvas + DOM)]:info
+participant M[Main Thread]:primary
 note over P: Initial state:<br/>scrollY = 500<br/>transform: translateY(500px)<br/>Canvas perfectly covers viewport
 note over C: User scrolls 40px
 C->>P: Compositor moves page to scrollY=540<br/>(canvas + DOM shift together, instant)
@@ -602,9 +602,9 @@ NOTE --- VP`,
     Note over P: Element snaps back into place<br/>but for that frame it was wrong → jelly`,
     },
     after: `sequenceDiagram
-participant C[Compositor]
-participant P[Page (canvas here)]
-participant M[Main Thread]
+participant C[Compositor]:success
+participant P[Page (canvas here)]:info
+participant M[Main Thread]:primary
 note over P: "Fixed" element sitting at<br/>its viewport position on the canvas
 note over C: User scrolls 40px
 C->>P: Compositor moves page to scrollY=540<br/>(entire canvas shifts, including the "fixed" element)

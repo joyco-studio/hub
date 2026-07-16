@@ -30,7 +30,12 @@ import { cn } from '@/lib/utils'
 const graphTheme: TrazoTheme = {
   ...joycoTheme,
   background: 'none',
-  tokens: { ...joycoTheme.tokens, bg: 'var(--card)' },
+  tokens: {
+    ...joycoTheme.tokens,
+    bg: 'var(--card)',
+    'neutral-foreground': 'var(--muted)',
+    success: 'var(--color-mint-green)',
+  },
 }
 
 // Git branches map onto lane-1, lane-2, … in commit order. This app's --chart-*
@@ -64,21 +69,30 @@ function detectLang(source: string): DiagramLang {
   return 'flow'
 }
 
-function layoutFor(lang: DiagramLang, source: string, theme: TrazoTheme): PositionedGraph {
+function layoutFor(
+  lang: DiagramLang,
+  source: string,
+  theme: TrazoTheme
+): PositionedGraph {
   switch (lang) {
     case 'sequence': {
       const { graph, error } = parseSequence(source)
-      if (error) throw new Error(`trazo sequence DSL line ${error.line}: ${error.message}`)
+      if (error)
+        throw new Error(
+          `trazo sequence DSL line ${error.line}: ${error.message}`
+        )
       return layoutSequence(graph)
     }
     case 'block': {
       const { graph, error } = parseBlock(source)
-      if (error) throw new Error(`trazo block DSL line ${error.line}: ${error.message}`)
+      if (error)
+        throw new Error(`trazo block DSL line ${error.line}: ${error.message}`)
       return layoutBlock(graph)
     }
     case 'git': {
       const { graph, error } = parseGit(source)
-      if (error) throw new Error(`trazo git DSL line ${error.line}: ${error.message}`)
+      if (error)
+        throw new Error(`trazo git DSL line ${error.line}: ${error.message}`)
       // Horizontal orientation reads like a real `git log --graph` timeline
       // (commits left→right, branches as rows) instead of trazo's default
       // vertical lane, which crams every commit label into one narrow column.
@@ -90,7 +104,14 @@ function layoutFor(lang: DiagramLang, source: string, theme: TrazoTheme): Positi
     }
     default: {
       const { graph, error } = parseFlow(source)
-      if (error) throw new Error(`trazo flow DSL line ${error.line}: ${error.message}`)
+      if (error)
+        throw new Error(`trazo flow DSL line ${error.line}: ${error.message}`)
+      // House rule (see CLAUDE.md "Diagram conventions"): connectors are never
+      // colored — an arrow/lane always renders in the neutral accent color, never
+      // a source node's role color. Neutralize trazo's per-edge `colored` flag
+      // here so a colored token (`===`/`==>`/`<==`/`<==>`) anywhere in the DSL
+      // can't reintroduce a colored lane. Only node fills carry role color.
+      for (const edge of graph.edges) edge.colored = false
       return layoutFlow(graph, themeFlowOptions(theme))
     }
   }
@@ -160,7 +181,12 @@ export function Diagram({
       )}
       {graph ? (
         <div className="relative flex justify-center px-6 py-12 [&_svg]:max-w-full">
-          <Graph graph={graph} title={title} className={className} theme={theme} />
+          <Graph
+            graph={graph}
+            title={title}
+            className={className}
+            theme={theme}
+          />
         </div>
       ) : (
         <div className="relative overflow-x-auto px-6 py-12">

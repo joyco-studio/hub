@@ -166,10 +166,10 @@ function animate(time: number) {
 JS drives `scrollTop` each frame, so the compositor and JS are always in agreement. There's no race. The DOM scrolls to exactly where JS told it to, and the canvas renders with the same value.
 
 <Diagram index={5} title="JS-driven scroll frame sequence">{`sequenceDiagram
-participant U[User Input]
-participant M[Main Thread (Lenis)]
-participant C[Compositor]
-participant S[Screen]
+participant U[User Input]:warning
+participant M[Main Thread (Lenis)]:primary
+participant C[Compositor]:success
+participant S[Screen]:info
 note over U: User scrolls
 U->>M: Scroll input
 note over M: rAF callback
@@ -239,9 +239,9 @@ function animate() {
 The canvas and DOM move together on the compositor, with no content drift. The only stale thing is the `transform` correction that repositions the canvas over the viewport. Here's what a single scroll looks like:
 
 <Diagram index={7} title="Absolute approach: edge drift sequence">{`sequenceDiagram
-participant C[Compositor]
-participant P[Page (canvas + DOM)]
-participant M[Main Thread]
+participant C[Compositor]:success
+participant P[Page (canvas + DOM)]:info
+participant M[Main Thread]:primary
 note over P: Initial state:<br/>scrollY = 500<br/>transform: translateY(500px)<br/>Canvas perfectly covers viewport
 note over C: User scrolls 40px
 C->>P: Compositor moves page to scrollY=540<br/>(canvas + DOM shift together, instant)
@@ -284,9 +284,9 @@ This is the main tradeoff of the absolute approach. The canvas lives on the **P*
 To keep a WebGL element fixed on screen, you don't need to translate anything. It would just sit at its viewport position. The problem is that the canvas is on the page side. When the compositor scrolls, it takes the entire canvas with it, including your "fixed" element. That compositor scroll instantly displaces it. JS hasn't caught up yet, so for that frame the element slides with the page when it should have stayed put. That's the jelly. The element gets dragged by the compositor scroll until the next rAF where JS can correct it back.
 
 <Diagram index={9} title="The fixed-element jelly sequence">{`sequenceDiagram
-participant C[Compositor]
-participant P[Page (canvas here)]
-participant M[Main Thread]
+participant C[Compositor]:success
+participant P[Page (canvas here)]:info
+participant M[Main Thread]:primary
 note over P: "Fixed" element sitting at<br/>its viewport position on the canvas
 note over C: User scrolls 40px
 C->>P: Compositor moves page to scrollY=540<br/>(entire canvas shifts, including the "fixed" element)

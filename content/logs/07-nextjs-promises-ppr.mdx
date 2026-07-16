@@ -378,8 +378,8 @@ Compare this to the traditional approach where nothing renders for 350ms.
 ### Without promise forwarding (traditional)
 
 <Diagram index={5} title="Traditional: slow TTFB, fast render">{`sequenceDiagram
-participant S[Server]
-participant C[Client]
+participant S[Server]:primary
+participant C[Client]:success
 note over C: Blank screen…
 S->>S: await getCart() (200ms)
 S->>S: await getFlags() (150ms)
@@ -392,8 +392,8 @@ note over S,C: Slow TTFB, fast render`}</Diagram>
 ### With promise forwarding + PPR
 
 <Diagram index={6} title="Promise forwarding + PPR: fast TTFB, progressive render">{`sequenceDiagram
-participant S[Server]
-participant C[Client]
+participant S[Server]:primary
+participant C[Client]:success
 S->>S: Start getCart()
 S->>S: Start getFlags()
 S->>C: Static shell + fallbacks (instant)

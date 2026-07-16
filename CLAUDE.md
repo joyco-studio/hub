@@ -20,3 +20,12 @@ The Components sidebar splits pages into sub-sections based on the `type` frontm
 - **Games** — `type: game`
 
 The type enum is defined in `source.config.ts`. Slug getters live in `lib/source.ts` and are passed through `app/(registry)/layout.tsx` → `RegistrySidebar` → `SidebarSection`.
+
+## Diagram conventions (`<Diagram>` / trazo)
+
+Log diagrams render through the `Diagram` component (`components/flow.tsx`) using the `@joycostudio/trazo` DSL. Two house rules:
+
+- **Arrows/connectors are never colored.** Only node fills carry semantic role color (`:primary`, `:success`, …); every connector renders in the neutral accent color. This is **enforced in code** — `Diagram` strips trazo's per-edge `colored` flag before layout — so a colored token (`===`, `==>`, `<==`, `<==>`) renders identically to its neutral form (`---`, `-->`, `<--`, `<-->`). Prefer the neutral tokens in new DSL for clarity, but either way the render stays neutral. (Git-graph branch lanes are exempt — those are colored by branch on purpose.)
+- **Sequence participants should carry roles.** Give each `participant` a `:role` (e.g. `participant S[Server]:primary`) so the actor boxes are colored, matching the flow diagrams. Keep the role for a given actor consistent across an article (e.g. Main Thread → `:primary`, Compositor → `:success`).
+
+When editing a diagram that also appears on the temporary `/diagram-comparison` review page (`app/diagram-comparison/page.tsx`), update the duplicated DSL in that page's `after` field too.
