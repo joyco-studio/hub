@@ -30,15 +30,7 @@ import { cn } from '@/lib/utils'
 const graphTheme: TrazoTheme = {
   ...joycoTheme,
   background: 'none',
-  tokens: {
-    ...joycoTheme.tokens,
-    bg: 'var(--card)',
-    // Inline `code` chips read as plain monospace text, not a boxed chip: no
-    // background fill, and the glyph color `inherit`s the parent node label's
-    // own foreground (each node's role foreground) instead of a fixed token.
-    code: 'transparent',
-    'code-foreground': 'inherit',
-  },
+  tokens: { ...joycoTheme.tokens, bg: 'var(--card)' },
 }
 
 // Git branches map onto lane-1, lane-2, … in commit order. This app's --chart-*
