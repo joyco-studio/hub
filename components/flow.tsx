@@ -40,6 +40,7 @@ const graphTheme: TrazoTheme = {
     bg: 'var(--card)',
     'neutral-foreground': 'var(--muted)',
     success: 'var(--color-mint-green)',
+    warning: 'var(--color-mustard-yellow)',
     code: 'oklch(1 0 0 / 0.16)',
     'code-foreground': 'inherit',
   },
