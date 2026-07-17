@@ -23,6 +23,9 @@ importers:
       '@joycostudio/marquee':
         specifier: ^0.0.12
         version: 0.0.12(react@19.2.0)
+      '@joycostudio/trazo':
+        specifier: ^0.10.0
+        version: 0.10.0(eslint@9.39.1(jiti@2.6.1))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@radix-ui/react-avatar':
         specifier: ^1.1.11
         version: 1.1.11(@types/react-dom@19.2.3(@types/react@19.2.5))(@types/react@19.2.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -915,6 +918,20 @@ packages:
     resolution: {integrity: sha512-zBZIlXr4lkwYIUvvvrSViVk/4ztmGr0XU7s4aJp8BZSEAiGdkOGScY3zqnvbCTEsLIwBzRWm8tOTwEPES0oRMQ==}
     peerDependencies:
       react: '>=16.8.0'
+
+  '@joycostudio/trazo@0.10.0':
+    resolution: {integrity: sha512-oEq614BnXAkOg/q6Kn/N0KQ8CSMXaF+B81RkQQjGHUnfJPwThKdxt+fvfU4ZCl/LOgALGqTN/d/y+85t6EJ3tA==}
+    peerDependencies:
+      eslint: '>=9'
+      react: '>=18'
+      react-dom: '>=18'
+    peerDependenciesMeta:
+      eslint:
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -6338,6 +6355,12 @@ snapshots:
   '@joycostudio/marquee@0.0.12(react@19.2.0)':
     dependencies:
       react: 19.2.0
+
+  '@joycostudio/trazo@0.10.0(eslint@9.39.1(jiti@2.6.1))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
+    optionalDependencies:
+      eslint: 9.39.1(jiti@2.6.1)
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:

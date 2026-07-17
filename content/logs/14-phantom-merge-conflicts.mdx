@@ -14,9 +14,14 @@ The long answer is a story. Let me introduce you to Elvira and Homero.
 
 Elvira has been working on the new checkout flow in `elvira/checkout`. Homero needs the checkout API for his receipt page, and he's not going to sit around waiting for Elvira's PR to land. So he branches off her branch:
 
-```bash
-main ← elvira/checkout ← homero/receipts
-```
+<Diagram index={1} title="Stacked branches">{`
+flow LR
+main["main"]:primary
+elvira["elvira/checkout"]:success
+homero["homero/receipts"]:info
+main <==|base of| elvira
+elvira <==|base of| homero
+`}</Diagram>
 
 A stacked branch. Totally normal, this is how parallel work on dependent features should happen.
 
@@ -34,13 +39,12 @@ And git explodes. Conflicts in `checkout.ts`. Conflicts in `payment-client.ts`. 
 
 The squash merge took all of Elvira's commits and produced **one brand-new commit** on `main` with the combined diff. Same changes, new hash, no ancestry link back to the originals, which still live inside Homero's branch, because that's where he branched from:
 
-```bash
+<Diagram index={2} ascii title="Squash merge: same work, a new hash">{`
 main:              A ── B ───────── S        (S = squash of elvira/checkout)
-                          \
+                            \\
 homero/receipts:           e1 ── e2 ── h1 ── h2
-                          └ Elvira's ┘└ Homero's ┘
-                             commits      commits
-```
+                           └ Elvira's ┘└ Homero's ┘
+`}</Diagram>
 
 To merge, git walks back to the **merge base**, the most recent common ancestor of both sides: `B`. The squash `S` is not an ancestor of Homero's branch, so from `B`'s point of view both sides changed the same files: `main` via `S`, `homero/receipts` via `e1` and `e2`. Git can't tell these are the same changes. It just sees two unrelated edits to the same lines and flags a conflict. The conflicts land in Elvira's files because that's where the duplicated work lives.
 
@@ -84,11 +88,11 @@ git rebase --onto <new-base> <old-base> [<branch>]
 
 Elvira's commits fall outside the `<old-base>..<branch>` range, so they're simply left behind. Only `h1` and `h2` get replayed, and since they never touched Elvira's files, the rebase completes with **zero conflicts**:
 
-```bash
+<Diagram index={3} ascii title="After rebase --onto: only your commits replayed">{`
 main:              A ── B ── S
-                                 \
-homero/receipts:                  h1' ── h2'
-```
+                            \\
+homero/receipts:           h1' ── h2'
+`}</Diagram>
 
 A few gotchas worth knowing:
 

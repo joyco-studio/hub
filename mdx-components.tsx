@@ -11,11 +11,19 @@ import { ImageCols } from '@/components/image-cols'
 import { PackageManagerCommand } from './components/package-manager-command'
 import { AgentsScriptCommand } from './components/agents-script-command'
 import { Mermaid } from './components/mermaid'
+import { Diagram } from './components/flow'
 
-export function getMDXComponents(components?: MDXComponents): MDXComponents {
+export function getMDXComponents(
+  components?: MDXComponents,
+  opts?: { logNumber?: string | null }
+): MDXComponents {
+  const articleNumber = opts?.logNumber ?? undefined
   return {
     ...defaultMdxComponents,
     Mermaid,
+    Diagram: (props: React.ComponentProps<typeof Diagram>) => (
+      <Diagram {...props} articleNumber={articleNumber} />
+    ),
     CodeTabs: CodeTabs,
     FileCodeblock: FileCodeblock,
     Video: ({

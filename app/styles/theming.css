@@ -25,11 +25,11 @@
   --preview-foreground: var(--card-foreground);
   --code-highlight: oklch(0.96 0 0);
   --code-number: oklch(0.56 0 0 / 0.5);
-  --chart-1: oklch(0.50 0.22 263);
+  --chart-1: oklch(0.5 0.22 263);
   --chart-2: oklch(0.62 0.18 243);
   --chart-3: oklch(0.42 0.16 283);
-  --chart-4: oklch(0.70 0.12 253);
-  --chart-5: oklch(0.55 0.10 273);
+  --chart-4: oklch(0.896 0.052 282.912);
+  --chart-5: oklch(0.55 0.1 273);
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -38,6 +38,22 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* trazo diagram label text — one AA-checked color per chart fill. Trazo resolves
+     both the lane slots (lane-2..6 → chart-1..5) and the chart-backed roles
+     (success → chart-2, info → chart-3, warning → chart-4) to these through its
+     token fallback, so every saturated node reads legibly. Contrast picked per fill
+     against oklch(0.145) vs white; see chart-N lightness above. */
+  --chart-1-foreground: oklch(1 0 0);
+  --chart-2-foreground: oklch(0.145 0 0);
+  --chart-3-foreground: oklch(1 0 0);
+  --chart-4-foreground: oklch(0.145 0 0);
+  --chart-5-foreground: oklch(1 0 0);
+  --trazo-muted: oklch(0.922 0 0 / 0.8);
+
+  /* error fills use --destructive, primary/lane-1 use --primary-foreground —
+     neither is a chart color, so pair them explicitly. */
+  --trazo-error-foreground: oklch(1 0 0);
 }
 
 .dark {
@@ -65,11 +81,19 @@
   --preview-foreground: var(--card-foreground);
   --code-highlight: oklch(0.27 0 0);
   --code-number: oklch(0.72 0 0 / 0.5);
-  --chart-1: oklch(0.58 0.20 263);
-  --chart-2: oklch(0.70 0.16 243);
-  --chart-3: oklch(0.50 0.14 283);
-  --chart-4: oklch(0.78 0.10 253);
+  --chart-1: oklch(0.58 0.2 263);
+  --chart-2: oklch(0.7 0.16 243);
+  --chart-3: oklch(0.5 0.14 283);
+  --chart-4: oklch(0.78 0.1 253);
   --chart-5: oklch(0.63 0.08 273);
+
+  --chart-1-foreground: oklch(0.145 0 0);
+  --chart-2-foreground: oklch(0.145 0 0);
+  --chart-3-foreground: oklch(1 0 0);
+  --chart-4-foreground: oklch(0.145 0 0);
+  --chart-5-foreground: oklch(0.145 0 0);
+  --trazo-muted: oklch(0.285 0 0 / 0.8);
+  --trazo-error-foreground: oklch(0.145 0 0);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
@@ -107,11 +131,19 @@
   --preview-foreground: var(--card-foreground);
   --code-highlight: oklch(0.935 0.025 250);
   --code-number: oklch(0.5 0.025 250 / 0.5);
-  --chart-1: oklch(0.50 0.22 263);
+  --chart-1: oklch(0.5 0.22 263);
   --chart-2: oklch(0.62 0.18 243);
   --chart-3: oklch(0.42 0.16 283);
-  --chart-4: oklch(0.70 0.12 253);
-  --chart-5: oklch(0.55 0.10 273);
+  --chart-4: oklch(0.7 0.12 253);
+  --chart-5: oklch(0.55 0.1 273);
+
+  --chart-1-foreground: oklch(1 0 0);
+  --chart-2-foreground: oklch(0.145 0 0);
+  --chart-3-foreground: oklch(1 0 0);
+  --chart-4-foreground: oklch(0.145 0 0);
+  --chart-5-foreground: oklch(1 0 0);
+  --trazo-muted: oklch(0.922 0 0 / 0.8);
+  --trazo-error-foreground: oklch(1 0 0);
   --sidebar: oklch(0.955 0.025 250);
   --sidebar-foreground: oklch(0.145 0.025 250);
   --sidebar-primary: oklch(0.65 0.2 45);
@@ -153,6 +185,15 @@
   --chart-3: oklch(0.6 0.1 130);
   --chart-4: oklch(0.55 0.18 150);
   --chart-5: oklch(0.75 0.22 140);
+  --trazo-muted: var(--border);
+
+  /* terminal fills are bright greens — dark text reads on every one. */
+  --chart-1-foreground: oklch(0.145 0 0);
+  --chart-2-foreground: oklch(0.145 0 0);
+  --chart-3-foreground: oklch(0.145 0 0);
+  --chart-4-foreground: oklch(0.145 0 0);
+  --chart-5-foreground: oklch(0.145 0 0);
+  --trazo-error-foreground: oklch(0.145 0 0);
   --sidebar: oklch(0.1 0.012 140);
   --sidebar-foreground: oklch(0.85 0.18 145);
   --sidebar-primary: oklch(0.7 0.2 145);

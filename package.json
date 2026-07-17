@@ -20,6 +20,7 @@
     "@diceui/mention": "^0.8.0",
     "@gsap/react": "^2.1.2",
     "@joycostudio/marquee": "^0.0.12",
+    "@joycostudio/trazo": "^0.10.0",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dialog": "^1.1.15",

@@ -23,7 +23,11 @@ export async function proxy(request: NextRequest) {
     return response
   }
 
-  if (pathname === '/toolbox/ui' && !request.cookies.has('joyco-team')) {
+  const JOYCO_TEAM_ONLY_PATHS = ['/toolbox/ui', '/diagram-comparison']
+  if (
+    JOYCO_TEAM_ONLY_PATHS.includes(pathname) &&
+    !request.cookies.has('joyco-team')
+  ) {
     return NextResponse.redirect(new URL('/', request.url))
   }
 

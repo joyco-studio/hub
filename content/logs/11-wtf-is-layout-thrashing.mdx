@@ -10,7 +10,19 @@ Layout thrashing is when JavaScript repeatedly writes to the DOM and then reads 
 
 The browser pipeline for a single frame looks like this (and YOU should know this as the palm of your hand):
 
-<Figure src="https://r2.joyco.studio/nbOp4PikfFPi.png" alt="Browser rendering pipeline" width={1903} height={520} />
+<Diagram index={1} title="Browser rendering pipeline">{`
+flow LR
+js["JS"]:warning
+style["Style"]:info
+layout["Layout"]:primary
+paint["Paint"]:success
+composite["Composite"]:error
+js --- style
+style --- layout
+layout --- paint
+paint --- composite
+note layout below "this one makes fps cry 😢"
+`}</Diagram>
 
 1. **JavaScript**: your code runs: event handlers, `requestAnimationFrame` callbacks, GSAP tweens, React commits. Any DOM mutations happen here.
 2. **Style**: the browser matches CSS selectors to elements and resolves every property into a final `computed value`. This one could be long if impacts too many elements.
