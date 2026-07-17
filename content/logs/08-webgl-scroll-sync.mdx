@@ -39,7 +39,7 @@ The compositor updates what the user sees **immediately**. The main thread gets 
 When JS modifies a transform via `requestAnimationFrame`, the change has to travel through Chromium's full pipeline before it reaches the screen:
 
 <Diagram index={2} title="The full Chromium render pipeline">{`flow TD
-subgraph main ["Main Thread"]
+subgraph main ["Main Thread"]:info
 S["Style"]:primary
 L["Layout"]:primary
 PP["Pre-paint"]:primary
@@ -48,10 +48,10 @@ S --- L
 L --- PP
 PP --- P
 end
-subgraph commit ["Commit"]
+subgraph commit ["Commit"]:primary
 CO["Copy layer tree +<br/>property trees to impl thread<br/>(main thread blocked)"]:warning
 end
-subgraph impl ["Compositor Thread (impl)"]
+subgraph impl ["Compositor Thread (impl)"]:warning
 LY["Layerize"]:success
 R["Raster<br/>(worker threads → GPU tiles)"]:success
 AC["Activate"]:success

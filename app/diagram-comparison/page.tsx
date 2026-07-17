@@ -272,14 +272,14 @@ note over S,C: Fast TTFB, progressive render`,
     style R8 fill:#e9d5ff,stroke:#7c3aed,color:#000`,
     },
     after: flow`flow TD
-subgraph build ["BUILD TIME"]
+subgraph build ["BUILD TIME"]:info
 B1["Next.js prerenders the route"]
 B2["Static Shell<br/>html, body, nav, main, footer<br/>Suspense fallbacks<br/>All non-dynamic content"]
 B3[("CDN / Edge Cache")]:primary
 B1 --- B2
 B2 --- B3
 end
-subgraph request ["REQUEST TIME"]
+subgraph request ["REQUEST TIME"]:success
 R1["CDN serves static shell"]
 R2["Browser paints immediately"]:success
 R3["Server executes layout"]
@@ -358,7 +358,7 @@ B --- D`,
     style impl fill:#f0fdf4,stroke:#16a34a,color:#000`,
     },
     after: flow`flow TD
-subgraph main ["Main Thread"]
+subgraph main ["Main Thread"]:info
 S["Style"]:primary
 L["Layout"]:primary
 PP["Pre-paint"]:primary
@@ -367,10 +367,10 @@ S --- L
 L --- PP
 PP --- P
 end
-subgraph commit ["Commit"]
+subgraph commit ["Commit"]:primary
 CO["Copy layer tree +<br/>property trees to impl thread<br/>(main thread blocked)"]:warning
 end
-subgraph impl ["Compositor Thread (impl)"]
+subgraph impl ["Compositor Thread (impl)"]:warning
 LY["Layerize"]:success
 R["Raster<br/>(worker threads → GPU tiles)"]:success
 AC["Activate"]:success

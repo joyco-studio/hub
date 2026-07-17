@@ -41,7 +41,7 @@ const graphTheme: TrazoTheme = {
     success: 'var(--color-mint-green)',
     code: 'oklch(1 0 0 / 0.16)',
     'code-foreground': 'inherit',
-    
+    muted: 'lab(17.06 0 0 / 0.8)',
   },
 }
 
