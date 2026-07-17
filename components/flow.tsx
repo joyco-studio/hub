@@ -34,6 +34,7 @@ import { cn } from '@/lib/utils'
 const graphTheme: TrazoTheme = {
   ...joycoTheme,
   background: 'none',
+  textCase: 'none',
   tokens: {
     ...joycoTheme.tokens,
     bg: 'var(--card)',
