@@ -49,6 +49,7 @@
   --chart-3-foreground: oklch(1 0 0);
   --chart-4-foreground: oklch(0.145 0 0);
   --chart-5-foreground: oklch(1 0 0);
+  --trazo-muted: oklch(0.922 0 0 / 0.8);
 
   /* error fills use --destructive, primary/lane-1 use --primary-foreground —
      neither is a chart color, so pair them explicitly. */
@@ -91,6 +92,7 @@
   --chart-3-foreground: oklch(1 0 0);
   --chart-4-foreground: oklch(0.145 0 0);
   --chart-5-foreground: oklch(0.145 0 0);
+  --trazo-muted: oklch(0.285 0 0 / 0.8);
   --trazo-error-foreground: oklch(0.145 0 0);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
