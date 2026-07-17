@@ -13,6 +13,10 @@ import {
   joycoTheme,
   type PositionedGraph,
   type TrazoTheme,
+  type FlowGraph,
+  type SequenceGraph,
+  type BlockGraph,
+  type CommitGraph,
 } from '@joycostudio/trazo'
 import { Graph } from '@joycostudio/trazo/react'
 import { Badge } from '@/components/ui/badge'
@@ -30,7 +34,15 @@ import { cn } from '@/lib/utils'
 const graphTheme: TrazoTheme = {
   ...joycoTheme,
   background: 'none',
-  tokens: { ...joycoTheme.tokens, bg: 'var(--card)' },
+  tokens: {
+    ...joycoTheme.tokens,
+    bg: 'var(--card)',
+    'neutral-foreground': 'var(--muted)',
+    success: 'var(--color-mint-green)',
+    code: 'oklch(1 0 0 / 0.16)',
+    'code-foreground': 'inherit',
+    muted: 'lab(17.06 0 0 / 0.8)',
+  },
 }
 
 // Git branches map onto lane-1, lane-2, … in commit order. This app's --chart-*
@@ -64,34 +76,81 @@ function detectLang(source: string): DiagramLang {
   return 'flow'
 }
 
-function layoutFor(lang: DiagramLang, source: string, theme: TrazoTheme): PositionedGraph {
+// A trazo graph a `<Diagram>` can render — either authored as a string DSL and
+// parsed here, or handed in already-parsed from a `flow`/`seq`/`git`/`block`
+// tagged-template call (which validates the DSL at build time).
+export type DiagramGraph = FlowGraph | SequenceGraph | BlockGraph | CommitGraph
+
+// The commit graph is the only trazo graph without a `kind` discriminator — it
+// carries `commits`/`refs` instead — so it's identified by the absence of `kind`.
+function isCommitGraph(graph: DiagramGraph): graph is CommitGraph {
+  return !('kind' in graph)
+}
+
+function themeFor(graph: DiagramGraph): TrazoTheme {
+  return isCommitGraph(graph) ? gitTheme : graphTheme
+}
+
+// Lay out an already-parsed graph. Both entry points (string DSL and the
+// tagged-template graphs) funnel through here so the git/flow rules stay in one
+// place.
+function layoutParsed(graph: DiagramGraph, theme: TrazoTheme): PositionedGraph {
+  if (isCommitGraph(graph)) {
+    // Horizontal orientation reads like a real `git log --graph` timeline
+    // (commits left→right, branches as rows) instead of trazo's default
+    // vertical lane, which crams every commit label into one narrow column.
+    // labelSide 'left' places commit labels ABOVE the lane in a horizontal chart.
+    return layoutGit(
+      graph,
+      themeGitOptions(theme, { orientation: 'horizontal', labelSide: 'left' })
+    )
+  }
+  switch (graph.kind) {
+    case 'sequence':
+      return layoutSequence(graph)
+    case 'block':
+      return layoutBlock(graph)
+    default: {
+      // House rule (see CLAUDE.md "Diagram conventions"): connectors are never
+      // colored — an arrow/lane always renders in the neutral accent color, never
+      // a source node's role color. Neutralize trazo's per-edge `colored` flag
+      // here so a colored token (`===`/`==>`/`<==`/`<==>`) anywhere in the DSL
+      // can't reintroduce a colored lane. Only node fills carry role color.
+      for (const edge of graph.edges) edge.colored = false
+      return layoutFlow(graph, themeFlowOptions(theme))
+    }
+  }
+}
+
+// Parse a string DSL to a graph, dispatching on the detected language. Parse
+// errors are surfaced with the offending line.
+function parseSource(lang: DiagramLang, source: string): DiagramGraph {
   switch (lang) {
     case 'sequence': {
       const { graph, error } = parseSequence(source)
-      if (error) throw new Error(`trazo sequence DSL line ${error.line}: ${error.message}`)
-      return layoutSequence(graph)
+      if (error)
+        throw new Error(
+          `trazo sequence DSL line ${error.line}: ${error.message}`
+        )
+      return graph
     }
     case 'block': {
       const { graph, error } = parseBlock(source)
-      if (error) throw new Error(`trazo block DSL line ${error.line}: ${error.message}`)
-      return layoutBlock(graph)
+      if (error)
+        throw new Error(`trazo block DSL line ${error.line}: ${error.message}`)
+      return graph
     }
     case 'git': {
       const { graph, error } = parseGit(source)
-      if (error) throw new Error(`trazo git DSL line ${error.line}: ${error.message}`)
-      // Horizontal orientation reads like a real `git log --graph` timeline
-      // (commits left→right, branches as rows) instead of trazo's default
-      // vertical lane, which crams every commit label into one narrow column.
-      // labelSide 'left' places commit labels ABOVE the lane in a horizontal chart.
-      return layoutGit(
-        graph,
-        themeGitOptions(theme, { orientation: 'horizontal', labelSide: 'left' })
-      )
+      if (error)
+        throw new Error(`trazo git DSL line ${error.line}: ${error.message}`)
+      return graph
     }
     default: {
       const { graph, error } = parseFlow(source)
-      if (error) throw new Error(`trazo flow DSL line ${error.line}: ${error.message}`)
-      return layoutFlow(graph, themeFlowOptions(theme))
+      if (error)
+        throw new Error(`trazo flow DSL line ${error.line}: ${error.message}`)
+      return graph
     }
   }
 }
@@ -104,7 +163,10 @@ export function Diagram({
   className,
   ascii = false,
 }: {
-  children: string
+  // A string DSL (parsed here) or a graph from a `flow`/`seq`/`git`/`block`
+  // tagged-template call (parsed at the call site, so the DSL is validated at
+  // build time). `ascii` mode requires a string.
+  children: string | DiagramGraph
   title?: string
   index?: number
   articleNumber?: string
@@ -114,10 +176,25 @@ export function Diagram({
   // one — e.g. git commit graphs whose commits the prose refers to by letter.
   ascii?: boolean
 }) {
-  const source = String(children).trim()
-  const lang = ascii ? undefined : detectLang(source)
-  const theme = lang === 'git' ? gitTheme : graphTheme
-  const graph = lang ? layoutFor(lang, source, theme) : null
+  // ASCII mode always takes a raw string and renders it verbatim.
+  const asciiSource =
+    ascii && typeof children === 'string' ? children.trim() : null
+
+  // Resolve the theme (needed for both layout and the <Graph> paint pass) and
+  // lay out, from whichever form `children` arrived in.
+  let theme = graphTheme
+  let graph: PositionedGraph | null = null
+  if (!ascii) {
+    if (typeof children === 'string') {
+      const source = children.trim()
+      const parsed = parseSource(detectLang(source), source)
+      theme = themeFor(parsed)
+      graph = layoutParsed(parsed, theme)
+    } else {
+      theme = themeFor(children)
+      graph = layoutParsed(children, theme)
+    }
+  }
 
   // The corner tag reads `N{article}-{illustration}` (e.g. N07-01): the log's
   // number, injected per-page, paired with this diagram's order in the article.
@@ -160,7 +237,12 @@ export function Diagram({
       )}
       {graph ? (
         <div className="relative flex justify-center px-6 py-12 [&_svg]:max-w-full">
-          <Graph graph={graph} title={title} className={className} theme={theme} />
+          <Graph
+            graph={graph}
+            title={title}
+            className={className}
+            theme={theme}
+          />
         </div>
       ) : (
         <div className="relative overflow-x-auto px-6 py-12">
@@ -170,7 +252,7 @@ export function Diagram({
               className
             )}
           >
-            {source}
+            {asciiSource}
           </pre>
         </div>
       )}

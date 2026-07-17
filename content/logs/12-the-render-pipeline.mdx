@@ -21,7 +21,7 @@ js --- style
 style --- layout
 layout --- paint
 end
-subgraph compositor ["Compositor Thread"]
+subgraph compositor ["Compositor Thread"]:error
 composite["Composite"]:error
 end
 paint === composite
