@@ -48,10 +48,10 @@ S --- L
 L --- PP
 PP --- P
 end
-subgraph commit ["Commit"]:primary
+subgraph commit ["Commit"]:warning
 CO["Copy layer tree +<br/>property trees to impl thread<br/>(main thread blocked)"]:warning
 end
-subgraph impl ["Compositor Thread (impl)"]:warning
+subgraph impl ["Compositor Thread (impl)"]:success
 LY["Layerize"]:success
 R["Raster<br/>(worker threads → GPU tiles)"]:success
 AC["Activate"]:success
