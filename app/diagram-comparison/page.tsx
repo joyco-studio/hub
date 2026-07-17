@@ -745,7 +745,7 @@ homero/receipts:           e1 ── e2 ── h1 ── h2
                              commits      commits`,
     },
     after: `main:              A ── B ───────── S        (S = squash of elvira/checkout)
-                            \\
+                          \\
 homero/receipts:           e1 ── e2 ── h1 ── h2
                            └ Elvira's ┘└ Homero's ┘`,
   },
@@ -761,7 +761,7 @@ homero/receipts:           e1 ── e2 ── h1 ── h2
 homero/receipts:                  h1' ── h2'`,
     },
     after: `main:              A ── B ── S
-                            \\
+                          \\
 homero/receipts:           h1' ── h2'`,
   },
 ]
