@@ -1,0 +1,141 @@
+---
+title: 21 - The AI Gets the Words; the Engine Gets the Numbers
+description: "Let deterministic code own the facts and the LLM own the language: calculate first, pass the model a validated provenance-aware fact packet, constrain its output to prose, enforce semantic invariants in code, and keep a local fallback that preserves the product when generation disappears."
+author: 'justkahdri'
+---
+
+Say you have a tested engine that computes a hard number: a risk score, a projected cost, a failure probability. You also want the product to explain *why* the number is what it is, in plain language. That sounds like an ideal LLM feature: hand the model the inputs and ask it to analyze the situation.
+
+It is also how you quietly replace a tested product with plausible prose.
+
+The boundary worth settling on is simple:
+
+> The engine owns facts. The model owns language.
+
+## Do not ask the model a question your code can answer
+
+If an LLM receives the raw inputs and returns the verdict, it becomes an uncalibrated second calculator:
+
+```txt
+inputs → LLM → "High risk, roughly 20%"
+```
+
+The percentage may be reasonable. It may even match the engine today. But it has no stable relationship to the tests that validate the real number, and a provider or model upgrade can change the answer without touching your code. Prompting it to "be accurate" does not connect it to those contracts.
+
+Instead, calculate first and give the model a closed set of facts to explain:
+
+```txt
+user input
+  → deterministic engine
+  → typed analysis facts
+      ├─→ UI renders numbers directly
+      ├─→ local explanation fallback
+      └─→ LLM writes constrained prose
+```
+
+The model is downstream of truth. It never sits on the path that creates truth.
+
+## Build a typed fact packet
+
+Do not dump internal state into the prompt and hope the model finds the important parts. Build a deliberate transfer object containing only established facts and the uncertainty you have chosen to expose:
+
+```ts
+const InsightInput = z.object({
+  tier: z.enum(['low', 'elevated', 'high', 'critical']),
+  score: z.number().finite(),
+  scoreAtLowInput: z.number().finite(),
+  scoreAtHighInput: z.number().finite(),
+  topRiskFactors: z.array(RiskFactor),
+  verifiedFixes: z.array(VerifiedFix),
+  usesApproximateData: z.boolean(),
+})
+```
+
+This packet is not a convenience DTO. It is the authority boundary:
+
+- Every number came from your code.
+- Every field has explicit semantics.
+- Unknown or non-finite values cannot slip through as `NaN` and become prose.
+- Approximate inputs carry provenance, so the explanation can name uncertainty honestly.
+- Facts the model does not need never enter its context.
+
+Validate the packet at the API boundary even if the client built it. Server-side validation stops partial, outdated, or hand-written requests from turning the model into a more permissive alternate endpoint.
+
+## Shape the output around language, not duplicated facts
+
+The output schema should contain only the things language models are useful for:
+
+```ts
+const Insight = z.object({
+  verdict: z.string(),
+  drivers: z.array(CausalDriver).min(2).max(4),
+  suggestions: z.array(Suggestion).min(2).max(4),
+  flavor: z.string(),
+})
+```
+
+Notice what is absent: no computed tier, no replacement score, no new calculated fix. The UI already has those values and renders them from the engine. Asking the model to echo them creates two sources of truth and forces the UI to decide which one wins when they disagree.
+
+This complements [Understanding the Agentic Chat Model](/logs/18-understanding-the-agentic-chat-model): structured message parts answer who owns live conversation state; this boundary answers who owns the claims inside the conversation.
+
+## Prompts state the contract; architecture enforces it
+
+The prompt should still say the rule plainly:
+
+```txt
+The engine has already decided the tier and verified the fixes.
+Explain those facts; never replace them with your own math.
+Use only numbers present in DATA. Never invent a value or predicted effect.
+```
+
+That improves output quality, but the prompt is not the boundary. The boundary is structural:
+
+1. The model never receives authority to write calculated state.
+2. Its schema has no field for replacement calculations.
+3. Verified numbers render from engine output, not model output.
+4. The application can operate without a model response.
+
+If correctness depends only on the model obeying a sentence in a prompt, correctness is probabilistic.
+
+## Schema validation is necessary and insufficient
+
+A response can be syntactically perfect and still violate policy: it can return every required field while suggesting something the product must never do. The schema cannot tell whether that crosses a domain boundary. Add semantic guards for invariants important enough to reject the response, and deterministic post-processing for state that is non-negotiable:
+
+```ts
+const parsed = Insight.safeParse(modelOutput)
+if (!parsed.success) return fallback
+if (violatesDomainInvariant(parsed.data)) return fallback
+```
+
+Use the schema for shape, semantic guards for meaning, and post-processing for the parts that must be exact regardless of what the model returned.
+
+## The model must be additive
+
+An API key can be missing. A provider can time out. Generation can fail or return a valid shape that breaks an invariant. None of that should remove the engine's answer from the page. Build a local explanation from the same fact packet:
+
+```ts
+const fallback = buildFallbackInsight(input)
+const insight = await requestModel(input).catch(() => fallback)
+```
+
+The fallback need not imitate the model. It preserves the contract: state the computed tier, name the deterministic drivers, offer conservative suggestions. The LLM adds specificity and better writing when available. That gives a clean degradation ladder:
+
+```txt
+engine facts + model prose
+engine facts + local prose
+engine facts only
+```
+
+There is no rung where the product has prose but loses its facts. The same principle applies on retry: if the user regenerates and the new request fails, keep the prior valid response and surface the failure separately. "Try again" should never destroy the best result the system already has. Track provenance (`model`, `fallback-no-key`, `fallback-error`) to control the label and retry behavior without touching the facts.
+
+## Be explicit about what was not measured
+
+The model is good at connecting supplied facts to real-world advice, but that fluency blurs the line between measured and merely plausible. If the engine does not model some factor, forbid language that presents its effect as calculated. The model may say "reducing load could ease this." It may not say "reducing load lowers risk to 9%" unless 9% exists in the fact packet. This is not a disclaimer pasted below the output; it is the epistemic contract: suggestions can reach beyond the model, measurements cannot.
+
+## When this split is useful
+
+Reach for this whenever deterministic or externally verified logic already owns the answer: finance calculators, analytics, diagnostics, eligibility rules, scheduling, security findings, scientific models. Let the LLM summarize, prioritize, translate, and explain; do not let it quietly recalculate. If the task has no deterministic answer (brainstorming a name, drafting copy, exploring a strategy), the model can own more of the result. The boundary follows the product's source of truth, not a blanket rule that AI must always be decorative.
+
+## The rule
+
+> Calculate facts before generation, pass the model a validated and provenance-aware fact packet, constrain its output to language-shaped work, enforce semantic invariants in code, and keep a local path that preserves the product when generation disappears.
