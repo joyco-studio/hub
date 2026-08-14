@@ -81,8 +81,8 @@ So this request was denied:
 fetch('blob:https://example.com/63f...')
 ```
 
-The browser console contained the useful evidence—a CSP violation followed by Three.js reporting
-that it could not load a `blob:` texture—but the visual result looked enough like a material problem
+The browser console contained the useful evidence (a CSP violation followed by Three.js reporting
+that it could not load a `blob:` texture), but the visual result looked enough like a material problem
 to send the investigation toward shaders and lighting first.
 
 The minimal policy change was to allow the scheme in the directive used by that path:
