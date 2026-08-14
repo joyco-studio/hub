@@ -44,3 +44,9 @@ next-env.d.ts
 .source
 .env*.local
 .worktrees/
+
+# drafts (local publication drafts, not wired into the build)
+drafts/
+
+# macOS
+.DS_Store

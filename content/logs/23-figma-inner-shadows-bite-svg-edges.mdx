@@ -1,0 +1,127 @@
+---
+title: 23 - Figma Inner Shadows Bite Your SVG Edges
+description: Why a Figma Inner Shadow exported to SVG comes out with aliased "bitten" diagonal edges, why no amount of blur or resolution fixes it, and how to rebuild the emboss as real masked geometry.
+author: 'justkahdri'
+---
+
+You export an icon from Figma, drop the SVG into the app, and the diagonal edges look chewed up: stair-stepped, "bitten", like antialiasing quit halfway through. The straight edges are perfect. It looks flawless back in Figma. And no CSS property you reach for (`shape-rendering`, `image-rendering`, a bump in DPR) touches it.
+
+The short answer: **the icon uses Figma's _Inner Shadow_ effect, and Figma's SVG exporter renders that effect's silhouette as a 1-bit mask with no antialiasing.** A 1-bit mask is fine on axis-aligned edges and falls apart on everything diagonal or curved. The fix isn't a setting, it's rebuilding the shadow as real geometry.
+
+## The symptom
+
+Two shapes gave it away in the arcade leaderboard: the 3D podium stands and the Escape from Hell mute glyph. Both have a subtle emboss, and both had one edge that looked crisp and another that looked serrated. Below, the podium's dark side face, zoomed onto its inner diagonal. Left is the Figma export; right is the fix.
+
+<ImageCols>
+  <Image
+    src="/static/logs/figma-inner-shadows/podium-before.png"
+    alt="Podium side-face inner edge exported from Figma: the diagonal staircases"
+    width={1200}
+    height={2043}
+    unoptimized
+  />
+  <Image
+    src="/static/logs/figma-inner-shadows/podium-after.png"
+    alt="The same edge rebuilt as real geometry: a clean, antialiased diagonal"
+    width={2000}
+    height={3404}
+    unoptimized
+  />
+</ImageCols>
+
+_The right side is a true vector render; the left is rendered at real on-screen size, which matters, see below._
+
+## It's not resolution, and it's not blur
+
+Two things you'll try first, both dead ends.
+
+**Resolution.** Inline the SVG instead of using it as a `background-image`, scale the geometry up 10×, crank the DPR. Nothing. The bite doesn't come from a low-res raster buffer, so throwing pixels at it does nothing at the size the icon actually renders.
+
+**Blur.** If the Inner Shadow has a Blur of 0, you'll be tempted to nudge it up. But Blur only softens the shadow's _inner_ edge (the offset side). The _outer_ edge, where the shadow clips to the shape's silhouette, stays hard no matter what. So a diagonal silhouette stays bitten at every blur value, and now your emboss is muddy too.
+
+## Why it happens: the ×127 hardAlpha
+
+Open the exported SVG and you'll find this inside the `<filter>`:
+
+```xml
+<feColorMatrix in="SourceAlpha"
+  values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 127 0"
+  result="hardAlpha" />
+```
+
+That `127` in the alpha row multiplies the shape's alpha channel by 127 and clamps. Any pixel with even slight coverage is slammed to fully opaque; only the truly-zero pixels stay out. The result is a **1-bit mask**: every pixel is 100% in or 100% out, with no partial-coverage values in between. Figma uses it to keep the shadow's clip crisp.
+
+A 1-bit mask has one property that decides everything here:
+
+- On a **horizontal or vertical** edge, the boundary falls cleanly between rows or columns of pixels. No partial coverage was needed anyway, so it looks perfect.
+- On a **diagonal or curved** edge, the boundary _needs_ partial-coverage pixels to look smooth. The 1-bit mask can't store them, so it snaps each one to all-or-nothing. That's the staircase.
+
+Figma's canvas hides this because its live renderer antialiases properly; only the **SVG export** bakes in the hardAlpha trick. That's why the file looks great in Figma and bitten in the browser.
+
+And it's why "just enlarge the SVG" is a trap. The bite is a small-size phenomenon: at high enough resolution the mask's steps shrink below one pixel and even the export looks smooth. Render it at button size, where it actually lives, and the steps are back. In the podium comparison above, the "after" is a crisp vector render at any scale; the "before" is drawn at real size, because that's the only honest place to see the bug.
+
+## The tell: real geometry never bites
+
+Here's the observation that cracked it. In the very same podium SVG, the **light top face** is a plain `<path fill="#F1FFF4" />` and it's smooth on every diagonal. The **dark side face** was an Inner Shadow, and it bit on the same angles. Same shape, same slopes, sitting side by side. The only difference was **real vector geometry vs. a Figma effect**.
+
+A normal filled `<path>` gets the browser's native antialiasing, always. Nothing routed through the hardAlpha filter does. So the fix writes itself: stop shipping the effect, draw the shadow as a real shape.
+
+## The fix: rebuild the emboss as masked geometry
+
+Instead of the Inner Shadow effect, each rim becomes a normal fill **masked to `shape − shape·offset`**: the shape in white, minus a copy of the shape offset by the shadow's distance in black. What survives the mask is exactly the rim band, and because both mask paths are ordinary vector fills, the band is antialiased on every angle.
+
+```jsx
+<g style={{ isolation: 'isolate' }}>
+  <path d={D} fill="#000" fillOpacity=".36" />
+  {/* dark rim on top, light rim on the bottom, both blended like the original */}
+  <path d={D} fill="#000" fillOpacity=".48" mask="url(#rim-dark)"  style={{ mixBlendMode: 'overlay' }} />
+  <path d={D} fill="#fff"                    mask="url(#rim-light)" style={{ mixBlendMode: 'overlay' }} />
+</g>
+
+<mask id="rim-dark" maskUnits="userSpaceOnUse" /* … */>
+  <path d={D} fill="#fff" />
+  <path d={D} fill="#000" transform="translate(0 .6)" />
+</mask>
+```
+
+The `translate` is the Inner Shadow's X/Y position; the fill color and opacity are the shadow's color. If the original used a blend mode (Figma's emboss usually rides `overlay`), wrap the base and rims in an isolated group so they blend against the glyph, not whatever's behind it. No `hardAlpha`, no 1-bit mask, no bite.
+
+Same edit on the mute glyph, this time the speaker's slanted top rim:
+
+<ImageCols>
+  <Image
+    src="/static/logs/figma-inner-shadows/mute-before.png"
+    alt="Mute glyph rim exported from Figma: the diagonal bites"
+    width={1400}
+    height={934}
+    unoptimized
+  />
+  <Image
+    src="/static/logs/figma-inner-shadows/mute-after.png"
+    alt="Mute glyph rim rebuilt as real geometry: a clean diagonal"
+    width={2400}
+    height={1601}
+    unoptimized
+  />
+</ImageCols>
+
+_Shown on a neutral plate so the `overlay` emboss reads; it's the diagonal rim, not the plate, that matters._
+
+## When to just ship a PNG
+
+The geometry rebuild is the right call when the emboss is **chunky**, like the podium's side faces. When it's a **hair-thin rim shown small**, like the mute icon at button size, the band is sub-pixel by nature: it antialiases now, but you're polishing something almost nobody can see. If you want it pixel-identical to the Figma render, export a **PNG at ≥3×** the on-screen size. Figma's rasterizer antialiases everything, so a hi-res PNG is the deterministic match, and it sits fine next to other PNG art.
+
+## Fixing it at the Figma source
+
+There's **no export toggle** that removes the hardAlpha; it's generated for the _Inner Shadow_ effect, full stop. To keep an asset clean and vector:
+
+- Rebuild the emboss with **real offset shapes** (duplicate, offset, clip to the silhouette) instead of the effect, or
+- Export a hi-res **PNG**.
+- Bumping Blur is not a fix; it only touches the inner edge.
+
+If you hand an icon off and it has an Inner Shadow on it, assume the SVG will bite on any diagonal and treat it as one of the two above before it ships.
+
+## Links
+
+- [MDN: `feColorMatrix`](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/feColorMatrix) — the alpha-row math behind the ×127 trick
+- Reference implementations in the Jam repo: `games/escape-from-hell/mute-icons.tsx` and the leaderboard `podium-stands.tsx`, with the full write-up in `docs/figma-svg-inner-shadows.md`
