@@ -10,7 +10,7 @@ The short answer: **the icon uses Figma's _Inner Shadow_ effect, and Figma's SVG
 
 ## The symptom
 
-Two shapes gave it away in the arcade leaderboard: the 3D podium stands and the Escape from Hell mute glyph. Both have a subtle emboss, and both had one edge that looked crisp and another that looked serrated. Below, the podium's dark side face, zoomed onto its inner diagonal. Left is the Figma export; right is the fix.
+Two shapes gave it away: a set of 3D podium stands and a speaker/mute glyph. Both have a subtle emboss, and both had one edge that looked crisp and another that looked serrated. Below, the podium's dark side face, zoomed onto its inner diagonal. Left is the Figma export; right is the fix.
 
 <ImageCols>
   <Image
@@ -124,4 +124,3 @@ If you hand an icon off and it has an Inner Shadow on it, assume the SVG will bi
 ## Links
 
 - [MDN: `feColorMatrix`](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/feColorMatrix): the alpha-row math behind the ×127 trick
-- Reference implementations in the Jam repo: `games/escape-from-hell/mute-icons.tsx` and the leaderboard `podium-stands.tsx`, with the full write-up in `docs/figma-svg-inner-shadows.md`
