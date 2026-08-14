@@ -1,0 +1,90 @@
+---
+title: 20 - The GLB Loaded. Its Textures Didn't.
+description: "When a GLB renders correctly in an independent inspector but wrong in the app, verify its subresource requests before touching the material: embedded textures can become temporary blob: URLs, and if the loader fetches them, CSP must allow that scheme in connect-src, not only img-src."
+author: 'justkahdri'
+---
+
+A 3D model can look correct everywhere except in the app that ships it.
+
+The same `.glb` renders right in a standalone inspector: meshes, materials, and embedded texture maps all present. In the app, the material looks broken. The familiar suspects line up: color space, environment lighting, post-processing, a material override somewhere after `GLTFLoader` returns.
+
+None of them is the problem. The browser downloaded the GLB, but Content Security Policy blocked Three.js from turning the images inside it into textures. The detail that hides this: allowing `blob:` in `img-src` is not enough. On the code path Three.js selects, those images are loaded with `fetch()`, so the governing directive is `connect-src`.
+
+## A GLB is a container, not one indivisible resource
+
+A binary glTF file packages several kinds of data into one response: scene and node definitions, mesh buffers, material parameters, animations, and the image bytes used by textures. A successful request for `model.glb` only proves the outer container arrived. It does not prove every resource inside it completed the browser APIs needed to become a renderable texture.
+
+For an embedded image, Three.js' [`GLTFLoader`](https://github.com/mrdoob/three.js/blob/r183/examples/jsm/loaders/GLTFLoader.js) roughly follows this path:
+
+```txt
+GLB response
+  -> image bufferView
+  -> Blob
+  -> temporary blob: URL
+  -> ImageBitmapLoader
+  -> fetch(blob:...)
+  -> createImageBitmap(...)
+  -> Three.js texture
+  -> GPU upload
+```
+
+Two steps surprise. First, the temporary URL: when an image lives in a `bufferView`, `GLTFLoader` wraps its bytes in a `Blob` and calls `URL.createObjectURL()`, producing a `blob:https://…` URL that exists only long enough to decode. Second, the loading API: where `createImageBitmap` is available, `GLTFLoader` prefers [`ImageBitmapLoader`](https://github.com/mrdoob/three.js/blob/r183/src/loaders/ImageBitmapLoader.js), which calls `fetch(url)`, reads the response as a blob, and passes it to `createImageBitmap()`. That implementation detail decides which CSP directive applies.
+
+## `img-src` does not govern every image-shaped thing
+
+A policy that looks correct at a glance:
+
+```txt
+default-src 'self';
+img-src 'self' data: blob: https:;
+connect-src 'self' https: wss:;
+```
+
+The resource is an image and `img-src` allows `blob:`. But CSP does not classify a request by the kind of data it eventually becomes; the loading mechanism and request destination matter. An HTML image load is governed by `img-src`. A script-level `fetch()` is governed by `connect-src`. The [CSP specification](https://www.w3.org/TR/CSP3/#directive-connect-src) explicitly places `fetch()` under `connect-src`. So `fetch('blob:…')` is denied, and the minimal fix allows the scheme on the directive that path uses:
+
+```diff
+- connect-src 'self' https: wss:;
++ connect-src 'self' blob: https: wss:;
+```
+
+Keep `blob:` in `img-src` too for cross-browser safety: when `ImageBitmapLoader` is unavailable, Three.js falls back to a traditional image loader governed by `img-src` instead. The same asset can exercise different CSP directives in different browsers. This is not license to paste a permissive CSP everywhere; add only the schemes the app intentionally uses, to the directives that need them, and keep the rest narrow.
+
+## The inspector cuts the system in half
+
+The decisive check is opening the exact production asset outside the application. A [GLTF inspector](https://hub.joyco.studio/toolbox/gltf) showing the same remote GLB with its expected materials does not prove the app renderer is correct, but it proves something more useful: re-exporting the model is no longer the next move. The investigation boundary shifts from asset creation to application loading.
+
+Use that split deliberately:
+
+1. Open the exact production GLB in an independent inspector, not a local file with the same name.
+2. If it is wrong there too, inspect the export, material definitions, texture packing, and glTF extensions.
+3. If it is correct there, inspect the console, network requests, CSP, loader configuration, renderer, and any post-load material mutation.
+
+## Read the console before rewriting the material
+
+For "correct GLB, wrong app," search the console for `CSP`, `blob:`, `texture`, and the loader's error prefix. In the Network panel, do not stop at a successful `.glb` response; look for the subsequent image, blob, decoder, and worker requests. Match the policy to the API actually making the request rather than to the final resource type: an HTML image, a `fetch()`, a worker, and a media element each fall under a different directive.
+
+Change one boundary at a time. If the browser refused a texture request, adjusting metalness, roughness, or output color space cannot restore the missing bytes. Fix the loading boundary first, then judge the material. One gotcha: a CSP delivered as an HTTP header may survive a hot reload, so reload the full page and verify the active header in DevTools.
+
+## Preserve the fix as a contract
+
+A `blob:` source looks redundant next to `img-src`, so it invites a future "cleanup." A small test names why it exists:
+
+```ts
+test('CSP allows GLTFLoader to resolve embedded textures from blob URLs', () => {
+  const connectSrc = contentSecurityPolicy
+    .split('; ')
+    .find((directive) => directive.startsWith('connect-src '))
+
+  expect(connectSrc?.split(' ')).toContain('blob:')
+})
+```
+
+That protects the configuration. A browser-level check protects the behavior: load a GLB with an embedded texture under the real header, fail on CSP violations, and confirm the texture request completes. The unit test explains the odd-looking token; the browser test catches a future loader or policy change that moves the request to a different path.
+
+## The broader lesson
+
+This bug needs a particular intersection: embedded glTF textures, a loader that turns them into temporary object URLs, a `fetch()`-based decoding path, and a restrictive CSP. It reappears after tightening security headers, moving textures into a GLB, upgrading Three.js, or swapping a dev server's headers for production ones. The lesson generalizes past glTF: a successful container request does not prove its internal resources survived every later browser boundary, and CSP follows the API performing the load, not your mental category for the resulting data.
+
+## The rule
+
+> When a GLB is correct in an independent inspector but wrong in the app, verify its subresource requests before touching the material. Embedded textures may become temporary `blob:` URLs, and if the loader fetches them, CSP must allow that scheme in `connect-src`, not only `img-src`.
