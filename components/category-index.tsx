@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { source } from '@/lib/source'
+import { getCategoryPages, type DocumentPageType } from '@/lib/source'
 import { CategoryIndexBadge } from './category-index-badge'
 import { PreviewCard } from '@/components/cards'
 import { GltfIcon, MetriIcon, SunoIcon } from '@/components/icons'
@@ -20,45 +20,14 @@ import { EyeIcon } from 'lucide-react'
 import { Fragment } from 'react'
 import { cn } from '@/lib/utils'
 
-type PageTreeNode = {
-  type?: string
-  $id?: string
-  url?: string
-  children?: PageTreeNode[]
-}
-
-function getPageTreeOrder(category: string): string[] {
-  const children = source.pageTree.children as unknown as PageTreeNode[]
-  const folder = children.find(
-    (child) => child.type === 'folder' && child.$id?.split(':')[1] === category
-  )
-  if (!folder?.children) return []
-  return folder.children
-    .filter((child) => child.type === 'page' && child.url)
-    .map((child) => child.url!)
-}
-
 export async function CategoryIndex({
   category,
+  pageType,
 }: {
   category: keyof RegistryCounts
+  pageType?: DocumentPageType
 }) {
-  const pages = source
-    .getPages()
-    .filter((page) => page.slugs[0] === category && page.slugs.length > 1)
-
-  // Sort pages based on meta.json order (reflected in the page tree)
-  const pageTreeOrder = getPageTreeOrder(category)
-  if (pageTreeOrder.length > 0) {
-    const orderMap = new Map(pageTreeOrder.map((url, i) => [url, i]))
-    pages.sort((a, b) => {
-      const aIndex = orderMap.get(a.url) ?? Infinity
-      const bIndex = orderMap.get(b.url) ?? Infinity
-      return aIndex - bIndex
-    })
-  }
-
-  if (category === 'logs') pages.reverse()
+  const pages = getCategoryPages(category, pageType)
 
   // Toolbox: pull featured tools out to highlight as cards. Both groups keep the
   // page-tree order (creation date, newest first).

@@ -58,10 +58,20 @@ export function getPageImage(page: InferPageType<typeof source>) {
  * Resolve a category's pages in the same order the `CategoryIndex` component
  * renders them, so the LLM/raw markdown matches what a browser sees.
  */
-function getCategoryPages(category: string) {
+export type DocumentPageType = InferPageType<typeof source>['data']['type']
+
+export function getCategoryPages(
+  category: string,
+  pageType?: DocumentPageType
+) {
   const pages = source
     .getPages()
-    .filter((page) => page.slugs[0] === category && page.slugs.length > 1)
+    .filter(
+      (page) =>
+        page.slugs[0] === category &&
+        page.slugs.length > 1 &&
+        (!pageType || page.data.type === pageType)
+    )
 
   // Match the page-tree (meta.json / creation-date) order used in the sidebar.
   const folder = getTopLevelFolder(category)
@@ -90,8 +100,11 @@ function getCategoryPages(category: string) {
 const escapeMarkdownLinkText = (text: string) =>
   text.replace(/[[\]()]/g, '\\$&')
 
-function renderCategoryIndexAsMarkdown(category: string): string {
-  const pages = getCategoryPages(category)
+function renderCategoryIndexAsMarkdown(
+  category: string,
+  pageType?: DocumentPageType
+): string {
+  const pages = getCategoryPages(category, pageType)
 
   return pages
     .map((page) => {
@@ -109,7 +122,11 @@ function renderCategoryIndexAsMarkdown(category: string): string {
 }
 
 const categoryIndexRegex =
-  /<CategoryIndex[\s\S]*?category="([^"]+)"[\s\S]*?(?:\/>|<\/CategoryIndex>)/g
+  /<CategoryIndex\b([^>]*?)(?:\/>|>[\s\S]*?<\/CategoryIndex>)/g
+
+function getStringProp(attributes: string, name: string) {
+  return attributes.match(new RegExp(`\\b${name}="([^"]+)"`))?.[1]
+}
 
 export async function getLLMText(page: InferPageType<typeof source>) {
   const llmCompanion = path.join(
@@ -128,9 +145,15 @@ export async function getLLMText(page: InferPageType<typeof source>) {
 
   // Expand `<CategoryIndex category="..." />` into a real markdown list so the
   // raw/.md representation lists every entry instead of an opaque JSX tag.
-  processed = processed.replace(categoryIndexRegex, (_match, category) =>
-    renderCategoryIndexAsMarkdown(category)
-  )
+  processed = processed.replace(categoryIndexRegex, (match, attributes) => {
+    const category = getStringProp(attributes, 'category')
+    if (!category) return match
+
+    const pageType = getStringProp(attributes, 'pageType') as
+      | DocumentPageType
+      | undefined
+    return renderCategoryIndexAsMarkdown(category, pageType)
+  })
 
   let libraryBody = ''
   if (page.data.type === 'library' && page.data.repo) {
