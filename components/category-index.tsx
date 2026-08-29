@@ -29,15 +29,14 @@ export async function CategoryIndex({
 }) {
   const pages = getCategoryPages(category, pageType)
 
-  // Toolbox: pull featured tools out to highlight as cards. Both groups keep the
-  // page-tree order (creation date, newest first).
+  // The main toolbox index pulls featured tools out of the list. Filtered
+  // indexes keep the cards while repeating every result in the complete list.
   const isToolbox = category === 'toolbox'
   const featuredPages = isToolbox
     ? pages.filter((page) => page.data.featured)
     : []
-  const listPages = isToolbox
-    ? pages.filter((page) => !page.data.featured)
-    : pages
+  const listPages =
+    isToolbox && !pageType ? pages.filter((page) => !page.data.featured) : pages
 
   const typeMap: Record<keyof RegistryCounts, ItemType> = {
     components: 'component',
