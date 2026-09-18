@@ -4,7 +4,7 @@ Tres propuestas con una misma forma, luz superior y sombras de la misma familia 
 
 ![Tres materiales con la misma dirección de luz](proposals.png)
 
-La fila grande muestra el material ampliado y rerasterizado. La fila pequeña conserva renders de 52 × 49 píxeles. Estos son **prototipos SVG generados localmente y renderizados en Chrome**, no nuevas exportaciones de Figma. No reemplazan todavía las pruebas del artículo.
+La fila grande muestra el material ampliado y rerasterizado. La fila pequeña conserva renders de 52 × 49 píxeles. Estos son **prototipos SVG generados localmente y renderizados en Chrome**, no nuevas exportaciones de Figma. Los prototipos no sustituyen las pruebas del artículo. Ya recibimos el export real de Slate + porcelain: [original](../slate-porcelain.svg), [alpha 1](../slate-porcelain-alpha1.svg) y [reconstrucción](../slate-porcelain-rebuilt.svg). El export compone la luz blanca después de la sombra oscura, a diferencia del prototipo; esa es la secuencia que se validó y se usa en el artículo.
 
 Los SVG, previews individuales y la lámina de propuestas tienen fondo transparente. Las comparaciones de diagnóstico de abajo conservan fondos controlados para que el cambio de alpha se pueda evaluar sobre la misma superficie.
 

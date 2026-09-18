@@ -154,3 +154,30 @@ node temp/hardalpha-validation/render-public.cjs
 Los scripts no necesitan ejecutar el hub ni modificar sus dependencias. Los renders intermedios nativos y supersampleados se regeneran y están ignorados por git; las comparaciones, fixtures, parámetros, paths calculados y resultados numéricos sí se conservan en el repositorio.
 
 Las ilustraciones publicadas en el log se vuelven a renderizar directamente desde los SVG con fondo transparente mediante `render-public.cjs`. No se elimina el blanco por color: eso borraría las luces blancas de la estrella. Los fondos de las mediciones y las comparaciones de este informe permanecen fijos, y los resultados numéricos siguen correspondiendo a esos renders controlados.
+
+## Export real Slate + porcelain
+
+El archivo [slate-porcelain.svg](../slate-porcelain.svg) fue reexportado por el usuario desde Figma. Conserva el path de 52 × 49, fill #7B8EA8, sombra #34465F al 30% con dy -2 y sigma 1, y luz blanca al 100% con dy 3. La sombra oscura se compone primero y la luz blanca al final. El prototipo local tenía el orden inverso; no se usó como sustituto del nuevo export.
+
+Se compararon el original, una edición que sólo cambia las dos matrices de 127 a 1, y una reconstrucción que separa `S ∩ translate(S, 0, 3)` y `S − translate(S, 0, 3)`. La sombra suave se aplica a la región slate y la región blanca se pinta al final. Se conserva el clip al viewport de 52 × 49 en los renders.
+
+En blanco, alpha 1 mejora el escalonado pero deja una línea gris azulada alrededor del bisel. La reconstrucción elimina ese color residual. Error de borde contra el filtro original a 32×: 21.17 para 127, 11.60 para 1 y 6.58 para la reconstrucción. La banda que incluye la sombra confirma ese orden: 15.47, 7.05 y 4.18. Las referencias a 8× y 16× coinciden en la conclusión.
+
+En gris, alpha 1 y la reconstrucción quedan cerca (7.72 y 7.84 en borde a 32×). En oscuro, el orden entre ambos cambia según la resolución de referencia; a 32× quedan en 13.43 y 13.22, mientras que la diferencia entre referencias 16× y 32× es 2.18. **No hay una ventaja general demostrada para la reconstrucción en esos fondos.** El hallazgo que explica el artículo es la eliminación del color slate bajo el rim blanco, particularmente visible sobre blanco.
+
+Las capturas SVG inline coinciden exactamente con los renders de canvas para las tres variantes. Como antes, la referencia supersampleada es el filtro de Chrome, no una captura del canvas de Figma. Resultados completos: [slate-results.json](slate-results.json).
+
+![Comparación sobre blanco con labels centrados](renders/slate-white-comparison.png)
+
+![Comparación sobre oscuro con labels centrados](renders/slate-dark-comparison.png)
+
+Estas comparaciones de medición conservan sus fondos controlados. Los PNG publicados en el artículo se generan por separado con transparencia real y labels centrados.
+
+Con las dependencias indicadas arriba:
+
+```sh
+.context/hardalpha-venv/bin/python temp/hardalpha-validation/slate-prepare.py
+node temp/hardalpha-validation/slate-render.cjs
+.context/hardalpha-venv/bin/python temp/hardalpha-validation/slate-analyze.py
+.context/hardalpha-venv/bin/python temp/hardalpha-validation/slate-publish.py
+```

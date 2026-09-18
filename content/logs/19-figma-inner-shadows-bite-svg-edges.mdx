@@ -94,26 +94,26 @@ Look at the diagonal red rim: the alpha-1 edit reduces the harsh steps while kee
 
 [Original SVG](/static/logs/figma-inner-shadows/star1-original.svg) · [Alpha-1 SVG](/static/logs/figma-inner-shadows/star1-alpha1.svg)
 
-## The counterexample: a white rim with a blue fringe
+## When the small fix leaves a fringe
 
-The second export keeps the same shape, offsets, and blur. Only the shadow opacities change: white at **100%**, red at **20%**. The fill is still opaque blue; both shadows use normal blending.
+For a subtler example, this Slate + porcelain star uses an opaque `#7B8EA8` fill, a dark `#34465F` inner shadow at 30% with offset `(0, -2)` and blur `stdDeviation=1`, then a white inner shadow at **100%** with offset `(0, 3)` and no blur. Both shadows use normal blending in the Figma export.
 
-Now `127 → 1` leaves a pale blue line around the white tip and horizontal edges. On a white background, the white rim should disappear into the background, which makes the blue fringe easy to spot.
+The small edit improves the jagged outline here too, but leaves a pale gray-blue line around the white tip and horizontal edges. On a white background, the white rim should disappear into the background, which makes that residual fringe easy to spot. On dark backgrounds, look for a cool tint along the white rim; the difference is subtler.
 
 <ImageCols>
   <Figure
-    src="/static/logs/figma-inner-shadows/star2-a1-pixels.png"
-    alt="Nearest-neighbor enlargement of the alpha-1 star showing a blue fringe around its white upper tip"
-    caption="Alpha 1: the white rim reveals a blue fringe."
+    src="/static/logs/figma-inner-shadows/slate-a1-pixels.png"
+    alt="Nearest-neighbor enlargement of the alpha-1 slate star showing a gray-blue fringe around its white rim"
+    caption="Alpha 1: slate color leaks into the white rim."
     width={416}
     height={392}
     className="my-0"
     unoptimized
   />
   <Figure
-    src="/static/logs/figma-inner-shadows/star2-partition-pixels.png"
-    alt="Nearest-neighbor enlargement of the rebuilt star with the blue fill removed from beneath the white rim"
-    caption="Rebuilt regions: no blue fill beneath the white rim."
+    src="/static/logs/figma-inner-shadows/slate-rebuilt-pixels.png"
+    alt="Nearest-neighbor enlargement of the rebuilt slate star with no slate fill beneath the white rim"
+    caption="Rebuilt regions: no slate fill beneath the white rim."
     width={416}
     height={392}
     className="my-0"
@@ -122,15 +122,15 @@ Now `127 → 1` leaves a pale blue line around the white tip and horizontal edge
 </ImageCols>
 
 <Figure
-  src="/static/logs/figma-inner-shadows/star2-native.png"
-  alt="Second star at native size, comparing original 127, alpha 1, and rebuilt regions"
+  src="/static/logs/figma-inner-shadows/slate-native.png"
+  alt="Slate star at native size, with centered labels for original 127, alpha 1, and rebuilt regions"
   caption="The same case at its actual 52 × 49 raster size."
   width={280}
   height={97}
   unoptimized
 />
 
-At an edge pixel with coverage `A`, the softened white shadow can have alpha `A` over blue fill that also has alpha `A`. Normal source-over composition leaves a blue contribution proportional to `A × (1 − A)`. At 50% coverage, that's 0.25 of premultiplied blue left underneath the white. On white, it reads as a pale blue line.
+At an edge pixel with coverage `A`, the softened white shadow can have alpha `A` over slate fill that also has alpha `A`. Normal source-over composition leaves a slate contribution proportional to `A × (1 − A)`. At 50% coverage, that's 0.25 of premultiplied slate left underneath the white. On white, it reads as a pale gray-blue line.
 
 That is a compositing explanation of this measured case, following the [source-over rules](https://www.w3.org/TR/compositing-1/#porterduffcompositingoperators_srcover). It isn't evidence of Figma's reason for choosing 127.
 
@@ -141,35 +141,40 @@ The subtraction earlier in the graph is a different operation:
   operator="arithmetic" k2="-1" k3="1" />
 ```
 
-Here the arithmetic computes `max(in2 − in, 0)`. It does **not** multiply two 50% alphas into 25%. The residual blue appears when the shadow is composited over the fill.
+Here the arithmetic computes `max(in2 − in, 0)`. It does **not** multiply two 50% alphas into 25%. The residual slate color appears when the shadow is composited over the fill.
 
 ## The complete fix for this edge: separate the regions
 
-Drawing a white rim over the complete blue shape still stacks antialiased coverage at their shared outer edge. A mask made from vector paths can do the same thing. Calling those paths “geometry” doesn't remove the overlap.
+Drawing a white rim over the complete slate shape still stacks antialiased coverage at their shared outer edge. A mask made from vector paths can do the same thing. Calling those paths “geometry” doesn't remove the overlap.
 
-For this star, split the shape before drawing it. If `S` is the original shape and `T` is its copy translated by the white shadow's `(2, 15)` offset:
+For this star, split the shape before drawing it. If `S` is the original shape and `T` is its copy translated by the white shadow's `(0, 3)` offset:
 
 ```text
-blue region  = intersection(S, T)
+slate region = intersection(S, T)
 white region = difference(S, T)
 ```
 
-Compute those Boolean operations in your vector editor or geometry tooling, then export the resulting paths as separate fills. There is no full blue silhouette underneath the white rim anymore. In this case the white shadow is fully opaque, so the rim can be drawn directly in white.
+Compute those Boolean operations in your vector editor or geometry tooling, then export the resulting paths as separate fills. There is no full slate silhouette underneath the white rim anymore. In this case the white shadow is fully opaque, so the rim can be drawn directly in white.
 
 ```jsx
 <g style={{ isolation: 'isolate' }}>
-  <path d={BLUE_REGION} fill="#4391FF" />
+  <path d={SLATE_REGION} fill="#7B8EA8" />
+  {/* Preserve the dark shadow on the slate region, before the white rim. */}
+  <path
+    d={SLATE_REGION}
+    fill="#34465F"
+    fillOpacity={0.3}
+    mask="url(#dark-rim)"
+  />
   <path d={WHITE_REGION} fill="#fff" />
-  {/* Keep the second shadow's soft profile in its own blurred mask. */}
-  <path d={STAR} fill="#ff2222" fillOpacity={0.2} mask="url(#red-rim)" />
 </g>
 ```
 
-This rebuild removes the blue fringe around the white rim while retaining the red shadow's blur. It is a hybrid of Boolean geometry and a blurred mask, not a claim that a hard-edged path can reproduce any soft shadow. Semitransparent rims and other blend modes need their own color and opacity treatment.
+This rebuild removes the slate-colored fringe around the white rim while retaining the dark shadow's blur and the export's dark-then-white order. It is a hybrid of Boolean geometry and a blurred mask, not a claim that a hard-edged path can reproduce any soft shadow. Semitransparent rims and other blend modes need their own color and opacity treatment.
 
-The mask-only version was also tested. It performed worse here: applying an antialiased mask to another antialiased path reduced the white edge coverage further. The relevant fix is the region partition, not merely replacing a filter with a mask.
+In the earlier blue-and-white fixture, a mask-only rebuild made the fringe worse: applying an antialiased mask to another antialiased path reduced the white edge coverage further. That comparison remains in the detailed report. The relevant fix is the region partition, not merely replacing a filter with a mask.
 
-[Original SVG](/static/logs/figma-inner-shadows/star2-original.svg) · [Alpha-1 SVG](/static/logs/figma-inner-shadows/star2-alpha1.svg) · [Rebuilt SVG](/static/logs/figma-inner-shadows/star2-rebuilt.svg)
+[Original SVG](/static/logs/figma-inner-shadows/slate-original.svg) · [Alpha-1 SVG](/static/logs/figma-inner-shadows/slate-alpha1.svg) · [Rebuilt SVG](/static/logs/figma-inner-shadows/slate-rebuilt.svg)
 
 ## What to look for before keeping the fix
 
@@ -179,13 +184,13 @@ Check the result at the size and on the background where it will be used. Three 
 - **The shading:** do the light and dark bands still have the same apparent strength?
 - **The material:** does the icon still read as the same raised, inset, or glossy surface?
 
-Star 1 makes the case for keeping the small edit. Star 2 shows a specific reason to go further: the white rim picks up blue from the fill below it. The separate regions remove that overlap, which is the change to look for in the enlarged comparison.
+The first star makes the case for keeping the small edit. Slate + porcelain shows a reason to go further: the white rim picks up color from the fill below it even after the staircase improves. The separate regions remove that overlap. This helps most clearly on white; our gray and dark comparisons do not establish an equally clear overall advantage for the rebuild. Judge the result on the background you intend to use.
 
 Translucent fills need another check. Because `SourceAlpha` already includes the fill opacity, changing 127 to 1 can weaken the whole shadow, not just soften its edge. We reproduced that by lowering Star 1's fill opacity. Moving opacity onto a group after the filter is a different operation.
 
 The examples above are native-size Chrome captures. We also checked blur, blend modes, backgrounds, and subpixel positions against supersampled versions of the original filters. That reference helps compare the edge behavior; it is not a screenshot of Figma's renderer. The measurements and reproduction scripts are available separately for readers who want to inspect the experiment.
 
-[Detailed report and reproduction](https://github.com/joyco-studio/hub/tree/main/temp/hardalpha-validation) · [Measurement data](/static/logs/figma-inner-shadows/hardalpha-results.json)
+[Detailed report and reproduction](https://github.com/joyco-studio/hub/tree/main/temp/hardalpha-validation) · [Original measurements](/static/logs/figma-inner-shadows/hardalpha-results.json) · [Slate measurements](/static/logs/figma-inner-shadows/slate-results.json)
 
 ## What is documented, and what isn't
 
@@ -193,4 +198,4 @@ A [2024 Figma community report](https://forum.figma.com/ask-the-community-7/junk
 
 I found public examples using the same matrix, including [AlignUI's avatar filter](https://www.alignui.com/docs/v1.2/ui/avatar), but no authoritative explanation for why the multiplier is specifically 127 or a documented guarantee that replacing it with 1 preserves every shadow. The recommendations here come from the supplied exports and the comparisons above.
 
-**Start with the tiny edit. Keep it if the edge and shading hold up. If a halo or intensity change remains, rebuild the affected regions and preserve the soft parts of the effect deliberately.** Star 1 makes the case for the cheap fix; Star 2 shows why the full rebuild still matters.
+**Start with the tiny edit. Keep it if the edge and shading hold up. If a halo or intensity change remains, rebuild the affected regions and preserve the soft parts of the effect deliberately.** The first star makes the case for the cheap fix; Slate + porcelain shows when the extra work still matters.

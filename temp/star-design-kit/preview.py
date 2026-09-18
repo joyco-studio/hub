@@ -21,7 +21,7 @@ for i,c in enumerate(recipes):
  draw.text((x,560),'52 × 49 px reales',font=mono(12),fill='#647067')
  for j,a in enumerate([127,1]):
   board.paste(Image.open(root/f"{c['id']}-alpha{a}-transparent.png").convert('RGBA'),(x+j*120,586))
-  draw.text((x+j*120,646),f'alpha {a}',font=mono(12),fill='#888888')
+  draw.text((x+j*120+26,646),f'alpha {a}',anchor='mt',font=mono(12),fill='#888888')
  draw.text((x,695),f"Base {c['fill']}",font=mono(13),fill='#888888')
  draw.text((x,724),f"Luz {c['light']} / {round(c['lightOpacity']*100)}%",font=mono(13),fill='#888888')
  draw.text((x,753),f"Sombra {c['dark']} / {round(c['darkOpacity']*100)}%",font=mono(13),fill='#888888')
@@ -38,6 +38,6 @@ for c in recipes:
  comparison=Image.new('RGB',(3*336+64,408),'#F8F7F3');d=ImageDraw.Draw(comparison)
  for i,(label,img) in enumerate(zip(['127, nativo','1, nativo','Referencia 16x'],panels)):
   x=32+336*i
-  d.text((x,20),label,font=mono(15),fill='#394A40')
+  d.text((x+156,20),label,anchor='mt',font=mono(15),fill='#394A40')
   comparison.paste(img.resize((312,294),Image.Resampling.NEAREST),(x,66))
  comparison.save(root/f"{c['id']}-comparison.png")

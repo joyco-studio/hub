@@ -55,3 +55,16 @@ User refinement: transparent PNG/SVG backgrounds. Re-rendered publication star a
 Final revision validated: production build, log numbering, targeted formatting, and whitespace checks passed. Chrome checks at 1440px and 390px confirm five loaded transparent illustrations, six working downloads, zero result tables, no duplicate coverage caption, no runtime errors, no missing anchors, and no horizontal overflow. Visually reviewed the coverage illustration, Trazo flow, and enlarged halo comparison on the dark site background. The optional Figma file link was not supplied; the editable-effect recipes and transparent prototype previews are ready in the design kit.
 
 Final user refinement: removed the Trazo filter-flow diagram because it duplicated the preceding explanation. Retained the coverage illustration and the SourceAlpha/hardAlpha prose.
+
+## Slate + porcelain Figma export
+
+The user supplied the actual `temp/slate-porcelain.svg` export. Its white highlight is composited after the dark shadow, unlike the local prototype. Validate the actual export before replacing the older article counterexample.
+
+1. Preserve the original and generate a matrix-only alpha-1 candidate and an order-correct region reconstruction.
+2. Render in Chrome at native size and 8×/16×/32×, compare edge and shadow bands on light/dark backgrounds, and inspect nearest-neighbor enlargements.
+3. If confirmed, replace the article's counterexample with transparent slate assets and update the explanation, downloads, and reproducible report. Keep the earlier fixtures as evidence.
+4. Check the article, commit, and update the existing PR.
+
+Slate validation completed in Chrome 153 at native size and 8×/16×/32× on white, gray, and dark. The alpha-only edit improves the jagged outline but leaves a gray-blue fringe over white; partitioning removes the underlying slate contribution. Edge error on white at 32×: 21.17 original, 11.60 alpha 1, 6.58 reconstruction. Gray is nearly tied and dark depends on reference resolution, so the article does not claim universal superiority. Inline and canvas renders match for all three variants.
+
+Published the actual export and transparent comparisons with centered labels, preserving dark-then-white composition. Updated the article counterexample and recipes provenance, kept the earlier fixtures and fixed-background measurements. Production build, log numbering, formatting, matrix-only patch check, SVG parsing, alpha-channel checks, and whitespace checks passed. Chrome verified five images and seven downloads at 1440px and 390px, with no errors, missing anchors, or overflow.
