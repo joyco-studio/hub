@@ -1,126 +1,163 @@
 ---
-title: 19 - The aliasing lurks in the shadows
-description: Why a Figma Inner Shadow exported to SVG comes out with aliased "bitten" diagonal edges, why no amount of blur or resolution fixes it, and how to rebuild the emboss as real masked geometry.
+title: 19 - HardAlpha
+description: Why Figma's SVG shadows bite diagonal edges, when changing 127 to 1 helps, and when a geometric rebuild fixes the remaining halo.
 author: 'justkahdri'
 ---
 
-You export an icon from Figma, drop the SVG into the app, and the diagonal edges look chewed up: stair-stepped, "bitten", like antialiasing quit halfway through. The straight edges are perfect. It looks flawless back in Figma. And no CSS property you reach for (`shape-rendering`, `image-rendering`, a bump in DPR) touches it.
+You export an icon from Figma, drop the SVG into the app, and the diagonal edges look chewed up. Open the filter and there it is: `hardAlpha`, with an alpha multiplier of `127`.
 
-The short answer: **the icon uses Figma's _Inner Shadow_ effect, and Figma's SVG exporter renders that effect's silhouette as a 1-bit mask with no antialiasing.** A 1-bit mask is fine on axis-aligned edges and falls apart on everything diagonal or curved. The fix isn't a setting, it's rebuilding the shadow as real geometry.
+**Try changing that multiplier to `1` first.** It can remove much of the bite with a tiny edit. But check the result at its actual size, on its actual background: some shadows develop a colored fringe, and translucent fills can lose shadow intensity. When that happens, rebuilding the affected regions gives you control over the edge that the one-number fix doesn't.
 
-## The symptom
+We tested both outcomes in Chrome. Here is where each fix earns its place.
 
-Two shapes gave it away: a set of 3D podium stands and a speaker/mute glyph. Both have a subtle emboss, and both had one edge that looked crisp and another that looked serrated. Below, the podium's dark side face, zoomed onto its inner diagonal. Left is the Figma export; right is the fix.
+## What 127 does
 
-<ImageCols>
-  <Image
-    src="/static/logs/figma-inner-shadows/podium-before.png"
-    alt="Podium side-face inner edge exported from Figma: the diagonal staircases"
-    width={1200}
-    height={2043}
-    unoptimized
-  />
-  <Image
-    src="/static/logs/figma-inner-shadows/podium-after.png"
-    alt="The same edge rebuilt as real geometry: a clean, antialiased diagonal"
-    width={2000}
-    height={3404}
-    unoptimized
-  />
-</ImageCols>
-
-_The right side is a true vector render; the left is rendered at real on-screen size, which matters, see below._
-
-## It's not resolution, and it's not blur
-
-Two things you'll try first, both dead ends.
-
-**Resolution.** Inline the SVG instead of using it as a `background-image`, scale the geometry up 10×, crank the DPR. Nothing. The bite doesn't come from a low-res raster buffer, so throwing pixels at it does nothing at the size the icon actually renders.
-
-**Blur.** If the Inner Shadow has a Blur of 0, you'll be tempted to nudge it up. But Blur only softens the shadow's _inner_ edge (the offset side). The _outer_ edge, where the shadow clips to the shape's silhouette, stays hard no matter what. So a diagonal silhouette stays bitten at every blur value, and now your emboss is muddy too.
-
-## Why it happens: the ×127 hardAlpha
-
-Open the exported SVG and you'll find this inside the `<filter>`:
+These Figma exports contain this primitive before each inner shadow:
 
 ```xml
-<feColorMatrix in="SourceAlpha"
+<feColorMatrix in="SourceAlpha" type="matrix"
   values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 127 0"
   result="hardAlpha" />
 ```
 
-That `127` in the alpha row multiplies the shape's alpha channel by 127 and clamps. Any pixel with even slight coverage is slammed to fully opaque; only the truly-zero pixels stay out. The result is a **1-bit mask**: every pixel is 100% in or 100% out, with no partial-coverage values in between. Figma uses it to keep the shadow's clip crisp.
+The last row multiplies the source alpha by 127 and clamps it to the range 0–1. An edge pixel with 30% coverage becomes fully opaque. So does one with 1% coverage. Values below `1/127` can remain fractional, so this isn't literally a one-bit mask, but it hardens almost the entire antialiased transition.
 
-A 1-bit mask has one property that decides everything here:
+Diagonals, curves, and edges between pixel boundaries need that partial coverage. Hardening it changes the shadow's silhouette and produces the staircase. Horizontal and vertical edges aligned exactly to the pixel grid have less coverage information to lose; move them between pixels and they can suffer too.
 
-- On a **horizontal or vertical** edge, the boundary falls cleanly between rows or columns of pixels. No partial coverage was needed anyway, so it looks perfect.
-- On a **diagonal or curved** edge, the boundary _needs_ partial-coverage pixels to look smooth. The 1-bit mask can't store them, so it snaps each one to all-or-nothing. That's the staircase.
+The [filter specification](https://www.w3.org/TR/filter-effects-1/#feColorMatrixElement) defines the matrix operation. `hardAlpha` is just the name Figma gives its intermediate result, not a special SVG feature.
 
-Figma's canvas hides this because its live renderer antialiases properly; only the **SVG export** bakes in the hardAlpha trick. That's why the file looks great in Figma and bitten in the browser.
+## The small fix: 127 → 1
 
-And it's why "just enlarge the SVG" is a trap. The bite is a small-size phenomenon: at high enough resolution the mask's steps shrink below one pixel and even the export looks smooth. Render it at button size, where it actually lives, and the steps are back. In the podium comparison above, the "after" is a crisp vector render at any scale; the "before" is drawn at real size, because that's the only honest place to see the bug.
+Change the alpha row in the affected inner-shadow block:
 
-## The tell: real geometry never bites
-
-Here's the observation that cracked it. In the very same podium SVG, the **light top face** is a plain `<path fill="#F1FFF4" />` and it's smooth on every diagonal. The **dark side face** was an Inner Shadow, and it bit on the same angles. Same shape, same slopes, sitting side by side. The only difference was **real vector geometry vs. a Figma effect**.
-
-A normal filled `<path>` gets the browser's native antialiasing, always. Nothing routed through the hardAlpha filter does. So the fix writes itself: stop shipping the effect, draw the shadow as a real shape.
-
-## The fix: rebuild the emboss as masked geometry
-
-Instead of the Inner Shadow effect, each rim becomes a normal fill **masked to `shape − shape·offset`**: the shape in white, minus a copy of the shape offset by the shadow's distance in black. What survives the mask is exactly the rim band, and because both mask paths are ordinary vector fills, the band is antialiased on every angle.
-
-```jsx
-<g style={{ isolation: 'isolate' }}>
-  <path d={D} fill="#000" fillOpacity=".36" />
-  {/* dark rim on top, light rim on the bottom, both blended like the original */}
-  <path d={D} fill="#000" fillOpacity=".48" mask="url(#rim-dark)"  style={{ mixBlendMode: 'overlay' }} />
-  <path d={D} fill="#fff"                    mask="url(#rim-light)" style={{ mixBlendMode: 'overlay' }} />
-</g>
-
-<mask id="rim-dark" maskUnits="userSpaceOnUse" /* … */>
-  <path d={D} fill="#fff" />
-  <path d={D} fill="#000" transform="translate(0 .6)" />
-</mask>
+```diff
+- 0 0 0 127 0
++ 0 0 0   1 0
 ```
 
-The `translate` is the Inner Shadow's X/Y position; the fill color and opacity are the shadow's color. If the original used a blend mode (Figma's emboss usually rides `overlay`), wrap the base and rims in an isolated group so they blend against the glyph, not whatever's behind it. No `hardAlpha`, no 1-bit mask, no bite.
+Leave the rest of the matrix and filter graph intact. The result can still be named `hardAlpha`; its pixels now retain the source alpha. Don't replace every occurrence of `127` in the file: coordinates and other effects are unrelated to this edit.
 
-Same edit on the mute glyph, this time the speaker's slanted top rim:
+This first star has an opaque blue fill and two inner shadows: white at 60% with offset `(2, 15)`, and red at 60% with offset `(0, -4)` and blur `stdDeviation=1`.
+
+<Figure
+  src="/static/logs/figma-inner-shadows/star1-native.png"
+  alt="Chrome renders of the first star at 52 by 49 pixels: original 127 on the left and alpha 1 on the right"
+  caption="Actual raster size. Two shadows and blur, and the small fix still helps."
+  width={192}
+  height={97}
+  unoptimized
+/>
+
+Against the original filter rendered at 8× and downsampled, edge error dropped from **18.68 to 9.32**. The improvement held on gray and dark backgrounds, and at smaller and larger sizes. Adding an overlay variant didn't invalidate it either. Multiple shadows, blur, or a blend mode alone aren't reasons to skip the simple fix.
+
+[Original SVG](/static/logs/figma-inner-shadows/star1-original.svg) · [Alpha-1 SVG](/static/logs/figma-inner-shadows/star1-alpha1.svg)
+
+## The counterexample: a white rim with a blue fringe
+
+The second export keeps the same shape, offsets, and blur. Only the shadow opacities change: white at **100%**, red at **20%**. The fill is still opaque blue; both shadows use normal blending.
+
+Now `127 → 1` leaves a pale blue line around the white tip and horizontal edges. On a white background, the white rim should disappear into the background, which makes the blue fringe easy to spot.
 
 <ImageCols>
-  <Image
-    src="/static/logs/figma-inner-shadows/mute-before.png"
-    alt="Mute glyph rim exported from Figma: the diagonal bites"
-    width={1400}
-    height={934}
+  <Figure
+    src="/static/logs/figma-inner-shadows/star2-a1-pixels.png"
+    alt="Nearest-neighbor enlargement of the alpha-1 star showing a blue fringe around its white upper tip"
+    caption="Alpha 1 — the white rim reveals a blue fringe."
+    width={416}
+    height={392}
+    className="my-0"
     unoptimized
   />
-  <Image
-    src="/static/logs/figma-inner-shadows/mute-after.png"
-    alt="Mute glyph rim rebuilt as real geometry: a clean diagonal"
-    width={2400}
-    height={1601}
+  <Figure
+    src="/static/logs/figma-inner-shadows/star2-partition-pixels.png"
+    alt="Nearest-neighbor enlargement of the rebuilt star with the blue fill removed from beneath the white rim"
+    caption="Rebuilt regions — no blue fill beneath the white rim."
+    width={416}
+    height={392}
+    className="my-0"
     unoptimized
   />
 </ImageCols>
 
-_Shown on a neutral plate so the `overlay` emboss reads; it's the diagonal rim, not the plate, that matters._
+<Figure
+  src="/static/logs/figma-inner-shadows/star2-native.png"
+  alt="Second star at native size, comparing original 127, alpha 1, and rebuilt regions"
+  caption="The same case at its actual 52 × 49 raster size."
+  width={280}
+  height={97}
+  unoptimized
+/>
 
-## When to just ship a PNG
+At an edge pixel with coverage `A`, the softened white shadow can have alpha `A` over blue fill that also has alpha `A`. Normal source-over composition leaves a blue contribution proportional to `A × (1 − A)`. At 50% coverage, that's 0.25 of premultiplied blue left underneath the white. On white, it reads as a pale blue line.
 
-The geometry rebuild is the right call when the emboss is **chunky**, like the podium's side faces. When it's a **hair-thin rim shown small**, like the mute icon at button size, the band is sub-pixel by nature: it antialiases now, but you're polishing something almost nobody can see. If you want it pixel-identical to the Figma render, export a **PNG at ≥3×** the on-screen size. Figma's rasterizer antialiases everything, so a hi-res PNG is the deterministic match, and it sits fine next to other PNG art.
+That is a compositing explanation of this measured case, following the [source-over rules](https://www.w3.org/TR/compositing-1/#porterduffcompositingoperators_srcover). It isn't evidence of Figma's reason for choosing 127.
 
-## Fixing it at the Figma source
+The subtraction earlier in the graph is a different operation:
 
-There's **no export toggle** that removes the hardAlpha; it's generated for the _Inner Shadow_ effect, full stop. To keep an asset clean and vector:
+```xml
+<feComposite in2="hardAlpha"
+  operator="arithmetic" k2="-1" k3="1" />
+```
 
-- Rebuild the emboss with **real offset shapes** (duplicate, offset, clip to the silhouette) instead of the effect, or
-- Export a hi-res **PNG**.
-- Bumping Blur is not a fix; it only touches the inner edge.
+Here the arithmetic computes `max(in2 − in, 0)`. It does **not** multiply two 50% alphas into 25%. The residual blue appears when the shadow is composited over the fill.
 
-If you hand an icon off and it has an Inner Shadow on it, assume the SVG will bite on any diagonal and treat it as one of the two above before it ships.
+## The complete fix for this edge: separate the regions
 
-## Links
+Drawing a white rim over the complete blue shape still stacks antialiased coverage at their shared outer edge. A mask made from vector paths can do the same thing. Calling those paths “geometry” doesn't remove the overlap.
 
-- [MDN: `feColorMatrix`](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/feColorMatrix): the alpha-row math behind the ×127 trick
+For this star, split the shape before drawing it. If `S` is the original shape and `T` is its copy translated by the white shadow's `(2, 15)` offset:
+
+```text
+blue region  = intersection(S, T)
+white region = difference(S, T)
+```
+
+Compute those Boolean operations in your vector editor or geometry tooling, then export the resulting paths as separate fills. There is no full blue silhouette underneath the white rim anymore. In this case the white shadow is fully opaque, so the rim can be drawn directly in white.
+
+```jsx
+<g style={{ isolation: 'isolate' }}>
+  <path d={BLUE_REGION} fill="#4391FF" />
+  <path d={WHITE_REGION} fill="#fff" />
+  {/* Keep the second shadow's soft profile in its own blurred mask. */}
+  <path d={STAR} fill="#ff2222" fillOpacity={0.2} mask="url(#red-rim)" />
+</g>
+```
+
+This rebuild removes the blue fringe around the white rim while retaining the red shadow's blur. It is a hybrid of Boolean geometry and a blurred mask, not a claim that a hard-edged path can reproduce any soft shadow. Semitransparent rims and other blend modes need their own color and opacity treatment.
+
+The mask-only version was also tested. It performed worse here: applying an antialiased mask to another antialiased path reduced the white edge coverage further. The relevant fix is the region partition, not merely replacing a filter with a mask.
+
+[Original SVG](/static/logs/figma-inner-shadows/star2-original.svg) · [Alpha-1 SVG](/static/logs/figma-inner-shadows/star2-alpha1.svg) · [Rebuilt SVG](/static/logs/figma-inner-shadows/star2-rebuilt.svg)
+
+## What the measurements say
+
+RGB RMSE on a common band around the silhouette, in 0–255 channel units. Lower is better. These rows use a white background and an 8× reference.
+
+| Export                        | Original 127 |  Alpha 1 | Mask-only rebuild | Regions + blur |
+| ----------------------------- | -----------: | -------: | ----------------: | -------------: |
+| Star 1: white/red at 60%/60%  |        18.68 | **9.32** |             13.26 |          10.86 |
+| Star 2: white/red at 100%/20% |        10.01 |    11.16 |             15.42 |       **5.41** |
+
+The wider band covering the shadows tells another useful part of the story: on Star 2, alpha 1 improves overall error from 9.04 to 6.08 despite the visible fringe. The partitioned rebuild improves it further, to 3.60. A good average can hide a bad edge.
+
+There is another failure mode with translucent fills. A controlled variant of Star 1 with `fill-opacity=0.36` loses shadow intensity when the multiplier becomes 1. Against its reference on gray, edge error increases from 17.54 to 30.31. `SourceAlpha` includes fill opacity, so this edit changes more than edge coverage. Opacity applied to a group after filtering is a different situation.
+
+We ran 37 cases in Chrome 153, including blur, normal/overlay/multiply blending, different sizes and backgrounds, and subpixel placement. The reference was the original SVG filter rendered at 8× and area-downsampled, with 16× checks and 32× checks for both supplied stars. It approximates a higher-resolution version of that filter; it is **not a Figma screenshot** or proof of a pixel-identical Figma match.
+
+All candidates used Chrome rendering and common measurement masks. We measured both the narrow edge band and a wider band reaching through the blur. Changing the reference resolution or averaging in linear light can change close rankings; the Star 2 partition's advantage survives those checks. Safari and Firefox weren't tested.
+
+[Full measurements](/static/logs/figma-inner-shadows/hardalpha-results.json) · [Fixtures, scripts, and detailed report](https://github.com/joyco-studio/hub/tree/main/temp/hardalpha-validation)
+
+## Inspect the pixels you ship
+
+Render at the target size, then enlarge that screenshot with nearest-neighbor interpolation. Enlarging the SVG itself rerasterizes it and can conceal the original artifact. The enlarged images above come from native-size Chrome renders, not a simulated hard mask.
+
+Higher DPR can make the problem less visible by giving the shape more physical pixels. Blur changes the shadow profile, but doesn't guarantee that its silhouette or final composition will be correct. Check the actual result rather than assuming either setting fixes it.
+
+## What is documented, and what isn't
+
+A [2024 Figma community report](https://forum.figma.com/ask-the-community-7/junky-borders-when-exporting-in-svg-33951) describes related shadow-export fringes and a workaround that separates fill and stroke geometry. It is useful precedent, not a diagnosis of this exact matrix or an official Figma explanation.
+
+I found public examples using the same matrix, including [AlignUI's avatar filter](https://www.alignui.com/docs/v1.2/ui/avatar), but no authoritative explanation for why the multiplier is specifically 127 or a documented guarantee that replacing it with 1 preserves every shadow. The recommendations here come from the supplied exports and the comparisons above.
+
+**Start with the tiny edit. Keep it if the edge and shading hold up. If a halo or intensity change remains, rebuild the affected regions and preserve the soft parts of the effect deliberately.** Star 1 makes the case for the cheap fix; Star 2 shows why the full rebuild still matters.
