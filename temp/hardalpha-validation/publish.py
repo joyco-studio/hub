@@ -8,13 +8,15 @@ assets=root.parents[1]/'public/static/logs/figma-inner-shadows'
 assets.mkdir(parents=True,exist_ok=True)
 font=ImageFont.truetype('/System/Library/Fonts/Menlo.ttc',11)
 for fixture,variants in [('figma_star_original',['a127','a1']),('figma_star2_original',['a127','a1','partition'])]:
-    native=Image.new('RGB',(len(variants)*88+16,97),'white')
+    native=Image.new('RGBA',(len(variants)*88+16,97),(0,0,0,0))
     draw=ImageDraw.Draw(native)
     for i,variant in enumerate(variants):
-        raster=Image.open(root/'renders'/f'{fixture}-{variant}-1.png').convert('RGB')
+        star='star1' if fixture=='figma_star_original' else 'star2'
+        suffix={'a127':'original','a1':'alpha1','partition':'rebuilt'}[variant]
+        raster=Image.open(root/'renders'/f'{star}-{suffix}-transparent.png').convert('RGBA')
         x=16+i*88
         native.paste(raster,(x,12))
-        draw.text((x,70),{'a127':'127','a1':'1','partition':'Rebuilt'}[variant],font=font,fill='#444444')
+        draw.text((x,70),{'a127':'127','a1':'1','partition':'Rebuilt'}[variant],font=font,fill='#888888')
         if fixture=='figma_star2_original' and variant in ['a1','partition']:
             raster.resize((416,392),Image.Resampling.NEAREST).save(assets/f'star2-{variant}-pixels.png')
     native.save(assets/('star1-native.png' if fixture=='figma_star_original' else 'star2-native.png'))

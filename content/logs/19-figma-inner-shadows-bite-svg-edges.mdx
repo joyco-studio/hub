@@ -4,27 +4,69 @@ description: Perfect in Figma. Jagged in the browser. The tiny SVG fix that help
 author: 'justkahdri'
 ---
 
-You export an icon from Figma, drop the SVG into the app, and the diagonal edges look chewed up. Open the filter and there it is: `hardAlpha`, with an alpha multiplier of `127`.
+You export an icon from Figma, drop the SVG into the app, and one edge looks chewed up. The face of the icon is smooth. The thin shadow along its diagonal looks like someone took tiny bites out of it.
 
-**Try changing that multiplier to `1` first.** It can remove much of the bite with a tiny edit. But check the result at its actual size, on its actual background: some shadows develop a colored fringe, and translucent fills can lose shadow intensity. When that happens, rebuilding the affected regions gives you control over the edge that the one-number fix doesn't.
+It is tempting to blame the image size, the browser, or the way the SVG is embedded. But the useful clue is inside the icon itself: a plain filled path can look smooth while the shadow beside it stair-steps along the same angle. Something happens while the shadow is being built.
 
-We tested both outcomes in Chrome. Here is where each fix earns its place.
+To see why, start with the pixels along that edge.
 
-## What 127 does
+## A diagonal needs more than on and off
 
-These Figma exports contain this primitive before each inner shadow:
+A vector can describe a perfectly smooth diagonal. A screen has to draw it on a grid of square pixels. Most pixels along the boundary belong partly to the shape and partly to the background.
+
+**Antialiasing preserves that partial coverage.** If the shape covers roughly a third of an edge pixel, that pixel contributes roughly a third of the shape's color. The background supplies the rest. Those intermediate values make the diagonal look smooth at its actual size.
+
+Force those pixels to fully on or fully off and the grid becomes visible. That is aliasing: the staircase was always in the pixel grid; the intermediate coverage values were hiding it.
+
+<Image
+  src="/static/logs/figma-inner-shadows/alpha-coverage.png"
+  alt="Left: edge pixels preserve partial coverage. Right: forcing coverage to on or off exposes the staircase."
+  width={1472}
+  height={688}
+  className="dark:hue-rotate-180 dark:invert"
+  unoptimized
+/>
+
+The illustration shows the basic idea, not the exact output of Figma's filter. It labels smooth alpha in its familiar 0–255 representation; SVG filter calculations use the equivalent normalized range, 0–1.
+
+## What SourceAlpha and hardAlpha mean
+
+An SVG pixel has red, green, blue, and **alpha**. Alpha describes opacity: 0 is transparent, 1 is opaque, and values between them let the background show through. At a shape's edge, alpha also carries the partial coverage used for antialiasing.
+
+`SourceAlpha` is the source graphic's alpha channel, with the colors removed. Think of it as a stencil of the shape: solid in the middle, transparent outside, and partly transparent along the boundary. If the fill itself is translucent, that opacity is already part of the stencil.
+
+An inner shadow needs a stencil like this. The exporter takes the silhouette, moves a copy by the shadow's offset, optionally blurs it, and subtracts that copy from the unshifted silhouette. The remaining band is the rim that gets colored and blended over the icon.
+
+In these Figma exports, there is an extra step before the offset:
 
 ```xml
 <feColorMatrix in="SourceAlpha" type="matrix"
-  values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 127 0"
+  values="0 0 0 0   0
+          0 0 0 0   0
+          0 0 0 0   0
+          0 0 0 127 0"
   result="hardAlpha" />
 ```
 
-The last row multiplies the source alpha by 127 and clamps it to the range 0–1. An edge pixel with 30% coverage becomes fully opaque. So does one with 1% coverage. Values below `1/127` can remain fractional, so this isn't literally a one-bit mask, but it hardens almost the entire antialiased transition.
+`feColorMatrix` recalculates the pixel channels. Here the first three rows keep the stencil colorless; the last row says **multiply alpha by 127**. Values above 1 are clamped back to 1.
 
-Diagonals, curves, and edges between pixel boundaries need that partial coverage. Hardening it changes the shadow's silhouette and produces the staircase. Horizontal and vertical edges aligned exactly to the pixel grid have less coverage information to lose; move them between pixels and they can suffer too.
+Follow one edge pixel through it: alpha `0.3` becomes `38.1`, then clamps to `1`. A pixel that was only 30% covered is now treated as fully covered. Even alpha `0.01` becomes opaque. Most of the intermediate edge coverage has disappeared before the shadow is offset or blurred.
 
-The [filter specification](https://www.w3.org/TR/filter-effects-1/#feColorMatrixElement) defines the matrix operation. `hardAlpha` is just the name Figma gives its intermediate result, not a special SVG feature.
+`result="hardAlpha"` gives that hardened stencil a name so later filter steps can reuse it. **hardAlpha is a named intermediate image, not a special SVG property or an export setting.**
+
+The name fits its purpose: the alpha has been hardened. It is not literally a one-bit mask, because positive values below `1/127` can remain fractional. But most of the antialiased transition has been pushed toward an all-or-nothing edge. The [filter specification](https://www.w3.org/TR/filter-effects-1/#feColorMatrixElement) defines that matrix math.
+
+## Why the shadow bites where the fill doesn't
+
+The plain fill can still use its original partial coverage. The shadow is built from the hardened version. That is why two parts of the same icon can behave differently along the same diagonal.
+
+A horizontal or vertical edge placed exactly on the pixel grid has little partial coverage to lose. Diagonals and curves depend on it. Move a straight edge between pixels and it can show the problem too.
+
+Blur can soften the shifted copy inside the shadow band, but it does not restore the coverage already discarded from the unshifted stencil. Increasing it changes the look of the shadow without guaranteeing a clean silhouette.
+
+Enlarging the SVG can hide the symptom for another reason: the browser rasterizes the shape onto a finer grid. To inspect the icon you will actually ship, render it at the target size and enlarge that screenshot with nearest-neighbor interpolation. Otherwise, you are looking at a new render of a larger icon.
+
+Now there is a useful place to intervene: the step that hardened the alpha in the first place.
 
 ## The small fix: 127 → 1
 
@@ -48,7 +90,7 @@ This first star has an opaque blue fill and two inner shadows: white at 60% with
   unoptimized
 />
 
-Against the original filter rendered at 8× and downsampled, edge error dropped from **18.68 to 9.32**. The improvement held on gray and dark backgrounds, and at smaller and larger sizes. Adding an overlay variant didn't invalidate it either. Multiple shadows, blur, or a blend mode alone aren't reasons to skip the simple fix.
+Look at the diagonal red rim: the alpha-1 edit reduces the harsh steps while keeping the two shadow bands recognizable. It also held up on gray and dark backgrounds in our comparisons. Two shadows and blur are not, by themselves, reasons to skip the simple edit.
 
 [Original SVG](/static/logs/figma-inner-shadows/star1-original.svg) · [Alpha-1 SVG](/static/logs/figma-inner-shadows/star1-alpha1.svg)
 
@@ -129,30 +171,21 @@ The mask-only version was also tested. It performed worse here: applying an anti
 
 [Original SVG](/static/logs/figma-inner-shadows/star2-original.svg) · [Alpha-1 SVG](/static/logs/figma-inner-shadows/star2-alpha1.svg) · [Rebuilt SVG](/static/logs/figma-inner-shadows/star2-rebuilt.svg)
 
-## What the measurements say
+## What to look for before keeping the fix
 
-RGB RMSE on a common band around the silhouette, in 0–255 channel units. Lower is better. These rows use a white background and an 8× reference.
+Check the result at the size and on the background where it will be used. Three details matter:
 
-| Export                        | Original 127 |  Alpha 1 | Mask-only rebuild | Regions + blur |
-| ----------------------------- | -----------: | -------: | ----------------: | -------------: |
-| Star 1: white/red at 60%/60%  |        18.68 | **9.32** |             13.26 |          10.86 |
-| Star 2: white/red at 100%/20% |        10.01 |    11.16 |             15.42 |       **5.41** |
+- **The silhouette:** did the staircase improve, or did a new colored line appear around the edge?
+- **The shading:** do the light and dark bands still have the same apparent strength?
+- **The material:** does the icon still read as the same raised, inset, or glossy surface?
 
-The wider band covering the shadows tells another useful part of the story: on Star 2, alpha 1 improves overall error from 9.04 to 6.08 despite the visible fringe. The partitioned rebuild improves it further, to 3.60. A good average can hide a bad edge.
+Star 1 makes the case for keeping the small edit. Star 2 shows a specific reason to go further: the white rim picks up blue from the fill below it. The separate regions remove that overlap, which is the change to look for in the enlarged comparison.
 
-There is another failure mode with translucent fills. A controlled variant of Star 1 with `fill-opacity=0.36` loses shadow intensity when the multiplier becomes 1. Against its reference on gray, edge error increases from 17.54 to 30.31. `SourceAlpha` includes fill opacity, so this edit changes more than edge coverage. Opacity applied to a group after filtering is a different situation.
+Translucent fills need another check. Because `SourceAlpha` already includes the fill opacity, changing 127 to 1 can weaken the whole shadow, not just soften its edge. We reproduced that by lowering Star 1's fill opacity. Moving opacity onto a group after the filter is a different operation.
 
-We ran 37 cases in Chrome 153, including blur, normal/overlay/multiply blending, different sizes and backgrounds, and subpixel placement. The reference was the original SVG filter rendered at 8× and area-downsampled, with 16× checks and 32× checks for both supplied stars. It approximates a higher-resolution version of that filter; it is **not a Figma screenshot** or proof of a pixel-identical Figma match.
+The examples above are native-size Chrome captures. We also checked blur, blend modes, backgrounds, and subpixel positions against supersampled versions of the original filters. That reference helps compare the edge behavior; it is not a screenshot of Figma's renderer. The measurements and reproduction scripts are available separately for readers who want to inspect the experiment.
 
-All candidates used Chrome rendering and common measurement masks. We measured both the narrow edge band and a wider band reaching through the blur. Changing the reference resolution or averaging in linear light can change close rankings; the Star 2 partition's advantage survives those checks. Safari and Firefox weren't tested.
-
-[Full measurements](/static/logs/figma-inner-shadows/hardalpha-results.json) · [Fixtures, scripts, and detailed report](https://github.com/joyco-studio/hub/tree/main/temp/hardalpha-validation)
-
-## Inspect the pixels you ship
-
-Render at the target size, then enlarge that screenshot with nearest-neighbor interpolation. Enlarging the SVG itself rerasterizes it and can conceal the original artifact. The enlarged images above come from native-size Chrome renders, not a simulated hard mask.
-
-Higher DPR can make the problem less visible by giving the shape more physical pixels. Blur changes the shadow profile, but doesn't guarantee that its silhouette or final composition will be correct. Check the actual result rather than assuming either setting fixes it.
+[Detailed report and reproduction](https://github.com/joyco-studio/hub/tree/main/temp/hardalpha-validation) · [Measurement data](/static/logs/figma-inner-shadows/hardalpha-results.json)
 
 ## What is documented, and what isn't
 

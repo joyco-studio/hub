@@ -1,0 +1,41 @@
+[
+  {
+    "id": "amber",
+    "name": "Amber",
+    "fill": "#D7A04A",
+    "light": "#FFE4A3",
+    "lightOpacity": 0.75,
+    "lightY": 2,
+    "dark": "#7B4A1F",
+    "darkOpacity": 0.35,
+    "darkY": -2,
+    "background": "#F7F4ED",
+    "purpose": "Simple, readable bevel"
+  },
+  {
+    "id": "enamel",
+    "name": "Blue enamel",
+    "fill": "#5676C8",
+    "light": "#CAD8FF",
+    "lightOpacity": 0.85,
+    "lightY": 2,
+    "dark": "#253B70",
+    "darkOpacity": 0.45,
+    "darkY": -2,
+    "background": "#F0F3FA",
+    "purpose": "Same light, cooler material"
+  },
+  {
+    "id": "slate",
+    "name": "Slate + porcelain",
+    "fill": "#7B8EA8",
+    "light": "#FFFFFF",
+    "lightOpacity": 1,
+    "lightY": 3,
+    "dark": "#34465F",
+    "darkOpacity": 0.3,
+    "darkY": -2,
+    "background": "#FFFFFF",
+    "purpose": "Candidate for the halo example"
+  }
+]

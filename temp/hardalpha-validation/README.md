@@ -147,7 +147,10 @@ WRITE_CASES_ONLY=1 node temp/hardalpha-validation/render.cjs
 .context/hardalpha-venv/bin/python temp/hardalpha-validation/boolean.py
 node temp/hardalpha-validation/render.cjs
 .context/hardalpha-venv/bin/python temp/hardalpha-validation/analyze.py
+node temp/hardalpha-validation/render-public.cjs
 .context/hardalpha-venv/bin/python temp/hardalpha-validation/publish.py
 ```
 
 Los scripts no necesitan ejecutar el hub ni modificar sus dependencias. Los renders intermedios nativos y supersampleados se regeneran y están ignorados por git; las comparaciones, fixtures, parámetros, paths calculados y resultados numéricos sí se conservan en el repositorio.
+
+Las ilustraciones publicadas en el log se vuelven a renderizar directamente desde los SVG con fondo transparente mediante `render-public.cjs`. No se elimina el blanco por color: eso borraría las luces blancas de la estrella. Los fondos de las mediciones y las comparaciones de este informe permanecen fijos, y los resultados numéricos siguen correspondiendo a esos renders controlados.

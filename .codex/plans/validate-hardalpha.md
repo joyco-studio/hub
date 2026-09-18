@@ -36,3 +36,22 @@ Article work completed: log 19 now presents alpha 1 as the first fix, the reprod
 User correction: preserve the original title, **19 - The aliasing lurks in the shadows**. Restored it and replaced the technical summary with the more inviting subtitle: “Perfect in Figma. Jagged in the browser. The tiny SVG fix that helps, and the halo it can leave behind.”
 
 Validation passed: production build, log numbering, targeted Prettier, SVG parsing, minimal-patch checks, report links, and git whitespace checks. Chrome verified the article at 1440px and 390px: four images loaded; native comparison images stayed 192 × 97 and 280 × 97; all six downloads returned 200; no runtime errors, missing heading anchors, or horizontal overflow. Existing baseline-browser-mapping, Shiki-version, and module-type build warnings remain nonblocking. Intermediate supersampled rasters are gitignored and reproducible; comparison images, raw user fixtures, scripts, parameters, computed paths, and metrics are included.
+
+## Editorial revision and improved Figma examples
+
+The user found the original article's explanation stronger and wants harmonious stars to re-export from Figma. Preserve the original title and avoid em dashes throughout.
+
+1. Recover the original narrative order: visible symptom, coverage/antialiasing, source alpha, the hardAlpha filter chain, and only then the remedies. Retain the experimental corrections instead of restoring the original's inaccurate universal claims.
+2. Prepare three restrained palettes with coherent lighting, short offsets, and exact editable-effect recipes. Render local SVG prototypes in Chrome to evaluate appearance and whether they retain the required aliasing/halo behavior. Label these as prototypes, not Figma exports.
+3. Ask for the target Figma file while preparing the designs independently. If accessible, create native editable stars and effects there; otherwise provide a self-contained Figma setup kit and settings. Keep proven article illustrations until replacement exports have been verified.
+4. Validate and push the narrative improvements and example kit to the existing PR, preserving the existing reproduction data.
+
+Additional user direction: remove the RMSE table from the article body because it does not explain the issue to readers. Use the provided alpha-coverage illustration and a Trazo flow diagram instead. The supplied illustration already contains labels, so display it without a redundant caption, with the explanation in alt text only.
+
+Implemented the explanation-first narrative and removed the metric table and numerical result commentary from the article body. Added the original user illustration, a Trazo diagram of the actual shadow filter chain, and a practical visual checklist. Prepared three harmonious local star prototypes and exact native-effect recipes in `temp/star-design-kit`; Amber and Slate retain useful contrasting behaviors in Chrome previews. Awaiting an optional Figma file link; current article screenshots remain the verified exports until replacement exports are available.
+
+User refinement: transparent PNG/SVG backgrounds. Re-rendered publication star assets from their transparent SVG sources, preserving white highlights instead of color-keying the measured PNGs. Proposal artwork also uses transparency. Removed the forced white background from the supplied coverage illustration and added dark-theme contrast adaptation; it still has no visible caption. Fixed-background captures remain in the technical appendix for reproducibility.
+
+Final revision validated: production build, log numbering, targeted formatting, and whitespace checks passed. Chrome checks at 1440px and 390px confirm five loaded transparent illustrations, six working downloads, zero result tables, no duplicate coverage caption, no runtime errors, no missing anchors, and no horizontal overflow. Visually reviewed the coverage illustration, Trazo flow, and enlarged halo comparison on the dark site background. The optional Figma file link was not supplied; the editable-effect recipes and transparent prototype previews are ready in the design kit.
+
+Final user refinement: removed the Trazo filter-flow diagram because it duplicated the preceding explanation. Retained the coverage illustration and the SourceAlpha/hardAlpha prose.
