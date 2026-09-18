@@ -68,3 +68,19 @@ The user supplied the actual `temp/slate-porcelain.svg` export. Its white highli
 Slate validation completed in Chrome 153 at native size and 8×/16×/32× on white, gray, and dark. The alpha-only edit improves the jagged outline but leaves a gray-blue fringe over white; partitioning removes the underlying slate contribution. Edge error on white at 32×: 21.17 original, 11.60 alpha 1, 6.58 reconstruction. Gray is nearly tied and dark depends on reference resolution, so the article does not claim universal superiority. Inline and canvas renders match for all three variants.
 
 Published the actual export and transparent comparisons with centered labels, preserving dark-then-white composition. Updated the article counterexample and recipes provenance, kept the earlier fixtures and fixed-background measurements. Production build, log numbering, formatting, matrix-only patch check, SVG parsing, alpha-channel checks, and whitespace checks passed. Chrome verified five images and seven downloads at 1440px and 390px, with no errors, missing anchors, or overflow.
+
+## Make the examples legible
+
+The user spotted the unreplaced first illustration and cannot see the slate halo on the dark site. Replace the first comparison and its caption with the actual slate export so one example carries the explanation. Keep transparent PNGs and centered labels. Ask whether the user prefers a background selector to reveal the verified light-background fringe, or another fixture that reads clearly on dark. Implement the selected presentation, inspect it at desktop/mobile widths, and update the existing PR.
+
+No preference response arrived while the first comparison was being corrected. Proceeded with the suggested light/dark selector using existing MDX tabs. It changes only the CSS surface behind the same transparent native-pixel PNGs, defaults to the background where the measured fringe is visible, and explicitly explains why the dark view is inconclusive. Both enlarged variants use nearest-neighbor display scaling.
+
+User chose separate examples for light and dark and requested a wider first image so its caption fits in two lines. Added Slate + graphite as an explicitly labeled palette variant and validated it with the same native/8×/16×/32× Chrome pipeline. On dark its edge error is 24.24/13.26/7.44 for 127/1/regions, with the same ranking across references and exact inline/canvas agreement. Transparent native images remain at 52 × 49; the first image gains transparent margins to reach 320px. Existing tabs show Porcelain or Graphite, defaulting according to Light/Radio vs Dark/Terminal themes, with manual selection available.
+
+Visual checks found Terminal globally recolors images green. Scoped a filter override to these measurement illustrations so their source colors remain accurate; the rest of the theme remains intact.
+
+Final steering: remove tabs entirely. A reusable ThemeImage now switches source and alt from the active theme for all four star illustrations. It uses the existing next-themes provider, preserves transparent backgrounds, and has no controls. Light/Radio selects Porcelain; Dark/Terminal selects Graphite.
+
+Clarified the high-contrast conditions: contrasting fill and opaque rim, with a background close to the rim color, expose residual fill. The Porcelain-on-dark observation is explicitly used to explain why the halo is not universally visible.
+
+Completed final validation after removing controls: production build, ESLint, Prettier, log numbering, SVG/alpha checks, and whitespace checks passed. Chrome at 1440px and 390px verified live image switching through Light/Dark/Radio/Terminal, exactly two caption lines, 320px first images, four loaded star illustrations with transparent backgrounds and unchanged colors, nine working downloads, and no tabs, runtime errors, or horizontal overflow. Visually inspected the dark halo comparison and Terminal mobile caption.

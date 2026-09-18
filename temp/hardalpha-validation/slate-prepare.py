@@ -43,3 +43,17 @@ rebuilt = f'''<svg xmlns="http://www.w3.org/2000/svg" width="52" height="49" vie
 '''
 (root.parent / 'slate-porcelain-rebuilt.svg').write_text(rebuilt)
 (root / 'slate-paths.json').write_text(json.dumps({'shape': d, 'base': base, 'rim': rim}, indent=2) + '\n')
+
+# Controlled dark-surface counterpart: preserve geometry, offsets and opacity.
+# This is a palette variant of the supplied export, not another Figma export.
+dark_source = source.replace(
+    '0 0 0 0 0.203922 0 0 0 0 0.27451 0 0 0 0 0.372549 0 0 0 0.3 0',
+    '0 0 0 0 0.796078 0 0 0 0 0.847059 0 0 0 0 0.92549 0 0 0 0.3 0'
+).replace(
+    '0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0',
+    '0 0 0 0 0.062745 0 0 0 0 0.062745 0 0 0 0 0.062745 0 0 0 1 0'
+)
+(root.parent / 'slate-graphite.svg').write_text(dark_source)
+(root.parent / 'slate-graphite-alpha1.svg').write_text(dark_source.replace('0 127 0', '0 1 0'))
+dark_rebuilt = rebuilt.replace('fill="#34465F"', 'fill="#CBD8EC"').replace(f'<path d="{rim}" fill="white"', f'<path d="{rim}" fill="#101010"')
+(root.parent / 'slate-graphite-rebuilt.svg').write_text(dark_rebuilt)

@@ -79,58 +79,100 @@ Change the alpha row in the affected inner-shadow block:
 
 Leave the rest of the matrix and filter graph intact. The result can still be named `hardAlpha`; its pixels now retain the source alpha. Don't replace every occurrence of `127` in the file: coordinates and other effects are unrelated to this edit.
 
-This first star has an opaque blue fill and two inner shadows: white at 60% with offset `(2, 15)`, and red at 60% with offset `(0, -4)` and blur `stdDeviation=1`.
+This star has an opaque slate fill and two inner shadows: a soft band at 30% with offset `(0, -2)` and blur `stdDeviation=1`, followed by an opaque rim at `(0, 3)` with no blur. Both use normal blending. The light theme shows Porcelain, the supplied Figma export. Dark themes show Graphite, a palette variant of that export with a dark rim and a soft light.
 
-<Figure
-  src="/static/logs/figma-inner-shadows/star1-native.png"
-  alt="Chrome renders of the first star at 52 by 49 pixels: original 127 on the left and alpha 1 on the right"
-  caption="Actual raster size. Two shadows and blur, and the small fix still helps."
-  width={192}
-  height={97}
-  unoptimized
-/>
+<figure className="mx-auto my-6 max-w-80 [&_img]:filter-none!">
+  <ThemeImage
+    light={{
+      src: '/static/logs/figma-inner-shadows/slate-fix-native.png',
+      alt: 'Porcelain: original 127 and alpha 1 at 52 by 49 pixels',
+    }}
+    dark={{
+      src: '/static/logs/figma-inner-shadows/graphite-fix-native.png',
+      alt: 'Graphite: original 127 and alpha 1 at 52 by 49 pixels',
+    }}
+    width={320}
+    height={97}
+    unoptimized
+  />
+  <figcaption className="text-muted-foreground mt-2 text-center text-sm whitespace-pre-line">
+    {'Original filter and alpha 1.\nEach at 52 × 49 px.'}
+  </figcaption>
+</figure>
 
-Look at the diagonal red rim: the alpha-1 edit reduces the harsh steps while keeping the two shadow bands recognizable. It also held up on gray and dark backgrounds in our comparisons. Two shadows and blur are not, by themselves, reasons to skip the simple edit.
+Look at the bevel along the upper diagonals: alpha 1 softens the jagged outline while keeping the soft shading. Both palettes improve on white, gray, and dark backgrounds. Two shadows and blur are not, by themselves, reasons to skip the simple edit.
 
-[Original SVG](/static/logs/figma-inner-shadows/star1-original.svg) · [Alpha-1 SVG](/static/logs/figma-inner-shadows/star1-alpha1.svg)
+[Porcelain: original](/static/logs/figma-inner-shadows/slate-original.svg) · [alpha 1](/static/logs/figma-inner-shadows/slate-alpha1.svg) · [Graphite: original](/static/logs/figma-inner-shadows/graphite-original.svg) · [alpha 1](/static/logs/figma-inner-shadows/graphite-alpha1.svg)
 
 ## When the small fix leaves a fringe
 
-For a subtler example, this Slate + porcelain star uses an opaque `#7B8EA8` fill, a dark `#34465F` inner shadow at 30% with offset `(0, -2)` and blur `stdDeviation=1`, then a white inner shadow at **100%** with offset `(0, 3)` and no blur. Both shadows use normal blending in the Figma export.
+The same star also shows why a smoother silhouette is not the only check. **The visible halo in these examples depends on a high-contrast combination:** an opaque white or near-black rim over a contrasting slate fill, viewed against a background close to the rim's color. Alpha 1 preserves partial coverage in both layers, so a little of the fill can show through the rim at the edge.
 
-The small edit improves the jagged outline here too, but leaves a pale gray-blue line around the white tip and horizontal edges. On a white background, the white rim should disappear into the background, which makes that residual fringe easy to spot. On dark backgrounds, look for a cool tint along the white rim; the difference is subtler.
+Slate + porcelain made this distinction clear: its halo was barely visible on the dark site background. On white, the white rim disappears into the background while the residual slate-colored line remains. Graphite reverses the setup for a dark surface. These are specific contrast conditions that expose the overlap; they do not mean every inner shadow develops a visible halo after the edit.
 
-<ImageCols>
-  <Figure
-    src="/static/logs/figma-inner-shadows/slate-a1-pixels.png"
-    alt="Nearest-neighbor enlargement of the alpha-1 slate star showing a gray-blue fringe around its white rim"
-    caption="Alpha 1: slate color leaks into the white rim."
-    width={416}
-    height={392}
-    className="my-0"
-    unoptimized
-  />
-  <Figure
-    src="/static/logs/figma-inner-shadows/slate-rebuilt-pixels.png"
-    alt="Nearest-neighbor enlargement of the rebuilt slate star with no slate fill beneath the white rim"
-    caption="Rebuilt regions: no slate fill beneath the white rim."
-    width={416}
-    height={392}
-    className="my-0"
-    unoptimized
-  />
+Follow the horizontal top edges of the arms. With **Porcelain on light**, alpha 1 leaves a gray-blue line around the white rim. With **Graphite on dark**, it leaves a lighter line around the dark rim. Separating the regions removes the fill color beneath either rim.
+
+The example follows the site theme: Porcelain for Light and Radio, Graphite for Dark and Terminal. Graphite keeps the export's shape, offsets, blur, and opacities, using a `#101010` rim and a soft `#CBD8EC` light. It is a controlled palette variant rather than a separate Figma export.
+
+<ImageCols className="[&_img]:filter-none! [&_img]:[image-rendering:pixelated]">
+  <figure className="mx-auto my-0 max-w-[416px]">
+    <ThemeImage
+      light={{
+        src: '/static/logs/figma-inner-shadows/slate-a1-pixels.png',
+        alt: 'Porcelain alpha 1: gray-blue fringe around the white rim',
+      }}
+      dark={{
+        src: '/static/logs/figma-inner-shadows/graphite-a1-pixels.png',
+        alt: 'Graphite alpha 1: light fringe around the dark rim',
+      }}
+      width={416}
+      height={392}
+      unoptimized
+    />
+    <figcaption className="text-muted-foreground mt-2 text-center text-sm whitespace-pre-line">
+      {'Alpha 1: fill color leaks into the rim.'}
+    </figcaption>
+  </figure>
+  <figure className="mx-auto my-0 max-w-[416px]">
+    <ThemeImage
+      light={{
+        src: '/static/logs/figma-inner-shadows/slate-rebuilt-pixels.png',
+        alt: 'Porcelain rebuilt: no slate fill beneath the white rim',
+      }}
+      dark={{
+        src: '/static/logs/figma-inner-shadows/graphite-rebuilt-pixels.png',
+        alt: 'Graphite rebuilt: no slate fill beneath the dark rim',
+      }}
+      width={416}
+      height={392}
+      unoptimized
+    />
+    <figcaption className="text-muted-foreground mt-2 text-center text-sm whitespace-pre-line">
+      {'Separate regions: no fill beneath the rim.'}
+    </figcaption>
+  </figure>
 </ImageCols>
 
-<Figure
-  src="/static/logs/figma-inner-shadows/slate-native.png"
-  alt="Slate star at native size, with centered labels for original 127, alpha 1, and rebuilt regions"
-  caption="The same case at its actual 52 × 49 raster size."
-  width={280}
-  height={97}
-  unoptimized
-/>
+<figure className="mx-auto my-6 max-w-[280px] [&_img]:filter-none!">
+  <ThemeImage
+    light={{
+      src: '/static/logs/figma-inner-shadows/slate-native.png',
+      alt: 'Porcelain at native size: original 127, alpha 1, and separate regions',
+    }}
+    dark={{
+      src: '/static/logs/figma-inner-shadows/graphite-native.png',
+      alt: 'Graphite at native size: original 127, alpha 1, and separate regions',
+    }}
+    width={280}
+    height={97}
+    unoptimized
+  />
+  <figcaption className="text-muted-foreground mt-2 text-center text-sm whitespace-pre-line">
+    {'The same case at its actual 52 × 49 raster size.'}
+  </figcaption>
+</figure>
 
-At an edge pixel with coverage `A`, the softened white shadow can have alpha `A` over slate fill that also has alpha `A`. Normal source-over composition leaves a slate contribution proportional to `A × (1 − A)`. At 50% coverage, that's 0.25 of premultiplied slate left underneath the white. On white, it reads as a pale gray-blue line.
+For Porcelain, at an edge pixel with coverage `A`, the softened white shadow can have alpha `A` over slate fill that also has alpha `A`. Normal source-over composition leaves a slate contribution proportional to `A × (1 − A)`. At 50% coverage, that's 0.25 of premultiplied slate left underneath the white. On white, it reads as a pale gray-blue line. Graphite has the same overlap with a dark rim, so the residual slate color reads as a lighter line on dark.
 
 That is a compositing explanation of this measured case, following the [source-over rules](https://www.w3.org/TR/compositing-1/#porterduffcompositingoperators_srcover). It isn't evidence of Figma's reason for choosing 127.
 
@@ -174,7 +216,9 @@ This rebuild removes the slate-colored fringe around the white rim while retaini
 
 In the earlier blue-and-white fixture, a mask-only rebuild made the fringe worse: applying an antialiased mask to another antialiased path reduced the white edge coverage further. That comparison remains in the detailed report. The relevant fix is the region partition, not merely replacing a filter with a mask.
 
-[Original SVG](/static/logs/figma-inner-shadows/slate-original.svg) · [Alpha-1 SVG](/static/logs/figma-inner-shadows/slate-alpha1.svg) · [Rebuilt SVG](/static/logs/figma-inner-shadows/slate-rebuilt.svg)
+[Porcelain: original](/static/logs/figma-inner-shadows/slate-original.svg) · [alpha 1](/static/logs/figma-inner-shadows/slate-alpha1.svg) · [Graphite: original](/static/logs/figma-inner-shadows/graphite-original.svg) · [alpha 1](/static/logs/figma-inner-shadows/graphite-alpha1.svg)
+
+[Rebuilt Porcelain](/static/logs/figma-inner-shadows/slate-rebuilt.svg) · [Rebuilt Graphite](/static/logs/figma-inner-shadows/graphite-rebuilt.svg)
 
 ## What to look for before keeping the fix
 
@@ -184,13 +228,13 @@ Check the result at the size and on the background where it will be used. Three 
 - **The shading:** do the light and dark bands still have the same apparent strength?
 - **The material:** does the icon still read as the same raised, inset, or glossy surface?
 
-The first star makes the case for keeping the small edit. Slate + porcelain shows a reason to go further: the white rim picks up color from the fill below it even after the staircase improves. The separate regions remove that overlap. This helps most clearly on white; our gray and dark comparisons do not establish an equally clear overall advantage for the rebuild. Judge the result on the background you intend to use.
+The examples show both the benefit of the small edit and a reason to go further: a rim can pick up color from the fill below it even after the staircase improves. Porcelain exposes it on light; Graphite exposes it on dark. Reversing their backgrounds makes the fringe less apparent, and the measurements do not show the same clear advantage for the rebuild there. Judge the result on the background you intend to use.
 
-Translucent fills need another check. Because `SourceAlpha` already includes the fill opacity, changing 127 to 1 can weaken the whole shadow, not just soften its edge. We reproduced that by lowering Star 1's fill opacity. Moving opacity onto a group after the filter is a different operation.
+Translucent fills need another check. Because `SourceAlpha` already includes the fill opacity, changing 127 to 1 can weaken the whole shadow, not just soften its edge. We reproduced that by lowering the fill opacity in an earlier export. Moving opacity onto a group after the filter is a different operation.
 
 The examples above are native-size Chrome captures. We also checked blur, blend modes, backgrounds, and subpixel positions against supersampled versions of the original filters. That reference helps compare the edge behavior; it is not a screenshot of Figma's renderer. The measurements and reproduction scripts are available separately for readers who want to inspect the experiment.
 
-[Detailed report and reproduction](https://github.com/joyco-studio/hub/tree/main/temp/hardalpha-validation) · [Original measurements](/static/logs/figma-inner-shadows/hardalpha-results.json) · [Slate measurements](/static/logs/figma-inner-shadows/slate-results.json)
+[Detailed report and reproduction](https://github.com/joyco-studio/hub/tree/main/temp/hardalpha-validation) · [Original measurements](/static/logs/figma-inner-shadows/hardalpha-results.json) · [Porcelain measurements](/static/logs/figma-inner-shadows/slate-results.json) · [Graphite measurements](/static/logs/figma-inner-shadows/graphite-results.json)
 
 ## What is documented, and what isn't
 
@@ -198,4 +242,4 @@ A [2024 Figma community report](https://forum.figma.com/ask-the-community-7/junk
 
 I found public examples using the same matrix, including [AlignUI's avatar filter](https://www.alignui.com/docs/v1.2/ui/avatar), but no authoritative explanation for why the multiplier is specifically 127 or a documented guarantee that replacing it with 1 preserves every shadow. The recommendations here come from the supplied exports and the comparisons above.
 
-**Start with the tiny edit. Keep it if the edge and shading hold up. If a halo or intensity change remains, rebuild the affected regions and preserve the soft parts of the effect deliberately.** The first star makes the case for the cheap fix; Slate + porcelain shows when the extra work still matters.
+**Start with the tiny edit. Keep it if the edge and shading hold up. If a halo or intensity change remains, rebuild the affected regions and preserve the soft parts of the effect deliberately.** A cleaner silhouette is the first check. The color and strength of the shadow are the next.

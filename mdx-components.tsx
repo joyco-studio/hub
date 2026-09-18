@@ -12,6 +12,7 @@ import { PackageManagerCommand } from './components/package-manager-command'
 import { AgentsScriptCommand } from './components/agents-script-command'
 import { Mermaid } from './components/mermaid'
 import { Diagram } from './components/flow'
+import { ThemeImage } from './components/theme-image'
 
 export function getMDXComponents(
   components?: MDXComponents,
@@ -21,6 +22,7 @@ export function getMDXComponents(
   return {
     ...defaultMdxComponents,
     Mermaid,
+    ThemeImage,
     Diagram: (props: React.ComponentProps<typeof Diagram>) => (
       <Diagram {...props} articleNumber={articleNumber} />
     ),

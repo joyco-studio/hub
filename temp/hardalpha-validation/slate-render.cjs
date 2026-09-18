@@ -2,12 +2,14 @@ const fs = require('node:fs')
 const path = require('node:path')
 const { chromium } = require(process.env.PLAYWRIGHT_PATH || 'playwright')
 const root = __dirname
+const fixture = process.env.SHADOW_FIXTURE || 'slate'
+const material = fixture === 'graphite' ? 'slate-graphite' : 'slate-porcelain'
 const output = path.join(root, 'renders')
 const sources = Object.fromEntries(
   [
-    ['a127', 'slate-porcelain'],
-    ['a1', 'slate-porcelain-alpha1'],
-    ['rebuilt', 'slate-porcelain-rebuilt'],
+    ['a127', material],
+    ['a1', `${material}-alpha1`],
+    ['rebuilt', `${material}-rebuilt`],
   ].map(([key, name]) => [
     key,
     fs.readFileSync(path.join(root, '..', name + '.svg'), 'utf8'),
@@ -69,7 +71,7 @@ function svg(variant, scale, background) {
             }
           }, source)
           fs.writeFileSync(
-            path.join(output, `slate-${name}-${variant}-${scale}.png`),
+            path.join(output, `${fixture}-${name}-${variant}-${scale}.png`),
             Buffer.from(png, 'base64')
           )
         }
@@ -79,12 +81,12 @@ function svg(variant, scale, background) {
       await page.setContent(
         `<style>html,body{margin:0}svg{display:block}</style>${svg(variant, 1, '#ffffff')}`
       )
-      await page
-        .locator('svg')
-        .screenshot({ path: path.join(output, `slate-${variant}-inline.png`) })
+      await page.locator('svg').screenshot({
+        path: path.join(output, `${fixture}-${variant}-inline.png`),
+      })
     }
     fs.writeFileSync(
-      path.join(root, 'slate-manifest.json'),
+      path.join(root, `${fixture}-manifest.json`),
       JSON.stringify(manifest, null, 2) + '\n'
     )
   } finally {

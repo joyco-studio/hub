@@ -181,3 +181,21 @@ node temp/hardalpha-validation/slate-render.cjs
 .context/hardalpha-venv/bin/python temp/hardalpha-validation/slate-analyze.py
 .context/hardalpha-venv/bin/python temp/hardalpha-validation/slate-publish.py
 ```
+
+## Variante Slate + graphite para superficies oscuras
+
+El usuario pidió un ejemplo que también haga visible el halo en oscuro. Se preparó una variante controlada del export, sin cambiar el path, los offsets, el blur ni las opacidades: rim #101010 al 100%, luz suave #CBD8EC al 30%, base #7B8EA8. **No es un nuevo export de Figma.** Se genera junto con Porcelain en `slate-prepare.py`.
+
+Chrome reproduce el halo claro sobre #101010 al editar 127 a 1. Contra la referencia original a 32×, los errores de borde son 24.24 (127), 13.26 (1) y 7.44 (regiones); la banda amplia da 17.77, 8.06 y 4.72. Las referencias 8× y 16× coinciden en el orden. La diferencia entre referencias 16× y 32× es 0.67 en borde. Las tres variantes coinciden exactamente entre canvas y screenshot inline. En blanco no se obtiene una ventaja clara de la reconstrucción.
+
+![Graphite sobre oscuro, con labels centrados](renders/graphite-dark-comparison.png)
+
+Resultados: [graphite-results.json](graphite-results.json). Reproducción, después de preparar las geometrías:
+
+```sh
+SHADOW_FIXTURE=graphite node temp/hardalpha-validation/slate-render.cjs
+SHADOW_FIXTURE=graphite .context/hardalpha-venv/bin/python temp/hardalpha-validation/slate-analyze.py
+SHADOW_FIXTURE=graphite .context/hardalpha-venv/bin/python temp/hardalpha-validation/slate-publish.py
+```
+
+Los PNG publicados siguen siendo transparentes. El componente ThemeImage selecciona Porcelain para Light/Radio y Graphite para Dark/Terminal directamente desde el theme actual, sin tabs ni fondos añadidos. Los ejemplos excluyen el filtro verde global de Terminal para conservar sus colores. El primer par tiene un canvas transparente más ancho (320 × 97) para dar espacio al caption sin ampliar los renders de 52 × 49.
