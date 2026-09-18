@@ -76,13 +76,13 @@ Los siguientes son fixtures controlados, reconstruidos para este experimento; no
 | Caso controlado                                  |   127 |         1 | Máscaras | Paths booleanos |
 | ------------------------------------------------ | ----: | --------: | -------: | --------------: |
 | Estrella, sombra normal, offset diagonal 2.1/2.1 | 33.49 |     11.89 |    12.56 |       **10.59** |
-| Estrella, sombra normal, blur 2                  | 27.21 | **11.18** |    11.44 |               — |
+| Estrella, sombra normal, blur 2                  | 27.21 | **11.18** |    11.44 |             N/A |
 | Estrella, emboss overlay, offsets ±0.6           | 23.24 |     12.85 | **9.78** |           10.44 |
-| Estrella, overlay con blur 2                     | 15.52 |      8.40 | **7.89** |               — |
-| Estrella, multiply con blur 2                    | 27.33 | **11.48** |    11.90 |               — |
+| Estrella, overlay con blur 2                     | 15.52 |      8.40 | **7.89** |             N/A |
+| Estrella, multiply con blur 2                    | 27.33 | **11.48** |    11.90 |             N/A |
 | Estrella, relleno 0.36, sombra normal            | 15.74 |     22.15 |     8.08 |        **4.06** |
-| Estrella, relleno 0.36, sombra normal, blur 2    | 11.97 |     18.84 | **7.08** |               — |
-| Estrella, relleno 0.36, overlay grueso y blur 2  | 14.40 |     17.55 | **6.66** |               — |
+| Estrella, relleno 0.36, sombra normal, blur 2    | 11.97 |     18.84 | **7.08** |             N/A |
+| Estrella, relleno 0.36, overlay grueso y blur 2  | 14.40 |     17.55 | **6.66** |             N/A |
 
 Las diferencias pequeñas no son victorias robustas: en el blur normal, cambiar la referencia de 8× a 16× invierte el orden entre `=1` y máscaras. Con overlay en 64px y blur 2, `=1` supera a máscaras. Por eso «sombra compleja ⇒ geometría siempre mejor» tampoco se sostiene.
 
