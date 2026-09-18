@@ -1,0 +1,4 @@
+# Regenerable supersampled intermediates. Keep 1x renders and proposal images.
+*-8x.png
+*-16x.png
+__pycache__/

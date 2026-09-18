@@ -1,0 +1,15 @@
+<svg width="21" height="18" viewBox="0 0 21 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<mask id="rim-white" maskUnits="userSpaceOnUse" x="0" y="0" width="21" height="18">
+<path d="M10.3923 0L20.7846 18H-9.53674e-07L10.3923 0Z" fill="#fff"/>
+<path d="M10.3923 0L20.7846 18H-9.53674e-07L10.3923 0Z" fill="#000" transform="translate(2 4)"/>
+</mask>
+<mask id="rim-red" maskUnits="userSpaceOnUse" x="0" y="0" width="21" height="18">
+<path d="M10.3923 0L20.7846 18H-9.53674e-07L10.3923 0Z" fill="#fff"/>
+<path d="M10.3923 0L20.7846 18H-9.53674e-07L10.3923 0Z" fill="#000" transform="translate(0 -4)"/>
+</mask>
+</defs>
+<path d="M10.3923 0L20.7846 18H-9.53674e-07L10.3923 0Z" fill="#4391FF"/>
+<path d="M10.3923 0L20.7846 18H-9.53674e-07L10.3923 0Z" fill="#ffffff" fill-opacity="0.6" mask="url(#rim-white)"/>
+<path d="M10.3923 0L20.7846 18H-9.53674e-07L10.3923 0Z" fill="#ff2222" fill-opacity="0.6" mask="url(#rim-red)"/>
+</svg>

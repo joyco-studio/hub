@@ -1,0 +1,227 @@
+# Validación de hardAlpha: 127 → 1
+
+## Resultado
+
+**El cambio es un buen primer arreglo, pero no conserva todas las sombras.** `Star 1.svg` mejora con `=1`, incluso con dos sombras y blur. El segundo original aportado, `Star2.svg`, **sí muestra una franja azul con `=1` alrededor del rim blanco**. La máscara del post agrava esa franja; dividir el relleno y el rim en regiones vectoriales independientes la elimina en ese borde. Además, con relleno semitransparente, `=1` puede reducir mucho la intensidad de las sombras.
+
+Se midieron 37 casos en Google Chrome **153.0.8010.52**, con Playwright **1.62.0**. Los resultados son específicos de estos fixtures y este renderer. La referencia aproxima el SVG original, **no es una captura de Figma** ni demuestra fidelidad a su renderizador.
+
+## Star2: el halo reproducible y la reconstrucción que lo elimina
+
+[Star2.svg](../Star2.svg) conserva forma, offsets y blur del primer SVG, pero usa sombra blanca al 100% y roja al 20%. No se cambió el relleno opaco ni el blend mode normal.
+
+![Star2: comparación ampliada de renders nativos](renders/figma_star2_original-comparison.png)
+
+![Star2 a tamaño nativo](renders/figma_star2_original-native.png)
+
+| Star2, error de borde |   127 |     1 | Máscara del post | Regiones + blur |
+| --------------------- | ----: | ----: | ---------------: | --------------: |
+| Fondo blanco          | 10.01 | 11.16 |            15.42 |        **5.41** |
+| Fondo gris            | 27.98 |  9.51 |            15.84 |        **7.52** |
+| Fondo oscuro          | 49.65 | 14.40 |            18.63 |       **13.07** |
+
+En fondo blanco el rim blanco original se confunde con el fondo; `=1` deja ver una línea azul alrededor de la punta superior y los bordes horizontales. **Menos aliasing y más fidelidad no son equivalentes en todos los píxeles.** En la banda ancha, `=1` mejora globalmente aun con esa franja: `9.04 → 6.08`; regiones + blur mejora más, a **3.60**. Por eso no alcanza con RMSE global para descartar un defecto localizado.
+
+El candidato **Regiones + blur** calcula `S ∩ S_desplazada` para el relleno azul y `S − S_desplazada` para el rim blanco. Son paths disjuntos: no hay una silueta azul completa debajo del borde blanco. La segunda sombra roja conserva su perfil difuso mediante una máscara con blur. Es una reconstrucción híbrida, no un SVG completamente libre de filtros ni una solución automática para cualquier diseño.
+
+Con la referencia 32×, el error de borde sobre blanco es `10.54 / 11.24 / 15.44 / 5.19`: la ventaja de la reconstrucción se conserva. El orden entre 127 y 1 puede cambiar con el promedio en luz lineal; la franja visible y la ventaja de la reconstrucción permanecen.
+
+Archivos listos para comparar: [Star2-alpha1.svg](../Star2-alpha1.svg) y [Star2-rebuilt.svg](../Star2-rebuilt.svg). Ambos conservan fondo transparente; los fondos de las imágenes son controles de medición.
+
+### Dónde nace esa franja
+
+En un píxel del borde blanco con cobertura `A`, `=1` produce una sombra blanca con alpha aproximadamente `A` sobre el relleno azul que también tiene alpha `A`. El blend normal deja una contribución azul proporcional a `A × (1 − A)`. Con `A=0.5`, sobrevive 0.25 de contribución azul premultiplicada: sobre blanco se ve celeste. El problema está en superponer esas coberturas, no en que la resta aritmética multiplique dos alphas.
+
+La máscara del post aplica además la máscara a otro path antialiasado, reduciendo aún más la cobertura del blanco en ese borde. Separar las regiones evita que haya azul debajo del rim blanco. Esta explicación corresponde al tramo blanco de este fixture; no afirma que todos los blend modes o sombras produzcan la misma franja.
+
+## La estrella exportada de Figma
+
+Original: [Star 1.svg](../Star%201.svg). Arreglo mínimo: [Star 1-alpha1.svg](../Star%201-alpha1.svg); únicamente se modificaron los dos multiplicadores de alpha.
+
+El SVG mide 52 × 49, tiene relleno opaco `#4391FF` y dos inner shadows en modo `normal`:
+
+- Blanca, opacidad 0.6, offset `(2, 15)`, sin blur.
+- Roja, opacidad 0.6, offset `(0, -4)`, `stdDeviation=1`.
+
+Comparación al tamaño rasterizado original: 127 / 1 / máscara / regiones + blur / referencia.
+
+![Estrella original a tamaño nativo](renders/figma_star_original-native.png)
+
+Ampliación nearest-neighbor del mismo render, sin volver a rasterizar el SVG:
+
+![Estrella original ampliada](renders/figma_star_original-comparison.png)
+
+### Error de borde, RMSE RGB 0–255: menor es mejor
+
+| Caso                                    |   127 |         1 | Reconstrucción con máscaras |
+| --------------------------------------- | ----: | --------: | --------------------------: |
+| Estrella original, fondo blanco         | 18.68 |  **9.32** |                       13.26 |
+| Original, fondo gris                    | 17.68 |  **8.36** |                       13.16 |
+| Original, fondo oscuro                  | 30.24 | **13.22** |                       15.91 |
+| Variante: ambas sombras en overlay      | 12.68 |  **8.49** |                        9.38 |
+| Variante: fill-opacity 0.36, fondo gris | 17.54 |     30.31 |                   **10.35** |
+
+La variante semitransparente cambia exclusivamente `fill-opacity` del path fuente a `0.36`; el fondo gris es común a todos sus candidatos y referencias. **No es el archivo original**, ni una exportación adicional obtenida de Figma.
+
+![Variante semitransparente, pérdida de intensidad con alpha 1](renders/figma_star_translucent_variant-comparison.png)
+
+La banda ancha que incluye las sombras da el mismo orden: original `10.67 / 4.90 / 6.82`; variante semitransparente `10.00 / 21.68 / 5.38`. Por tanto, la conclusión no depende de medir solamente el filo exterior.
+
+La referencia 32× confirma las diferencias: original `19.78 / 9.28 / 12.72`; semitransparente `18.53 / 29.89 / 9.38`. La diferencia entre referencias 16× y 32× es 0.72 y 0.76 respectivamente. También se probaron tamaños 24 × 23 y 104 × 98: `=1` conserva la ventaja en la estrella original.
+
+## Blur, blend modes y geometría real
+
+Los siguientes son fixtures controlados, reconstruidos para este experimento; no reproducen exactamente los tests de 40px de la minuta porque sus fuentes no estaban disponibles. Sus números no se deben comparar directamente con aquella tabla.
+
+| Caso controlado                                  |   127 |         1 | Máscaras | Paths booleanos |
+| ------------------------------------------------ | ----: | --------: | -------: | --------------: |
+| Estrella, sombra normal, offset diagonal 2.1/2.1 | 33.49 |     11.89 |    12.56 |       **10.59** |
+| Estrella, sombra normal, blur 2                  | 27.21 | **11.18** |    11.44 |             N/A |
+| Estrella, emboss overlay, offsets ±0.6           | 23.24 |     12.85 | **9.78** |           10.44 |
+| Estrella, overlay con blur 2                     | 15.52 |      8.40 | **7.89** |             N/A |
+| Estrella, multiply con blur 2                    | 27.33 | **11.48** |    11.90 |             N/A |
+| Estrella, relleno 0.36, sombra normal            | 15.74 |     22.15 |     8.08 |        **4.06** |
+| Estrella, relleno 0.36, sombra normal, blur 2    | 11.97 |     18.84 | **7.08** |             N/A |
+| Estrella, relleno 0.36, overlay grueso y blur 2  | 14.40 |     17.55 | **6.66** |             N/A |
+
+Las diferencias pequeñas no son victorias robustas: en el blur normal, cambiar la referencia de 8× a 16× invierte el orden entre `=1` y máscaras. Con overlay en 64px y blur 2, `=1` supera a máscaras. Por eso «sombra compleja ⇒ geometría siempre mejor» tampoco se sostiene.
+
+La columna **Máscaras** implementa el enfoque del post: silueta blanca, copia negra desplazada y path coloreado enmascarado, con el mismo orden de capas y blend mode. Para conservar blur, la copia negra lleva un filtro gaussiano. Esto sigue usando composición rasterizada y, cuando corresponde, filtros.
+
+La columna **Paths booleanos** resta los polígonos antes del render y dibuja el contorno resultante como un path, sin máscara ni filtro. Se calculó con Shapely 2.1.2 para sombras de borde duro. Este candidato todavía superpone el rim sobre un relleno completo; es diferente de la partición que corrige Star2. No se equipara un rim duro a una sombra difusa: las celdas con blur quedan sin ese candidato.
+
+![Contraejemplo con geometría booleana real](renders/star_translucent_normal-comparison.png)
+
+## Qué explica el contraejemplo
+
+`SourceAlpha` incorpora la opacidad del relleno. En el interior de un path con `fill-opacity=0.36`, el multiplicador 127 lleva ese valor a 1; el multiplicador 1 conserva 0.36. Al desplazar, difuminar y restar, se cambia la intensidad de toda la banda. No se recupera únicamente el antialiasing perdido.
+
+Esto explica por qué el contraejemplo persiste al supersamplear: en la estrella semitransparente, los filtros `127` y `1`, ambos renderizados a 16× y reducidos, todavía difieren **29.64** RMSE en el borde. En la original opaca difieren **1.11**. La opacidad aplicada después del filtro a un grupo completo es otro caso y no debe confundirse con `fill-opacity` que ya forma parte de `SourceAlpha`.
+
+Hay que corregir dos afirmaciones del borrador:
+
+1. `×127` no es literalmente un umbral binario: los alpha positivos menores que `1/127` pueden seguir siendo fraccionales.
+2. La operación `feComposite` con `k2=-1`, `k3=1` es una resta clamped, `max(in2 − in, 0)`. No es la multiplicación `0.5 × 0.5 = 0.25` usada para explicar el supuesto halo. Una máscara aplicada a otro path sí puede multiplicar coberturas, pero es otra operación. Véase la [especificación de feComposite](https://www.w3.org/TR/filter-effects-1/#feCompositeElement) y [feColorMatrix](https://www.w3.org/TR/filter-effects-1/#feColorMatrixElement).
+
+No se deduce de estos tests por qué Figma eligió 127. Star2 verifica una franja causada por la superposición de coberturas, pero no demuestra una motivación oficial del exportador ni un defecto universal del cambio a 1.
+
+## Recomendación editorial
+
+> Probá primero cambiar el multiplicador de alpha de 127 a 1. Puede corregir gran parte del escalonado, incluso con varias sombras, blur o overlay. Revisalo al tamaño final y sobre el fondo donde va a vivir: si aparece una franja de color o cambia la intensidad del efecto, reconstruí el relleno y los rims como regiones independientes, evitando apilar coberturas antialiasadas en el borde. Las sombras difusas necesitan conservar su perfil de blur. Los rellenos semitransparentes requieren especial atención porque el cambio también modifica la intensidad de la sombra.
+
+La geometría queda como solución completa para el caso verificado donde el arreglo mínimo deja una franja, no como una garantía universal para todo efecto. A pedido del usuario, el log 19 se actualizó con esta recomendación, las ilustraciones verificadas y la distinción entre máscaras y regiones booleanas.
+
+## Antecedentes públicos consultados
+
+- [Figma Forum, Junky borders when exporting in SVG, 26 de abril de 2024](https://forum.figma.com/ask-the-community-7/junky-borders-when-exporting-in-svg-33951): reporte de primera mano sobre franjas al exportar sombras y un workaround que separa geometría de relleno y stroke. No identifica específicamente el multiplicador 127 ni constituye una explicación oficial.
+- [AlignUI, Avatar](https://www.alignui.com/docs/v1.2/ui/avatar): código publicado que usa `SourceAlpha`, el multiplicador 127 y `hardAlpha` en un filtro de inner shadow. Confirma el patrón en código público, pero no explica la elección del número.
+- [W3C, Filter Effects](https://www.w3.org/TR/filter-effects-1/) y [Compositing and Blending](https://www.w3.org/TR/compositing-1/): definiciones primarias de la matriz, la resta aritmética y la composición source-over.
+
+Las búsquedas por `hardAlpha`, `127`, Figma, halo y antialiasing no localizaron una explicación autorizada de Figma sobre la elección de 127 ni una garantía para el reemplazo por 1. Eso describe el alcance de la búsqueda, no prueba que tal explicación no exista. No se usaron artículos genéricos o copias de código como evidencia del motivo del exportador.
+
+## Metodología y límites
+
+1. El SVG se carga como imagen en Google Chrome y se dibuja en canvas a sus dimensiones nativas, con perfil sRGB forzado. No se rasteriza con resvg, librsvg ni sharp. Screenshots del triángulo y las dos estrellas originales como SVG inline coinciden exactamente con canvas: diferencia máxima de canal **0** en los tres controles.
+2. La referencia es el filtro original `127` renderizado a 8× y reducido por promedio de bloques exacto. Se compara también 16×; para las dos estrellas adjuntas se agrega 32×. Es una aproximación al límite de resolución del filtro original, no una verdad de diseño independiente de ese filtro.
+3. Los fondos son opacos y se componen en Chrome antes de medir RGB, evitando el RGB indefinido de píxeles transparentes. Todos los candidatos conservan el espacio de filtros sRGB del original.
+4. La métrica principal usa una banda común derivada de la silueta sin sombras a 16×: píxeles de cobertura parcial y vecinos de la frontera binaria, dilatados un píxel. Se exportan las máscaras. La banda ancha suma alcance de offset y tres desviaciones de blur. Para rims muy anchos puede abarcar todo el icono; por eso se informa junto con la banda estrecha.
+5. `results.json` incluye RMSE con referencias 8× y 16×, ambas bandas y sensibilidad al promedio en luz lineal a 16×. Las diferencias pequeñas pueden cambiar con la referencia o el resampling; los contraejemplos fuertes de relleno semitransparente y el resultado de la estrella original se conservan. El control de espacio de color se apoya en el log [Color Spaces sRGB & Linear de JOYCO](https://hub.joyco.studio/logs/10-color-spaces-srgb-linear).
+6. Se incluyen tamaños 16/24/40/64px, fases subpíxel, un offset cero, fondos blanco/gris/oscuro y los tres SVG aportados. Variar el tamaño escala el SVG entero: los parámetros no se mantienen en píxeles físicos constantes. No se probaron Safari, Firefox, sombras exteriores ni exportaciones nuevas de Figma con relleno semitransparente.
+
+Los scripts previos recuperados en `/private/tmp` están en `legacy/`, sólo para auditar su procedencia. Fabricaban el before por umbralización manual y usaban sharp para otros renders. No se ejecutaron para esta medición y no se deben usar como evidencia de Chrome. Los originales de Desktop siguen inaccesibles por la restricción de macOS.
+
+## Reproducción
+
+Los scripts `render.cjs`, `boolean.py` y `analyze.py` están junto a este informe. Los SVG renderizados, PNG nativos, referencias, máscaras de medición y ampliaciones están en `renders/`. Los parámetros completos están en `cases.json` y `manifest.json`; todos los resultados en `results.json`.
+
+Dependencias: Chrome instalado, Node con Playwright 1.62.0, Python con NumPy 2.4.6, Pillow 12.0.0 y Shapely 2.1.2. `analyze.py` usa la fuente Menlo de macOS. Shapely sólo es necesario para regenerar los paths booleanos; sus resultados ya se guardaron en `boolean-paths.json`.
+
+Para preparar dependencias aisladas desde la raíz del repositorio:
+
+```sh
+npm install --prefix .context/hardalpha-tools --no-save playwright@1.62.0
+python3 -m venv .context/hardalpha-venv
+.context/hardalpha-venv/bin/python -m pip install -r temp/hardalpha-validation/requirements.txt
+export PLAYWRIGHT_PATH="$PWD/.context/hardalpha-tools/node_modules/playwright"
+WRITE_CASES_ONLY=1 node temp/hardalpha-validation/render.cjs
+.context/hardalpha-venv/bin/python temp/hardalpha-validation/boolean.py
+node temp/hardalpha-validation/render.cjs
+.context/hardalpha-venv/bin/python temp/hardalpha-validation/analyze.py
+node temp/hardalpha-validation/render-public.cjs
+.context/hardalpha-venv/bin/python temp/hardalpha-validation/publish.py
+```
+
+Los scripts no necesitan ejecutar el hub ni modificar sus dependencias. Los renders intermedios nativos y supersampleados se regeneran y están ignorados por git; las comparaciones, fixtures, parámetros, paths calculados y resultados numéricos sí se conservan en el repositorio.
+
+Las ilustraciones publicadas en el log se vuelven a renderizar directamente desde los SVG con fondo transparente mediante `render-public.cjs`. No se elimina el blanco por color: eso borraría las luces blancas de la estrella. Los fondos de las mediciones y las comparaciones de este informe permanecen fijos, y los resultados numéricos siguen correspondiendo a esos renders controlados.
+
+## Export real Slate + porcelain
+
+El archivo [slate-porcelain.svg](../slate-porcelain.svg) fue reexportado por el usuario desde Figma. Conserva el path de 52 × 49, fill #7B8EA8, sombra #34465F al 30% con dy -2 y sigma 1, y luz blanca al 100% con dy 3. La sombra oscura se compone primero y la luz blanca al final. El prototipo local tenía el orden inverso; no se usó como sustituto del nuevo export.
+
+Se compararon el original, una edición que sólo cambia las dos matrices de 127 a 1, y una reconstrucción que separa `S ∩ translate(S, 0, 3)` y `S − translate(S, 0, 3)`. La sombra suave se aplica a la región slate y la región blanca se pinta al final. Se conserva el clip al viewport de 52 × 49 en los renders.
+
+En blanco, alpha 1 mejora el escalonado pero deja una línea gris azulada alrededor del bisel. La reconstrucción elimina ese color residual. Error de borde contra el filtro original a 32×: 21.17 para 127, 11.60 para 1 y 6.58 para la reconstrucción. La banda que incluye la sombra confirma ese orden: 15.47, 7.05 y 4.18. Las referencias a 8× y 16× coinciden en la conclusión.
+
+En gris, alpha 1 y la reconstrucción quedan cerca (7.72 y 7.84 en borde a 32×). En oscuro, el orden entre ambos cambia según la resolución de referencia; a 32× quedan en 13.43 y 13.22, mientras que la diferencia entre referencias 16× y 32× es 2.18. **No hay una ventaja general demostrada para la reconstrucción en esos fondos.** El hallazgo que explica el artículo es la eliminación del color slate bajo el rim blanco, particularmente visible sobre blanco.
+
+Las capturas SVG inline coinciden exactamente con los renders de canvas para las tres variantes. Como antes, la referencia supersampleada es el filtro de Chrome, no una captura del canvas de Figma. Resultados completos: [slate-results.json](slate-results.json).
+
+![Comparación sobre blanco con labels centrados](renders/slate-white-comparison.png)
+
+![Comparación sobre oscuro con labels centrados](renders/slate-dark-comparison.png)
+
+Estas comparaciones de medición conservan sus fondos controlados. Los PNG publicados en el artículo se generan por separado con transparencia real y labels centrados.
+
+Con las dependencias indicadas arriba:
+
+```sh
+.context/hardalpha-venv/bin/python temp/hardalpha-validation/slate-prepare.py
+node temp/hardalpha-validation/slate-render.cjs
+.context/hardalpha-venv/bin/python temp/hardalpha-validation/slate-analyze.py
+.context/hardalpha-venv/bin/python temp/hardalpha-validation/slate-publish.py
+```
+
+## Variante Slate + graphite para superficies oscuras
+
+El usuario pidió un ejemplo que también haga visible el halo en oscuro. Se preparó una variante controlada del export, sin cambiar el path, los offsets, el blur ni las opacidades: rim #101010 al 100%, luz suave #CBD8EC al 30%, base #7B8EA8. **No es un nuevo export de Figma.** Se genera junto con Porcelain en `slate-prepare.py`.
+
+Chrome reproduce el halo claro sobre #101010 al editar 127 a 1. Contra la referencia original a 32×, los errores de borde son 24.24 (127), 13.26 (1) y 7.44 (regiones); la banda amplia da 17.77, 8.06 y 4.72. Las referencias 8× y 16× coinciden en el orden. La diferencia entre referencias 16× y 32× es 0.67 en borde. Las tres variantes coinciden exactamente entre canvas y screenshot inline. En blanco no se obtiene una ventaja clara de la reconstrucción.
+
+![Graphite sobre oscuro, con labels centrados](renders/graphite-dark-comparison.png)
+
+Resultados: [graphite-results.json](graphite-results.json). Reproducción, después de preparar las geometrías:
+
+```sh
+SHADOW_FIXTURE=graphite node temp/hardalpha-validation/slate-render.cjs
+SHADOW_FIXTURE=graphite .context/hardalpha-venv/bin/python temp/hardalpha-validation/slate-analyze.py
+SHADOW_FIXTURE=graphite .context/hardalpha-venv/bin/python temp/hardalpha-validation/slate-publish.py
+```
+
+Los PNG publicados siguen siendo transparentes. El componente ThemeImage selecciona Porcelain para Light/Radio y Graphite para Dark/Terminal directamente desde el theme actual, sin tabs ni fondos añadidos. Los ejemplos excluyen el filtro verde global de Terminal para conservar sus colores. El primer par tiene un canvas transparente más ancho (320 × 97) para dar espacio al caption sin ampliar los renders de 52 × 49.
+
+## Fuentes portables para los labels
+
+Los scripts usan `fonts.py`: intentan una fuente configurada, fuentes habituales del sistema y, si ninguna está disponible, la fuente incluida en Pillow. No es necesario tener macOS ni instalar fuentes para generar métricas o imágenes. Las mediciones no dependen de la fuente; sólo cambian los labels de las láminas.
+
+Podés definir `HARDALPHA_MONO_FONT` y `HARDALPHA_SANS_FONT` con rutas a fuentes propias para controlar el aspecto de los labels. Se verificaron el fallback sin fuentes de sistema, una ruta configurada inexistente, una ruta válida y el dibujo centrado de los caracteres utilizados.
+
+## Contraste reforzado para las ilustraciones publicadas
+
+Para que la banda suave se distinga mejor del fill, las ilustraciones actuales usan variantes con opacidad 80% en lugar de 30%. Se conserva la base #7B8EA8, sigma 1, offset (0, -2) y rim opaco a (0, 3). La variante clara usa sombra #101C30 y rim blanco; la oscura usa luz #EBF2FF y rim #101010. Los exports originales permanecen intactos: estas variantes están generadas en `contrast-light*.svg` y `contrast-dark*.svg`.
+
+Se repitió la comparación en Chrome a 1×/8×/16×/32× sobre blanco, gris y oscuro. En el fondo correspondiente a cada variante, alpha 1 reduce el escalonado pero mantiene el halo, y la partición mejora el borde y la banda completa en las tres resoluciones de referencia. A 32×, en blanco: 33.15 / 14.50 / 9.21 de RMSE de borde para 127 / 1 / regiones. En oscuro: 35.00 / 15.96 / 9.46. Los screenshots inline coinciden exactamente con canvas para las tres versiones de ambas variantes. Los resultados completos están en [contrast-light-results.json](contrast-light-results.json) y [contrast-dark-results.json](contrast-dark-results.json).
+
+En fondos opuestos, alpha 1 puede superar a la reconstrucción. Se conserva la recomendación contextual, sin prometer una mejora universal de la geometría.
+
+![Banda oscura reforzada sobre claro](renders/contrast-light-white-comparison.png)
+
+![Banda clara reforzada sobre oscuro](renders/contrast-dark-dark-comparison.png)
+
+Preparar primero con `slate-prepare.py`, luego repetir render, análisis y publicación para `SHADOW_FIXTURE=contrast-light` y `SHADOW_FIXTURE=contrast-dark`:
+
+```sh
+SHADOW_FIXTURE=contrast-light node temp/hardalpha-validation/slate-render.cjs
+SHADOW_FIXTURE=contrast-light .context/hardalpha-venv/bin/python temp/hardalpha-validation/slate-analyze.py
+SHADOW_FIXTURE=contrast-light .context/hardalpha-venv/bin/python temp/hardalpha-validation/slate-publish.py
+```
