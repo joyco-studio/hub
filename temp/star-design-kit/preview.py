@@ -1,11 +1,14 @@
 from pathlib import Path
 import json
+import sys
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 root=Path(__file__).parent
+sys.path.insert(0, str(root.parent / 'hardalpha-validation'))
+from fonts import load_font
 recipes=json.loads((root/'recipes.json').read_text())
-font=lambda n:ImageFont.truetype('/System/Library/Fonts/HelveticaNeue.ttc',n)
-mono=lambda n:ImageFont.truetype('/System/Library/Fonts/Menlo.ttc',n)
+font=lambda n:load_font(n, 'sans')
+mono=load_font
 board=Image.new('RGBA',(1200,860),(0,0,0,0))
 draw=ImageDraw.Draw(board)
 draw.text((48,32),'FIGMA / ESTUDIO DE SOMBRAS',font=mono(13),fill='#888888')

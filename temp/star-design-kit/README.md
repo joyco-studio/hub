@@ -75,6 +75,6 @@ node temp/star-design-kit/build.cjs
 python3 temp/star-design-kit/preview.py
 ```
 
-`PLAYWRIGHT_PATH` debe apuntar al módulo Playwright instalado. Chrome y las fuentes de macOS deben estar disponibles. Los colores y valores están definidos en `build.cjs` y se guardan en `recipes.json`.
+`PLAYWRIGHT_PATH` debe apuntar al módulo Playwright instalado. Chrome debe estar disponible. Las fuentes son opcionales: se usa un fallback incluido en Pillow si no hay fuentes del sistema. `HARDALPHA_MONO_FONT` y `HARDALPHA_SANS_FONT` permiten elegirlas. Los colores y valores están definidos en `build.cjs` y se guardan en `recipes.json`.
 
 Referencia de los controles: [Figma, Apply effects to layers](https://help.figma.com/hc/en-us/articles/360041488473-Apply-effects-to-layers).

@@ -199,3 +199,29 @@ SHADOW_FIXTURE=graphite .context/hardalpha-venv/bin/python temp/hardalpha-valida
 ```
 
 Los PNG publicados siguen siendo transparentes. El componente ThemeImage selecciona Porcelain para Light/Radio y Graphite para Dark/Terminal directamente desde el theme actual, sin tabs ni fondos añadidos. Los ejemplos excluyen el filtro verde global de Terminal para conservar sus colores. El primer par tiene un canvas transparente más ancho (320 × 97) para dar espacio al caption sin ampliar los renders de 52 × 49.
+
+## Fuentes portables para los labels
+
+Los scripts usan `fonts.py`: intentan una fuente configurada, fuentes habituales del sistema y, si ninguna está disponible, la fuente incluida en Pillow. No es necesario tener macOS ni instalar fuentes para generar métricas o imágenes. Las mediciones no dependen de la fuente; sólo cambian los labels de las láminas.
+
+Podés definir `HARDALPHA_MONO_FONT` y `HARDALPHA_SANS_FONT` con rutas a fuentes propias para controlar el aspecto de los labels. Se verificaron el fallback sin fuentes de sistema, una ruta configurada inexistente, una ruta válida y el dibujo centrado de los caracteres utilizados.
+
+## Contraste reforzado para las ilustraciones publicadas
+
+Para que la banda suave se distinga mejor del fill, las ilustraciones actuales usan variantes con opacidad 80% en lugar de 30%. Se conserva la base #7B8EA8, sigma 1, offset (0, -2) y rim opaco a (0, 3). La variante clara usa sombra #101C30 y rim blanco; la oscura usa luz #EBF2FF y rim #101010. Los exports originales permanecen intactos: estas variantes están generadas en `contrast-light*.svg` y `contrast-dark*.svg`.
+
+Se repitió la comparación en Chrome a 1×/8×/16×/32× sobre blanco, gris y oscuro. En el fondo correspondiente a cada variante, alpha 1 reduce el escalonado pero mantiene el halo, y la partición mejora el borde y la banda completa en las tres resoluciones de referencia. A 32×, en blanco: 33.15 / 14.50 / 9.21 de RMSE de borde para 127 / 1 / regiones. En oscuro: 35.00 / 15.96 / 9.46. Los screenshots inline coinciden exactamente con canvas para las tres versiones de ambas variantes. Los resultados completos están en [contrast-light-results.json](contrast-light-results.json) y [contrast-dark-results.json](contrast-dark-results.json).
+
+En fondos opuestos, alpha 1 puede superar a la reconstrucción. Se conserva la recomendación contextual, sin prometer una mejora universal de la geometría.
+
+![Banda oscura reforzada sobre claro](renders/contrast-light-white-comparison.png)
+
+![Banda clara reforzada sobre oscuro](renders/contrast-dark-dark-comparison.png)
+
+Preparar primero con `slate-prepare.py`, luego repetir render, análisis y publicación para `SHADOW_FIXTURE=contrast-light` y `SHADOW_FIXTURE=contrast-dark`:
+
+```sh
+SHADOW_FIXTURE=contrast-light node temp/hardalpha-validation/slate-render.cjs
+SHADOW_FIXTURE=contrast-light .context/hardalpha-venv/bin/python temp/hardalpha-validation/slate-analyze.py
+SHADOW_FIXTURE=contrast-light .context/hardalpha-venv/bin/python temp/hardalpha-validation/slate-publish.py
+```

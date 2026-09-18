@@ -3,7 +3,13 @@ const path = require('node:path')
 const { chromium } = require(process.env.PLAYWRIGHT_PATH || 'playwright')
 const root = __dirname
 const fixture = process.env.SHADOW_FIXTURE || 'slate'
-const material = fixture === 'graphite' ? 'slate-graphite' : 'slate-porcelain'
+const material = {
+  slate: 'slate-porcelain',
+  graphite: 'slate-graphite',
+  'contrast-light': 'contrast-light',
+  'contrast-dark': 'contrast-dark',
+}[fixture]
+if (!material) throw new Error(`Unknown fixture: ${fixture}`)
 const output = path.join(root, 'renders')
 const sources = Object.fromEntries(
   [

@@ -3,12 +3,13 @@ from pathlib import Path
 import json
 import os
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
+from fonts import load_font
 
 root = Path(__file__).parent
 out = root / 'renders'
 fixture = os.environ.get('SHADOW_FIXTURE', 'slate')
-font = ImageFont.truetype('/System/Library/Fonts/Menlo.ttc', 13)
+font = load_font(13)
 
 def read(name):
     return np.asarray(Image.open(out / f'{name}.png').convert('RGB'), dtype=float)

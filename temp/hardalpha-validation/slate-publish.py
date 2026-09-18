@@ -2,13 +2,15 @@
 from pathlib import Path
 import shutil
 import os
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
+from fonts import load_font
 
 root = Path(__file__).parent
 assets = root.parents[1] / 'public/static/logs/figma-inner-shadows'
 fixture = os.environ.get('SHADOW_FIXTURE', 'slate')
-material = 'slate-graphite' if fixture == 'graphite' else 'slate-porcelain'
-font = ImageFont.truetype('/System/Library/Fonts/Menlo.ttc', 11)
+material = {'slate': 'slate-porcelain', 'graphite': 'slate-graphite',
+            'contrast-light': 'contrast-light', 'contrast-dark': 'contrast-dark'}[fixture]
+font = load_font(11)
 board = Image.new('RGBA', (280, 97), (0, 0, 0, 0))
 draw = ImageDraw.Draw(board)
 for i, (variant, label, suffix) in enumerate([('a127', '127', ''), ('a1', '1', '-alpha1'), ('rebuilt', 'Rebuilt', '-rebuilt')]):

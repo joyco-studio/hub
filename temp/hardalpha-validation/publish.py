@@ -1,12 +1,13 @@
 """Copy verified fixtures and native-pixel illustrations into the log assets."""
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
+from fonts import load_font
 import shutil
 
 root=Path(__file__).parent
 assets=root.parents[1]/'public/static/logs/figma-inner-shadows'
 assets.mkdir(parents=True,exist_ok=True)
-font=ImageFont.truetype('/System/Library/Fonts/Menlo.ttc',11)
+font=load_font(11)
 for fixture,variants in [('figma_star_original',['a127','a1']),('figma_star2_original',['a127','a1','partition'])]:
     native=Image.new('RGBA',(len(variants)*88+16,97),(0,0,0,0))
     draw=ImageDraw.Draw(native)

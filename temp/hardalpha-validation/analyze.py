@@ -2,7 +2,8 @@
 from pathlib import Path
 import json
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
+from fonts import load_font
 
 ROOT = Path(__file__).parent
 OUT = ROOT / 'renders'
@@ -35,7 +36,7 @@ def rmse(a,b,mask):
     return float(np.sqrt(np.mean((a[mask]-b[mask])**2)))
 
 results=[]
-font=ImageFont.truetype('/System/Library/Fonts/Menlo.ttc',13)
+font=load_font(13)
 for c in manifest['cases']:
     name=c['id']
     silhouette=down(read(name+'-silhouette-16'),16)[:,:,0]/255

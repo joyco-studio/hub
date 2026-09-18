@@ -79,16 +79,16 @@ Change the alpha row in the affected inner-shadow block:
 
 Leave the rest of the matrix and filter graph intact. The result can still be named `hardAlpha`; its pixels now retain the source alpha. Don't replace every occurrence of `127` in the file: coordinates and other effects are unrelated to this edit.
 
-This star has an opaque blue-gray fill and two inner shadows: a soft band at 30% with offset `(0, -2)` and blur `stdDeviation=1`, followed by an opaque rim at `(0, 3)` with no blur. Both use normal blending. The light-background version comes from a Figma export; the dark-background version changes only its palette.
+This star has an opaque blue-gray fill and two inner shadows: a soft band at 80% with offset `(0, -2)` and blur `stdDeviation=1`, followed by an opaque rim at `(0, 3)` with no blur. Both use normal blending. Both versions use the same Figma-exported filter, with stronger shadow colors and opacity to make the bands easier to see.
 
 <figure className="mx-auto my-6 max-w-80 [&_img]:filter-none!">
   <ThemeImage
     light={{
-      src: '/static/logs/figma-inner-shadows/slate-fix-native.png',
+      src: '/static/logs/figma-inner-shadows/contrast-light-fix-native.png',
       alt: 'White rim: original 127 and alpha 1 at 52 by 49 pixels',
     }}
     dark={{
-      src: '/static/logs/figma-inner-shadows/graphite-fix-native.png',
+      src: '/static/logs/figma-inner-shadows/contrast-dark-fix-native.png',
       alt: 'Dark rim: original 127 and alpha 1 at 52 by 49 pixels',
     }}
     width={320}
@@ -102,7 +102,7 @@ This star has an opaque blue-gray fill and two inner shadows: a soft band at 30%
 
 Look at the bevel along the upper diagonals: alpha 1 softens the jagged outline while keeping the soft shading. Both palettes improve on white, gray, and dark backgrounds. Two shadows and blur are not, by themselves, reasons to skip the simple edit.
 
-[Light: original](/static/logs/figma-inner-shadows/slate-original.svg) · [alpha 1](/static/logs/figma-inner-shadows/slate-alpha1.svg) · [Dark: original](/static/logs/figma-inner-shadows/graphite-original.svg) · [alpha 1](/static/logs/figma-inner-shadows/graphite-alpha1.svg)
+[Light: original](/static/logs/figma-inner-shadows/contrast-light-original.svg) · [alpha 1](/static/logs/figma-inner-shadows/contrast-light-alpha1.svg) · [Dark: original](/static/logs/figma-inner-shadows/contrast-dark-original.svg) · [alpha 1](/static/logs/figma-inner-shadows/contrast-dark-alpha1.svg)
 
 ## When the small fix leaves a fringe
 
@@ -116,11 +116,11 @@ That is why a clean silhouette alone is not enough to judge the fix. Check the e
   <figure className="mx-auto my-0 max-w-[416px]">
     <ThemeImage
       light={{
-        src: '/static/logs/figma-inner-shadows/slate-a1-pixels.png',
+        src: '/static/logs/figma-inner-shadows/contrast-light-a1-pixels.png',
         alt: 'White rim alpha 1: gray-blue fringe around the white rim',
       }}
       dark={{
-        src: '/static/logs/figma-inner-shadows/graphite-a1-pixels.png',
+        src: '/static/logs/figma-inner-shadows/contrast-dark-a1-pixels.png',
         alt: 'Dark rim alpha 1: light fringe around the dark rim',
       }}
       width={416}
@@ -134,11 +134,11 @@ That is why a clean silhouette alone is not enough to judge the fix. Check the e
   <figure className="mx-auto my-0 max-w-[416px]">
     <ThemeImage
       light={{
-        src: '/static/logs/figma-inner-shadows/slate-rebuilt-pixels.png',
+        src: '/static/logs/figma-inner-shadows/contrast-light-rebuilt-pixels.png',
         alt: 'White rim rebuilt: no base fill beneath the white rim',
       }}
       dark={{
-        src: '/static/logs/figma-inner-shadows/graphite-rebuilt-pixels.png',
+        src: '/static/logs/figma-inner-shadows/contrast-dark-rebuilt-pixels.png',
         alt: 'Dark rim rebuilt: no base fill beneath the dark rim',
       }}
       width={416}
@@ -154,11 +154,11 @@ That is why a clean silhouette alone is not enough to judge the fix. Check the e
 <figure className="mx-auto my-6 max-w-[280px] [&_img]:filter-none!">
   <ThemeImage
     light={{
-      src: '/static/logs/figma-inner-shadows/slate-native.png',
+      src: '/static/logs/figma-inner-shadows/contrast-light-native.png',
       alt: 'White rim at native size: original 127, alpha 1, and separate regions',
     }}
     dark={{
-      src: '/static/logs/figma-inner-shadows/graphite-native.png',
+      src: '/static/logs/figma-inner-shadows/contrast-dark-native.png',
       alt: 'Dark rim at native size: original 127, alpha 1, and separate regions',
     }}
     width={280}
@@ -202,8 +202,8 @@ Compute those Boolean operations in your vector editor or geometry tooling, then
   {/* Preserve the dark shadow on the base region, before the white rim. */}
   <path
     d={BASE_REGION}
-    fill="#34465F"
-    fillOpacity={0.3}
+    fill="#101C30"
+    fillOpacity={0.8}
     mask="url(#dark-rim)"
   />
   <path d={WHITE_REGION} fill="#fff" />
@@ -214,9 +214,9 @@ This rebuild removes the fill-colored fringe around the white rim while retainin
 
 In the earlier blue-and-white fixture, a mask-only rebuild made the fringe worse: applying an antialiased mask to another antialiased path reduced the white edge coverage further. That comparison remains in the detailed report. The relevant fix is the region partition, not merely replacing a filter with a mask.
 
-[Light: original](/static/logs/figma-inner-shadows/slate-original.svg) · [alpha 1](/static/logs/figma-inner-shadows/slate-alpha1.svg) · [Dark: original](/static/logs/figma-inner-shadows/graphite-original.svg) · [alpha 1](/static/logs/figma-inner-shadows/graphite-alpha1.svg)
+[Light: original](/static/logs/figma-inner-shadows/contrast-light-original.svg) · [alpha 1](/static/logs/figma-inner-shadows/contrast-light-alpha1.svg) · [Dark: original](/static/logs/figma-inner-shadows/contrast-dark-original.svg) · [alpha 1](/static/logs/figma-inner-shadows/contrast-dark-alpha1.svg)
 
-[Rebuilt for light](/static/logs/figma-inner-shadows/slate-rebuilt.svg) · [Rebuilt for dark](/static/logs/figma-inner-shadows/graphite-rebuilt.svg)
+[Rebuilt for light](/static/logs/figma-inner-shadows/contrast-light-rebuilt.svg) · [Rebuilt for dark](/static/logs/figma-inner-shadows/contrast-dark-rebuilt.svg)
 
 ## What to look for before keeping the fix
 
@@ -232,7 +232,7 @@ Translucent fills need another check. Because `SourceAlpha` already includes the
 
 The examples above are native-size Chrome captures. We also checked blur, blend modes, backgrounds, and subpixel positions against supersampled versions of the original filters. That reference helps compare the edge behavior; it is not a screenshot of Figma's renderer. The measurements and reproduction scripts are available separately for readers who want to inspect the experiment.
 
-[Detailed report and reproduction](https://github.com/joyco-studio/hub/tree/main/temp/hardalpha-validation) · [Original measurements](/static/logs/figma-inner-shadows/hardalpha-results.json) · [Light-background measurements](/static/logs/figma-inner-shadows/slate-results.json) · [Dark-background measurements](/static/logs/figma-inner-shadows/graphite-results.json)
+[Detailed report and reproduction](https://github.com/joyco-studio/hub/tree/main/temp/hardalpha-validation) · [Original measurements](/static/logs/figma-inner-shadows/hardalpha-results.json) · [Light-background measurements](/static/logs/figma-inner-shadows/contrast-light-results.json) · [Dark-background measurements](/static/logs/figma-inner-shadows/contrast-dark-results.json)
 
 ## What is documented, and what isn't
 

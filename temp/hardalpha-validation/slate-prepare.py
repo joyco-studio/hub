@@ -57,3 +57,21 @@ dark_source = source.replace(
 (root.parent / 'slate-graphite-alpha1.svg').write_text(dark_source.replace('0 127 0', '0 1 0'))
 dark_rebuilt = rebuilt.replace('fill="#34465F"', 'fill="#CBD8EC"').replace(f'<path d="{rim}" fill="white"', f'<path d="{rim}" fill="#101010"')
 (root.parent / 'slate-graphite-rebuilt.svg').write_text(dark_rebuilt)
+
+# Stronger illustration variants, preserving the user's original export above.
+for name, color, rim_color in [
+    ('contrast-light', '#101C30', '#FFFFFF'),
+    ('contrast-dark', '#EBF2FF', '#101010'),
+]:
+    channels = [int(color[i:i+2], 16) / 255 for i in (1, 3, 5)]
+    rim_channels = [int(rim_color[i:i+2], 16) / 255 for i in (1, 3, 5)]
+    def matrix(rgb, opacity):
+        return ' '.join(f'0 0 0 0 {v:.8f}' for v in rgb) + f' 0 0 0 {opacity} 0'
+    candidate = source.replace(
+        '0 0 0 0 0.203922 0 0 0 0 0.27451 0 0 0 0 0.372549 0 0 0 0.3 0',
+        matrix(channels, 0.8)
+    ).replace('0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0', matrix(rim_channels, 1))
+    candidate_rebuilt = rebuilt.replace('fill="#34465F"', f'fill="{color}"').replace('fill-opacity="0.3"', 'fill-opacity="0.8"').replace(f'<path d="{rim}" fill="white"', f'<path d="{rim}" fill="{rim_color}"')
+    (root.parent / f'{name}.svg').write_text(candidate)
+    (root.parent / f'{name}-alpha1.svg').write_text(candidate.replace('0 127 0', '0 1 0'))
+    (root.parent / f'{name}-rebuilt.svg').write_text(candidate_rebuilt)

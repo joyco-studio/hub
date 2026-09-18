@@ -84,3 +84,15 @@ Final steering: remove tabs entirely. A reusable ThemeImage now switches source 
 Clarified the high-contrast conditions: contrasting fill and opaque rim, with a background close to the rim color, expose residual fill. The Porcelain-on-dark observation is explicitly used to explain why the halo is not universally visible.
 
 Completed final validation after removing controls: production build, ESLint, Prettier, log numbering, SVG/alpha checks, and whitespace checks passed. Chrome at 1440px and 390px verified live image switching through Light/Dark/Radio/Terminal, exactly two caption lines, 320px first images, four loaded star illustrations with transparent backgrounds and unchanged colors, nine working downloads, and no tabs, runtime errors, or horizontal overflow. Visually inspected the dark halo comparison and Terminal mobile caption.
+
+## Greptile review and stronger shadows
+
+Greptile reported macOS-only font loading and em dashes. The punctuation issue was already fixed; make every annotation script use configurable fonts with a bundled Pillow fallback, and simulate missing system fonts to verify it.
+
+For stronger shadows, preserve all supplied exports and existing measurements. Generate controlled light/dark variants with a darker/lighter soft band and higher opacity, retaining geometry, blur and offsets. Inspect native Chrome comparisons, remeasure the halo against supersampled references, then update the article assets and parameters. Keep the conceptual prose free of fixture names, transparent backgrounds, automatic theme switching and two-line caption. Validate and push the result to the existing PR.
+
+Completed: replaced all macOS-only font loads in validation and preview scripts with the shared configurable fallback. Tested missing fonts, invalid/valid overrides, Unicode labels and full analysis/publication without OS fonts; metrics remained identical. Confirmed the em-dash review finding was already fixed.
+
+Published stronger controlled variants using an 80% soft band, #101C30 shadow on light and #EBF2FF light on dark. Preserved the original exports and previous results. New 8×/16×/32× Chrome comparisons retain the edge/band improvement from region partition on the matching backgrounds, with exact inline/canvas agreement. Updated article parameters, code sample, illustrations, downloads and measurement links.
+
+Validation passed: production build, log numbering, targeted formatting, Python syntax, matrix-only alpha edits, transparent PNG checks and whitespace checks. Chrome at 1440px and 390px verified all four themes, live image switching, two caption lines, original colors, transparent backgrounds and nine downloads, without runtime errors or horizontal overflow. Visually reviewed the stronger shadows in both light and dark screenshots.

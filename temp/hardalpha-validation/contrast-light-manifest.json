@@ -1,0 +1,10 @@
+{
+  "chrome": "153.0.8010.52",
+  "backgrounds": {
+    "white": "#ffffff",
+    "gray": "#808080",
+    "dark": "#101010",
+    "transparent": null
+  },
+  "inline": {}
+}
