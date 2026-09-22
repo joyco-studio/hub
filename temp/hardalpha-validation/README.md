@@ -1,12 +1,14 @@
 # Validación de hardAlpha: 127 → 1
 
-## Ilustraciones actuales: rayo de Figma
+## Variante archivada: rayo de Figma
 
-El artículo usa ahora el export de un rayo de 24 × 24, guardado sin cambios en `public/static/logs/figma-inner-shadows/bolt-original.svg`. Su borde blanco tiene offset `(1, 0)`; la sombra suave mantiene offset `(0, -2)`, sigma 1 y opacidad 30%. `bolt-alpha1.svg` cambia únicamente los dos multiplicadores de alpha de 127 a 1.
+La variante con rayo y grilla está guardada en el commit `b842f8d`. El artículo volvió a usar estrellas con una grilla de 52 × 49 celdas en las ampliaciones. Los assets y scripts del rayo se conservan para poder recuperarlo.
+
+El export del rayo de 24 × 24 está guardado sin cambios en `public/static/logs/figma-inner-shadows/bolt-original.svg`. Su borde blanco tiene offset `(1, 0)`; la sombra suave mantiene offset `(0, -2)`, sigma 1 y opacidad 30%. `bolt-alpha1.svg` cambia únicamente los dos multiplicadores de alpha de 127 a 1.
 
 `bolt-prepare.py` usa skia-pathops y fonttools para calcular la intersección y diferencia con una copia desplazada `(1, 0)`, conservando curvas Bézier. Verifica que las regiones no se solapen y que cubran el área del original. Las variantes `bolt-contrast-light-*` y `bolt-contrast-dark-*` mantienen la geometría y refuerzan las paletas como los ejemplos anteriores; no son exports originales adicionales.
 
-`bolt-render.cjs` captura cada variante corregida/reconstruida a 24 × 24 en Chrome y amplía los píxeles a 384 × 384 con nearest-neighbor. Las comparativas SVG se muestran a 96 × 96 sobre gris. Los PNG conservan fondo transparente para mostrar el halo sobre el tema de la página. El artículo superpone una grilla CSS de 24 × 24 que escala con cada imagen: una celda representa un píxel del render original.
+`bolt-render.cjs` captura cada variante corregida/reconstruida a 24 × 24 en Chrome y amplía los píxeles a 384 × 384 con nearest-neighbor. En la versión archivada, las comparativas SVG se muestran a 96 × 96 sobre gris. Los PNG conservan fondo transparente para mostrar el halo sobre el tema de la página. Esa versión superpone una grilla CSS de 24 × 24 que escala con cada imagen: una celda representa un píxel del render original.
 
 ```sh
 uv venv .context/bolt-venv

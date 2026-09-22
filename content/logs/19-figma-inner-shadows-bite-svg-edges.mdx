@@ -83,15 +83,15 @@ Change the alpha row in the affected inner-shadow block:
 
 Leave the rest of the matrix and filter graph intact. The result can still be named `hardAlpha`; its pixels now retain the source alpha. Don't replace every occurrence of `127` in the file: coordinates and other effects are unrelated to this edit.
 
-This original Figma export has a blue-gray fill, a soft dark inner shadow, and an opaque white inner rim offset by `(1, 0)`. The only change between the two versions is replacing `127` with `1` in both shadow matrices. A neutral gray background keeps the white rim visible in both page themes.
+This original Figma export has a blue-gray fill, a soft dark inner shadow, and an opaque white inner rim offset by `(4.1, 3)`. The only change between the two versions is replacing `127` with `1` in both shadow matrices. A neutral gray background keeps the white rim visible in both page themes.
 
-<div className="not-prose mx-auto my-6 grid max-w-sm grid-cols-2 justify-items-center gap-6 rounded-lg bg-[#71717a] p-6 [&_figcaption]:text-white [&_img]:h-auto [&_img]:w-[96px] [&_img]:max-w-full [&_img]:filter-none!">
+<div className="not-prose mx-auto my-6 grid max-w-sm grid-cols-2 justify-items-center gap-6 rounded-lg bg-[#71717a] p-6 [&_figcaption]:text-white [&_img]:h-auto [&_img]:w-[104px] [&_img]:max-w-full [&_img]:filter-none!">
   <figure className="m-0">
     <Image
-      src="/static/logs/figma-inner-shadows/bolt-original.svg"
-      alt="Original Figma export: blue-gray bolt with a white inner rim and the 127 multiplier"
-      width={96}
-      height={96}
+      src="/static/logs/figma-inner-shadows/figma-offset-original.svg"
+      alt="Original Figma export: blue-gray star with a white inner rim and the 127 multiplier"
+      width={104}
+      height={98}
       unoptimized
     />
     <figcaption className="text-muted-foreground mt-3 text-center text-sm">
@@ -100,10 +100,10 @@ This original Figma export has a blue-gray fill, a soft dark inner shadow, and a
   </figure>
   <figure className="m-0">
     <Image
-      src="/static/logs/figma-inner-shadows/bolt-alpha1.svg"
+      src="/static/logs/figma-inner-shadows/figma-offset-alpha1.svg"
       alt="The same Figma export with both shadow alpha multipliers changed to 1"
-      width={96}
-      height={96}
+      width={104}
+      height={98}
       unoptimized
     />
     <figcaption className="text-muted-foreground mt-3 text-center text-sm">
@@ -112,11 +112,11 @@ This original Figma export has a blue-gray fill, a soft dark inner shadow, and a
   </figure>
 </div>
 
-These SVGs render at 96 × 96 px for readability. The pixel close-ups in the next section preserve captures at the original 24 × 24 px; enlarging an SVG rerenders its edges at the new size.
+These SVGs render at 104 × 98 px for readability. The pixel close-ups in the next section preserve captures at the original 52 × 49 px; enlarging an SVG rerenders its edges at the new size.
 
 The version on the right preserves partial edge coverage while keeping the white rim and soft dark shading. On this gray background, the comparison highlights the change in the outline; the next section shows why the background also matters when checking for a halo.
 
-[Original SVG](/static/logs/figma-inner-shadows/bolt-original.svg) · [Alpha 1 SVG](/static/logs/figma-inner-shadows/bolt-alpha1.svg)
+[Original SVG](/static/logs/figma-inner-shadows/figma-offset-original.svg) · [Alpha 1 SVG](/static/logs/figma-inner-shadows/figma-offset-alpha1.svg)
 
 ## When the small fix leaves a fringe
 
@@ -124,26 +124,26 @@ A smoother edge can still have the wrong color. At the boundary, the fill and th
 
 **High contrast makes that residual color easier to see.** When the rim contrasts strongly with the fill but closely matches the background, it blends into the surrounding surface while the leftover fill color stands out as a thin halo. Against a contrasting background, the rim itself dominates and the same color leakage can be much less apparent.
 
-The examples below use a blue-gray bolt with an opaque white rim on light backgrounds and an opaque dark rim on dark backgrounds. These higher-contrast combinations make the leftover fill color visible around the rim after the same `127` → `1` edit.
+The examples below use a blue-gray star with an opaque white rim on light backgrounds and an opaque dark rim on dark backgrounds. These higher-contrast combinations make the leftover fill color visible around the rim after the same `127` → `1` edit.
 
 That is why a clean silhouette alone is not enough to judge the fix. Check the edge color on the background where the icon will actually be used. Separating the fill and rim into distinct regions removes the overlap responsible for this fringe.
 
-**Pixel close-up: each grid cell is one pixel from the original 24 × 24 render.** The enlargement keeps those pixels intact so the fill-colored fringe can be inspected.
+**Pixel close-up: each grid cell is one pixel from the original 52 × 49 render.** The enlargement keeps those pixels intact so the fill-colored fringe can be inspected.
 
 <ImageCols className="[&_img]:filter-none! [&_img]:[image-rendering:pixelated]">
-  <figure className="mx-auto my-0 max-w-[384px]">
+  <figure className="mx-auto my-0 max-w-[416px]">
     <div className="relative [&_img]:m-0 [&_img]:block">
       <ThemeImage
         light={{
-          src: '/static/logs/figma-inner-shadows/bolt-contrast-light-alpha1-pixels.png',
+          src: '/static/logs/figma-inner-shadows/contrast-light-a1-pixels.png',
           alt: 'White rim alpha 1: gray-blue fringe around the white rim',
         }}
         dark={{
-          src: '/static/logs/figma-inner-shadows/bolt-contrast-dark-alpha1-pixels.png',
+          src: '/static/logs/figma-inner-shadows/contrast-dark-a1-pixels.png',
           alt: 'Dark rim alpha 1: light fringe around the dark rim',
         }}
-        width={384}
-        height={384}
+        width={416}
+        height={392}
         unoptimized
       />
       <div
@@ -151,8 +151,8 @@ That is why a clean silhouette alone is not enough to judge the fix. Check the e
         className="pointer-events-none absolute inset-0 ring-1 ring-current/20 ring-inset"
         style={{
           backgroundImage:
-            'linear-gradient(to right, rgb(128 128 128 / 0.35) 1px, transparent 1px), linear-gradient(to bottom, rgb(128 128 128 / 0.35) 1px, transparent 1px)',
-          backgroundSize: 'calc(100% / 24) calc(100% / 24)',
+            'linear-gradient(to right, rgb(128 128 128 / 0.35) 0.5px, transparent 1px), linear-gradient(to bottom, rgb(128 128 128 / 0.35) 0.5px, transparent 1px)',
+          backgroundSize: 'calc(100% / 52) calc(100% / 49)',
         }}
       />
     </div>
@@ -160,19 +160,19 @@ That is why a clean silhouette alone is not enough to judge the fix. Check the e
       {'Alpha 1: fill color leaks into the rim.'}
     </figcaption>
   </figure>
-  <figure className="mx-auto my-0 max-w-[384px]">
+  <figure className="mx-auto my-0 max-w-[416px]">
     <div className="relative [&_img]:m-0 [&_img]:block">
       <ThemeImage
         light={{
-          src: '/static/logs/figma-inner-shadows/bolt-contrast-light-rebuilt-pixels.png',
+          src: '/static/logs/figma-inner-shadows/contrast-light-rebuilt-pixels.png',
           alt: 'White rim rebuilt: no base fill beneath the white rim',
         }}
         dark={{
-          src: '/static/logs/figma-inner-shadows/bolt-contrast-dark-rebuilt-pixels.png',
+          src: '/static/logs/figma-inner-shadows/contrast-dark-rebuilt-pixels.png',
           alt: 'Dark rim rebuilt: no base fill beneath the dark rim',
         }}
-        width={384}
-        height={384}
+        width={416}
+        height={392}
         unoptimized
       />
       <div
@@ -180,32 +180,32 @@ That is why a clean silhouette alone is not enough to judge the fix. Check the e
         className="pointer-events-none absolute inset-0 ring-1 ring-current/20 ring-inset"
         style={{
           backgroundImage:
-            'linear-gradient(to right, rgb(128 128 128 / 0.35) 1px, transparent 1px), linear-gradient(to bottom, rgb(128 128 128 / 0.35) 1px, transparent 1px)',
-          backgroundSize: 'calc(100% / 24) calc(100% / 24)',
+            'linear-gradient(to right, rgb(128 128 128 / 0.35) 0.5px, transparent 1px), linear-gradient(to bottom, rgb(128 128 128 / 0.35) 0.5px, transparent 1px)',
+          backgroundSize: 'calc(100% / 52) calc(100% / 49)',
         }}
       />
     </div>
     <figcaption className="text-muted-foreground mt-2 text-center text-sm whitespace-pre-line">
-      {'Separate regions: no fill beneath the rim.'}
+      {'Geometry: no fill beneath the rim.'}
     </figcaption>
   </figure>
 </ImageCols>
 
-The SVG overview uses a neutral gray background to keep each rim visible. The pixel close-ups above show the halo against the page background, where it is easier to see.
+The same three versions on the page background: original filter, alpha 1, and geometry with no fill beneath the rim.
 
-<div className="not-prose mx-auto my-6 grid max-w-lg grid-cols-3 justify-items-center gap-4 rounded-lg bg-[#71717a] p-4 [&_figcaption]:text-white [&_img]:mx-auto [&_img]:h-auto [&_img]:w-[96px] [&_img]:max-w-full [&_img]:filter-none!">
+<div className="not-prose mx-auto my-6 grid max-w-lg grid-cols-3 justify-items-center gap-4 [&_img]:mx-auto [&_img]:h-auto [&_img]:w-[104px] [&_img]:max-w-full [&_img]:filter-none!">
   <figure className="m-0 min-w-0">
     <ThemeImage
       light={{
-        src: '/static/logs/figma-inner-shadows/bolt-contrast-light-original.svg',
+        src: '/static/logs/figma-inner-shadows/contrast-light-original.svg',
         alt: 'White rim with the original 127 multiplier',
       }}
       dark={{
-        src: '/static/logs/figma-inner-shadows/bolt-contrast-dark-original.svg',
+        src: '/static/logs/figma-inner-shadows/contrast-dark-original.svg',
         alt: 'Dark rim with the original 127 multiplier',
       }}
-      width={96}
-      height={96}
+      width={104}
+      height={98}
       unoptimized
     />
     <figcaption className="text-muted-foreground mt-3 text-center text-sm">
@@ -215,15 +215,15 @@ The SVG overview uses a neutral gray background to keep each rim visible. The pi
   <figure className="m-0 min-w-0">
     <ThemeImage
       light={{
-        src: '/static/logs/figma-inner-shadows/bolt-contrast-light-alpha1.svg',
+        src: '/static/logs/figma-inner-shadows/contrast-light-alpha1.svg',
         alt: 'White rim with alpha 1',
       }}
       dark={{
-        src: '/static/logs/figma-inner-shadows/bolt-contrast-dark-alpha1.svg',
+        src: '/static/logs/figma-inner-shadows/contrast-dark-alpha1.svg',
         alt: 'Dark rim with alpha 1',
       }}
-      width={96}
-      height={96}
+      width={104}
+      height={98}
       unoptimized
     />
     <figcaption className="text-muted-foreground mt-3 text-center text-sm">
@@ -233,30 +233,30 @@ The SVG overview uses a neutral gray background to keep each rim visible. The pi
   <figure className="m-0 min-w-0">
     <ThemeImage
       light={{
-        src: '/static/logs/figma-inner-shadows/bolt-contrast-light-rebuilt.svg',
+        src: '/static/logs/figma-inner-shadows/contrast-light-rebuilt.svg',
         alt: 'White rim rebuilt with separate fill and rim regions',
       }}
       dark={{
-        src: '/static/logs/figma-inner-shadows/bolt-contrast-dark-rebuilt.svg',
+        src: '/static/logs/figma-inner-shadows/contrast-dark-rebuilt.svg',
         alt: 'Dark rim rebuilt with separate fill and rim regions',
       }}
-      width={96}
-      height={96}
+      width={104}
+      height={98}
       unoptimized
     />
     <figcaption className="text-muted-foreground mt-3 text-center text-sm">
-      Separate regions
+      Geometry
     </figcaption>
   </figure>
 </div>
 
 Changing 127 to 1 smooths the shadow's edge, but also lets some of the fill color show through it. That can leave a thin colored halo, especially with a white rim on white or a dark rim on dark. Removing that halo requires separating the fill and rim so they no longer overlap.
 
-## The complete fix for this edge: separate the regions
+## The complete fix for this edge: split the geometry
 
 Drawing a white rim over the complete filled shape still stacks antialiased coverage at their shared outer edge. A mask made from vector paths can do the same thing. Calling those paths “geometry” doesn't remove the overlap.
 
-For this bolt, split the shape before drawing it. If `S` is the original shape and `T` is its copy translated by the white shadow's `(1, 0)` offset:
+For this star, split the shape before drawing it. If `S` is the original shape and `T` is its copy translated by the white shadow's `(0, 3)` offset:
 
 ```text
 base region  = intersection(S, T)
@@ -283,9 +283,9 @@ This rebuild removes the fill-colored fringe around the white rim while retainin
 
 In the earlier blue-and-white fixture, a mask-only rebuild made the fringe worse: applying an antialiased mask to another antialiased path reduced the white edge coverage further. That comparison remains in the detailed report. The relevant fix is the region partition, not merely replacing a filter with a mask.
 
-[Light: original](/static/logs/figma-inner-shadows/bolt-contrast-light-original.svg) · [alpha 1](/static/logs/figma-inner-shadows/bolt-contrast-light-alpha1.svg) · [Dark: original](/static/logs/figma-inner-shadows/bolt-contrast-dark-original.svg) · [alpha 1](/static/logs/figma-inner-shadows/bolt-contrast-dark-alpha1.svg)
+[Light: original](/static/logs/figma-inner-shadows/contrast-light-original.svg) · [alpha 1](/static/logs/figma-inner-shadows/contrast-light-alpha1.svg) · [Dark: original](/static/logs/figma-inner-shadows/contrast-dark-original.svg) · [alpha 1](/static/logs/figma-inner-shadows/contrast-dark-alpha1.svg)
 
-[Rebuilt for light](/static/logs/figma-inner-shadows/bolt-contrast-light-rebuilt.svg) · [Rebuilt for dark](/static/logs/figma-inner-shadows/bolt-contrast-dark-rebuilt.svg)
+[Rebuilt for light](/static/logs/figma-inner-shadows/contrast-light-rebuilt.svg) · [Rebuilt for dark](/static/logs/figma-inner-shadows/contrast-dark-rebuilt.svg)
 
 ## What to look for before keeping the fix
 
@@ -299,7 +299,7 @@ The examples show both the benefit of the small edit and a reason to go further:
 
 Translucent fills need another check. Because `SourceAlpha` already includes the fill opacity, changing 127 to 1 can weaken the whole shadow, not just soften its edge. Lowering the fill opacity in an earlier export reproduced that effect. Moving opacity onto a group after the filter is a different operation.
 
-The comparisons above use SVGs rendered by the browser; the pixel close-ups are enlarged Chrome captures taken at 24 × 24 px. The detailed report covers earlier star-shaped examples, with checks of blur, blend modes, backgrounds, and subpixel positions against supersampled versions of their original filters. Those measurements apply to the earlier examples, not to this bolt. That reference helps compare the edge behavior; it is not a screenshot of Figma's renderer. The measurements and reproduction scripts are available separately for readers who want to inspect the experiment.
+The comparisons above use SVGs rendered by the browser; the pixel close-ups are enlarged Chrome captures taken at 52 × 49 px. The detailed report covers earlier star-shaped examples, with checks of blur, blend modes, backgrounds, and subpixel positions against supersampled versions of their original filters. The light- and dark-background measurements correspond to the high-contrast stars shown here. That reference helps compare the edge behavior; it is not a screenshot of Figma's renderer. The measurements and reproduction scripts are available separately for readers who want to inspect the experiment.
 
 [Detailed report and reproduction](https://github.com/joyco-studio/hub/tree/main/temp/hardalpha-validation) · [Earlier star measurements](/static/logs/figma-inner-shadows/hardalpha-results.json) · [Earlier light-background measurements](/static/logs/figma-inner-shadows/contrast-light-results.json) · [Earlier dark-background measurements](/static/logs/figma-inner-shadows/contrast-dark-results.json)
 
