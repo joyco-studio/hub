@@ -4,6 +4,8 @@ description: Perfect in Figma. Jagged in the browser. The tiny SVG fix that help
 author: 'justkahdri'
 ---
 
+import { Info } from 'lucide-react'
+
 An icon exported from Figma can have an edge that looks chewed up when the SVG is rendered in an app. The face of the icon is smooth. The thin shadow along its diagonal looks like someone took tiny bites out of it.
 
 It is tempting to blame the image size, the browser, or the way the SVG is embedded. But the useful clue is inside the icon itself: a plain filled path can look smooth while the shadow beside it stair-steps along the same angle. Something happens while the shadow is being built.
@@ -50,7 +52,7 @@ In these Figma exports, there is an extra step before the offset:
 
 `feColorMatrix` recalculates the pixel channels. Here the first three rows keep the stencil colorless; the last row says **multiply alpha by 127**. Values above 1 are clamped back to 1.
 
-<Callout title="Why 127?">
+<Callout title="Why 127?" icon={<Info className="size-5 shrink-0" />}>
   Figma uses this multiplier in these SVG exports, but no clear explanation for choosing `127` was found in the sources reviewed. See [what is documented, and what isn't](#what-is-documented-and-what-isnt).
 </Callout>
 
