@@ -83,9 +83,9 @@ Change the alpha row in the affected inner-shadow block:
 
 Leave the rest of the matrix and filter graph intact. The result can still be named `hardAlpha`; its pixels now retain the source alpha. Don't replace every occurrence of `127` in the file: coordinates and other effects are unrelated to this edit.
 
-This original Figma export has a blue-gray fill, a soft dark inner shadow, and an opaque white inner rim offset by `(4.1, 3)`. The only change between the two versions is replacing `127` with `1` in both shadow matrices. A neutral gray background keeps the white rim visible in both page themes.
+This original Figma export has a blue-gray fill, a soft dark inner shadow, and an opaque white inner rim offset by `(4.1, 3)`. The only change between the two versions is replacing `127` with `1` in both shadow matrices.
 
-<div className="not-prose mx-auto my-6 grid max-w-sm grid-cols-2 justify-items-center gap-6 rounded-lg bg-[#71717a] p-6 [&_figcaption]:text-white [&_img]:h-auto [&_img]:w-[104px] [&_img]:max-w-full [&_img]:filter-none!">
+<div className="not-prose mx-auto my-6 grid max-w-sm grid-cols-2 justify-items-center gap-6 [&_img]:h-auto [&_img]:w-[104px] [&_img]:max-w-full [&_img]:filter-none!">
   <figure className="m-0">
     <Image
       src="/static/logs/figma-inner-shadows/figma-offset-original.svg"
@@ -114,7 +114,7 @@ This original Figma export has a blue-gray fill, a soft dark inner shadow, and a
 
 These SVGs render at 104 × 98 px for readability. The pixel close-ups in the next section preserve captures at the original 52 × 49 px; enlarging an SVG rerenders its edges at the new size.
 
-The version on the right preserves partial edge coverage while keeping the white rim and soft dark shading. On this gray background, the comparison highlights the change in the outline; the next section shows why the background also matters when checking for a halo.
+The version on the right preserves partial edge coverage while keeping the white rim and soft dark shading. The next section shows why the background also matters when checking for a halo.
 
 [Original SVG](/static/logs/figma-inner-shadows/figma-offset-original.svg) · [Alpha 1 SVG](/static/logs/figma-inner-shadows/figma-offset-alpha1.svg)
 
@@ -252,61 +252,14 @@ The same three versions on the page background: original filter, alpha 1, and ge
 
 Changing 127 to 1 smooths the shadow's edge, but also lets some of the fill color show through it. That can leave a thin colored halo, especially with a white rim on white or a dark rim on dark. Removing that halo requires separating the fill and rim so they no longer overlap.
 
-## The complete fix for this edge: split the geometry
+## If a halo remains: separate the fill and rim
 
-Drawing a white rim over the complete filled shape still stacks antialiased coverage at their shared outer edge. A mask made from vector paths can do the same thing. Calling those paths “geometry” doesn't remove the overlap.
+Give the SVG to an LLM and ask it to convert the opaque inner shadow into real geometry: separate paths for the fill and rim, with no overlap. That is how the “Geometry” example above was built. With no base fill underneath the rim, its color no longer leaks through the edge. Keep any soft or translucent shadows, including their blur and opacity.
 
-For this star, split the shape before drawing it. If `S` is the original shape and `T` is its copy translated by the white shadow's `(0, 3)` offset:
+**Try `127 → 1` first and check the icon at its intended size and background.** Keep it if the edge is smoother and the shading still looks right. Separate the regions if a halo remains. With translucent fills, also check whether the shadow became weaker.
 
-```text
-base region  = intersection(S, T)
-white region = difference(S, T)
-```
-
-Compute those Boolean operations in your vector editor or geometry tooling, then export the resulting paths as separate fills. There is no full base silhouette underneath the white rim anymore. In this case the white shadow is fully opaque, so the rim can be drawn directly in white.
-
-```jsx
-<g style={{ isolation: 'isolate' }}>
-  <path d={BASE_REGION} fill="#7B8EA8" />
-  {/* Preserve the dark shadow on the base region, before the white rim. */}
-  <path
-    d={BASE_REGION}
-    fill="#101C30"
-    fillOpacity={0.8}
-    mask="url(#dark-rim)"
-  />
-  <path d={WHITE_REGION} fill="#fff" />
-</g>
-```
-
-This rebuild removes the fill-colored fringe around the white rim while retaining the dark shadow's blur and the export's dark-then-white order. It is a hybrid of Boolean geometry and a blurred mask, not a claim that a hard-edged path can reproduce any soft shadow. Semitransparent rims and other blend modes need their own color and opacity treatment.
-
-In the earlier blue-and-white fixture, a mask-only rebuild made the fringe worse: applying an antialiased mask to another antialiased path reduced the white edge coverage further. That comparison remains in the detailed report. The relevant fix is the region partition, not merely replacing a filter with a mask.
-
-[Light: original](/static/logs/figma-inner-shadows/contrast-light-original.svg) · [alpha 1](/static/logs/figma-inner-shadows/contrast-light-alpha1.svg) · [Dark: original](/static/logs/figma-inner-shadows/contrast-dark-original.svg) · [alpha 1](/static/logs/figma-inner-shadows/contrast-dark-alpha1.svg)
-
-[Rebuilt for light](/static/logs/figma-inner-shadows/contrast-light-rebuilt.svg) · [Rebuilt for dark](/static/logs/figma-inner-shadows/contrast-dark-rebuilt.svg)
-
-## What to look for before keeping the fix
-
-Check the result at the size and on the background where it will be used. Three details matter:
-
-- **The silhouette:** did the staircase improve, or did a new colored line appear around the edge?
-- **The shading:** do the light and dark bands still have the same apparent strength?
-- **The material:** does the icon still read as the same raised, inset, or glossy surface?
-
-The examples show both the benefit of the small edit and a reason to go further: a rim can pick up color from the fill below it even after the staircase improves. A white rim exposes it on light; a dark rim exposes it on dark. Reversing their backgrounds makes the fringe less apparent. Earlier measurements using star-shaped examples did not show the same clear advantage for the rebuild on those opposite backgrounds. Judge the result on the background you intend to use.
-
-Translucent fills need another check. Because `SourceAlpha` already includes the fill opacity, changing 127 to 1 can weaken the whole shadow, not just soften its edge. Lowering the fill opacity in an earlier export reproduced that effect. Moving opacity onto a group after the filter is a different operation.
-
-The comparisons above use SVGs rendered by the browser; the pixel close-ups are enlarged Chrome captures taken at 52 × 49 px. The detailed report covers earlier star-shaped examples, with checks of blur, blend modes, backgrounds, and subpixel positions against supersampled versions of their original filters. The light- and dark-background measurements correspond to the high-contrast stars shown here. That reference helps compare the edge behavior; it is not a screenshot of Figma's renderer. The measurements and reproduction scripts are available separately for readers who want to inspect the experiment.
-
-[Detailed report and reproduction](https://github.com/joyco-studio/hub/tree/main/temp/hardalpha-validation) · [Earlier star measurements](/static/logs/figma-inner-shadows/hardalpha-results.json) · [Earlier light-background measurements](/static/logs/figma-inner-shadows/contrast-light-results.json) · [Earlier dark-background measurements](/static/logs/figma-inner-shadows/contrast-dark-results.json)
+[Rebuilt SVG: light](/static/logs/figma-inner-shadows/contrast-light-rebuilt.svg) · [dark](/static/logs/figma-inner-shadows/contrast-dark-rebuilt.svg) · [Detailed tests and reproduction](https://github.com/joyco-studio/hub/tree/main/temp/hardalpha-validation)
 
 ## What is documented, and what isn't
 
-A [2024 Figma community report](https://forum.figma.com/ask-the-community-7/junky-borders-when-exporting-in-svg-33951) describes related shadow-export fringes and a workaround that separates fill and stroke geometry. It is useful precedent, not a diagnosis of this exact matrix or an official Figma explanation.
-
-There are public examples using the same matrix, including [AlignUI's avatar filter](https://www.alignui.com/docs/v1.2/ui/avatar), but the sources reviewed provide no authoritative explanation for why the multiplier is specifically 127 or a documented guarantee that replacing it with 1 preserves every shadow. The recommendations here come from the supplied exports and the comparisons above.
-
-**Start with the tiny edit. Keep it if the edge and shading hold up. If a halo or intensity change remains, rebuild the affected regions and preserve the soft parts of the effect deliberately.** A cleaner silhouette is the first check. The color and strength of the shadow are the next.
+The same `127` matrix appears in public exports, including [AlignUI's avatar filter](https://www.alignui.com/docs/v1.2/ui/avatar). The sources reviewed do not explain why Figma chose that value. Changing it to `1` improves the edges in these examples; it is not a documented fix for every shadow.
