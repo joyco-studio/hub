@@ -4,7 +4,7 @@ description: Perfect in Figma. Jagged in the browser. The tiny SVG fix that help
 author: 'justkahdri'
 ---
 
-You export an icon from Figma, drop the SVG into the app, and one edge looks chewed up. The face of the icon is smooth. The thin shadow along its diagonal looks like someone took tiny bites out of it.
+An icon exported from Figma can have an edge that looks chewed up when the SVG is rendered in an app. The face of the icon is smooth. The thin shadow along its diagonal looks like someone took tiny bites out of it.
 
 It is tempting to blame the image size, the browser, or the way the SVG is embedded. But the useful clue is inside the icon itself: a plain filled path can look smooth while the shadow beside it stair-steps along the same angle. Something happens while the shadow is being built.
 
@@ -35,7 +35,7 @@ An SVG pixel has red, green, blue, and **alpha**. Alpha describes opacity: 0 is 
 
 `SourceAlpha` is the source graphic's alpha channel, with the colors removed. Think of it as a stencil of the shape: solid in the middle, transparent outside, and partly transparent along the boundary. If the fill itself is translucent, that opacity is already part of the stencil.
 
-An inner shadow needs a stencil like this. The exporter takes the silhouette, moves a copy by the shadow's offset, optionally blurs it, and subtracts that copy from the unshifted silhouette. The remaining band is the rim that gets colored and blended over the icon.
+The exporter uses this stencil to work out where the inner shadow should appear. Imagine placing a copy over the original and sliding the copy down a few pixels: a narrow strip near the original's top edge is left uncovered. Subtracting the shifted copy from the original isolates that strip, which is then tinted with the shadow color and blended over the icon. If the shadow has blur, the copy is blurred before the subtraction, so the strip fades gradually toward the inside of the shape.
 
 In these Figma exports, there is an extra step before the offset:
 
@@ -49,6 +49,10 @@ In these Figma exports, there is an extra step before the offset:
 ```
 
 `feColorMatrix` recalculates the pixel channels. Here the first three rows keep the stencil colorless; the last row says **multiply alpha by 127**. Values above 1 are clamped back to 1.
+
+<Callout title="Why 127?">
+  Figma uses this multiplier in these SVG exports, but no clear explanation for choosing `127` was found in the sources reviewed. See [what is documented, and what isn't](#what-is-documented-and-what-isnt).
+</Callout>
 
 Follow one edge pixel through it: alpha `0.3` becomes `38.1`, then clamps to `1`. A pixel that was only 30% covered is now treated as fully covered. Even alpha `0.01` becomes opaque. Most of the intermediate edge coverage has disappeared before the shadow is offset or blurred.
 
@@ -64,7 +68,7 @@ A horizontal or vertical edge placed exactly on the pixel grid has little partia
 
 Blur can soften the shifted copy inside the shadow band, but it does not restore the coverage already discarded from the unshifted stencil. Increasing it changes the look of the shadow without guaranteeing a clean silhouette.
 
-Enlarging the SVG can hide the symptom for another reason: the browser rasterizes the shape onto a finer grid. To inspect the icon you will actually ship, render it at the target size and enlarge that screenshot with nearest-neighbor interpolation. Otherwise, you are looking at a new render of a larger icon.
+Enlarging the SVG can hide the symptom for another reason: the browser rasterizes the shape onto a finer grid. To inspect the icon as it will appear in the app, render it at the target size and enlarge that screenshot with nearest-neighbor interpolation. Enlarging the SVG itself produces a new render of a larger icon.
 
 Now there is a useful place to intervene: the step that hardened the alpha in the first place.
 
@@ -228,9 +232,9 @@ Check the result at the size and on the background where it will be used. Three 
 
 The examples show both the benefit of the small edit and a reason to go further: a rim can pick up color from the fill below it even after the staircase improves. A white rim exposes it on light; a dark rim exposes it on dark. Reversing their backgrounds makes the fringe less apparent, and the measurements do not show the same clear advantage for the rebuild there. Judge the result on the background you intend to use.
 
-Translucent fills need another check. Because `SourceAlpha` already includes the fill opacity, changing 127 to 1 can weaken the whole shadow, not just soften its edge. We reproduced that by lowering the fill opacity in an earlier export. Moving opacity onto a group after the filter is a different operation.
+Translucent fills need another check. Because `SourceAlpha` already includes the fill opacity, changing 127 to 1 can weaken the whole shadow, not just soften its edge. Lowering the fill opacity in an earlier export reproduced that effect. Moving opacity onto a group after the filter is a different operation.
 
-The examples above are native-size Chrome captures. We also checked blur, blend modes, backgrounds, and subpixel positions against supersampled versions of the original filters. That reference helps compare the edge behavior; it is not a screenshot of Figma's renderer. The measurements and reproduction scripts are available separately for readers who want to inspect the experiment.
+The examples above are native-size Chrome captures. Additional checks compared blur, blend modes, backgrounds, and subpixel positions against supersampled versions of the original filters. That reference helps compare the edge behavior; it is not a screenshot of Figma's renderer. The measurements and reproduction scripts are available separately for readers who want to inspect the experiment.
 
 [Detailed report and reproduction](https://github.com/joyco-studio/hub/tree/main/temp/hardalpha-validation) · [Original measurements](/static/logs/figma-inner-shadows/hardalpha-results.json) · [Light-background measurements](/static/logs/figma-inner-shadows/contrast-light-results.json) · [Dark-background measurements](/static/logs/figma-inner-shadows/contrast-dark-results.json)
 
@@ -238,6 +242,6 @@ The examples above are native-size Chrome captures. We also checked blur, blend 
 
 A [2024 Figma community report](https://forum.figma.com/ask-the-community-7/junky-borders-when-exporting-in-svg-33951) describes related shadow-export fringes and a workaround that separates fill and stroke geometry. It is useful precedent, not a diagnosis of this exact matrix or an official Figma explanation.
 
-I found public examples using the same matrix, including [AlignUI's avatar filter](https://www.alignui.com/docs/v1.2/ui/avatar), but no authoritative explanation for why the multiplier is specifically 127 or a documented guarantee that replacing it with 1 preserves every shadow. The recommendations here come from the supplied exports and the comparisons above.
+There are public examples using the same matrix, including [AlignUI's avatar filter](https://www.alignui.com/docs/v1.2/ui/avatar), but the sources reviewed provide no authoritative explanation for why the multiplier is specifically 127 or a documented guarantee that replacing it with 1 preserves every shadow. The recommendations here come from the supplied exports and the comparisons above.
 
 **Start with the tiny edit. Keep it if the edge and shading hold up. If a halo or intensity change remains, rebuild the affected regions and preserve the soft parts of the effect deliberately.** A cleaner silhouette is the first check. The color and strength of the shadow are the next.
