@@ -1,5 +1,23 @@
 # Validación de hardAlpha: 127 → 1
 
+## Ilustraciones actuales: rayo de Figma
+
+El artículo usa ahora el export de un rayo de 24 × 24, guardado sin cambios en `public/static/logs/figma-inner-shadows/bolt-original.svg`. Su borde blanco tiene offset `(1, 0)`; la sombra suave mantiene offset `(0, -2)`, sigma 1 y opacidad 30%. `bolt-alpha1.svg` cambia únicamente los dos multiplicadores de alpha de 127 a 1.
+
+`bolt-prepare.py` usa skia-pathops y fonttools para calcular la intersección y diferencia con una copia desplazada `(1, 0)`, conservando curvas Bézier. Verifica que las regiones no se solapen y que cubran el área del original. Las variantes `bolt-contrast-light-*` y `bolt-contrast-dark-*` mantienen la geometría y refuerzan las paletas como los ejemplos anteriores; no son exports originales adicionales.
+
+`bolt-render.cjs` captura cada variante corregida/reconstruida a 24 × 24 en Chrome y amplía los píxeles a 384 × 384 con nearest-neighbor. Las comparativas SVG se muestran a 96 × 96 sobre gris. Los PNG conservan fondo transparente para mostrar el halo sobre el tema de la página. El artículo superpone una grilla CSS de 24 × 24 que escala con cada imagen: una celda representa un píxel del render original.
+
+```sh
+uv venv .context/bolt-venv
+uv pip install --python .context/bolt-venv/bin/python skia-pathops==0.9.2 fonttools==4.65.0
+.context/bolt-venv/bin/python temp/hardalpha-validation/bolt-prepare.py
+# Requiere Playwright y Chrome; PLAYWRIGHT_PATH puede señalar una instalación existente.
+node temp/hardalpha-validation/bolt-render.cjs
+```
+
+Las métricas y conclusiones cuantitativas siguientes corresponden a las estrellas anteriores. No se presentan como mediciones del rayo.
+
 ## Resultado
 
 **El cambio es un buen primer arreglo, pero no conserva todas las sombras.** `Star 1.svg` mejora con `=1`, incluso con dos sombras y blur. El segundo original aportado, `Star2.svg`, **sí muestra una franja azul con `=1` alrededor del rim blanco**. La máscara del post agrava esa franja; dividir el relleno y el rim en regiones vectoriales independientes la elimina en ese borde. Además, con relleno semitransparente, `=1` puede reducir mucho la intensidad de las sombras.
