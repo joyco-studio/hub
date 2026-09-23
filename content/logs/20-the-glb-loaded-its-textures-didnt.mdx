@@ -1,5 +1,5 @@
 ---
-title: 20 - The GLB Loaded. Its Textures Didn't.
+title: 20 - Where Did My Textures Go? Loading GLBs on the Web
 description: Why embedded GLB textures can be blocked by connect-src, and the CSP change that lets them load.
 author: 'justkahdri'
 ---
@@ -10,10 +10,23 @@ The model renders correctly in a [glTF inspector](https://hub.joyco.studio/toolb
 
 A GLB can store image bytes inside the file as `bufferView`s. In three.js r183, [`GLTFLoader`](https://github.com/mrdoob/three.js/blob/r183/examples/jsm/loaders/GLTFLoader.js) loads those images through this path when using `ImageBitmapLoader`:
 
-```txt
-bufferView → Blob → URL.createObjectURL() → blob:https://…
-           → ImageBitmapLoader → fetch(blob:…) → createImageBitmap()
-```
+<Diagram index={1} title="How embedded image bytes become a texture">{`
+flow LR
+bufferView["bufferView"]:info
+blob["Blob"]
+objectUrl["URL.createObjectURL()"]
+blobUrl["blob:https://…"]:warning
+loader["ImageBitmapLoader"]
+fetch["fetch(blob:…)"]:error
+bitmap["createImageBitmap()"]:success
+bufferView --> blob
+blob --> objectUrl
+objectUrl --> blobUrl
+blobUrl --> loader
+loader --> fetch
+fetch --> bitmap
+note fetch below "governed by connect-src"
+`}</Diagram>
 
 The key step is `fetch()`: [`ImageBitmapLoader`](https://github.com/mrdoob/three.js/blob/r183/src/loaders/ImageBitmapLoader.js) uses it to read the temporary blob URL. The [CSP specification](https://www.w3.org/TR/CSP3/#directive-connect-src) puts that request under `connect-src`, even though the data becomes an image.
 
