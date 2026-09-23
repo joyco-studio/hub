@@ -1,0 +1,51 @@
+---
+title: 20 - Where Did My Textures Go? Loading GLBs on the Web
+description: Why embedded GLB textures can be blocked by connect-src, and the CSP change that lets them load.
+author: 'justkahdri'
+---
+
+The model renders correctly in a [glTF inspector](https://hub.joyco.studio/toolbox/gltf), but its textures are missing in the app, even though the `.glb` request returns 200. In this case, Content Security Policy (CSP) blocked the embedded textures through `connect-src`.
+
+## How embedded images become textures
+
+A GLB can store image bytes inside the file as `bufferView`s. In three.js r183, [`GLTFLoader`](https://github.com/mrdoob/three.js/blob/r183/examples/jsm/loaders/GLTFLoader.js) loads those images through this path when using `ImageBitmapLoader`:
+
+<Diagram index={1} title="How embedded image bytes become a texture">{`
+flow LR
+bufferView["bufferView"]:info
+blob["Blob"]
+objectUrl["URL.createObjectURL()"]
+blobUrl["blob:https://…"]:warning
+loader["ImageBitmapLoader"]
+fetch["fetch(blob:…)"]:error
+bitmap["createImageBitmap()"]:success
+bufferView --> blob
+blob --> objectUrl
+objectUrl --> blobUrl
+blobUrl --> loader
+loader --> fetch
+fetch --> bitmap
+note fetch below "governed by connect-src"
+`}</Diagram>
+
+The key step is `fetch()`: [`ImageBitmapLoader`](https://github.com/mrdoob/three.js/blob/r183/src/loaders/ImageBitmapLoader.js) uses it to read the temporary blob URL. The [CSP specification](https://www.w3.org/TR/CSP3/#directive-connect-src) puts that request under `connect-src`, even though the data becomes an image.
+
+## Allow blob requests in connect-src
+
+Allowing `blob:` in `img-src` does not authorize that `fetch()` request:
+
+```txt
+img-src 'self' data: blob: https:;
+connect-src 'self' https: wss:;
+```
+
+Add `blob:` to the existing `connect-src` directive:
+
+```diff
+- connect-src 'self' https: wss:;
++ connect-src 'self' blob: https: wss:;
+```
+
+Keep `blob:` in `img-src` too: when `GLTFLoader` uses its `TextureLoader` fallback, the image loads through an `<img>` element instead.
+
+Check the console for a blocked `blob:` request under `connect-src`, then reload the page after updating the policy. A successful `.glb` response confirms the model file arrived; its textures can still fail to load.
