@@ -6,7 +6,7 @@ author: 'justkahdri'
 
 import { Info } from 'lucide-react'
 
-An icon exported from Figma can have an edge that looks chewed up when the SVG is rendered in an app. The face of the icon is smooth. The thin shadow along its diagonal looks like someone took tiny bites out of it.
+An icon exported from Figma can have an edge that looks chewed up when the SVG is rendered in an app. The icon's filled shape has a smooth outline, but the thin shadow along one of its diagonal edges looks like someone took tiny bites out of it.
 
 It is tempting to blame the image size, the browser, or the way the SVG is embedded. But the useful clue is inside the icon itself: a plain filled path can look smooth while the shadow beside it stair-steps along the same angle. Something happens while the shadow is being built.
 
