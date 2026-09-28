@@ -71,6 +71,7 @@ export function ExperimentTOC({
 
   return (
     <div
+      data-slot="experiment-toc"
       className={cn(
         'fixed top-0 right-0 z-(--z-toc-popover) flex h-screen items-center max-md:top-(--mobile-header-height) max-md:h-[calc(100dvh-var(--mobile-header-height))]',
         'transition-transform duration-300 ease-in-out',
