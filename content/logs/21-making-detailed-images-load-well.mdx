@@ -1,0 +1,113 @@
+---
+title: 21 - Making detailed images load well
+description: How a detailed showcase led us to build Iris and rethink image exports, responsive sizes, and loading.
+author: 'fabroos'
+---
+
+import ImageResolutionDemo from '@/demos/image-resolution-demo'
+import ImageLoadingDemo from '@/demos/image-loading-demo'
+import GifSequenceDemo from '@/demos/gif-sequence-demo'
+
+Have you ever noticed an image looking softer than it should? Or watched a sharper version take too long to load? And when you added a blur placeholder, did it linger on a slower connection?
+
+We ran into these problems while building our showcase. Here's what we tried, what we built along the way, and where each approach fell short.
+
+## Start with the source
+
+Our showcase uses artwork that needs to hold up at full size. Some of it looked soft on very large desktop displays. The issue started with the raw assets: several had been exported with a minimum size that was too small for where we used them. The browser could choose a different file, but it couldn't recover detail that wasn't in the source.
+
+We re-exported the affected artwork and wrote an export manifest and workflow so the minimum size is an explicit decision. That gave us a repeatable starting point for each new image: decide where it will appear, export enough detail for that use, and check the result before it reaches the site.
+
+<Diagram index={1} title="From artwork to a usable source file">{`
+flow LR
+art["Artwork"]:primary
+requirements["Export requirements"]:info
+export["Exported file"]:warning
+check["Check dimensions"]:success
+site["Website"]:success
+art --> requirements
+requirements --> export
+export --> check
+check --> site
+`}</Diagram>
+
+The comparison below uses two new exports from the **same** Sazabi artwork. It illustrates what happens when a small source is stretched; these are not the historical files that caused our issue.
+
+<ImageResolutionDemo />
+
+That fixed the first problem. It also meant some of our source files were now substantial. Before changing how they loaded, we needed to know which version the browser was actually using.
+
+## Inspect what reaches the screen
+
+Those checks grew into **Iris**, the image delivery library we're building at JOYCO. It catalogs sources, prepares tiny placeholders, and lets us define loading recipes and the rules that select them. Its on-page debugger can show the selected URL, displayed size, device pixel ratio, timing, transferred bytes, and layout diagnostics. That lets us distinguish an undersized source from a browser choosing an undersized candidate, or a large file arriving slowly.
+
+Iris doesn't re-export full-size assets. Once the sources are good, it makes the rest of the decision repeatable across the site. We're developing it through this showcase, where we can test each recipe against real artwork and real loading conditions.
+
+## First, send the right size
+
+The simplest win is to avoid sending more pixels than the placement needs. Responsive images provide the browser with width candidates through `srcset`; `sizes` describes how wide an image will appear at different viewport widths. Next's `Image` component generates those candidates, and the browser chooses one using that hint and its own display density. [The Next.js image docs](https://nextjs.org/docs/app/api-reference/components/image#sizes) explain why an inaccurate or missing `sizes` value can lead to an unnecessarily large download.
+
+For a card that fills the screen on mobile and half the screen on desktop, that hint could look like this:
+
+```tsx
+<Image
+  src="/showcase/artwork.jpg"
+  alt="Showcase artwork"
+  fill
+  sizes="(max-width: 768px) 100vw, 50vw"
+/>
+```
+
+The source still needs enough pixels for its largest placement. The responsive candidates keep smaller placements from paying for all of them.
+
+## Then decide what people see while they wait
+
+Even a correctly sized file can take time to arrive, particularly for a large piece of artwork or a slower connection. We tried several ways to make that wait easier to understand. Press **Load images** to request the same artwork through three strategies. The server streams the JPEG files at the selected cap, so you can watch what each approach actually shows while its requests are in progress.
+
+<ImageLoadingDemo />
+
+### Blur placeholder
+
+A tiny version of the image can be embedded in the page, enlarged, and blurred until the final file loads. It gives the page the image's colors and composition immediately. Next supports this with `placeholder="blur"` and `blurDataURL`; Iris prepares placeholders for the sources in our catalog. [Next's documentation](https://nextjs.org/docs/app/api-reference/components/image#blurdataurl) describes the built-in behavior.
+
+This felt good for short waits. When the final image took longer, the blur stayed visible long enough to become the experience itself.
+
+### An intermediate preview
+
+For larger placements, we added a file between the blur and the final image. Our staged recipe requests a preview at roughly half the required width. Once it has loaded and decoded, the preview replaces the blur; the full image continues loading and eventually replaces the preview.
+
+That gives someone a useful image sooner. It also adds a request and more bytes, so we choose it for images where the improvement is worth that cost.
+
+<Diagram index={2} title="Two ways to wait for the final image">{`
+flow LR
+blur["Tiny blur"]:warning
+finalA["Final image"]:success
+blurB["Tiny blur"]:warning
+preview["Intermediate preview"]:info
+finalB["Final image"]:success
+blur --> finalA
+blurB --> preview
+preview --> finalB
+`}</Diagram>
+
+### Progressive JPEG and interlaced PNG
+
+We also explored files that reveal detail as their own bytes arrive. A progressive JPEG can show an early, rough pass and refine it with later scans. An interlaced PNG provides a similar gradual reveal when the artwork needs transparency. In this case there is one image request, rather than a separate preview that gets replaced. [MDN describes how these formats can display while loading](https://developer.mozilla.org/en-US/docs/Web/Media/Guides/Formats/Support_issues).
+
+We generally treat this as an alternative to the blur and preview layers. Covering the image would hide the reveal we wanted to show. The encoded file also needs to reach the browser unchanged: an optimizer can re-encode it and remove the progressive behavior. The playground above streams the progressive JPEG directly, without an optimizer or visual filter. The browser decides when it can paint each scan.
+
+## When the image moves
+
+The same question comes up with animation: how much do we need to control, and what does that cost to deliver? A GIF is easy to embed and loop. An image sequence gives us individual frames that we can pause, scrub, or load in a deliberate order, with more requests and playback logic to manage.
+
+The playground below uses the same eight-frame showcase animation in both forms. Press Play, then stop and scrub the sequence. The GIF here is 171&nbsp;kB; the eight WebP frames total 47&nbsp;kB. Those numbers describe these particular encodes, not a general size rule. The difference that matters for our use cases is the control over individual frames.
+
+<GifSequenceDemo />
+
+For sequences that need that control, our [image sequence component](/components/image-sequence) loads frames across the animation's range before filling in the gaps. A simple passive loop may call for a different format or video; the sequence earns its complexity when the frames themselves are part of the interaction.
+
+## Where we landed
+
+The decisions happen in order. Give the source enough detail. Make sure the browser requests a useful size. Then choose what should be visible while that file arrives. Blur, an intermediate preview, and progressive encoding each answer that last question differently. When the visual moves, decide whether access to individual frames is worth the extra loading and playback work.
+
+The image on the screen is only the last step of that chain. Getting that step right started much earlier, with the export. That's the problem we're building Iris around: keeping the detail the design needs while making delivery decisions visible and repeatable.
