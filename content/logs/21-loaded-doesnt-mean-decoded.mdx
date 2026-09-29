@@ -1,128 +1,210 @@
 ---
 title: 21 - Loaded Doesn't Mean Decoded
-description: Why high-resolution Canvas image sequences can re-decode every frame, how a sliding decoded window avoids it, and when a plain image is the better renderer.
+description: How image sequences move through transfer, decode, browser eviction, and presentation without putting that work on the critical frame.
 author: 'justkahdri'
 ---
 
-The investigation began with a narrow question: whether AVIF or WebP was faster
-in a Canvas image sequence. The codec benchmark answered the transfer-size part,
-but the performance traces exposed a more important problem: **an image can be
-downloaded, cached, and complete without its decoded pixels still being in
-memory**.
+An image sequence looks like one moving visual, but the browser sees dozens or
+hundreds of independent images. Every frame needs encoded bytes, decoded pixels,
+and a safe moment to become visible.
 
-That distinction changes how an image-sequence player should be designed.
+That creates three separate budgets:
 
-In the 86-frame sequence, AVIF transferred fewer bytes than WebP. Around
-`ctx.drawImage()`, however, both codecs had a p95 of roughly `0.1 ms`, too close
-to the timer resolution to claim a synchronous drawing winner. The
-[measurement conditions and results](#evidence-and-limits) are recorded below.
-Enabling responsive sources then increased the selected frame width from 640 to
-1080 pixels. Stable playback started re-decoding almost every frame and
-producing a partially presented frame at almost the same rate.
+- **transfer:** how quickly encoded AVIF or WebP responses become available;
+- **decode:** how many compressed frames can become pixel buffers in time;
+- **presentation:** whether a ready frame exists when the playback clock asks
+  for it.
 
-The codec had not suddenly become slow. The decoded-image working set had been
-exceeded.
+Optimizing only one of them is not enough. Downloading every frame does not make
+every frame ready. Keeping every `Image` object does not keep every decoded
+bitmap resident. The number of source frames determines duration and
+granularity; the playback clock determines fps. A 24 fps clock also does not
+give one decode 41.67 ms of main thread time. It means an appropriate frame must
+already be ready every 41.67 ms.
 
-## There are two image sizes
+## Every frame has a pipeline
 
-The size shown in Network is the **encoded** size: the AVIF or WebP bytes sent
-over the wire. Once decoded for display, both become a pixel buffer whose rough
-size is:
+A complete first traversal has to resolve every frame through the network or a
+browser cache, decode it, and present it. Later traversals may reuse the encoded
+response, but they can still require another decode.
+
+<Diagram index={1} title="The lifecycle of one sequence frame">{`
+flow LR
+demand["Frame is demanded"]:primary
+transfer["Encoded bytes"]:info
+decode["Decoded pixels"]:warning
+ready["Ready frame"]:success
+present["Presented surface"]:success
+evicted["Decoded pixels evicted"]:error
+demand --> transfer
+transfer --> decode
+decode --> ready
+ready --> present
+ready --> evicted
+evicted --> decode
+note transfer below "network or cache"
+note decode below "must finish before reveal"
+`}</Diagram>
+
+The steps are related, but they are not the same state:
+
+| State       | What exists                            | What it guarantees                          |
+| ----------- | -------------------------------------- | ------------------------------------------- |
+| Transferred | Encoded AVIF or WebP bytes             | Another network transfer may be avoidable   |
+| Decoded     | A pixel representation exists          | The image can become ready for presentation |
+| Presented   | A DOM or Canvas surface uses the frame | The frame is selected for the next paint    |
+
+`image.complete === true` only says that the resource finished loading or
+failed. It is not a promise that decoded pixels will remain in memory.
+
+## Encoded size and decoded size are different budgets
+
+Network tools report compressed bytes. Presentation uses decoded pixels. A
+useful lower-bound estimate for an RGBA image is:
 
 ```txt
 width × height × 4 bytes
 ```
 
-For square RGBA frames, that made the sequence approximately:
+That difference becomes large across a full sequence:
 
-| Frame size  | One decoded frame | 86 decoded frames |
-| ----------- | ----------------: | ----------------: |
-| 640 × 640   |          1.56 MiB |           134 MiB |
-| 1080 × 1080 |          4.45 MiB |           383 MiB |
+| Frame size  | One decoded frame | Three future frames | 86 decoded frames |
+| ----------- | ----------------: | ------------------: | ----------------: |
+| 640 × 640   |          1.56 MiB |            4.69 MiB |           134 MiB |
+| 1080 × 1080 |          4.45 MiB |           13.35 MiB |           383 MiB |
 
-Those are minimums. Canvas backing stores, compositor resources, GPU textures,
-and the rest of the page add more pressure.
+Those values do not include the visible and staging surfaces, temporary decode
+buffers, allocator overhead, compositor resources, GPU textures, or any other
+images on the page.
 
-AVIF can therefore save a third of the transfer bytes and still consume about
-the same decoded memory as WebP at the same dimensions. Codec and resolution
-solve different problems:
+This is also why codec and runtime memory are separate decisions. AVIF can
+transfer fewer bytes than WebP while both occupy roughly the same decoded memory
+at the same dimensions.
 
-- the codec controls transfer and decode characteristics;
-- the pixel dimensions control the decoded working set;
-- the player controls how much of that working set stays live.
+## The browser owns the decoded cache
 
-## The decoded bitmap is a cache
+Creating an `HTMLImageElement` does not reserve its decoded bitmap forever. The
+browser keeps decoded image data within internal, dynamic budgets and may evict
+it under memory pressure. The encoded response can remain cached while the
+pixels disappear.
 
-An `HTMLImageElement` does not permanently own a decoded bitmap. The compressed
-response may remain in the HTTP cache while the browser discards its decoded
-pixels under memory pressure.
+The application can control only part of that lifecycle:
 
-That gives an image at least three relevant states:
+| Resource                               | Application control                                        |
+| -------------------------------------- | ---------------------------------------------------------- |
+| Local `ready` collection               | Add and remove references directly                         |
+| Pending work                           | Cancel or ignore it with `AbortController` and generations |
+| Encoded application cache              | Retain or evict `Blob` responses when one exists           |
+| HTTP cache                             | Influence it through URLs and cache headers                |
+| Browser decoded-image cache            | No public limit, inspection, or eviction API               |
+| GPU textures and presentation surfaces | No direct lifecycle control                                |
 
-<Diagram
-  index={1}
-  title="An image can stay loaded after its decoded pixels are evicted"
->{`
-flow LR
-network["Encoded response"]:info
-element["Loaded image element"]:primary
-decoded["Decoded pixel buffer"]:success
-evicted["Decoded pixels evicted"]:warning
-network --> element
-element --> decoded
-decoded --> evicted
-evicted --> decoded
-note decoded below "ready to present"
-note evicted below "compressed bytes may still be cached"
-`}</Diagram>
+Removing an image from a `Map`, clearing its `src`, and dropping all JavaScript
+references makes it eligible for cleanup. It does not command the browser to
+release its pixels immediately. `CacheStorage.delete()` does not help with this
+problem either; Cache Storage owns encoded `Request` and `Response` objects, not
+decoded pixels.
 
-This is why `image.complete === true` is not a decoded-memory guarantee. In the
-eager Canvas player, all 86 `HTMLImageElement`s still existed, but their 1080px
-pixel buffers did not all remain resident. When playback looped back to an
-evicted frame, `drawImage()` pulled decoding back into the presentation path.
+The internal decoded budget cannot be discovered reliably at runtime. Code such
+as `navigator.imageDecodeCache.remainingBytes` does not exist. A player can
+measure the pixel memory it intends to own, then validate browser behavior with
+traces, but it cannot adapt to an exact browser cache limit.
 
-The diagnostic traces made the pattern unusually clear: both AVIF and WebP ran
-at about `23.6` decodes per second in a 24 fps sequence, and almost every
-affected frame occurred within 10 ms of a decode. These traces show correlation,
-not proof that every partial presentation was caused by a decode. At 640px the
-same architecture produced few or no stable-playback decodes because the much
-smaller working set happened to fit.
+## Why large eager sequences start decoding again
 
-That does not make 640px a free optimization. On a high-DPR display, a canvas
-that is 630 CSS pixels wide can need well over 1080 physical pixels. Fixing the
-source at 640 trades sharpness for memory. Reintroducing `srcset` correctly
-restored image quality, but it also revealed that keeping every responsive
-frame decoded was not a viable architecture.
-
-## Keep a decoded window, not the whole sequence
-
-The production player exposed the useful architecture, not a controlled
-renderer win. It kept a moving window of 12 frames around the current position.
-
-If frame 30 is visible, the window contains roughly `30…41`. When playback
-advances, frame 30 leaves and frame 42 enters. At 1080px, that changes the
-minimum decoded working set from about 383 MiB to about 53 MiB.
-
-That 53 MiB is a lower-bound estimate of the pixels the application chooses to
-own. It is not a promise about browser process memory, GPU memory, or how long
-the browser will keep every decoded buffer resident.
-
-Each incoming frame crosses an explicit readiness boundary:
+An eager loader can create all of its elements and still lose their decoded
+representations:
 
 ```ts showLineNumbers
-async function decodeFrame(index: number, signal: AbortSignal) {
+const frames = urls.map((url) => {
+  const image = new Image()
+  image.src = url
+  return image
+})
+```
+
+At 1080px, 86 decoded frames have a lower-bound footprint of about 383 MiB. If
+the browser evicts early frames before playback loops back to them, the `Image`
+objects still exist and their responses may still be cached, but their pixels
+must be decoded again.
+
+The expensive failure happens when that decode is discovered during
+presentation:
+
+```ts showLineNumbers
+ctx.drawImage(frameThatLostItsDecodedPixels, 0, 0)
+```
+
+`drawImage()` is a synchronous JavaScript call on a normal Canvas. The browser
+may defer some raster or GPU work, but JavaScript does not regain control until
+the call returns. In the measured 1080px Canvas sequence, evicted frames pulled
+decode work back beside presentation at roughly the 24 fps playback rate.
+
+That diagnostic trace used a loaded sequence at DPR 2.5 with no sequence
+requests in the selected 10.76-second window. It recorded 254 decodes, or
+`23.6/s`, and 250 of 253 affected frames occurred within 10 ms of a decode. The
+result strongly connects decoded eviction with presentation pressure in that
+run, but it does not prove that every affected frame was caused by decode.
+
+This is not fundamentally a Canvas versus `<img>` problem. Canvas can predecode
+and hold the previous drawing. An `<img>` can also jank if a new URL is exposed
+without a readiness gate. The actual problem is allowing an unprepared frame to
+enter the critical presentation path.
+
+## Decode before the deadline, not inside it
+
+The `Image` class creates an image element outside the DOM. That makes it useful
+for preparing future frames without exposing incomplete work:
+
+```ts showLineNumbers
+async function decodeFrame(
+  index: number,
+  signal: AbortSignal
+): Promise<HTMLImageElement> {
   const image = new Image()
   const props = getFrameProps(index)
 
+  image.decoding = 'async'
   image.srcset = props.srcSet
   image.sizes = props.sizes
   image.src = props.src
 
-  await withTimeout(image.decode(), FRAME_TIMEOUT, signal)
-  return image
-}
+  const abort = () => {
+    image.removeAttribute('srcset')
+    image.removeAttribute('src')
+  }
 
-function loadFrame(index: number, generation: number) {
+  signal.addEventListener('abort', abort, { once: true })
+
+  try {
+    await withTimeout(image.decode(), FRAME_TIMEOUT)
+    if (signal.aborted) throw new DOMException('Aborted', 'AbortError')
+    return image
+  } catch (error) {
+    abort()
+    throw error
+  } finally {
+    signal.removeEventListener('abort', abort)
+  }
+}
+```
+
+`await image.decode()` does not synchronously block the main thread. It suspends
+that async function while the browser works. Input, JavaScript tasks, style,
+layout, and paint can continue between scheduling the decode and resolving its
+promise. Decode still consumes CPU and can contend with the rest of the page,
+so concurrency still matters.
+
+Several `decode()` promises can be pending together, but the API does not
+guarantee one parallel decoder per image. Four outstanding operations may mean
+two network transfers, one queued decode, and one active decode. Concurrency is
+an admission limit, not a promise about how the browser schedules its workers.
+
+A frame becomes application-ready only when the decode succeeds and the request
+is still relevant:
+
+```ts showLineNumbers
+function queueDecode(index: number, generation: number) {
   const controller = new AbortController()
   pending.set(index, controller)
 
@@ -143,242 +225,358 @@ function loadFrame(index: number, generation: number) {
       }
     })
     .finally(() => {
-      // A newer request may already own this index.
       if (pending.get(index) !== controller) return
 
       pending.delete(index)
-      refillWindowFrom(current)
+      pumpDecodes()
     })
 }
 ```
 
-`await image.decode()` does **not** block the main thread. It suspends this async
-function while the browser downloads and decodes the image. Input, animation,
-React, style, layout, and paint can run after the function yields. Decoding can
-still contend for browser threads, CPU, and memory; the important part is that
-JavaScript is not synchronously waiting for the promise in the frame that tries
-to present the image.
+The scheduler owns the pending slot and releases it in `finally` after success,
+failure, timeout, or cancellation. The identity check prevents an old request
+from deleting a newer request for the same frame.
 
-Decode completion is not enough by itself. The frame must also still be wanted.
-A resize, scroll jump, visibility change, or unmount can make an in-flight frame
-obsolete before its promise resolves. Stale results should be discarded. The
-scheduler owns the pending slot, marks current-generation failures, and releases
-the slot in `finally` after success, failure, timeout, or cancellation. The
-identity check prevents an older request from deleting a newer request's slot.
-The preloader and visible image should also use the same final URL and CORS mode
-so the browser does not create duplicate request or decode paths.
+## Keep a small decoded runway
 
-The scheduler then advances only when the next frame is ready:
+Once encoded bytes are available, the decoded working set can be much smaller
+than the complete sequence. A useful starting point is three future ready frames
+in addition to the visible and staging surfaces.
+
+<Figure
+  src="/static/logs/loaded-doesnt-mean-decoded/decoded-runway.png"
+  alt="A hand-drawn timeline showing one visible frame, three decoded frames in a moving buffer, and the next frame waiting to be decoded"
+  caption="A small decoded runway moves with playback. The 41 ms cadence and roughly 6 ms decode annotation came from one measured case; they are not universal browser budgets."
+  width={2154}
+  height={1162}
+/>
+
+At 24 fps:
+
+```txt
+one frame interval = 1000 / 24 = 41.67 ms
+three ready frames = 3 × 41.67 = 125 ms of runway
+```
+
+The 41.67 ms interval is a presentation cadence, not a per-frame decode budget.
+A decode task that consumes 7 ms of CPU can still resolve much later after
+waiting for an available decoder, competing work, staging, and promise
+continuations. The useful metric is request-to-ready or request-to-reveal
+latency, not only the duration of an `ImageDecodeTask`.
+
+Three future frames are therefore a starting value, not a guarantee. A simple
+high and low watermark keeps the ring small without waiting for it to become
+empty:
 
 ```ts showLineNumbers
-function tick(delta: number) {
-  elapsed += delta
-  if (elapsed < FRAME_DURATION) return
+const READY_AHEAD_LOW = 2
+const READY_AHEAD_HIGH = 3
 
-  const next = (current + 1) % frameCount
-  const frame = ready.get(next)
+function maintainRunway() {
+  if (countReadyAhead() > READY_AHEAD_LOW) return
 
-  if (!frame) {
-    elapsed = Math.min(elapsed, FRAME_DURATION)
-    return // keep presenting the current frame
+  while (countReadyOrPendingAhead() < READY_AHEAD_HIGH) {
+    queueNextDecode()
   }
-
-  ready.delete(next)
-  visibleImage.replaceWith(frame)
-  visibleImage = frame
-  current = next
-  elapsed -= FRAME_DURATION
-  refillWindowFrom(current)
 }
 ```
 
-The decoded `Image` is also the element inserted into the document. Copying its
-URL to a different visible element would rely on the browser reusing decoded
-data, while `decode()` only established readiness for the original element.
-Each queued image therefore needs the same stable dimensions, class, alt text,
-and other presentation attributes as the current image before it is decoded.
-`current` advances only after that exact element has replaced the previous one.
+If measured request-to-ready p95 repeatedly exhausts 125 ms, the high watermark
+can increase to four or five. If several sequences are active or memory pressure
+appears, it can decrease. The target is the smallest runway that prevents
+underruns, not the largest set that fits once on a development machine.
 
-The `return` is the playback policy. If the next frame is not ready, the player
-holds the current frame and tries again on the next tick. It does not clear the
-screen, select an undecoded element, or accumulate an unlimited time debt and
-then skip forward. Under a slow network the sequence may run below 24 fps, but
-the rest of the page remains responsive and complete decoded elements are
-selected for presentation.
+## Fetch ahead, decode just in time
 
-The window size and request concurrency are separate knobs. A 12-frame window
-does not imply 12 simultaneous requests, and neither has anything to do with
-Sharp's encoder concurrency during the build. Name and measure those settings
-separately.
+Transfer and decode should not share one queue or one retention policy.
 
-### Autoplay is ordered demand
+<Diagram index={2} title="Encoded bytes can run ahead of decoded pixels">{`
+flow LR
+urls["Prioritized frame URLs"]:primary
+fetch["Transfer queue"]:info
+encoded["Encoded responses"]:info
+decode["Local decode pump"]:warning
+ready["3 future ready frames"]:success
+staging["Staging image"]:success
+visible["Visible image"]:success
+urls --> fetch
+fetch --> encoded
+encoded --> decode
+decode --> ready
+ready --> staging
+staging --> visible
+note fetch below "several requests may be in flight"
+note decode below "usually one decode at a time per sequence"
+`}</Diagram>
 
-For autoplay, the immediate next frame matters more than every later frame.
-Fill the bounded window sequentially from the current position, advance only
-when that next frame is ready, and cap accumulated time while holding so
-recovery does not fast-forward through the sequence.
+A practical starting point is:
 
-A binary order such as `0, 85, 42, 21…` gives early coverage across an
-incomplete sequence, but it optimizes a different contract: showing the nearest
-loaded approximation. It is not the default for a player that promises ordered
-frames and holds when the next one is unavailable.
-
-### Scroll is target demand
-
-Scroll-driven playback can jump from frame 8 to frame 55, so loading frame 9
-first may be wasted work. Prioritize the latest target, use the remaining window
-for nearby frames biased toward the direction of travel, and cancel pending work
-that is now far outside the wanted set. Coalesce scroll changes to one scheduling
-decision per animation frame; during a fast scrub, reaching the latest target is
-more useful than presenting every integer in between.
-
-Loading order and decoded-frame retention are separate policies, but both must
-match the kind of demand the interaction creates.
-
-## A good player fails without going blank
-
-The poster or first valid frame is part of the runtime contract, not decoration.
-Once it appears, the sequence should never return to an empty surface or loader.
-Network and decode pressure may slow animation progress, but they should not
-damage page integrity.
-
-That produces a compact set of lifecycle rules:
-
-- show a poster before playback; do not wait for the complete sequence to make
-  the component usable;
-- let only a decoded, still-wanted frame replace the visible one;
-- preserve the current frame while rebuilding future candidates after resize or
-  orientation changes;
-- pause the clock while the page is hidden and release future frames when the
-  section is no longer nearby;
-- show the poster under reduced motion instead of starting the playback loop;
-- time out failed frames, free their pending slots, and avoid continuous retry
-  loops.
-
-## The lesson is not “Canvas blocks, images don't”
-
-A normal Canvas 2D call is synchronous JavaScript:
-
-```ts
-ctx.drawImage(frame, 0, 0)
+```ts showLineNumbers
+const policy = {
+  fetchConcurrency: 4,
+  decodeConcurrencyPerSequence: 1,
+  readyAhead: 3,
+}
 ```
 
-JavaScript does not regain control until that call returns, although the browser
-may defer some raster or GPU work. If the decoded pixels are gone, the call can
-cause enough decode work on its critical path to miss presentation deadlines.
-Measuring only the duration around `drawImage()` still does not capture all
-decode, raster, or GPU completion, which is why the Performance trace mattered
-more than the microbenchmark.
+The transfer pool should roll continuously rather than wait for rigid batches.
+When one request completes, the highest-priority missing response takes its
+slot. The decode pump stays narrower so a sequence does not create a burst of
+large pixel allocations or several competing decode tasks at once.
 
-But Canvas can use the same readiness policy:
+For a minimal player, assigning a versioned URL to `new Image()` and relying on
+normal HTTP caching is enough. Correct immutable cache headers let later uses
+reuse encoded bytes without adding a service worker, object URLs, or a custom
+cache.
 
-```ts
+A page with several nearby sequences can add a shared transfer manager outside
+the component:
+
+```ts showLineNumbers
+const sequenceTransfers = createTransferManager({
+  concurrency: 4,
+  encodedByteBudget: 16 * MiB,
+})
+
+const blob = await sequenceTransfers.acquire({
+  owner: sequenceId,
+  url,
+  priority,
+  signal,
+})
+```
+
+That manager can deduplicate requests, retain a small LRU of compressed `Blob`s,
+and distribute the four slots fairly between owners. It does not need to own an
+`HTMLImageElement`, decoded pixels, the playhead, or React state. Local sequence
+controllers still own their decode rings.
+
+The shared manager is an optimization for a complex page, not a requirement for
+a reusable one-sequence component. It can be a module singleton rather than a
+React provider. Direct URL loading should remain the small default.
+
+## Priority depends on the interaction
+
+Working-set size answers how many decoded frames can remain ready. Priority
+answers which frame deserves the next transfer or decode slot. Those are
+different policies.
+
+### Sequential autoplay
+
+The exact next frame has the nearest deadline. Decode it first, then fill the
+remaining runway in order:
+
+```txt
+visible: 20
+decode priority: 21, 22, 23
+```
+
+If frame 21 is unavailable, strict autoplay holds frame 20. A bounded-skip mode
+may allow 22, but it should not jump arbitrarily to a distant ready frame.
+
+### Time-based hybrid playback
+
+Some decorative loops should preserve authored time even when delivery cannot
+produce every frame. In that mode the playhead advances, while presentation
+chooses the closest useful ready frame within an explicit maximum skip. The
+missing frame never produces a blank surface.
+
+Distributed transfer order can help this policy establish coarse coverage:
+
+```txt
+0, 85, 42, 21, 63, 10, 31, 52, 74…
+```
+
+That order is useful for encoded coverage. It does not justify retaining all 86
+frames as decoded pixels.
+
+### Scroll-driven demand
+
+Scroll can jump directly from frame 20 to frame 50. The target deserves the
+first slot, followed by nearby frames biased toward the direction of travel:
+
+```txt
+forward: 50, 51, 49, 52, 48…
+reverse: 50, 49, 51, 48, 52…
+```
+
+The current visible frame stays pinned until a valid candidate is ready. On a
+direction change, stale pending work is cancelled or demoted and the reverse
+side receives priority.
+
+### Approaching sequences
+
+A sequence near the viewport does not need a complete decoded runway yet. Its
+poster, entry frame, and perhaps one immediate successor are enough. The ring
+expands only when the sequence becomes visible or primary.
+
+This admission rule prevents several consecutive sections from reserving full
+decoded windows at the same time.
+
+## Present only a frame whose surface is ready
+
+Decoding a detached `Image` proves readiness for that element. Copying its URL
+to another visible `<img>` and immediately advancing state does not prove that
+the visible surface has decoded its own assignment.
+
+There are two safe presentation patterns:
+
+1. Insert the decoded `Image` itself into the document.
+2. Use visible and hidden surfaces, assign the ready URL to the hidden surface,
+   await that surface's `decode()`, then swap them.
+
+Double buffering keeps one stable image visible while another prepares:
+
+```ts showLineNumbers
+async function stageFrame(
+  frame: HTMLImageElement,
+  index: number,
+  generation: number
+) {
+  const staging = hiddenSurface
+  staging.src = frame.currentSrc || frame.src
+
+  await staging.decode()
+
+  if (generation !== activeGeneration || index !== wantedIndex) return
+
+  staging.hidden = false
+  visibleSurface.hidden = true
+
+  hiddenSurface = visibleSurface
+  visibleSurface = staging
+  visibleIndex = index
+}
+```
+
+The old surface remains visible on failure, timeout, or supersession. No loader
+or transparent gap appears between sequence frames.
+
+Canvas uses the same contract:
+
+```ts showLineNumbers
 const frame = ready.get(next)
-if (!frame) return // do not clear; the previous canvas pixels remain
+if (!frame) return // keep the previous canvas pixels
 
 ctx.drawImage(frame, 0, 0)
 current = next
 ```
 
-It should predecode into a bounded window, draw only when the effective frame
-changes, pause and cancel work offscreen, and hold when the next frame is not
-ready. Canvas was not inherently incapable of doing this; the eager player
-simply kept all 86 images and trusted their decoded representations to remain
-resident.
+The canvas must not be cleared before a ready replacement exists. Predecoding
+and a bounded ring remain necessary because a previously decoded image may have
+been evicted before `drawImage()` needs it.
 
-`OffscreenCanvas` can move Canvas drawing into a worker, usually with
-`ImageBitmap` or `ImageDecoder` instead of `HTMLImageElement`. That can keep the
-`drawImage()` call off the main thread, but it does not remove the costs of
-decoding, memory, transfer, rasterization, or GPU work. It is a larger
-architecture, not a switch that fixes an oversized working set.
+## Slow delivery needs buffering behavior
 
-## Prefer the smallest renderer that expresses the job
+When delivery is slower than consumption, starting on the first ready frame can
+produce a stop-start loop. Playback needs separate startup and recovery rules:
 
-For a sequence that displays one prerendered image at a time, keeping one
-presented `<img>` at a time is the more direct renderer:
+```ts showLineNumbers
+if (!hasStarted && readyAhead < START_RUNWAY) {
+  showPoster()
+  return
+}
 
-- `srcset` and `sizes` are native rather than recreated around Canvas;
-- `decode()` provides an explicit asynchronous readiness boundary;
-- stable dimensions let `src` change without causing layout;
-- the browser presents the image without an extra application-level draw step.
+if (!nextFrameReady) {
+  holdCurrentFrame()
+  state = 'rebuffering'
+  return
+}
 
-Replacing one decoded `<img>` with another 24 times per second is not the
-expensive part compared with decoding and presenting more than a million pixels
-per frame.
+if (state === 'rebuffering' && readyAhead < RESUME_RUNWAY) {
+  return
+}
 
-Canvas earns its complexity when the sequence actually needs drawing:
+state = 'playing'
+presentNextFrame()
+```
 
-- composing multiple images, masks, particles, or overlays;
-- dynamic clipping, blending, filters, or transforms;
-- procedural graphics in the same render loop;
-- pixel access, export, or use as an input to another graphics API.
+Using different start and resume thresholds adds hysteresis. It avoids toggling
+between play and hold every time a single frame becomes ready. Strict autoplay
+may wait for a contiguous runway; hybrid playback may resume with fewer exact
+frames because it permits bounded approximations.
 
-If the output is just one frame, Canvas is not automatically cleaner or faster.
-If composition is required, keep Canvas, but still give it the decoded-window
-architecture.
+The poster and last valid frame are part of the runtime contract. They remain
+visible during initial buffering, rebuffering, resize, failure, and visibility
+changes.
 
-## Benchmark the layers separately
+## Several sequences need fair transfer admission
 
-The original codec comparison stayed useful because it isolated codec from
-player architecture:
+Each sequence can keep its own small decode ring. A page-level coordinator is
+still useful when several sequences compete for network slots:
 
-1. Both formats were generated from the same source frames and served through
-   the same static path.
-2. Canvas size, scheduler, cache conditions, and browser request concurrency
-   were identical.
-3. Encoder configuration and encoder concurrency were fixed and recorded.
-4. Cold delivery was measured separately from stable playback.
-5. The timing probe wrapped only `drawImage()`, while a browser trace captured
-   decode and presentation behavior outside that synchronous call.
-6. The effective responsive candidate, viewport, DPR, focus, visibility, GPU
-   acceleration, and timer resolution were recorded.
+- an active primary sequence gets its immediate next frame first;
+- another visible sequence gets enough capacity to avoid starvation;
+- an approaching sequence receives entry frames, not a full runway;
+- speculative work cannot occupy every transfer slot indefinitely;
+- inactive owners get a short grace period before pending work retires.
 
-### Evidence and limits
+Fairness belongs in transfer admission, not in one global decoded-frame store.
+Decoded ownership stays local, which keeps disposal, direction changes, and
+presentation leases understandable.
 
-The controlled draw matrix and the later diagnostic traces were separate
-experiments. The recorded results are summarized here so the precision of the
-claims does not exceed the available evidence.
+If the page cannot sustain two 1080px sequences simultaneously, scheduling
+cannot create more bandwidth or CPU. A visible-primary policy must define which
+sequence keeps full cadence and which one degrades to a smaller runway, bounded
+skip, or held frame.
 
-| Evidence                      | Recorded conditions                                                                                                                                                                                                                               | Result                                                                                                                       | What it supports                                                                                  |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Controlled Canvas draw matrix | Native Chrome 153.0.8010.53; focused and visible MacBook Pro with Apple M4 Pro and 24 GB RAM; GPU acceleration enabled; 86 frames; DPR 2; effective 1080px and 480px sources; three interleaved 20-second stable runs for each codec and viewport | Every group's `drawImage()` p50 was `0 ms` and p95 was `0.1 ms`; the observed `performance.now()` quantum was about `0.1 ms` | No synchronous draw-time winner was demonstrated                                                  |
-| Loaded AVIF Canvas trace      | Chrome Performance trace; DPR 2.5; effective 1080px source; loaded state with no sequence requests in the selected 10.76-second window                                                                                                            | 254 decodes, or `23.6/s`; 253 affected frames, with 250 occurring within 10 ms of a decode                                   | Sustained decoding and partial presentation were strongly correlated under the larger working set |
-| Loaded WebP Canvas trace      | Same diagnostic setup; selected 11.00-second window                                                                                                                                                                                               | 260 decodes, or `23.6/s`; 258 affected frames, with 257 occurring within 10 ms of a decode                                   | The pattern was not specific to AVIF                                                              |
+## Measure the layers separately
 
-The draw matrix was controlled, but the loaded-state traces were one diagnostic
-run per codec. Their raw trace files and analysis tool are not public, so the
-summary is not independently reanalyzable and should not be treated as a
-universal renderer benchmark. Publishing sanitized traces with the analyzer
-would make a useful separate benchmark artifact; embedding multi-megabyte
-browser traces in this log would not make the explanation clearer.
+The [Render Pipeline](/logs/12-the-render-pipeline) explains why work pulled into
+presentation competes with JavaScript, style, layout, and paint. The
+[Performance Monitor](/logs/09-performance-monitor) is useful for watching CPU,
+memory, and frame behavior while navigating the real page. Neither replaces a
+trace with known conditions.
 
-Codec quality numbers are not a shared perceptual scale. In that benchmark,
-AVIF quality 65 / effort 3 and WebP quality 85 / alpha quality 100 reproduced
-the recipes used by that version of Next.js for a requested quality of 85. That
-made the pipeline comparison reproducible; it did not prove equal visual
-quality. A perceptual-quality claim would need a separate calibrated or blind
-comparison.
+Useful sequence telemetry keeps the stages separate:
 
-The later Canvas and production `<img>` traces answered a different question.
-They used different page revisions, durations, and cache conditions, so they
-were profiler diagnostics rather than a controlled renderer benchmark. They
-identified decoded-memory pressure and presentation policy as mechanisms; they
-did not prove that every `<img>` player is faster than every Canvas player. The
-case for `<img>` here comes from its simpler, browser-native fit for presenting
-one responsive image at a time.
+| Layer           | Measurements                                                        |
+| --------------- | ------------------------------------------------------------------- |
+| Transfer        | Source requests, encoded bytes, cache state, cancellations, retries |
+| Decode          | Request-to-ready median/p95/max, queue delay, active decodes        |
+| Local ownership | Ready-ahead count, estimated decoded bytes, evictions               |
+| Presentation    | Request-to-reveal, visible changes, holds, skips, playhead distance |
+| Page health     | Long tasks, dropped frames, partial presentation, competing owners  |
 
-The result was deliberately narrow: AVIF won on bytes, neither codec proved a
-`drawImage()` advantage, and the later playback regression came from decoded
-memory and scheduling rather than encoded format.
+At minimum, compare:
+
+1. cold navigation with normal browser caching;
+2. constrained delivery with cache disabled as a stress test;
+3. warm replay;
+4. replay after decoded pixels have been evicted while encoded bytes remain;
+5. one active sequence and multiple competing sequences.
+
+An observed decode near a dropped frame is correlation, not automatic proof of
+causation. One measured multi-sequence trace recorded decode work, request
+bursts, cancellations, and dropped frames in the same intervals, but some
+partial frames occurred before the first decode. Transfer pressure, decode,
+JavaScript, and presentation policy all need separate accounting.
+
+## Practical defaults
+
+These values are starting points to measure, not universal limits:
+
+| Setting                     |         Starting value | Reason                                                                      |
+| --------------------------- | ---------------------: | --------------------------------------------------------------------------- |
+| Playback cadence            |                 24 fps | One frame deadline every 41.67 ms                                           |
+| Future decoded frames       |                      3 | About 125 ms of ready runway                                                |
+| Decode concurrency          |         1 per sequence | Avoid local decode bursts and allocation spikes                             |
+| Shared transfer concurrency |                      4 | Keep delivery moving without every owner flooding the page                  |
+| Approaching demand          | poster + 1 or 2 frames | Prepare entry without reserving a full runway                               |
+| Missing-frame behavior      |     hold current frame | Never expose a blank or undecoded replacement                               |
+| Encoded application cache   |               optional | Useful for complex multi-sequence pages, unnecessary for the minimal player |
+
+Tune the runway from end-to-end readiness p95 and underruns. Tune transfer
+concurrency from delivery throughput and contention. Do not increase both simply
+because a single desktop trace has spare capacity.
 
 ## The rule
 
-> For image sequences, budget decoded pixels instead of downloaded files. Keep
-> a small moving window, mark frames ready only after asynchronous decoding and
-> a still-wanted check, schedule for ordered or target demand, hold the current
-> frame when the next one is not ready, and use Canvas only when the visual
-> result actually needs drawing.
+> Fetch encoded frames ahead, decode only the frames approaching presentation,
+> and reveal only a surface whose own decode is complete. Keep decoded ownership
+> local and small, add shared transfer fairness only when several sequences need
+> it, and hold the last valid frame whenever preparation loses the race.
 
-This is the same critical-path principle described in [The Render
-Pipeline](/logs/12-the-render-pipeline): expensive work is much easier to absorb
-before presentation than inside the frame that needs to appear now.
+Loaded does not mean decoded, decoded does not mean permanently resident, and a
+41.67 ms playback interval is not permission to spend 41.67 ms preparing the
+next frame on the critical path.
