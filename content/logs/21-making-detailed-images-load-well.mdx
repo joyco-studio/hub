@@ -39,7 +39,7 @@ That fixed the first problem. It also meant some of our source files were now su
 
 ## Inspect what reaches the screen
 
-Those checks grew into **Iris**, the image delivery library we're building at JOYCO. It catalogs sources, prepares tiny placeholders, and lets us define loading recipes and the rules that select them. Its on-page debugger can show the selected URL, displayed size, device pixel ratio, timing, transferred bytes, and layout diagnostics. That lets us distinguish an undersized source from a browser choosing an undersized candidate, or a large file arriving slowly.
+Those checks grew into **[Iris](https://www.npmjs.com/package/@joycostudio/iris)**, the image delivery library we're building at JOYCO. It catalogs sources, prepares tiny placeholders, and lets us define loading recipes and the rules that select them. Its on-page debugger can show the selected URL, displayed size, device pixel ratio, timing, transferred bytes, and layout diagnostics. That lets us distinguish an undersized source from a browser choosing an undersized candidate, or a large file arriving slowly.
 
 Iris doesn't re-export full-size assets. Once the sources are good, it makes the rest of the decision repeatable across the site. We're developing it through this showcase, where we can test each recipe against real artwork and real loading conditions.
 
