@@ -16,3 +16,7 @@ link.
 Status: complete. Formatting and the authenticated production build pass. The
 rendered page, raw Markdown page, main toolbox index, and library index all
 return the Trazo entry with its repository README content.
+
+Follow-up: the live README exposed that unlabeled fenced blocks skipped Shiki
+and inherited inline-code styling. Both Markdown pipelines now treat unlabeled
+blocks as plaintext while leaving inline code unchanged.
