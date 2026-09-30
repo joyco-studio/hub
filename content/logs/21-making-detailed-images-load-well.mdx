@@ -62,7 +62,7 @@ The source still needs enough pixels for its largest placement. The responsive c
 
 ## Then decide what people see while they wait
 
-Even a correctly sized file can take time to arrive, particularly for a large piece of artwork or a slower connection. We tried several ways to make that wait easier to understand. Press **Load images** to request the same artwork through three strategies. The server streams the JPEG files at the selected cap, so you can watch what each approach actually shows while its requests are in progress.
+Even a correctly sized file can take time to arrive, particularly for a large piece of artwork or a slower connection. We tried several ways to make that wait easier to understand. Press **Load images** to request the same artwork through four strategies. The server streams the files at the selected cap, so you can watch what each approach actually shows while its requests are in progress.
 
 <ImageLoadingDemo />
 
@@ -94,7 +94,7 @@ preview --> finalB
 
 We also explored files that reveal detail as their own bytes arrive. A progressive JPEG can show an early, rough pass and refine it with later scans. An interlaced PNG provides a similar gradual reveal when the artwork needs transparency. In this case there is one image request, rather than a separate preview that gets replaced. [MDN describes how these formats can display while loading](https://developer.mozilla.org/en-US/docs/Web/Media/Guides/Formats/Support_issues).
 
-We generally treat this as an alternative to the blur and preview layers. Covering the image would hide the reveal we wanted to show. The encoded file also needs to reach the browser unchanged: an optimizer can re-encode it and remove the progressive behavior. The playground above streams the progressive JPEG directly, without an optimizer or visual filter. The browser decides when it can paint each scan.
+We generally treat this as an alternative to the blur and preview layers. Covering the image would hide the reveal we wanted to show. The encoded file also needs to reach the browser unchanged: an optimizer can re-encode it and remove the progressive behavior. The playground above streams both a progressive JPEG and a truecolor Adam7 interlaced PNG made from the same 960 px artwork, without an optimizer or visual filter. The browser decides when it can paint each scan or pass. Their transfer times also show the file size cost of using PNG for this opaque artwork.
 
 ## When the image moves
 

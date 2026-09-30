@@ -1,16 +1,15 @@
 'use client'
 
-import Image from 'next/image'
 import { useState } from 'react'
 
 const base = '/images/logs/image-delivery'
 const speeds = [24, 48, 96] as const
 type Speed = (typeof speeds)[number]
-type Strategy = 'blur' | 'staged' | 'progressive'
+type Strategy = 'blur' | 'staged' | 'progressive' | 'interlaced'
 type Run = { id: string; speed: Speed }
 
 function imageUrl(
-  asset: 'baseline' | 'preview' | 'progressive',
+  asset: 'baseline' | 'preview' | 'progressive' | 'interlaced',
   speed: number,
   run: string
 ) {
@@ -27,30 +26,40 @@ function LoadingSample({
 }) {
   const [finalLoaded, setFinalLoaded] = useState(false)
   const [previewLoaded, setPreviewLoaded] = useState(false)
-  const isProgressive = strategy === 'progressive'
+  const isEncoded = strategy === 'progressive' || strategy === 'interlaced'
   const requestSpeed = run
     ? strategy === 'staged'
       ? run.speed / 2
       : run.speed
     : 0
   const showBlur =
-    !isProgressive && !finalLoaded && (strategy === 'blur' || !previewLoaded)
+    !isEncoded && !finalLoaded && (strategy === 'blur' || !previewLoaded)
   const title = {
     blur: 'Blur → final',
     staged: 'Blur → preview → final',
     progressive: 'Progressive JPEG',
+    interlaced: 'Interlaced PNG',
   }[strategy]
   const status = !run
     ? 'Ready to load'
     : finalLoaded
       ? 'Final image loaded'
-      : isProgressive
-        ? 'Progressive JPEG downloading'
+      : isEncoded
+        ? `${title} downloading`
         : strategy === 'staged' && previewLoaded
           ? 'Preview visible; final image downloading'
           : strategy === 'staged'
             ? 'Preview and final image downloading'
             : 'Final image downloading behind the blur'
+
+  async function revealPreview(image: HTMLImageElement) {
+    try {
+      await image.decode()
+    } catch {
+      // Some browsers reject decode after a successful load.
+    }
+    if (image.isConnected && image.naturalWidth) setPreviewLoaded(true)
+  }
 
   return (
     <div data-slot="sample" className="bg-card min-w-0 p-3">
@@ -59,18 +68,17 @@ function LoadingSample({
         className="bg-muted relative aspect-[3840/1956] overflow-hidden"
       >
         {run && (
-          // A native img receives the original JPEG bytes. Next Image would
-          // route the file through an optimizer and may change its encoding.
+          // Native img preserves the progressive/interlaced file encoding.
           <img
             data-slot="final-image"
             src={imageUrl(
-              isProgressive ? 'progressive' : 'baseline',
+              isEncoded ? strategy : 'baseline',
               requestSpeed,
               `${run.id}-${strategy}-final`
             )}
             alt={`Sazabi artwork loading with ${title.toLowerCase()}`}
-            width={2560}
-            height={1304}
+            width={isEncoded ? 960 : 2560}
+            height={isEncoded ? 489 : 1304}
             onLoad={() => setFinalLoaded(true)}
             className="absolute inset-0 size-full object-cover"
           />
@@ -83,24 +91,28 @@ function LoadingSample({
             aria-hidden="true"
             width={960}
             height={489}
-            onLoad={() => setPreviewLoaded(true)}
+            onLoad={(event) => void revealPreview(event.currentTarget)}
             className="absolute inset-0 size-full object-cover"
             style={{ visibility: previewLoaded ? 'visible' : 'hidden' }}
           />
         )}
         {showBlur && (
-          <Image
-            data-slot="blur-image"
-            src={`${base}/artwork-blur.webp`}
-            alt=""
+          <span
+            data-slot="blur-placeholder"
             aria-hidden="true"
-            width={16}
-            height={8}
-            unoptimized
-            className="absolute inset-0 size-full object-cover blur-xl"
-          />
+            className="pointer-events-none absolute inset-0 z-10 overflow-hidden bg-[#080713]"
+          >
+            <span
+              data-slot="blur-image"
+              className="absolute -inset-6 bg-[length:100%_100%]"
+              style={{
+                backgroundImage: `url("${base}/artwork-blur.webp")`,
+                filter: 'blur(12px)',
+              }}
+            />
+          </span>
         )}
-        {!run && isProgressive && (
+        {!run && isEncoded && (
           <span className="text-muted-foreground absolute inset-0 grid place-items-center text-xs">
             Press Load to start
           </span>
@@ -153,7 +165,7 @@ export default function ImageLoadingDemo() {
       </div>
       <div
         data-slot="comparison"
-        className="bg-border grid gap-px md:grid-cols-3"
+        className="bg-border grid gap-px md:grid-cols-2"
       >
         <LoadingSample
           key={`${run?.id ?? 'idle'}-blur`}
@@ -170,12 +182,18 @@ export default function ImageLoadingDemo() {
           strategy="progressive"
           run={run}
         />
+        <LoadingSample
+          key={`${run?.id ?? 'idle'}-interlaced`}
+          strategy="interlaced"
+          run={run}
+        />
       </div>
       <figcaption className="text-muted-foreground border-border border-t px-4 py-3 text-xs">
-        These are real image requests streamed at the selected cap. The staged
-        example splits that cap between its preview and final requests. The
-        progressive panel receives an unchanged progressive JPEG with no
-        covering layer; when its scans become visible depends on the browser.
+        These are real image requests streamed at the selected cap. Blur and
+        staged loading use the 2560 px JPEG; the staged preview and final share
+        the cap. The progressive JPEG and interlaced PNG use the same 960 px
+        artwork and arrive unchanged, with no covering layer. When their scans
+        or passes appear depends on the browser.
       </figcaption>
     </figure>
   )

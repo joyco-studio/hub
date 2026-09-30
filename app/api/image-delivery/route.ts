@@ -8,7 +8,8 @@ export const dynamic = 'force-dynamic'
 const files = {
   baseline: 'artwork-full.jpg',
   preview: 'artwork-preview.jpg',
-  progressive: 'artwork-progressive.jpg',
+  progressive: 'artwork-progressive-960.jpg',
+  interlaced: 'artwork-interlaced.png',
 } as const
 
 const speeds = new Set([12, 24, 48, 96])
@@ -49,7 +50,7 @@ export async function GET(request: NextRequest) {
 
   return new Response(stream, {
     headers: {
-      'Content-Type': 'image/jpeg',
+      'Content-Type': asset === 'interlaced' ? 'image/png' : 'image/jpeg',
       'Content-Length': String(bytes.length),
       'Cache-Control': 'private, no-store, no-transform',
       'X-Accel-Buffering': 'no',
