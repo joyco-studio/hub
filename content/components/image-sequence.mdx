@@ -293,7 +293,7 @@ alias or public controller API.
 | Legacy                      | Replacement                                                                  |
 | --------------------------- | ---------------------------------------------------------------------------- |
 | `getImagePath(index)`       | `source(index)`                                                              |
-| `isPlaying`                 | `playing`                                                                    |
+| `isPlaying`                 | `playing` holds the last frame; see reset behavior below                     |
 | `loop`                      | `loop`, with optional inclusive `loopStart` / `loopEnd`                      |
 | `objectFit`                 | `**:data-[slot=sequence-image]:object-contain` or `object-cover` on the root |
 | `resetOnPlay`               | Change `sequenceId` or `initialFrame` intentionally                          |
@@ -305,3 +305,25 @@ alias or public controller API.
 | `devicePixelRatio`          | Measured internally for responsive selection                                 |
 | Canvas attributes / `style` | Move layout to a wrapper or root `className`                                 |
 | `useSequence`               | `ImageSequence` with `mode="scrub"` and `onFrame`                            |
+
+`playing={false}` holds the last presented frame. The legacy player instead
+painted frame 0 when paused, so hover cards that must return to their initial pose
+need an explicit target. Keep `playing` enabled and switch between autoplay and
+scrub; changing mode restarts autoplay when the card becomes active again:
+
+```tsx
+<ImageSequence
+  {...props}
+  poster={{ src: source(0), width: 600, height: 600 }}
+  mode={active ? 'autoplay' : 'scrub'}
+  target={0}
+  ahead={0}
+  behind={0}
+/>
+```
+
+The native image also contributes intrinsic dimensions to layout, unlike the
+legacy absolutely positioned canvas. When filling a wrapper whose height comes
+from `aspect-*`, give the wrapper `relative` and the player
+`className="absolute inset-0 size-full"`. This keeps the wrapper's aspect ratio in
+control instead of letting the image's intrinsic ratio expand it.

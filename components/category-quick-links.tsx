@@ -53,6 +53,9 @@ export function CategoryQuickLinks() {
   }
   const handleLeave = () => setIsHovering(false)
 
+  // Inactive cards explicitly seek to frame 0; pausing would hold the last frame.
+  // Switching back to autoplay starts a fresh run on the same image element.
+  // Absolute positioning lets the splash aspect ratio own the image bounds.
   return (
     <div className="not-prose @container">
       <div className="grid grid-cols-1 gap-2 @md:gap-4 @xl:grid-cols-2 @2xl:grid-cols-3">
@@ -71,9 +74,9 @@ export function CategoryQuickLinks() {
           />
           <CategoryCardLinkSplash className="relative overflow-visible">
             <ImageSequence
-              sequenceId={`category-0-${activeIndex === 0}`}
+              sequenceId="category-0"
               poster={{
-                src: sequences[1].getImagePath(18),
+                src: sequences[1].getImagePath(0),
                 width: 600,
                 height: 600,
               }}
@@ -81,10 +84,13 @@ export function CategoryQuickLinks() {
               frameCount={sequences[1].frameCount}
               frameDuration={33}
               source={sequences[1].getImagePath}
-              playing={activeIndex === 0}
+              mode={activeIndex === 0 ? 'autoplay' : 'scrub'}
+              target={0}
+              ahead={0}
+              behind={0}
               /* Only start loading the sequence on md */
               enabled={isMd ?? false}
-              className="pointer-events-none size-full translate-y-[-3%] scale-[1.3] max-md:hidden"
+              className="pointer-events-none absolute inset-0 size-full translate-y-[-3%] scale-[1.3] max-md:hidden"
             />
             <Image
               className="object-contain md:hidden"
@@ -111,9 +117,9 @@ export function CategoryQuickLinks() {
           />
           <CategoryCardLinkSplash className="relative overflow-visible">
             <ImageSequence
-              sequenceId={`category-1-${activeIndex === 1}`}
+              sequenceId="category-1"
               poster={{
-                src: sequences[2].getImagePath(18),
+                src: sequences[2].getImagePath(0),
                 width: 600,
                 height: 600,
               }}
@@ -121,10 +127,13 @@ export function CategoryQuickLinks() {
               frameCount={sequences[2].frameCount}
               frameDuration={33}
               source={sequences[2].getImagePath}
-              playing={activeIndex === 1}
+              mode={activeIndex === 1 ? 'autoplay' : 'scrub'}
+              target={0}
+              ahead={0}
+              behind={0}
               /* Only start loading the sequence on md */
               enabled={isMd ?? false}
-              className="pointer-events-none size-full scale-[1.3] max-md:hidden"
+              className="pointer-events-none absolute inset-0 size-full scale-[1.3] max-md:hidden"
             />
             <Image
               className="object-contain md:hidden"
@@ -151,9 +160,9 @@ export function CategoryQuickLinks() {
           />
           <CategoryCardLinkSplash className="relative overflow-visible">
             <ImageSequence
-              sequenceId={`category-2-${activeIndex === 2}`}
+              sequenceId="category-2"
               poster={{
-                src: sequences[0].getImagePath(18),
+                src: sequences[0].getImagePath(0),
                 width: 600,
                 height: 600,
               }}
@@ -161,10 +170,13 @@ export function CategoryQuickLinks() {
               frameCount={sequences[0].frameCount}
               frameDuration={33}
               source={sequences[0].getImagePath}
-              playing={activeIndex === 2}
+              mode={activeIndex === 2 ? 'autoplay' : 'scrub'}
+              target={0}
+              ahead={0}
+              behind={0}
               /* Only start loading the sequence on md */
               enabled={isMd ?? false}
-              className="pointer-events-none size-full translate-y-[-5%] scale-[1.3] max-md:hidden"
+              className="pointer-events-none absolute inset-0 size-full translate-y-[-5%] scale-[1.3] max-md:hidden"
             />
             <Image
               className="object-contain md:hidden"
