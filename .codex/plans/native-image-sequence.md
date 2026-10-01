@@ -82,3 +82,19 @@ ignored `.context/` directory.
 
 Typechecking, focused ESLint, homepage Prettier, and `git diff --check` pass.
 No tests were added or run for this correction.
+
+## Demo resting-frame correction
+
+The component documentation demo still uses the migrated pause/sequence-ID
+pattern. Inspect the demo's mounted frame URLs during hover changes, apply the
+same explicit inactive frame-0 target used on the homepage, and verify hover and
+keyboard switching in the real page. Use focused lint and typechecking; do not
+add or run tests. Push the correction to the existing PR.
+
+Confirmed the demo held Lata24 and Bot23 after hover switched away. Replaced
+pause/boolean sequence identities with stable identities and an explicit frame-0
+scrub target while inactive. Browser inspection on localhost:3000 now shows both
+inactive sequences at frame 0 after each hover and keyboard-focus change, with
+all three original image nodes retained at 200 × 200px and no page errors.
+Typechecking, focused lint, formatting, and diff whitespace checks pass. No tests
+were added or run.

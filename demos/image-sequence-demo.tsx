@@ -43,13 +43,17 @@ function ImageSequenceDemo() {
               tabIndex={0}
             >
               <ImageSequence
-                sequenceId={`${seq.name}-${isActive}`}
+                sequenceId={seq.name}
                 poster={{ src: seq.getImagePath(0), width: 600, height: 600 }}
                 alt={seq.name}
                 frameCount={seq.frameCount}
                 frameDuration={33}
                 source={seq.getImagePath}
-                playing={isActive}
+                // Pause holds the last frame; inactive previews must seek to 0.
+                mode={isActive ? 'autoplay' : 'scrub'}
+                target={0}
+                ahead={0}
+                behind={0}
                 className={cn(
                   'size-50 transition-opacity duration-200',
                   !isActive && 'opacity-50'
