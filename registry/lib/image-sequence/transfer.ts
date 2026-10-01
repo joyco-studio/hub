@@ -29,6 +29,14 @@ class OversizedFrameError extends Error {
   }
 }
 
+class FrameHttpError extends Error {
+  readonly retryable: boolean
+  constructor(status: number) {
+    super(`Frame request failed: ${status}`)
+    this.retryable = status === 408 || status === 429 || status >= 500
+  }
+}
+
 /** Compressed responses survive local decoded-frame eviction. */
 class EncodedFrameCache {
   private entries = new Map<string, Blob>()
@@ -81,8 +89,10 @@ class FrameTransfer {
       priority: 'low',
       ...(accept ? { headers: { Accept: accept } } : {}),
     })
-    if (!response.ok)
-      throw new Error(`Frame request failed: ${response.status}`)
+    if (!response.ok) {
+      void response.body?.cancel().catch(() => {})
+      throw new FrameHttpError(response.status)
+    }
     const type = response.headers.get('content-type') ?? ''
     if (!response.body) return new Blob([], { type })
     const reader = response.body.getReader()
@@ -404,7 +414,11 @@ class FrameTransfer {
     entry.state = 'failed'
     entry.failures++
 
-    if (!(error instanceof OversizedFrameError)) this.retry(entry)
+    if (
+      !(error instanceof OversizedFrameError) &&
+      (!(error instanceof FrameHttpError) || error.retryable)
+    )
+      this.retry(entry)
     for (const owner of this.owners.values()) owner.notify()
   }
   private retry(entry: Entry) {

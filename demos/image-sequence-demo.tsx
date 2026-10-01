@@ -49,11 +49,8 @@ function ImageSequenceDemo() {
                 frameCount={seq.frameCount}
                 frameDuration={33}
                 source={seq.getImagePath}
-                // Pause holds the last frame; inactive previews must seek to 0.
-                mode={isActive ? 'autoplay' : 'scrub'}
-                target={0}
-                ahead={0}
-                behind={0}
+                playing={isActive}
+                resetOnPause
                 className={cn(
                   'size-50 transition-opacity duration-200',
                   !isActive && 'opacity-50'

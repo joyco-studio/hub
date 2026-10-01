@@ -53,8 +53,8 @@ export function CategoryQuickLinks() {
   }
   const handleLeave = () => setIsHovering(false)
 
-  // Inactive cards explicitly seek to frame 0; pausing would hold the last frame.
-  // Switching back to autoplay starts a fresh run on the same image element.
+  // Inactive cards restore their retained opening frame without another decode.
+  // resetOnPause also restarts playback when a card becomes active again.
   // Absolute positioning lets the splash aspect ratio own the image bounds.
   return (
     <div className="not-prose @container">
@@ -84,10 +84,8 @@ export function CategoryQuickLinks() {
               frameCount={sequences[1].frameCount}
               frameDuration={33}
               source={sequences[1].getImagePath}
-              mode={activeIndex === 0 ? 'autoplay' : 'scrub'}
-              target={0}
-              ahead={0}
-              behind={0}
+              playing={activeIndex === 0}
+              resetOnPause
               /* Only start loading the sequence on md */
               enabled={isMd ?? false}
               className="pointer-events-none absolute inset-0 size-full translate-y-[-3%] scale-[1.3] max-md:hidden"
@@ -127,10 +125,8 @@ export function CategoryQuickLinks() {
               frameCount={sequences[2].frameCount}
               frameDuration={33}
               source={sequences[2].getImagePath}
-              mode={activeIndex === 1 ? 'autoplay' : 'scrub'}
-              target={0}
-              ahead={0}
-              behind={0}
+              playing={activeIndex === 1}
+              resetOnPause
               /* Only start loading the sequence on md */
               enabled={isMd ?? false}
               className="pointer-events-none absolute inset-0 size-full scale-[1.3] max-md:hidden"
@@ -170,10 +166,8 @@ export function CategoryQuickLinks() {
               frameCount={sequences[0].frameCount}
               frameDuration={33}
               source={sequences[0].getImagePath}
-              mode={activeIndex === 2 ? 'autoplay' : 'scrub'}
-              target={0}
-              ahead={0}
-              behind={0}
+              playing={activeIndex === 2}
+              resetOnPause
               /* Only start loading the sequence on md */
               enabled={isMd ?? false}
               className="pointer-events-none absolute inset-0 size-full translate-y-[-5%] scale-[1.3] max-md:hidden"

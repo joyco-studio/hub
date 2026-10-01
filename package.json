@@ -12,7 +12,8 @@
     "check:logs": "node scripts/check-log-numbers.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test:image-sequence": "node --test tests/image-sequence.test.mjs"
   },
   "dependencies": {
     "@ai-sdk/groq": "^3.0.42",

@@ -16,6 +16,7 @@ export type ImageSequenceProps = Omit<SequenceOptions, 'onFrame'> & {
   alt: string
   className?: string
   playing?: boolean
+  resetOnPause?: boolean
   enabled?: boolean
   target?: number
   pixelated?: boolean
@@ -29,6 +30,7 @@ export function ImageSequence({
   alt,
   className,
   playing = true,
+  resetOnPause = false,
   enabled = true,
   target,
   pixelated = false,
@@ -51,10 +53,19 @@ export function ImageSequence({
   const imageRef = useRef<HTMLImageElement>(null)
   const syncRef = useRef<(() => void) | null>(null)
   const surfaceLease = useRef<(() => void) | undefined>(undefined)
+  const openingSurface = useRef<{
+    key: string
+    src: string
+    retain: () => () => void
+    release: () => void
+  } | null>(null)
+  // Opt-in hover previews start a fresh controller when resumed.
+  const restart = resetOnPause ? playing : null
   const latest = useRef({
     source,
     poster,
     playing,
+    resetOnPause,
     enabled,
     onFrame,
     onComplete,
@@ -71,6 +82,7 @@ export function ImageSequence({
       source,
       poster,
       playing,
+      resetOnPause,
       enabled,
       onFrame,
       onComplete,
@@ -83,6 +95,18 @@ export function ImageSequence({
     const root = rootRef.current
     const image = imageRef.current
     if (!root || !image) return
+    const runKey = JSON.stringify([
+      sequenceId,
+      initialFrame,
+      loopStart,
+      loopEnd,
+      frameCount,
+      resetOnPause,
+    ])
+    if (openingSurface.current?.key !== runKey) {
+      openingSurface.current?.release()
+      openingSurface.current = null
+    }
     const motion = matchMedia('(prefers-reduced-motion: reduce)')
     let nearby = false
     let visible = false
@@ -114,6 +138,7 @@ export function ImageSequence({
           !image.isConnected ||
           motion.matches ||
           !latest.current.enabled ||
+          !latest.current.playing ||
           document.hidden
         )
           return false
@@ -123,6 +148,15 @@ export function ImageSequence({
         image.src = frame.src
         surfaceLease.current = releaseNext
         releasePrevious?.()
+        if (latest.current.resetOnPause && !openingSurface.current) {
+          const retain = () => controller.retainSurface(frame)
+          openingSurface.current = {
+            key: runKey,
+            src: frame.src,
+            retain,
+            release: retain(),
+          }
+        }
         latest.current.onFrame?.(index)
         return true
       },
@@ -151,10 +185,15 @@ export function ImageSequence({
         image.srcset = value.srcSet ?? ''
       if (image.getAttribute('src') !== value.src) image.src = value.src
     }
-    const restorePoster = () => {
-      assignPoster()
-      surfaceLease.current?.()
-      surfaceLease.current = undefined
+    const restorePoster = (useOpeningFrame = false) => {
+      const opening = useOpeningFrame ? openingSurface.current : null
+      const releasePrevious = surfaceLease.current
+      surfaceLease.current = opening?.retain()
+      if (opening) {
+        image.removeAttribute('srcset')
+        if (image.src !== opening.src) image.src = opening.src
+      } else assignPoster()
+      releasePrevious?.()
       controller.restorePoster()
     }
     const sync = () => {
@@ -172,7 +211,11 @@ export function ImageSequence({
       if (visible && allowed && mode !== 'scrub' && !controller.isComplete) {
         if (raf === undefined) raf = requestAnimationFrame(tick)
       } else stop()
-      if (motion.matches) restorePoster()
+      if (
+        motion.matches ||
+        (latest.current.resetOnPause && !latest.current.playing)
+      )
+        restorePoster(!motion.matches)
       else if (!surfaceLease.current) assignPoster()
     }
     const resize = () => {
@@ -220,6 +263,8 @@ export function ImageSequence({
       // The separate surface lease survives replacement of this controller.
     }
   }, [
+    restart,
+    resetOnPause,
     sequenceId,
     frameCount,
     mode,
@@ -238,6 +283,8 @@ export function ImageSequence({
     () => () => {
       surfaceLease.current?.()
       surfaceLease.current = undefined
+      openingSurface.current?.release()
+      openingSurface.current = null
     },
     []
   )

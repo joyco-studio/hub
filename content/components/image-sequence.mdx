@@ -94,7 +94,7 @@ export function PlayOnce() {
 }
 ```
 
-Changing `playing` pauses/resumes the current run; it does not replay a completed
+By default, changing `playing` pauses/resumes the current run; it does not replay a completed
 run. Change `sequenceId` to restart or replace sources. Changing scheduling props
 (such as `initialFrame`, range, mode, or cadence) creates a new run too. The
 previous valid surface remains until its replacement is ready.
@@ -210,6 +210,7 @@ type FrameSource =
 | `alt`           | `string`                         | Required         | Meaningful description, or `""` for decoration                          |
 | `className`     | `string`                         | —                | Root styling; target inner elements with data slots                     |
 | `playing`       | `boolean`                        | `true`           | Allow sequence demand and visible playback                              |
+| `resetOnPause` | `boolean` | `false` | Restore the retained opening frame on pause; restart on resume |
 | `enabled`       | `boolean`                        | `true`           | Allow runtime work; disabling preserves the last frame                  |
 | `mode`          | `"autoplay" \| "scrub"`          | `"autoplay"`     | Clock-driven or target-driven playback                                  |
 | `target`        | `number`                         | Range start      | Zero-based scrub frame, coalesced per RAF                               |
@@ -243,8 +244,9 @@ type FrameSource =
   wait for abandoned promises. A decode times out after 15 seconds, after transfer.
 - Transfers have **no total-duration timeout**. A request is timed out after 15
   seconds without bytes only while another request is waiting for its occupied
-  slot. Transient failures retry with exponential delays capped at 30 seconds;
-  oversized responses stay failed while demanded.
+  slot. Network errors, HTTP 408/429, and server errors retry with exponential
+  delays capped at 30 seconds. Other HTTP errors (including 404) and oversized
+  responses stay failed while demanded.
 - Native observers use a **200px nearby boundary**. Nearby instances warm opening
   bytes; visible instances play. Distance, document hiding, pause, disable, and
   unmount release demand. Suspension releases the local ring while preserving the
@@ -296,7 +298,7 @@ alias or public controller API.
 | `isPlaying`                 | `playing` holds the last frame; see reset behavior below                     |
 | `loop`                      | `loop`, with optional inclusive `loopStart` / `loopEnd`                      |
 | `objectFit`                 | `**:data-[slot=sequence-image]:object-contain` or `object-cover` on the root |
-| `resetOnPlay`               | Change `sequenceId` or `initialFrame` intentionally                          |
+| `resetOnPlay`               | Change `sequenceId`, or use `resetOnPause` for hover previews                 |
 | `onFrameChange`             | `onFrame`                                                                    |
 | `preload`                   | Internal nearby/visible demand; `enabled={false}` prevents sequence work     |
 | `width` / `height`          | Poster dimensions and container CSS                                          |
@@ -306,19 +308,19 @@ alias or public controller API.
 | Canvas attributes / `style` | Move layout to a wrapper or root `className`                                 |
 | `useSequence`               | `ImageSequence` with `mode="scrub"` and `onFrame`                            |
 
-`playing={false}` holds the last presented frame. The legacy player instead
-painted frame 0 when paused, so hover cards that must return to their initial pose
-need an explicit target. Keep `playing` enabled and switch between autoplay and
-scrub; changing mode restarts autoplay when the card becomes active again:
+`playing={false}` normally holds the last presented frame. For hover previews,
+use `resetOnPause`: it retains the decoded opening frame separately and restores
+it immediately on pause, without fetching or decoding it again. Until an opening
+frame has been decoded it shows the poster. Resuming starts a fresh run while
+keeping the same image element mounted. This opt-in behavior retains one extra
+decoded frame until the sequence changes or unmounts.
 
 ```tsx
 <ImageSequence
   {...props}
   poster={{ src: source(0), width: 600, height: 600 }}
-  mode={active ? 'autoplay' : 'scrub'}
-  target={0}
-  ahead={0}
-  behind={0}
+  playing={active}
+  resetOnPause
 />
 ```
 
