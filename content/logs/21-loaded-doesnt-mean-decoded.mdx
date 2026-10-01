@@ -63,13 +63,6 @@ back to them. Attempting to reveal an `<img>` or draw to Canvas without checking
 readiness can pull that decode onto the presentation path and cost frames across
 the page.
 
-One loaded 1080px Chrome trace at DPR 2.5 showed the pattern without any
-sequence requests in the selected 10.76-second window: 254 `Decode Image`
-events, or `23.6/s`, ran on `CrRendererMain`. Of 253 smoothness-affected frame
-reports, 250 occurred within 10 ms of a decode. That is consistent with decoded
-frames being evicted and prepared again, but it is correlation rather than
-direct observation of eviction.
-
 The surface is not the root problem. Both `<img>` and Canvas are smooth when a
 frame is prepared before presentation, and both can fail when an unprepared
 frame reaches that deadline.
@@ -165,7 +158,7 @@ therefore a short-lived readiness signal, not ownership of browser memory.
 <Figure
   src="/static/logs/loaded-doesnt-mean-decoded/decoded-runway.png"
   alt="A hand-drawn timeline showing one visible frame, three decoded frames in a moving buffer, and the next frame waiting to be decoded"
-  caption="A small decoded runway moves with playback. The measured timings illustrate one case, not universal browser budgets."
+  caption="A small decoded runway moves with playback. Three future frames are a starting point, not a universal browser budget."
   width={2154}
   height={1162}
 />
@@ -247,21 +240,14 @@ the canvas first, and advance `currentIndex` only after `drawImage()`.
 
 ## A runway cannot fix slow delivery
 
-A decoded runway absorbs temporary latency. It cannot compensate when transfer
-throughput stays below playback demand.
+A decoded runway absorbs temporary latency. It cannot compensate when the
+network provides fewer frames than playback consumes. Every finite buffer will
+eventually empty, so increasing the runway only delays the stall while using
+more memory.
 
-In two Fast 4G traces, an 86-frame 1080px AVIF sequence used four shared request
-slots. Requests took roughly 450 ms each, so transfer capacity was about
-`4 / 0.45 = 8.9 frames/s` against a 24 fps target. The cold traversal produced
-9.9 to 10.3 visible transitions per second. Once all encoded responses were
-available, the same three-frame runway sustained 23.7 to 23.9 transitions per
-second. Normal browser caching sustained about 24 from startup.
-
-Those traces included competing Bot sequence activity, so they demonstrate the
-real page under contention rather than a controlled isolated benchmark. The
-conclusion is still useful: increasing the decoded runway cannot repair a
-sustained network deficit. Transfer must start earlier, complete faster, or
-playback must hold the poster or current frame until enough runway exists.
+When transfer cannot sustain the target cadence, it must start earlier, use
+smaller assets, or let playback hold the poster or current frame while the
+buffer recovers.
 
 Use separate start and resume thresholds to avoid alternating between one new
 frame and another stall. When the runway empties, hold the last valid frame;
@@ -283,27 +269,18 @@ The same principle applies to page lifecycle:
 | Resize/source change | Retire stale work, retain the surface, then prepare the new variant  |
 | Missing frame        | Hold the current frame until an acceptable replacement becomes ready |
 
-## Measure the stages separately
-
-The [Render Pipeline](/logs/12-the-render-pipeline) explains why decode pulled
-into presentation competes with JavaScript, style, layout, and paint. The
-[Performance Monitor](/logs/09-performance-monitor) helps observe CPU, memory,
-and dropped frames on the real page.
-
-Track enough data to identify the failing stage:
-
-| Stage        | Useful measurements                                            |
-| ------------ | -------------------------------------------------------------- |
-| Transfer     | request duration, cache state, bytes, cancellations            |
-| Decode       | request-to-ready p95, queue delay, active decodes              |
-| Presentation | request-to-reveal, holds, skips, visible-frame gaps            |
-| Page health  | long tasks, dropped frames, partial presentation, other owners |
+## Tune the whole pipeline
 
 Start with three future decoded frames, one decode per sequence, and four
-shared transfer slots. These are measurement defaults, not browser limits.
-Increase the runway only when end-to-end readiness repeatedly exhausts it, and
-increase transfer concurrency only when throughput improves without starving
-the rest of the page.
+shared transfer slots. Then measure request-to-ready, request-to-reveal, holds,
+skips, and dropped frames on the real page. Increase the runway only when
+end-to-end readiness repeatedly exhausts it, and increase transfer concurrency
+only when throughput improves without starving other work.
+
+The [Render Pipeline](/logs/12-the-render-pipeline) explains how preparation can
+compete with JavaScript, style, layout, and paint. The
+[Performance Monitor](/logs/09-performance-monitor) helps observe that behavior
+without turning this player into its own diagnostics system.
 
 ## The rule
 
