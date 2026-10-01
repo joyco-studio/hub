@@ -1,616 +1,289 @@
 'use client'
 
-import * as React from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
+import {
+  getSharedFrameTransfer,
+  resolveFrameSource,
+  SequenceDemandController,
+  type FrameSource,
+  type SequenceOptions,
+} from '@/registry/lib/image-sequence/runtime'
 
-/* -------------------------------------------------------------------------------------------------
- * Types
- * -------------------------------------------------------------------------------------------------*/
-
-type SequenceState = {
-  /** Map of loaded images by frame index */
-  images: Map<number, HTMLImageElement>
-  /** Whether the initial frames (first and last) are loaded */
-  initialFramesLoaded: boolean
-  /** Total number of frames loaded */
-  loadedCount: number
-  /** Total frame count */
-  frameCount: number
+export type { FrameSource }
+export type ImageSequenceProps = Omit<SequenceOptions, 'onFrame'> & {
+  sequenceId: string
+  poster: FrameSource
+  alt: string
+  className?: string
+  playing?: boolean
+  enabled?: boolean
+  target?: number
+  pixelated?: boolean
+  onFrame?: (index: number) => void
 }
 
-type UseSequenceOptions = {
-  /** Total number of frames in the sequence */
-  frameCount: number
-  /** Function to generate the image path for a given frame index */
-  getImagePath: (frameIndex: number) => string
-  /** Whether to start preloading images immediately */
-  preload?: boolean
-  /** Callback when a frame is loaded */
-  onFrameLoad?: (frameIndex: number, image: HTMLImageElement) => void
-  /** Callback when all frames are loaded */
-  onAllFramesLoaded?: () => void
-}
-
-type UseSequenceReturn = {
-  /** Current sequence state */
-  state: SequenceState
-  /** Get the image for a specific frame index */
-  getFrame: (frameIndex: number) => HTMLImageElement | undefined
-  /** Get the frame index for a given progress value (0-1) */
-  getFrameIndexByProgress: (progress: number) => number
-  /** Get the image for a given progress value (0-1) */
-  getFrameByProgress: (progress: number) => HTMLImageElement | undefined
-  /** Check if a specific frame is loaded */
-  isFrameLoaded: (frameIndex: number) => boolean
-  /** Manually trigger loading of all frames */
-  loadAllFrames: () => void
-}
-
-/* -------------------------------------------------------------------------------------------------
- * Binary Loading Strategy
- * -------------------------------------------------------------------------------------------------
- * Instead of loading frames sequentially or at fixed intervals, we use a binary approach:
- * 1. Load first and last frame (indices 0 and frameCount-1)
- * 2. Load the middle frame (frameCount/2)
- * 3. Load the middles of each half (frameCount/4 and 3*frameCount/4)
- * 4. Continue recursively until all frames are loaded
- *
- * This ensures the animation is visible from start to end early, but at low framerate
- * initially, with increasing smoothness as more frames load.
- * -------------------------------------------------------------------------------------------------*/
-
-function generateBinaryLoadOrder(frameCount: number): number[] {
-  if (frameCount <= 0) return []
-  if (frameCount === 1) return [0]
-  if (frameCount === 2) return [0, 1]
-
-  const loadOrder: number[] = []
-  const visited = new Set<number>()
-
-  // Start with first and last
-  const queue: Array<[number, number]> = [[0, frameCount - 1]]
-
-  // Add first and last to load order
-  loadOrder.push(0)
-  visited.add(0)
-  loadOrder.push(frameCount - 1)
-  visited.add(frameCount - 1)
-
-  // Process intervals in breadth-first manner
-  while (queue.length > 0) {
-    const [start, end] = queue.shift()!
-
-    if (end - start <= 1) continue
-
-    const mid = Math.floor((start + end) / 2)
-
-    if (!visited.has(mid)) {
-      loadOrder.push(mid)
-      visited.add(mid)
-    }
-
-    // Add sub-intervals to queue
-    queue.push([start, mid])
-    queue.push([mid, end])
-  }
-
-  return loadOrder
-}
-
-/* -------------------------------------------------------------------------------------------------
- * useSequence Hook
- * -------------------------------------------------------------------------------------------------*/
-
-export function useSequence({
-  frameCount,
-  getImagePath,
-  preload = true,
-  onFrameLoad,
-  onAllFramesLoaded,
-}: UseSequenceOptions): UseSequenceReturn {
-  const imagesRef = React.useRef<Map<number, HTMLImageElement>>(new Map())
-  const loadingRef = React.useRef<Set<number>>(new Set())
-  const hasStartedLoadingRef = React.useRef(false)
-  const getImagePathRef = React.useRef(getImagePath)
-  const onFrameLoadRef = React.useRef(onFrameLoad)
-  const onAllFramesLoadedRef = React.useRef(onAllFramesLoaded)
-
-  React.useEffect(() => {
-    getImagePathRef.current = getImagePath
-    onFrameLoadRef.current = onFrameLoad
-    onAllFramesLoadedRef.current = onAllFramesLoaded
-  })
-
-  const [state, setState] = React.useState<SequenceState>({
-    images: new Map(),
-    initialFramesLoaded: false,
-    loadedCount: 0,
-    frameCount,
-  })
-
-  // Generate binary load order once
-  const loadOrder = React.useMemo(
-    () => generateBinaryLoadOrder(frameCount),
-    [frameCount]
-  )
-
-  // Load a single image
-  const loadImage = React.useCallback(
-    async (frameIndex: number): Promise<HTMLImageElement | null> => {
-      // Skip if already loaded or currently loading
-      if (
-        imagesRef.current.has(frameIndex) ||
-        loadingRef.current.has(frameIndex)
-      ) {
-        return imagesRef.current.get(frameIndex) ?? null
-      }
-
-      loadingRef.current.add(frameIndex)
-
-      try {
-        const url = getImagePathRef.current(frameIndex)
-        const image = new Image()
-
-        await new Promise<void>((resolve, reject) => {
-          const handleLoad = () => {
-            image.removeEventListener('load', handleLoad)
-            image.removeEventListener('error', handleError)
-            resolve()
-          }
-          const handleError = () => {
-            image.removeEventListener('load', handleLoad)
-            image.removeEventListener('error', handleError)
-            reject(new Error(`Failed to load image: ${url}`))
-          }
-          image.addEventListener('load', handleLoad)
-          image.addEventListener('error', handleError)
-          image.src = url
-        })
-
-        imagesRef.current.set(frameIndex, image)
-        loadingRef.current.delete(frameIndex)
-
-        // Update state
-        setState((prev) => {
-          const newImages = new Map(prev.images)
-          newImages.set(frameIndex, image)
-
-          const newLoadedCount = newImages.size
-          const initialFramesLoaded =
-            newImages.has(0) && newImages.has(frameCount - 1)
-
-          return {
-            ...prev,
-            images: newImages,
-            loadedCount: newLoadedCount,
-            initialFramesLoaded,
-          }
-        })
-
-        onFrameLoadRef.current?.(frameIndex, image)
-
-        return image
-      } catch (error) {
-        loadingRef.current.delete(frameIndex)
-        console.error(`Failed to load frame ${frameIndex}:`, error)
-        return null
-      }
-    },
-    [frameCount]
-  )
-
-  // Load all frames in binary order
-  const loadAllFrames = React.useCallback(async () => {
-    if (hasStartedLoadingRef.current) return
-    hasStartedLoadingRef.current = true
-
-    // Load frames in binary order, but process in batches for better performance
-    const batchSize = 4
-    for (let i = 0; i < loadOrder.length; i += batchSize) {
-      const batch = loadOrder.slice(i, i + batchSize)
-      await Promise.all(batch.map((frameIndex) => loadImage(frameIndex)))
-    }
-
-    onAllFramesLoadedRef.current?.()
-  }, [loadOrder, loadImage])
-
-  // Start preloading on mount if enabled
-  React.useEffect(() => {
-    const loading = loadingRef.current
-    const images = imagesRef.current
-
-    if (preload) {
-      loadAllFrames()
-    }
-
-    return () => {
-      // Cleanup: reset loading state and cancel any pending loads
-      hasStartedLoadingRef.current = false
-      loading.clear()
-      images.forEach((img) => {
-        img.src = ''
-      })
-      images.clear()
-    }
-  }, [preload, loadAllFrames])
-
-  // Utility functions
-  const getFrame = React.useCallback(
-    (frameIndex: number) => imagesRef.current.get(frameIndex),
-    []
-  )
-
-  const getFrameIndexByProgress = React.useCallback(
-    (progress: number) => {
-      const clampedProgress = Math.max(0, Math.min(1, progress))
-      return Math.floor(clampedProgress * (frameCount - 1))
-    },
-    [frameCount]
-  )
-
-  const getFrameByProgress = React.useCallback(
-    (progress: number) => {
-      const frameIndex = getFrameIndexByProgress(progress)
-      return imagesRef.current.get(frameIndex)
-    },
-    [getFrameIndexByProgress]
-  )
-
-  const isFrameLoaded = React.useCallback(
-    (frameIndex: number) => imagesRef.current.has(frameIndex),
-    []
-  )
-
-  return {
-    state,
-    getFrame,
-    getFrameIndexByProgress,
-    getFrameByProgress,
-    isFrameLoaded,
-    loadAllFrames,
-  }
-}
-
-/* -------------------------------------------------------------------------------------------------
- * CanvasSequence Component
- * -------------------------------------------------------------------------------------------------
- * Renders an image sequence to a canvas element. This approach:
- * - Decodes images at paint time (prevents half-decoded visible images)
- * - Blocks rendering until the required frame is available
- * - Provides smoother playback than toggling img visibility
- * -------------------------------------------------------------------------------------------------*/
-
-interface CanvasSequenceProps extends Omit<
-  React.CanvasHTMLAttributes<HTMLCanvasElement>,
-  'children' | 'width' | 'height'
-> {
-  /** Total number of frames in the sequence */
-  frameCount: number
-  /** Duration of each frame in milliseconds */
-  frameDuration: number
-  /** Function to generate the image path for a given frame index */
-  getImagePath: (frameIndex: number) => string
-  /** Whether the animation is currently playing */
-  isPlaying?: boolean
-  /** Whether to loop the animation */
-  loop?: boolean
-  /** Whether to preload images */
-  preload?: boolean
-  /** Object fit behavior */
-  objectFit?: 'contain' | 'cover' | 'fill'
-  /** Callback when a frame is rendered */
-  onFrameChange?: (frameIndex: number) => void
-  /** Callback when all frames are loaded */
-  onAllFramesLoaded?: () => void
-  /** Transform time delta (for speed control) */
-  timeTransform?: (deltaTime: number) => number
-  /** Device pixel ratio for high-DPI displays */
-  devicePixelRatio?: number
-  /** Reset animation to frame 0 when playback starts */
-  resetOnPlay?: boolean
-  /**
-   * Optional wrapper width (in CSS px). If omitted, the component will size itself
-   * from its parent layout (recommended).
-   */
-  width?: number
-  /**
-   * Optional wrapper height (in CSS px). If omitted, the component will size itself
-   * from its parent layout (recommended).
-   */
-  height?: number
-}
-
-export function CanvasSequence({
-  frameCount,
-  frameDuration,
-  getImagePath,
-  isPlaying = true,
-  loop = true,
-  preload = true,
-  objectFit = 'contain',
-  onFrameChange,
-  onAllFramesLoaded,
-  timeTransform,
-  devicePixelRatio,
-  resetOnPlay = false,
-  width: initialWidth,
-  height: initialHeight,
+/** A standalone native-image player. Change sequenceId when replacing sources. */
+export function ImageSequence({
+  sequenceId,
+  poster,
+  alt,
   className,
-  style,
-  ...props
-}: CanvasSequenceProps) {
-  const containerRef = React.useRef<HTMLDivElement>(null)
-  const canvasRef = React.useRef<HTMLCanvasElement>(null)
-  const ctxRef = React.useRef<CanvasRenderingContext2D | null>(null)
-  const currentFrameRef = React.useRef<number>(-1)
-  const timePassedRef = React.useRef<number>(0)
-  const animationFrameRef = React.useRef<number | null>(null)
-  const lastTimeRef = React.useRef<number | null>(null)
-  const wasPlayingRef = React.useRef<boolean>(isPlaying)
-  const onFrameChangeRef = React.useRef(onFrameChange)
-  const timeTransformRef = React.useRef(timeTransform)
-  const [bounds, setBounds] = React.useState(() => ({
-    width: initialWidth ?? 0,
-    height: initialHeight ?? 0,
-  }))
+  playing = true,
+  enabled = true,
+  target,
+  pixelated = false,
+  onFrame,
+  onComplete,
+  frameCount,
+  source,
+  mode = 'autoplay',
+  frameDuration = 1000 / 24,
+  loop = true,
+  loopStart,
+  loopEnd,
+  initialFrame,
+  loadInitial = false,
+  priority = 'hybrid',
+  readyAhead = 3,
+  maxFrameSkip = 0,
+  ahead = 7,
+  behind = 3,
+}: ImageSequenceProps) {
+  const rootRef = useRef<HTMLSpanElement>(null)
+  const imageRef = useRef<HTMLImageElement>(null)
+  const controllerRef = useRef<SequenceDemandController | null>(null)
+  const syncRef = useRef<(() => void) | null>(null)
+  const surfaceLease = useRef<(() => void) | undefined>(undefined)
+  const latest = useRef({
+    source,
+    poster,
+    playing,
+    enabled,
+    onFrame,
+    onComplete,
+  })
+  // React owns the SSR poster once; the effect owns src/srcset afterwards. Parent
+  // renders must never overwrite a decoded surface with an undecoded candidate.
+  const [firstPoster] = useState(() =>
+    typeof poster === 'string' ? { src: poster } : poster
+  )
 
-  React.useEffect(() => {
-    onFrameChangeRef.current = onFrameChange
-    timeTransformRef.current = timeTransform
+  useEffect(() => {
+    latest.current = { source, poster, playing, enabled, onFrame, onComplete }
   })
 
-  const totalDuration = frameCount * frameDuration
-
-  // Use the sequence hook
-  const { state, getFrame, getFrameIndexByProgress, loadAllFrames } =
-    useSequence({
+  useEffect(() => {
+    const root = rootRef.current
+    const image = imageRef.current
+    if (!root || !image) return
+    const motion = matchMedia('(prefers-reduced-motion: reduce)')
+    let nearby = false
+    let visible = false
+    let disposed = false
+    let raf: number | undefined
+    let lastTime: number | undefined
+    let pixelWidth = Math.max(
+      1,
+      Math.ceil(image.getBoundingClientRect().width * devicePixelRatio)
+    )
+    const controller = new SequenceDemandController(getSharedFrameTransfer(), {
       frameCount,
-      getImagePath,
-      preload,
-      onAllFramesLoaded,
+      mode,
+      frameDuration,
+      loop,
+      loopStart,
+      loopEnd,
+      initialFrame,
+      loadInitial,
+      priority,
+      readyAhead,
+      maxFrameSkip,
+      ahead,
+      behind,
+      source: (index) =>
+        resolveFrameSource(latest.current.source(index), pixelWidth),
+      onFrame: (index, frame) => {
+        if (
+          disposed ||
+          !image.isConnected ||
+          motion.matches ||
+          !latest.current.enabled ||
+          document.hidden
+        )
+          return false
+        const releasePrevious = surfaceLease.current
+        const releaseNext = controller.retainSurface(frame)
+        image.removeAttribute('srcset')
+        image.src = frame.src
+        surfaceLease.current = releaseNext
+        releasePrevious?.()
+        latest.current.onFrame?.(index)
+        return true
+      },
+      onComplete: () => latest.current.onComplete?.(),
     })
+    controllerRef.current = controller
 
-  // If playing but nothing has been preloaded, trigger loading
-  React.useEffect(() => {
-    if (isPlaying && !state.initialFramesLoaded && state.loadedCount === 0) {
-      loadAllFrames()
+    const stop = () => {
+      if (raf !== undefined) cancelAnimationFrame(raf)
+      raf = undefined
+      lastTime = undefined
     }
-  }, [isPlaying, state.initialFramesLoaded, state.loadedCount, loadAllFrames])
-
-  // Get actual pixel ratio
-  const dpr =
-    devicePixelRatio ??
-    (typeof window !== 'undefined' ? window.devicePixelRatio : 1)
-
-  // Measure wrapper bounds and keep canvas synced to those bounds.
-  React.useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
-
-    const measure = () => {
-      const rect = el.getBoundingClientRect()
-      const nextWidth = Math.max(0, Math.floor(rect.width))
-      const nextHeight = Math.max(0, Math.floor(rect.height))
-
-      setBounds((prev) => {
-        if (prev.width === nextWidth && prev.height === nextHeight) return prev
-        return { width: nextWidth, height: nextHeight }
-      })
+    const tick = (time: number) => {
+      raf = undefined
+      controller.tick(lastTime === undefined ? 0 : time - lastTime)
+      lastTime = time
+      if (!disposed && !controller.isComplete) raf = requestAnimationFrame(tick)
     }
-
-    measure()
-    const ro = new ResizeObserver(measure)
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [])
-
-  const width = bounds.width
-  const height = bounds.height
-
-  // Setup canvas context
-  React.useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    if (width <= 0 || height <= 0) return
-
-    // Set canvas size accounting for device pixel ratio
-    canvas.width = width * dpr
-    canvas.height = height * dpr
-
-    const ctx = canvas.getContext('2d')
-    if (ctx) {
-      // Avoid accumulating transforms across resizes
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      ctxRef.current = ctx
+    const assignPoster = () => {
+      const current = latest.current.poster
+      const value = typeof current === 'string' ? { src: current } : current
+      // Reassigning the same URL can restart the native poster request, notably
+      // with browser cache disabled. Observer notifications must be idempotent.
+      if ((image.getAttribute('sizes') ?? '') !== (value.sizes ?? ''))
+        image.sizes = value.sizes ?? ''
+      if ((image.getAttribute('srcset') ?? '') !== (value.srcSet ?? ''))
+        image.srcset = value.srcSet ?? ''
+      if (image.getAttribute('src') !== value.src) image.src = value.src
     }
-  }, [width, height, dpr])
-
-  // Paint a frame to the canvas
-  const paintFrame = React.useCallback(
-    (frameIndex: number) => {
-      const ctx = ctxRef.current
-      const canvas = canvasRef.current
-      if (!ctx || !canvas) return false
-      if (width <= 0 || height <= 0) return false
-
-      const image = getFrame(frameIndex)
-      if (!image) return false
-
-      // Clear canvas
-      ctx.clearRect(0, 0, width, height)
-
-      // Calculate draw dimensions based on object-fit
-      let drawX = 0
-      let drawY = 0
-      let drawWidth = width
-      let drawHeight = height
-
-      const imageAspect = image.naturalWidth / image.naturalHeight
-      const canvasAspect = width / height
-
-      if (objectFit === 'contain') {
-        if (imageAspect > canvasAspect) {
-          drawHeight = width / imageAspect
-          drawY = (height - drawHeight) / 2
-        } else {
-          drawWidth = height * imageAspect
-          drawX = (width - drawWidth) / 2
-        }
-      } else if (objectFit === 'cover') {
-        if (imageAspect > canvasAspect) {
-          drawWidth = height * imageAspect
-          drawX = (width - drawWidth) / 2
-        } else {
-          drawHeight = width / imageAspect
-          drawY = (height - drawHeight) / 2
-        }
-      }
-      // 'fill' uses default full canvas dimensions
-
-      ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight)
-
-      if (currentFrameRef.current !== frameIndex) {
-        currentFrameRef.current = frameIndex
-        onFrameChangeRef.current?.(frameIndex)
-      }
-
-      return true
-    },
-    [getFrame, width, height, objectFit]
-  )
-
-  // Find the closest available frame (for when exact frame isn't loaded yet)
-  const findClosestLoadedFrame = React.useCallback(
-    (targetFrame: number): number | null => {
-      if (state.images.has(targetFrame)) return targetFrame
-
-      // Search outward from target frame
-      for (let offset = 1; offset < frameCount; offset++) {
-        const before = targetFrame - offset
-        const after = targetFrame + offset
-
-        if (before >= 0 && state.images.has(before)) return before
-        if (after < frameCount && state.images.has(after)) return after
-      }
-
-      return null
-    },
-    [state.images, frameCount]
-  )
-
-  // Animation loop
-  React.useEffect(() => {
-    if (!isPlaying) {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current)
-        animationFrameRef.current = null
-      }
-      lastTimeRef.current = null
-      return
+    const restorePoster = () => {
+      assignPoster()
+      surfaceLease.current?.()
+      surfaceLease.current = undefined
+      controller.restorePoster()
     }
-
-    // Wait for initial frames to be loaded before starting animation
-    if (!state.initialFramesLoaded) return
-
-    const tick = (timestamp: number) => {
-      if (lastTimeRef.current === null) {
-        lastTimeRef.current = timestamp
-        animationFrameRef.current = requestAnimationFrame(tick)
-        return
-      }
-
-      let deltaTime = timestamp - lastTimeRef.current
-      lastTimeRef.current = timestamp
-
-      // Apply time transform if provided
-      if (timeTransformRef.current) {
-        deltaTime = timeTransformRef.current(deltaTime)
-      }
-
-      timePassedRef.current += deltaTime
-
-      // Calculate progress
-      let progress: number
-      if (loop) {
-        progress = (timePassedRef.current % totalDuration) / totalDuration
-      } else {
-        progress = Math.min(timePassedRef.current / totalDuration, 1)
-      }
-
-      const targetFrame = getFrameIndexByProgress(progress)
-      const frameToRender = findClosestLoadedFrame(targetFrame)
-
-      if (frameToRender !== null) {
-        paintFrame(frameToRender)
-      }
-
-      // Continue animation if looping or not finished
-      if (loop || progress < 1) {
-        animationFrameRef.current = requestAnimationFrame(tick)
-      }
+    const sync = () => {
+      const allowed =
+        !document.hidden &&
+        !motion.matches &&
+        latest.current.enabled &&
+        latest.current.playing
+      controller.setConditions(nearby && allowed, visible && allowed)
+      if (visible && allowed && mode !== 'scrub' && !controller.isComplete) {
+        if (raf === undefined) raf = requestAnimationFrame(tick)
+      } else stop()
+      if (motion.matches) restorePoster()
+      else if (!surfaceLease.current) assignPoster()
     }
-
-    animationFrameRef.current = requestAnimationFrame(tick)
-
+    const resize = () => {
+      const next = Math.max(
+        1,
+        Math.ceil(image.getBoundingClientRect().width * devicePixelRatio)
+      )
+      if (pixelWidth === next) return
+      pixelWidth = next
+      controller.resetWindow()
+    }
+    const visibilityObserver = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting
+      sync()
+    })
+    const nearbyObserver = new IntersectionObserver(
+      ([entry]) => {
+        nearby = entry.isIntersecting
+        sync()
+      },
+      { rootMargin: '200px' }
+    )
+    const sizeObserver = new ResizeObserver(resize)
+    visibilityObserver.observe(root)
+    nearbyObserver.observe(root)
+    sizeObserver.observe(image)
+    motion.addEventListener('change', sync)
+    document.addEventListener('visibilitychange', sync)
+    window.addEventListener('resize', resize)
+    window.addEventListener('orientationchange', resize)
+    syncRef.current = sync
+    sync()
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current)
-        animationFrameRef.current = null
-      }
+      disposed = true
+      stop()
+      visibilityObserver.disconnect()
+      nearbyObserver.disconnect()
+      sizeObserver.disconnect()
+      motion.removeEventListener('change', sync)
+      document.removeEventListener('visibilitychange', sync)
+      window.removeEventListener('resize', resize)
+      window.removeEventListener('orientationchange', resize)
+      controller.dispose()
+      controllerRef.current = null
+      syncRef.current = null
+      // The separate surface lease survives replacement of this controller.
     }
   }, [
-    isPlaying,
+    sequenceId,
+    frameCount,
+    mode,
+    frameDuration,
     loop,
-    state.initialFramesLoaded,
-    totalDuration,
-    getFrameIndexByProgress,
-    findClosestLoadedFrame,
-    paintFrame,
+    loopStart,
+    loopEnd,
+    initialFrame,
+    loadInitial,
+    priority,
+    readyAhead,
+    maxFrameSkip,
+    ahead,
+    behind,
   ])
 
-  // Reset animation when sequence config changes
-  React.useEffect(() => {
-    timePassedRef.current = 0
-    currentFrameRef.current = -1
-    lastTimeRef.current = null
-  }, [frameCount, frameDuration])
+  useEffect(() => {
+    syncRef.current?.()
+  }, [playing, enabled, poster])
+  useEffect(() => {
+    if (target !== undefined) controllerRef.current?.queueTarget(target)
+  }, [
+    target,
+    sequenceId,
+    frameCount,
+    mode,
+    frameDuration,
+    loop,
+    loopStart,
+    loopEnd,
+    initialFrame,
+    loadInitial,
+    priority,
+    readyAhead,
+    maxFrameSkip,
+    ahead,
+    behind,
+  ])
+  useEffect(
+    () => () => {
+      surfaceLease.current?.()
+      surfaceLease.current = undefined
+    },
+    []
+  )
 
-  // Reset animation when playback starts (if resetOnPlay is enabled)
-  React.useEffect(() => {
-    const wasPlaying = wasPlayingRef.current
-    wasPlayingRef.current = isPlaying
-
-    if (resetOnPlay && isPlaying && !wasPlaying) {
-      timePassedRef.current = 0
-      currentFrameRef.current = -1
-      lastTimeRef.current = null
-    }
-  }, [isPlaying, resetOnPlay])
-
-  // Paint first frame when available (for non-playing state)
-  React.useEffect(() => {
-    if (!isPlaying && state.images.has(0)) {
-      paintFrame(0)
-    }
-  }, [isPlaying, state.images, paintFrame])
-
+  const dimensions = typeof poster === 'string' ? undefined : poster
   return (
-    <div
-      ref={containerRef}
-      data-slot="canvas-sequence"
-      className={cn('relative size-full', className)}
-      style={{
-        width: initialWidth,
-        height: initialHeight,
-        ...style,
-      }}
+    <span
+      ref={rootRef}
+      data-slot="image-sequence"
+      className={cn(
+        'relative block **:data-[slot=sequence-image]:block **:data-[slot=sequence-image]:size-full **:data-[slot=sequence-image]:object-contain **:data-[slot=sequence-picture]:block **:data-[slot=sequence-picture]:size-full',
+        pixelated &&
+          '**:data-[slot=sequence-image]:[image-rendering:pixelated]',
+        className
+      )}
     >
-      <canvas
-        ref={canvasRef}
-        data-slot="canvas"
-        className="absolute inset-0 block size-full"
-        {...props}
-      />
-    </div>
+      <picture data-slot="sequence-picture">
+        <img
+          ref={imageRef}
+          data-slot="sequence-image"
+          src={firstPoster.src}
+          srcSet={firstPoster.srcSet}
+          sizes={firstPoster.sizes}
+          width={dimensions?.width}
+          height={dimensions?.height}
+          alt={alt}
+          draggable={false}
+          decoding="async"
+        />
+      </picture>
+    </span>
   )
 }

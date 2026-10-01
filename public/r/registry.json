@@ -172,12 +172,23 @@
     {
       "name": "image-sequence",
       "type": "registry:component",
-      "title": "Image Sequence",
-      "description": "A canvas-based image sequence player with binary progressive loading for smooth playback.",
+      "title": "Responsive Image Sequence",
+      "description": "A responsive native-image sequence player with shared transfers, bounded decode readiness, and autoplay or scrub control.",
       "files": [
         {
           "path": "registry/components/image-sequence.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "components/image-sequence.tsx"
+        },
+        {
+          "path": "registry/lib/image-sequence/runtime.ts",
+          "type": "registry:lib",
+          "target": "lib/image-sequence/runtime.ts"
+        },
+        {
+          "path": "registry/lib/image-sequence/transfer.ts",
+          "type": "registry:lib",
+          "target": "lib/image-sequence/transfer.ts"
         }
       ],
       "registryDependencies": [

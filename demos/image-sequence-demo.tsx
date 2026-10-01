@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CanvasSequence } from '@/registry/components/image-sequence'
+import { ImageSequence } from '@/registry/components/image-sequence'
 import { cn } from '@/lib/utils'
 
 const sequences = [
@@ -39,18 +39,21 @@ function ImageSequenceDemo() {
               key={seq.name}
               className="relative cursor-pointer"
               onMouseEnter={() => setActiveIndex(index)}
+              onFocus={() => setActiveIndex(index)}
+              tabIndex={0}
             >
-              <CanvasSequence
+              <ImageSequence
+                sequenceId={`${seq.name}-${isActive}`}
+                poster={{ src: seq.getImagePath(0), width: 600, height: 600 }}
+                alt={seq.name}
                 frameCount={seq.frameCount}
                 frameDuration={33}
-                getImagePath={seq.getImagePath}
-                objectFit="contain"
-                isPlaying={isActive}
-                resetOnPlay
-                width={200}
-                height={200}
-                className="rounded-lg transition-opacity duration-200"
-                style={{ opacity: isActive ? 1 : 0.5 }}
+                source={seq.getImagePath}
+                playing={isActive}
+                className={cn(
+                  'size-50 transition-opacity duration-200',
+                  !isActive && 'opacity-50'
+                )}
               />
 
               {/* Active frame indicator */}

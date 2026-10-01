@@ -1,6 +1,6 @@
 ---
 title: Image Sequence
-description: A canvas-based image sequence player with binary progressive loading for smooth playback.
+description: A responsive native-image player with shared transfers, bounded decode readiness, and autoplay or scrub control.
 maintainers: ['matiasperz']
 ---
 
@@ -14,71 +14,294 @@ import { ComponentPreview } from '@/components/preview/component-preview'
 npx shadcn@latest add @joyco/image-sequence
 ```
 
-## Usage
+Installs `components/image-sequence.tsx`, `lib/image-sequence/runtime.ts`, and
+`lib/image-sequence/transfer.ts`, plus the shared `cn` utility. No provider or global
+setup is required. Every instance uses the same module-level transfer scheduler.
+
+## Autoplay
 
 ```tsx
-import { CanvasSequence } from '@/components/image-sequence'
-<div className="h-[400px] w-[400px]">
-  <CanvasSequence
-    frameCount={71}
-    frameDuration={33}
-    getImagePath={(idx) => `/frames/frame_${String(idx).padStart(2, '0')}.webp`}
-    className="size-full"
-  />
-</div>
+import { ImageSequence } from '@/components/image-sequence'
+
+const source = (index: number) =>
+  `/frames/frame_${String(index).padStart(2, '0')}.webp`
+
+export function ProductSpin() {
+  return (
+    <ImageSequence
+      sequenceId="product-spin"
+      poster={{ src: source(0), width: 1080, height: 1080 }}
+      frameCount={71}
+      source={source}
+      frameDuration={1000 / 24}
+      priority="hybrid"
+      alt="Rotating product"
+      className="aspect-square w-full max-w-96"
+    />
+  )
+}
+```
+
+The player keeps one `<img>` mounted. It decodes candidates using off-DOM
+`Image()` instances, then assigns their decoded Blob URLs. An unavailable or
+failed frame leaves the poster or last valid frame visible.
+
+`hybrid` is the default: authored time advances independently and presentation
+chooses a nearby ready frame without moving backward within a loop. Transfers
+cover the range in binary order: first, last, midpoint, then smaller intervals.
+Playback can begin as soon as the first frame is ready; it does not wait for the
+last frame.
+
+Use `priority="sequential"` when continuity matters more than elapsed time. It
+holds for the next frame, including when that frame fails and must retry.
+`maxFrameSkip` explicitly permits skipping up to that many unavailable frames in
+sequential mode; hybrid mode chooses the closest useful ready frame independently.
+
+### Play once and replay
+
+Set `loop={false}` to stop after the configured final frame has been presented.
+`onComplete` fires once for that run. `loopStart` and `loopEnd` are inclusive
+bounds; they do not enable looping. The initial frame defaults to `loopStart`.
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { ImageSequence } from '@/components/image-sequence'
+
+const source = (index: number) => `/frames/${index}.webp`
+
+export function PlayOnce() {
+  const [run, setRun] = useState(0)
+  return (
+    <>
+      <ImageSequence
+        sequenceId={`intro-${run}`}
+        poster={{ src: source(0), width: 1080, height: 1080 }}
+        frameCount={71}
+        source={source}
+        loop={false}
+        onComplete={() => console.log('Final frame selected')}
+        alt="Product opening"
+        className="aspect-square w-full max-w-96"
+      />
+      <button type="button" onClick={() => setRun(run + 1)}>
+        Replay
+      </button>
+    </>
+  )
+}
+```
+
+Changing `playing` pauses/resumes the current run; it does not replay a completed
+run. Change `sequenceId` to restart or replace sources. Changing scheduling props
+(such as `initialFrame`, range, mode, or cadence) creates a new run too. The
+previous valid surface remains until its replacement is ready.
+
+## Scroll scrubbing
+
+`target` is a zero-based frame index, clamped to the configured range. The player
+coalesces updates to one per animation frame and gives the newest target priority.
+Reversing direction swaps the larger ahead/behind transfer neighborhood. A late
+candidate cannot move presentation farther from the latest target.
+
+```tsx
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
+import { ImageSequence } from '@/components/image-sequence'
+
+const source = (index: number) => `/frames/${index}.webp`
+
+export function ScrollSequence() {
+  const section = useRef<HTMLElement>(null)
+  const [target, setTarget] = useState(0)
+
+  useEffect(() => {
+    let raf = 0
+    const update = () => {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(() => {
+        const element = section.current
+        if (!element) return
+        const bounds = element.getBoundingClientRect()
+        const distance = Math.max(1, bounds.height - window.innerHeight)
+        const progress = Math.max(0, Math.min(1, -bounds.top / distance))
+        setTarget(Math.round(progress * 70))
+      })
+    }
+    update()
+    window.addEventListener('scroll', update, { passive: true })
+    window.addEventListener('resize', update)
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
+    }
+  }, [])
+
+  return (
+    <section ref={section} className="h-[200vh]">
+      <div className="sticky top-0 flex h-screen items-center">
+        <ImageSequence
+          sequenceId="scroll-product"
+          poster={{ src: source(0), width: 1080, height: 1080 }}
+          frameCount={71}
+          source={source}
+          mode="scrub"
+          target={target}
+          alt="Product rotation controlled by scrolling"
+          className="mx-auto aspect-square w-full max-w-96"
+        />
+      </div>
+    </section>
+  )
+}
+```
+
+## Responsive sources
+
+```ts
+import type { FrameSource } from '@/components/image-sequence'
+
+const source = (index: number): FrameSource => ({
+  src: `/frames/1080/${index}.webp`,
+  srcSet: `/frames/320/${index}.webp 320w, /frames/640/${index}.webp 640w, /frames/1080/${index}.webp 1080w`,
+  sizes: '(max-width: 768px) 100vw, 630px',
+  width: 1080,
+  height: 1080,
+})
+```
+
+The poster uses native `srcSet` and `sizes`. For fetched frames, the runtime picks
+the smallest width candidate covering measured image width × device pixel ratio,
+capped at the largest available candidate. **Frame `srcSet` supports width (`w`)
+descriptors only**, not density (`1x`/`2x`) descriptors or art direction. Without
+valid width candidates it uses `src`. Use ordinary URL candidates (no data URLs
+containing commas). `sizes` describes the poster; runtime frame selection measures
+the actual rendered image.
+
+Resize rebuilds future demand while keeping the current surface. Transfers are
+deduplicated by the resolved URL. Give each content variant a distinct URL;
+`accept`, when supplied, must agree for all owners requesting the same URL.
+
+```ts
+type FrameSource =
+  | string
+  | {
+      src: string
+      srcSet?: string
+      sizes?: string
+      width?: number
+      height?: number
+      accept?: string
+    }
 ```
 
 ## Props
 
-### CanvasSequence
+| Prop            | Type                             | Default          | Behavior                                                                |
+| --------------- | -------------------------------- | ---------------- | ----------------------------------------------------------------------- |
+| `sequenceId`    | `string`                         | Required         | Change to replace sources or replay intentionally                       |
+| `poster`        | `FrameSource`                    | Required         | Initial and reduced-motion image; include dimensions                    |
+| `frameCount`    | `number`                         | Required         | Number of zero-based source frames                                      |
+| `source`        | `(index: number) => FrameSource` | Required         | Frame URL or responsive candidates                                      |
+| `alt`           | `string`                         | Required         | Meaningful description, or `""` for decoration                          |
+| `className`     | `string`                         | —                | Root styling; target inner elements with data slots                     |
+| `playing`       | `boolean`                        | `true`           | Allow sequence demand and visible playback                              |
+| `enabled`       | `boolean`                        | `true`           | Allow runtime work; disabling preserves the last frame                  |
+| `mode`          | `"autoplay" \| "scrub"`          | `"autoplay"`     | Clock-driven or target-driven playback                                  |
+| `target`        | `number`                         | Range start      | Zero-based scrub frame, coalesced per RAF                               |
+| `frameDuration` | `number`                         | `1000 / 24`      | Authored milliseconds per frame                                         |
+| `loop`          | `boolean`                        | `true`           | Repeat the configured range                                             |
+| `loopStart`     | `number`                         | `0`              | Inclusive lower bound                                                   |
+| `loopEnd`       | `number`                         | `frameCount - 1` | Inclusive upper bound                                                   |
+| `initialFrame`  | `number`                         | `loopStart`      | Starting frame, clamped to the range                                    |
+| `loadInitial`   | `boolean`                        | `false`          | Allow initial presentation while nearby, before visible playback        |
+| `priority`      | `"sequential" \| "hybrid"`       | `"hybrid"`       | Continuity-first or authored-time policy                                |
+| `readyAhead`    | `number`                         | `3`              | Future autoplay candidates, clamped to **0..3**; zero decodes on demand |
+| `maxFrameSkip`  | `number`                         | `0`              | Maximum unavailable frames sequential playback may skip                 |
+| `ahead`         | `number`                         | `7`              | Scrub transfer positions in the travel direction                        |
+| `behind`        | `number`                         | `3`              | Scrub transfer positions against the travel direction                   |
+| `pixelated`     | `boolean`                        | `false`          | Set pixelated image rendering                                           |
+| `onFrame`       | `(index: number) => void`        | —                | Decoded frame assigned to the mounted image                             |
+| `onComplete`    | `() => void`                     | —                | One-shot autoplay final frame assigned, once per run                    |
 
-| Prop                | Type                             | Default                   | Description                                       |
-| ------------------- | -------------------------------- | ------------------------- | ------------------------------------------------- |
-| `frameCount`        | `number`                         | -                         | Total number of frames in the sequence            |
-| `frameDuration`     | `number`                         | -                         | Duration of each frame in milliseconds            |
-| `getImagePath`      | `(frameIndex: number) => string` | -                         | Function to generate the image URL for each frame |
-| `width`             | `number`                         | -                         | Optional wrapper width in CSS pixels              |
-| `height`            | `number`                         | -                         | Optional wrapper height in CSS pixels             |
-| `isPlaying`         | `boolean`                        | `true`                    | Whether the animation is playing                  |
-| `isVisible`         | `boolean`                        | `true`                    | Whether the canvas is visible                     |
-| `loop`              | `boolean`                        | `true`                    | Whether to loop the animation                     |
-| `preload`           | `boolean`                        | `true`                    | Whether to preload images on mount                |
-| `objectFit`         | `'contain' \| 'cover' \| 'fill'` | `'contain'`               | How the image fits in the canvas                  |
-| `onFrameChange`     | `(frameIndex: number) => void`   | -                         | Callback when frame changes                       |
-| `onAllFramesLoaded` | `() => void`                     | -                         | Callback when all frames are loaded               |
-| `timeTransform`     | `(deltaTime: number) => number`  | -                         | Transform delta time for speed control            |
-| `devicePixelRatio`  | `number`                         | `window.devicePixelRatio` | Pixel ratio for high-DPI displays                 |
-| `resetOnPlay`       | `boolean`                        | `false`                   | Reset animation to frame 0 when playback starts   |
+## Ownership and lifecycle
 
-## useSequence Hook
+- **Eight shared transfers**, with round-robin admission among visible sequences.
+  Nearby sequences have lower priority and may relinquish slots after a one-second
+  grace. Background requests use low fetch priority.
+- **16 MiB encoded Blob LRU** across instances; each response also has a 16 MiB
+  streamed size limit. Evicting a decoded frame does not require another source
+  request while its encoded bytes remain retained.
+- **Three relevant decode promises per sequence** and **three future decoded
+  candidates** by default. These are different controls. The mounted frame has a
+  separate lease, so ownership can include the visible frame plus three candidates.
+- Decode cancellation is logical: `Image.decode()` has no cancellable API, so
+  obsolete native work can briefly overlap current work. New scrub demand does not
+  wait for abandoned promises. A decode times out after 15 seconds, after transfer.
+- Transfers have **no total-duration timeout**. A request is timed out after 15
+  seconds without bytes only while another request is waiting for its occupied
+  slot. Transient failures retry with exponential delays capped at 30 seconds;
+  oversized responses stay failed while demanded.
+- Native observers use a **200px nearby boundary**. Nearby instances warm opening
+  bytes; visible instances play. Distance, document hiding, pause, disable, and
+  unmount release demand. Suspension releases the local ring while preserving the
+  visible lease. Unmount releases all local ownership.
 
-For more control, use the `useSequence` hook directly:
+Slow delivery reduces cadence: hybrid selects a useful ready approximation and
+sequential holds. The player never replaces a valid surface with a loader or an
+unavailable frame. Browser HTTP caches, the encoded LRU, decoded readiness, and
+browser raster/GPU resources have separate ownership. A completed `decode()` is a
+readiness signal, not proof of physical GPU presentation or permanent residency.
+
+## Accessibility and styling
+
+Reduced motion restores the responsive poster and stops sequence work. Provide
+poster `width` and `height`, and reserve a container aspect ratio to prevent layout
+shift. Use `alt=""` for decorative sequences. Give users pause controls for
+continuous motion where appropriate; set `playing` from that control.
+
+The root is the only `className` target. Available slots are `image-sequence`,
+`sequence-picture`, and `sequence-image`:
 
 ```tsx
-import { useSequence } from '@/components/image-sequence'
-
-function MyComponent() {
-  const { state, getFrame, getFrameByProgress } = useSequence({
-    frameCount: 71,
-    getImagePath: (idx) => `/frames/frame_${idx}.webp`,
-    preload: true,
-    onAllFramesLoaded: () => console.log('Ready!'),
-  })
-
-  // state.initialFramesLoaded - first and last frames are ready
-  // state.loadedCount - number of frames loaded
-  // getFrame(index) - get image for specific frame
-  // getFrameByProgress(0.5) - get image at 50% progress
-}
+<ImageSequence
+  {...props}
+  className="aspect-video w-full **:data-[slot=sequence-image]:object-cover"
+/>
 ```
 
-## Binary Loading Strategy
+## Network requirements
 
-The hook uses a binary loading strategy for progressive playback:
+Frames are fetched and presented with Blob URLs. Same-origin files in `public/`
+need no CORS configuration. Cross-origin CDN or R2 responses must allow your
+origin (or `*`) through `Access-Control-Allow-Origin`. Images that display through
+an ordinary `<img>` may still fail when fetched without CORS.
 
-1. First and last frames load first
-2. Then the middle frame
-3. Then middles of each half
-4. Continues recursively until all frames load
+For a restrictive Content Security Policy, allow the asset host in `connect-src`
+and permit Blob URLs in `img-src` (`blob:`), alongside the poster host. Fetches use
+default same-origin credentials; authenticated cross-origin assets are not part
+of this component's contract.
 
-This ensures the full animation range is visible early at low framerate, progressively smoothing out as more frames load.
+## Migration from CanvasSequence
+
+This replaces `CanvasSequence` and the eager `useSequence` hook. There is no legacy
+alias or public controller API.
+
+| Legacy                      | Replacement                                                                  |
+| --------------------------- | ---------------------------------------------------------------------------- |
+| `getImagePath(index)`       | `source(index)`                                                              |
+| `isPlaying`                 | `playing`                                                                    |
+| `loop`                      | `loop`, with optional inclusive `loopStart` / `loopEnd`                      |
+| `objectFit`                 | `**:data-[slot=sequence-image]:object-contain` or `object-cover` on the root |
+| `resetOnPlay`               | Change `sequenceId` or `initialFrame` intentionally                          |
+| `onFrameChange`             | `onFrame`                                                                    |
+| `preload`                   | Internal nearby/visible demand; `enabled={false}` prevents sequence work     |
+| `width` / `height`          | Poster dimensions and container CSS                                          |
+| `onAllFramesLoaded`         | Removed: readiness is local and bounded                                      |
+| `timeTransform`             | Set `frameDuration`, or control `target` in scrub mode                       |
+| `devicePixelRatio`          | Measured internally for responsive selection                                 |
+| Canvas attributes / `style` | Move layout to a wrapper or root `className`                                 |
+| `useSequence`               | `ImageSequence` with `mode="scrub"` and `onFrame`                            |
