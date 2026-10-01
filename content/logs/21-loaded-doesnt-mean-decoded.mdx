@@ -80,28 +80,66 @@ The `Image` class creates an image element without displaying it. It can prepare
 future frames without exposing incomplete work:
 
 ```ts showLineNumbers
-async function decodeFrame(index: number) {
+function createDecodeJob(index: number, generation: number) {
   const image = new Image()
+  let retired = false
+
   image.decoding = 'async'
   image.src = getFrameUrl(index)
 
-  await withTimeout(image.decode(), FRAME_TIMEOUT)
-  return image
+  const retire = () => {
+    retired = true
+    image.removeAttribute('src')
+  }
+
+  return {
+    generation,
+    get retired() {
+      return retired
+    },
+    retire,
+    async decode() {
+      try {
+        await withTimeout(image.decode(), FRAME_TIMEOUT)
+        return image
+      } catch (error) {
+        retire()
+        throw error
+      }
+    },
+  }
 }
 
 function queueDecode(index: number, generation: number) {
-  if (pending.has(index)) return
-  pending.add(index)
+  const previous = pending.get(index)
+  if (previous?.generation === generation) return
 
-  void decodeFrame(index)
+  previous?.retire()
+
+  const job = createDecodeJob(index, generation)
+  pending.set(index, job)
+
+  void job
+    .decode()
     .then((image) => {
-      if (generation !== activeGeneration || !wanted.has(index)) return
+      if (
+        job.retired ||
+        pending.get(index) !== job ||
+        generation !== activeGeneration ||
+        !wanted.has(index)
+      )
+        return
+
       ready.set(index, image)
     })
     .catch(() => {
-      if (generation === activeGeneration) failed.add(index)
+      if (pending.get(index) === job && generation === activeGeneration) {
+        failed.add(index)
+      }
     })
     .finally(() => {
+      if (pending.get(index) !== job) return
+
       pending.delete(index)
       pumpDecodes()
     })
@@ -110,8 +148,11 @@ function queueDecode(index: number, generation: number) {
 
 `await image.decode()` suspends the async function instead of spinning until
 decode finishes. Decode still consumes CPU and may use main-thread time, so its
-concurrency must remain bounded. The `finally` path also matters: success,
-failure, and timeout must all release the pending slot.
+admission must remain bounded. Supersession retires the old job immediately,
+while the identity checks prevent its completion from touching the replacement.
+Timeout and failure also retire the image and release the slot in `finally`.
+Clearing `src` is best-effort because the browser may not stop underlying work
+immediately.
 
 Successful `decode()` is not a permanent lease. The
 [HTML `decode()` algorithm](https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-decode-dev)
