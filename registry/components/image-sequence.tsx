@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
 import {
-  getSharedFrameTransfer,
   resolveFrameSource,
   SequenceDemandController,
   type FrameSource,
@@ -45,14 +44,11 @@ export function ImageSequence({
   initialFrame,
   loadInitial = false,
   priority = 'hybrid',
-  readyAhead = 3,
-  maxFrameSkip = 0,
   ahead = 7,
   behind = 3,
 }: ImageSequenceProps) {
   const rootRef = useRef<HTMLSpanElement>(null)
   const imageRef = useRef<HTMLImageElement>(null)
-  const controllerRef = useRef<SequenceDemandController | null>(null)
   const syncRef = useRef<(() => void) | null>(null)
   const surfaceLease = useRef<(() => void) | undefined>(undefined)
   const latest = useRef({
@@ -62,6 +58,7 @@ export function ImageSequence({
     enabled,
     onFrame,
     onComplete,
+    target,
   })
   // React owns the SSR poster once; the effect owns src/srcset afterwards. Parent
   // renders must never overwrite a decoded surface with an undecoded candidate.
@@ -70,7 +67,16 @@ export function ImageSequence({
   )
 
   useEffect(() => {
-    latest.current = { source, poster, playing, enabled, onFrame, onComplete }
+    latest.current = {
+      source,
+      poster,
+      playing,
+      enabled,
+      onFrame,
+      onComplete,
+      target,
+    }
+    syncRef.current?.()
   })
 
   useEffect(() => {
@@ -82,12 +88,13 @@ export function ImageSequence({
     let visible = false
     let disposed = false
     let raf: number | undefined
+    let lastTarget: number | undefined
     let lastTime: number | undefined
     let pixelWidth = Math.max(
       1,
       Math.ceil(image.getBoundingClientRect().width * devicePixelRatio)
     )
-    const controller = new SequenceDemandController(getSharedFrameTransfer(), {
+    const controller = new SequenceDemandController({
       frameCount,
       mode,
       frameDuration,
@@ -97,8 +104,6 @@ export function ImageSequence({
       initialFrame,
       loadInitial,
       priority,
-      readyAhead,
-      maxFrameSkip,
       ahead,
       behind,
       source: (index) =>
@@ -123,7 +128,6 @@ export function ImageSequence({
       },
       onComplete: () => latest.current.onComplete?.(),
     })
-    controllerRef.current = controller
 
     const stop = () => {
       if (raf !== undefined) cancelAnimationFrame(raf)
@@ -154,6 +158,11 @@ export function ImageSequence({
       controller.restorePoster()
     }
     const sync = () => {
+      const target = latest.current.target
+      if (target !== undefined && target !== lastTarget) {
+        lastTarget = target
+        controller.queueTarget(target)
+      }
       const allowed =
         !document.hidden &&
         !motion.matches &&
@@ -207,7 +216,6 @@ export function ImageSequence({
       window.removeEventListener('resize', resize)
       window.removeEventListener('orientationchange', resize)
       controller.dispose()
-      controllerRef.current = null
       syncRef.current = null
       // The separate surface lease survives replacement of this controller.
     }
@@ -222,34 +230,10 @@ export function ImageSequence({
     initialFrame,
     loadInitial,
     priority,
-    readyAhead,
-    maxFrameSkip,
     ahead,
     behind,
   ])
 
-  useEffect(() => {
-    syncRef.current?.()
-  }, [playing, enabled, poster])
-  useEffect(() => {
-    if (target !== undefined) controllerRef.current?.queueTarget(target)
-  }, [
-    target,
-    sequenceId,
-    frameCount,
-    mode,
-    frameDuration,
-    loop,
-    loopStart,
-    loopEnd,
-    initialFrame,
-    loadInitial,
-    priority,
-    readyAhead,
-    maxFrameSkip,
-    ahead,
-    behind,
-  ])
   useEffect(
     () => () => {
       surfaceLease.current?.()

@@ -54,8 +54,9 @@ last frame.
 
 Use `priority="sequential"` when continuity matters more than elapsed time. It
 holds for the next frame, including when that frame fails and must retry.
-`maxFrameSkip` explicitly permits skipping up to that many unavailable frames in
-sequential mode; hybrid mode chooses the closest useful ready frame independently.
+Sequential mode never skips an unavailable next frame; hybrid mode chooses the
+closest useful ready frame independently. Autoplay keeps a fixed window of up to
+three future decoded candidates.
 
 ### Play once and replay
 
@@ -219,8 +220,6 @@ type FrameSource =
 | `initialFrame`  | `number`                         | `loopStart`      | Starting frame, clamped to the range                                    |
 | `loadInitial`   | `boolean`                        | `false`          | Allow initial presentation while nearby, before visible playback        |
 | `priority`      | `"sequential" \| "hybrid"`       | `"hybrid"`       | Continuity-first or authored-time policy                                |
-| `readyAhead`    | `number`                         | `3`              | Future autoplay candidates, clamped to **0..3**; zero decodes on demand |
-| `maxFrameSkip`  | `number`                         | `0`              | Maximum unavailable frames sequential playback may skip                 |
 | `ahead`         | `number`                         | `7`              | Scrub transfer positions in the travel direction                        |
 | `behind`        | `number`                         | `3`              | Scrub transfer positions against the travel direction                   |
 | `pixelated`     | `boolean`                        | `false`          | Set pixelated image rendering                                           |
@@ -236,8 +235,9 @@ type FrameSource =
   streamed size limit. Evicting a decoded frame does not require another source
   request while its encoded bytes remain retained.
 - **Three relevant decode promises per sequence** and **three future decoded
-  candidates** by default. These are different controls. The mounted frame has a
-  separate lease, so ownership can include the visible frame plus three candidates.
+  candidates** in a fixed autoplay window. These are different limits. The mounted
+  frame has a separate lease, so ownership can include the visible frame plus three
+  candidates.
 - Decode cancellation is logical: `Image.decode()` has no cancellable API, so
   obsolete native work can briefly overlap current work. New scrub demand does not
   wait for abandoned promises. A decode times out after 15 seconds, after transfer.

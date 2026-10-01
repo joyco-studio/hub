@@ -16,7 +16,7 @@ type Entry = {
   reclaiming?: boolean
   preemptTimer?: ReturnType<typeof setTimeout>
 }
-export const DEFAULT_ENCODED_FRAME_BUDGET = 16 * 1024 * 1024
+const DEFAULT_ENCODED_FRAME_BUDGET = 16 * 1024 * 1024
 const PENDING_FRAME_GRACE_MS = 1_000
 const CONTENDED_FRAME_IDLE_MS = 15_000
 export const sourceUrl = (source: FrameSource) =>
@@ -30,10 +30,9 @@ class OversizedFrameError extends Error {
 }
 
 /** Compressed responses survive local decoded-frame eviction. */
-export class EncodedFrameCache {
+class EncodedFrameCache {
   private entries = new Map<string, Blob>()
   private bytes = 0
-  constructor(private budget = DEFAULT_ENCODED_FRAME_BUDGET) {}
   has(url: string) {
     return this.entries.has(url)
   }
@@ -50,10 +49,10 @@ export class EncodedFrameCache {
       this.bytes -= previous.size
       this.entries.delete(url)
     }
-    if (blob.size > this.budget) return
+    if (blob.size > DEFAULT_ENCODED_FRAME_BUDGET) return
     this.entries.set(url, blob)
     this.bytes += blob.size
-    while (this.bytes > this.budget) {
+    while (this.bytes > DEFAULT_ENCODED_FRAME_BUDGET) {
       const oldest = this.entries.keys().next().value
       if (oldest === undefined) break
       this.bytes -= this.entries.get(oldest)!.size
@@ -63,58 +62,53 @@ export class EncodedFrameCache {
 }
 
 /** Shared admission and deduplication. Owns encoded bytes, never decoded images. */
-export class FrameTransfer {
+class FrameTransfer {
   private entries = new Map<string, Entry>()
   private owners = new Map<symbol, Owner>()
   private active = 0
   private reclaiming = 0
   private lastOwner?: symbol
-  constructor(
-    private load: (
-      url: string,
-      signal: AbortSignal,
-      accept?: string,
-      onBytes?: () => void
-    ) => Promise<Blob> = async (url, signal, accept, onBytes) => {
-      const response = await fetch(url, {
-        signal,
-        priority: 'low',
-        ...(accept ? { headers: { Accept: accept } } : {}),
-      })
-      if (!response.ok)
-        throw new Error(`Frame request failed: ${response.status}`)
-      const type = response.headers.get('content-type') ?? ''
-      if (!response.body) return new Blob([], { type })
-      const reader = response.body.getReader()
-      const chunks: Uint8Array<ArrayBuffer>[] = []
-      let bytes = 0
-      try {
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
-          if (value.byteLength === 0) continue
-          if (value.byteLength > DEFAULT_ENCODED_FRAME_BUDGET - bytes) {
-            void reader.cancel().catch(() => {})
-            throw new OversizedFrameError()
-          }
-          bytes += value.byteLength
-          // Stream producers may reuse the buffer before the Blob is assembled.
-          chunks.push(new Uint8Array(value))
-          onBytes?.()
+  private encoded = new EncodedFrameCache()
+  private concurrency = 8
+  private async load(
+    url: string,
+    signal: AbortSignal,
+    accept?: string,
+    onBytes?: () => void
+  ) {
+    const response = await fetch(url, {
+      signal,
+      priority: 'low',
+      ...(accept ? { headers: { Accept: accept } } : {}),
+    })
+    if (!response.ok)
+      throw new Error(`Frame request failed: ${response.status}`)
+    const type = response.headers.get('content-type') ?? ''
+    if (!response.body) return new Blob([], { type })
+    const reader = response.body.getReader()
+    const chunks: Uint8Array<ArrayBuffer>[] = []
+    let bytes = 0
+    try {
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        if (value.byteLength === 0) continue
+        if (value.byteLength > DEFAULT_ENCODED_FRAME_BUDGET - bytes) {
+          void reader.cancel().catch(() => {})
+          throw new OversizedFrameError()
         }
-      } finally {
-        reader.releaseLock()
+        bytes += value.byteLength
+        // Stream producers may reuse the buffer before the Blob is assembled.
+        chunks.push(new Uint8Array(value))
+        onBytes?.()
       }
-      return new Blob(chunks, { type })
-    },
-    readonly encoded = new EncodedFrameCache(),
-    private concurrency = 8
-  ) {}
+    } finally {
+      reader.releaseLock()
+    }
+    return new Blob(chunks, { type })
+  }
   get(source: FrameSource) {
     return this.encoded.get(sourceUrl(source))
-  }
-  hasFailed(source: FrameSource) {
-    return this.entries.get(sourceUrl(source))?.state === 'failed'
   }
   update(
     owner: symbol,

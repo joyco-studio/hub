@@ -1,11 +1,8 @@
-import { FrameTransfer, sourceUrl, type TransferDemand } from './transfer'
-export type { TransferDemand } from './transfer'
-export {
-  EncodedFrameCache,
+import {
   getSharedFrameTransfer,
-  DEFAULT_ENCODED_FRAME_BUDGET,
+  sourceUrl,
+  type TransferDemand,
 } from './transfer'
-export type FrameTransport = Pick<FrameTransfer, 'get' | 'update' | 'release'>
 
 export type FrameSource =
   | string
@@ -17,18 +14,12 @@ export type FrameSource =
       height?: number
       accept?: string
     }
-export type DecodedFrame = {
-  image: HTMLImageElement
-  src: string
-  width: number
-  height: number
-  bytes: number
-}
+type DecodedFrame = HTMLImageElement
 type Demand = TransferDemand & { index: number }
-const MAX_READY_AHEAD = 3
+const READY_AHEAD = 3
 
 /** Spread first, last, and midpoint transfer requests across a frame range. */
-export function binaryFrameOrder(first: number, last: number): number[] {
+function binaryFrameOrder(first: number, last: number): number[] {
   if (first > last) return []
   if (first === last) return [first]
   const order = [first, last]
@@ -44,51 +35,31 @@ export function binaryFrameOrder(first: number, last: number): number[] {
 }
 
 /** Pick the smallest responsive candidate that covers the visible image's physical pixels. */
-export function resolveFrameUrl(
-  source: FrameSource,
-  pixelWidth: number
-): string {
-  if (typeof source === 'string' || !source.srcSet)
-    return typeof source === 'string' ? source : source.src
-  const candidates = source.srcSet
-    .split(',')
-    .map((candidate) => {
-      const [url, descriptor] = candidate.trim().split(/\s+/)
-      const width = Number(descriptor?.match(/^(\d+)w$/)?.[1])
-      return width > 0 ? { url, width } : null
-    })
-    .filter(
-      (candidate): candidate is { url: string; width: number } =>
-        candidate !== null
-    )
-    .sort((a, b) => a.width - b.width)
-  if (!candidates.length) return source.src
-  return (
-    candidates.find((candidate) => candidate.width >= pixelWidth)?.url ??
-    candidates.at(-1)!.url
-  )
-}
-
-/** Retain transfer metadata when choosing a responsive URL for the fetch queue. */
 export function resolveFrameSource(
   source: FrameSource,
   pixelWidth: number
 ): FrameSource {
-  if (typeof source === 'string') return source
-  return {
-    ...source,
-    src: resolveFrameUrl(source, pixelWidth),
-    srcSet: undefined,
-  }
+  if (typeof source === 'string' || !source.srcSet) return source
+  const candidates = source.srcSet
+    .split(',')
+    .flatMap((candidate) => {
+      const [url, descriptor] = candidate.trim().split(/\s+/)
+      const width = Number(descriptor?.match(/^(\d+)w$/)?.[1])
+      return width > 0 ? [{ url, width }] : []
+    })
+    .sort((a, b) => a.width - b.width)
+  const selected =
+    candidates.find((candidate) => candidate.width >= pixelWidth) ??
+    candidates.at(-1)
+  return { ...source, src: selected?.url ?? source.src, srcSet: undefined }
 }
 
 function releaseFrame(frame: DecodedFrame) {
-  frame.image.removeAttribute('srcset')
-  frame.image.removeAttribute('src')
-  if (frame.src.startsWith('blob:')) URL.revokeObjectURL(frame.src)
+  URL.revokeObjectURL(frame.src)
+  frame.removeAttribute('src')
 }
 
-export async function decodeFrame(
+async function decodeFrame(
   blob: Blob,
   signal: AbortSignal
 ): Promise<DecodedFrame> {
@@ -113,13 +84,7 @@ export async function decodeFrame(
     })
     await Promise.race([image.decode(), cancelled, timedOut])
     if (signal.aborted) throw signal.reason
-    return {
-      image,
-      src,
-      width: image.naturalWidth,
-      height: image.naturalHeight,
-      bytes: image.naturalWidth * image.naturalHeight * 4,
-    }
+    return image
   } catch (error) {
     image.removeAttribute('src')
     URL.revokeObjectURL(src)
@@ -130,22 +95,19 @@ export async function decodeFrame(
   }
 }
 
-type DecodeDemand = { index: number; source: FrameSource; priority: number }
 /** A sequence's decoded ring and bounded decode pump. */
 class LocalFrames {
+  private transport = getSharedFrameTransfer()
   private frames = new Map<string, DecodedFrame>()
   private retained = new Map<DecodedFrame, number>()
-  private wanted: DecodeDemand[] = []
+  private wanted: FrameSource[] = []
   private visible?: string
   private pending = new Map<string, AbortController>()
   private readonly decodeConcurrency = 3
-  private generation = 0
   private disposed = false
-  private failures = new Set<string>()
   private decodeFailures = new Map<string, number>()
   private retryTimers = new Map<string, ReturnType<typeof setTimeout>>()
   constructor(
-    private transport: FrameTransport,
     private owner: symbol,
     private source: (index: number) => FrameSource,
     private notify: (reason: 'transfer' | 'decode') => void
@@ -179,14 +141,8 @@ class LocalFrames {
   }
   update(wanted: Demand[], decode: number[], active: boolean) {
     if (this.disposed) return
-    this.wanted = decode.map((index, priority) => ({
-      index,
-      source: this.source(index),
-      priority,
-    }))
-    const demandUrls = new Set(
-      this.wanted.map((item) => sourceUrl(item.source))
-    )
+    this.wanted = decode.map(this.source)
+    const demandUrls = new Set(this.wanted.map(sourceUrl))
     // This bounds relevant decode promises. Browser codec work abandoned after
     // cancellation may overlap briefly because HTMLImageElement.decode() has no
     // cancellable API. Current demand must not wait behind obsolete frames.
@@ -208,11 +164,10 @@ class LocalFrames {
     this.pump()
   }
   private trim() {
-    const keep = new Set(this.wanted.map((item) => sourceUrl(item.source)))
+    const keep = new Set(this.wanted.map(sourceUrl))
     if (this.visible) keep.add(this.visible)
-    for (const url of this.failures)
+    for (const url of this.decodeFailures.keys())
       if (!keep.has(url)) {
-        this.failures.delete(url)
         this.decodeFailures.delete(url)
         const timer = this.retryTimers.get(url)
         if (timer) clearTimeout(timer)
@@ -228,31 +183,29 @@ class LocalFrames {
     if (this.disposed) return
     for (const next of this.wanted) {
       if (this.pending.size >= this.decodeConcurrency) break
-      const url = sourceUrl(next.source)
+      const url = sourceUrl(next)
       if (
         this.frames.has(url) ||
-        this.failures.has(url) ||
+        this.retryTimers.has(url) ||
         this.pending.has(url)
       )
         continue
-      const blob = this.transport.get(next.source)
+      const blob = this.transport.get(next)
       if (!blob) continue
       this.startDecode(url, blob)
     }
   }
   private startDecode(url: string, blob: Blob) {
     const controller = new AbortController()
-    const generation = this.generation
     this.pending.set(url, controller)
     void decodeFrame(blob, controller.signal)
       .then(
         (frame) => {
           if (
             this.disposed ||
-            generation !== this.generation ||
             controller.signal.aborted ||
             this.pending.get(url) !== controller ||
-            !this.wanted.some((item) => sourceUrl(item.source) === url)
+            !this.wanted.some((source) => sourceUrl(source) === url)
           ) {
             releaseFrame(frame)
             return
@@ -261,13 +214,7 @@ class LocalFrames {
           this.notify('decode')
         },
         () => {
-          if (
-            controller.signal.aborted ||
-            generation !== this.generation ||
-            this.disposed
-          )
-            return
-          this.failures.add(url)
+          if (controller.signal.aborted || this.disposed) return
           const failures = (this.decodeFailures.get(url) ?? 0) + 1
           this.decodeFailures.set(url, failures)
           const delay = Math.min(500 * 2 ** Math.min(failures - 1, 6), 30_000)
@@ -275,8 +222,7 @@ class LocalFrames {
             url,
             setTimeout(() => {
               this.retryTimers.delete(url)
-              this.failures.delete(url)
-              if (!this.disposed && generation === this.generation) this.pump()
+              if (!this.disposed) this.pump()
             }, delay)
           )
         }
@@ -288,10 +234,8 @@ class LocalFrames {
       })
   }
   resize() {
-    this.generation++
     for (const controller of this.pending.values()) controller.abort()
     this.pending.clear()
-    this.failures.clear()
     this.decodeFailures.clear()
     for (const timer of this.retryTimers.values()) clearTimeout(timer)
     this.retryTimers.clear()
@@ -328,9 +272,6 @@ export type SequenceOptions = {
   initialFrame?: number
   loadInitial?: boolean
   priority?: 'sequential' | 'hybrid'
-  /** Future decoded candidates; supported range is 0..3. */
-  readyAhead?: number
-  maxFrameSkip?: number
   ahead?: number
   behind?: number
 }
@@ -360,17 +301,12 @@ export class SequenceDemandController {
   private readonly start: number
   private readonly end: number
   private readonly initial: number
-  private readonly runway: number
   private readonly duration: number
   private readonly order: number[]
   private readonly hybrid: boolean
-  private readonly skip: number
   private completed = false
 
-  constructor(
-    transport: FrameTransport,
-    private options: SequenceOptions
-  ) {
+  constructor(private options: SequenceOptions) {
     this.count = Math.max(0, integer(options.frameCount, 0))
     this.end = Math.max(
       0,
@@ -382,34 +318,21 @@ export class SequenceDemandController {
       Math.min(this.end, integer(options.initialFrame, this.start))
     )
     this.current = this.playhead = this.target = this.initial
-    this.runway = Math.max(
-      0,
-      Math.min(MAX_READY_AHEAD, integer(options.readyAhead, 3))
-    )
     this.duration = Math.max(
       1,
       Number.isFinite(options.frameDuration)
         ? options.frameDuration!
         : 1000 / 24
     )
-    this.skip = Math.max(
-      0,
-      Math.min(this.end - this.start, integer(options.maxFrameSkip, 0))
-    )
     this.hybrid = options.priority !== 'sequential'
     this.order = binaryFrameOrder(this.start, this.end)
-    this.frames = new LocalFrames(
-      transport,
-      this.owner,
-      options.source,
-      (reason) => {
-        if (this.disposed || !this.nearby || this.completed) return
-        if (reason === 'transfer') this.refresh()
-        if (options.mode === 'scrub') this.presentTarget()
-        else if (!this.hasPresented && (this.playing || options.loadInitial))
-          this.present(this.initial)
-      }
-    )
+    this.frames = new LocalFrames(this.owner, options.source, (reason) => {
+      if (this.disposed || !this.nearby || this.completed) return
+      if (reason === 'transfer') this.refresh()
+      if (options.mode === 'scrub') this.presentTarget()
+      else if (!this.hasPresented && (this.playing || options.loadInitial))
+        this.present(this.initial)
+    })
   }
 
   get isComplete() {
@@ -488,13 +411,11 @@ export class SequenceDemandController {
       // Hold authored time until an allowed next frame is ready.
       this.elapsed = Math.min(this.elapsed, this.duration * 2)
       this.refresh()
-      for (let offset = 1; offset <= this.skip + 1; offset++) {
-        const next = this.advance(this.current, offset)
-        if (!this.frames.isReady(this.options.source(next))) continue
+      const next = this.advance(this.current, 1)
+      if (this.frames.isReady(this.options.source(next))) {
         this.elapsed -= this.duration
         this.playhead = next
         this.present(next)
-        break
       }
     }
   }
@@ -661,14 +582,12 @@ export class SequenceDemandController {
       decode = [this.initial]
     } else if (this.hybrid) {
       add(this.playhead, 0)
-      for (let offset = 1; offset <= this.runway; offset++)
+      for (let offset = 1; offset <= READY_AHEAD; offset++)
         add(this.advance(this.playhead, offset), 1)
       this.order.forEach((index, rank) => add(index, rank + 2))
-      // With no runway, decode only the frame due now. It must still progress.
-      const limit = Math.max(1, this.runway)
       decode = wanted
         .filter((item) => item.index !== this.current)
-        .slice(0, limit)
+        .slice(0, READY_AHEAD)
         .map((item) => item.index)
       if (
         !decode.some((index) =>
@@ -691,25 +610,13 @@ export class SequenceDemandController {
           decode = [
             fallback.index,
             ...decode.filter((index) => index !== fallback.index),
-          ].slice(0, limit)
+          ].slice(0, READY_AHEAD)
       }
-      if (this.playhead === this.current) {
-        if (this.runway === 0) decode = []
-        decode.unshift(this.current)
-      }
+      if (this.playhead === this.current) decode.unshift(this.current)
     } else {
-      const count = this.runway || (this.elapsed >= this.duration ? 1 : 0)
-      for (
-        let offset = 1;
-        offset <= Math.max(count, count ? this.skip + 1 : 0);
-        offset++
-      )
+      for (let offset = 1; offset <= READY_AHEAD; offset++)
         add(this.advance(this.current, offset), offset)
-      // A skip permits already-transferred candidates beyond a missing next frame.
-      decode = wanted
-        .filter((item) => this.skip === 0 || this.frames.hasBytes(item.source))
-        .slice(0, Math.max(1, count))
-        .map((item) => item.index)
+      decode = wanted.map((item) => item.index)
     }
     this.frames.update(wanted, decode, this.playing)
   }
