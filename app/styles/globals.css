@@ -380,6 +380,17 @@ body {
   translate: -100% 0;
 }
 
+/*
+ * Once the collapse has settled the regions go back to `display: none`, which
+ * is what keeps them out of the tab order and the accessibility tree. They
+ * stay rendered only for the duration of the transition itself.
+ */
+#nd-docs-layout[data-zen='true']:not([data-zen-animating])
+  > [data-slot='layout-sidebar'],
+#nd-docs-layout[data-zen='true']:not([data-zen-animating]) > #nd-toc {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   #nd-docs-layout[data-zen-animating],
   #nd-docs-layout[data-zen-animating] > [data-slot='layout-sidebar'],

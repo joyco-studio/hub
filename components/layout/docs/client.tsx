@@ -55,6 +55,20 @@ const ZEN_COLLAPSED_REGIONS =
 const isModalOpen = () =>
   document.querySelector('[role="dialog"][aria-modal="true"]') !== null
 
+/** `display: none` elements cannot take focus, so skip them. */
+const isRendered = (element: Element | null): element is HTMLElement =>
+  element instanceof HTMLElement && element.getClientRects().length > 0
+
+/**
+ * Preferred landing spot first. The toggle is hidden on top-category pages and
+ * absent on lab routes, so fall back to the article and then to the layout.
+ */
+const ZEN_FOCUS_FALLBACKS = [
+  '[data-slot="zen-toggle"]',
+  '#nd-page',
+  '#nd-docs-layout',
+]
+
 const hasNoModifiers = (event: KeyboardEvent) =>
   !event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey
 
@@ -146,7 +160,13 @@ export function LayoutContextProvider({
     )
       return
 
-    document.querySelector<HTMLElement>('[data-slot="zen-toggle"]')?.focus()
+    for (const selector of ZEN_FOCUS_FALLBACKS) {
+      const target = document.querySelector(selector)
+      if (isRendered(target)) {
+        target.focus()
+        return
+      }
+    }
   }, [isZenMode])
   const isTop =
     useIsScrollTop({ enabled: navTransparentMode === 'top' }) ?? true
@@ -224,6 +244,7 @@ export function LayoutBody({
   return (
     <div
       id="nd-docs-layout"
+      tabIndex={-1}
       data-zen={isZenMode}
       data-zen-animating={isZenAnimating || undefined}
       className={cn(
