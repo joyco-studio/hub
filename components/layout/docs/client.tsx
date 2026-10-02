@@ -6,6 +6,7 @@ import {
   type ReactNode,
   use,
   useCallback,
+  type SetStateAction,
   useEffect,
   useMemo,
   useState,
@@ -28,8 +29,34 @@ import { useIsScrollTop } from 'fumadocs-ui/utils/use-is-scroll-top'
 export const LayoutContext = createContext<{
   isNavTransparent: boolean
   isZenMode: boolean
+  isZenAnimating: boolean
   toggleZenMode: () => void
 } | null>(null)
+
+const ZEN_DESKTOP_QUERY = '(min-width: 768px)'
+
+const ZEN_FALLBACK_DURATION_MS = 300
+
+/** Reads `--zen-duration` so the CSS keeps owning the timing. */
+const readZenDuration = () => {
+  const raw = getComputedStyle(document.documentElement)
+    .getPropertyValue('--zen-duration')
+    .trim()
+  const ms = raw.endsWith('ms')
+    ? Number.parseFloat(raw)
+    : Number.parseFloat(raw) * 1000
+  return Number.isFinite(ms) && ms > 0 ? ms : ZEN_FALLBACK_DURATION_MS
+}
+
+/** Regions Zen mode collapses — focus must never be left inside them. */
+const ZEN_COLLAPSED_REGIONS =
+  '[data-slot="layout-sidebar"], #nd-toc, [data-slot="experiment-toc"]'
+
+const isModalOpen = () =>
+  document.querySelector('[role="dialog"][aria-modal="true"]') !== null
+
+const hasNoModifiers = (event: KeyboardEvent) =>
+  !event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey
 
 export function LayoutContextProvider({
   navTransparentMode = 'none',
@@ -39,32 +66,56 @@ export function LayoutContextProvider({
   children: ReactNode
 }) {
   const [isZenMode, setIsZenMode] = useState(false)
-  const toggleZenMode = useCallback(() => {
-    if (window.matchMedia('(min-width: 768px)').matches) {
-      setIsZenMode((value) => !value)
-    }
+  const [isZenAnimating, setIsZenAnimating] = useState(false)
+  // Bumped on every deliberate change so the timer below restarts even when a
+  // second toggle lands mid-flight.
+  const [zenChangeId, setZenChangeId] = useState(0)
+
+  // Breakpoints move the same track variables Zen mode animates, so the
+  // transition is gated on `isZenAnimating` rather than being always on. It
+  // has to be set in the same update as the mode, otherwise the attribute
+  // lands a commit late and the tracks snap before the transition exists.
+  const setZenMode = useCallback((next: SetStateAction<boolean>) => {
+    setIsZenAnimating(true)
+    setZenChangeId((id) => id + 1)
+    setIsZenMode(next)
   }, [])
 
+  const toggleZenMode = useCallback(() => {
+    if (!window.matchMedia(ZEN_DESKTOP_QUERY).matches) return
+    setZenMode((value) => !value)
+  }, [setZenMode])
+
   useEffect(() => {
-    const desktop = window.matchMedia('(min-width: 768px)')
+    const desktop = window.matchMedia(ZEN_DESKTOP_QUERY)
     const handleResize = () => {
       if (!desktop.matches) setIsZenMode(false)
     }
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (
-        event.defaultPrevented ||
-        event.repeat ||
-        !event.metaKey ||
-        event.ctrlKey ||
-        event.altKey ||
-        event.shiftKey ||
-        event.key !== '.' ||
-        !desktop.matches
-      )
-        return
+      if (event.defaultPrevented || event.repeat || !desktop.matches) return
 
-      event.preventDefault()
-      toggleZenMode()
+      // Escape leaves Zen mode, unless a modal is up and owns the key.
+      if (
+        event.key === 'Escape' &&
+        isZenMode &&
+        hasNoModifiers(event) &&
+        !isModalOpen()
+      ) {
+        event.preventDefault()
+        setZenMode(false)
+        return
+      }
+
+      if (
+        event.key === '.' &&
+        event.metaKey &&
+        !event.ctrlKey &&
+        !event.altKey &&
+        !event.shiftKey
+      ) {
+        event.preventDefault()
+        toggleZenMode()
+      }
     }
 
     desktop.addEventListener('change', handleResize)
@@ -73,7 +124,30 @@ export function LayoutContextProvider({
       desktop.removeEventListener('change', handleResize)
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [toggleZenMode])
+  }, [isZenMode, setZenMode, toggleZenMode])
+
+  useEffect(() => {
+    if (zenChangeId === 0) return
+    const timer = window.setTimeout(
+      () => setIsZenAnimating(false),
+      readZenDuration()
+    )
+    return () => window.clearTimeout(timer)
+  }, [zenChangeId])
+
+  // Entering Zen mode hides the sidebar and TOC. If focus was inside one of
+  // them the browser would drop it on <body>, so hand it to the toggle.
+  useEffect(() => {
+    if (!isZenMode) return
+    const active = document.activeElement
+    if (
+      !(active instanceof HTMLElement) ||
+      !active.closest(ZEN_COLLAPSED_REGIONS)
+    )
+      return
+
+    document.querySelector<HTMLElement>('[data-slot="zen-toggle"]')?.focus()
+  }, [isZenMode])
   const isTop =
     useIsScrollTop({ enabled: navTransparentMode === 'top' }) ?? true
   const isNavTransparent =
@@ -85,9 +159,10 @@ export function LayoutContextProvider({
         () => ({
           isNavTransparent,
           isZenMode,
+          isZenAnimating,
           toggleZenMode,
         }),
-        [isNavTransparent, isZenMode, toggleZenMode]
+        [isNavTransparent, isZenMode, isZenAnimating, toggleZenMode]
       )}
     >
       {children}
@@ -105,6 +180,7 @@ export function ZenModeToggle() {
       <TooltipTrigger asChild>
         <Button
           type="button"
+          data-slot="zen-toggle"
           variant="secondary"
           size="icon-sm"
           aria-pressed={isZenMode}
@@ -143,31 +219,38 @@ export function LayoutBody({
   children,
   ...props
 }: ComponentProps<'div'>) {
-  const { isZenMode } = use(LayoutContext)!
+  const { isZenMode, isZenAnimating } = use(LayoutContext)!
 
   return (
     <div
       id="nd-docs-layout"
       data-zen={isZenMode}
+      data-zen-animating={isZenAnimating || undefined}
       className={cn(
         'grid min-h-(--fd-docs-height) auto-cols-auto auto-rows-auto overflow-x-clip [--fd-docs-height:100dvh] [--fd-header-height:0px] [--fd-sidebar-width:0px] [--fd-toc-popover-height:0px] [--fd-toc-width:0px]',
         isZenMode &&
-          '[&>#nd-toc]:hidden [&>[data-slot=experiment-toc]]:hidden [&>[data-slot=layout-sidebar]]:hidden [&>[data-toc-popover]]:hidden',
+          '[&>[data-slot=experiment-toc]]:hidden [&>[data-toc-popover]]:hidden',
         className
       )}
       style={
         {
           gridTemplate: `"sidebar header toc"
         "sidebar toc-popover toc"
-        "sidebar main toc" 1fr / minmax(var(--fd-sidebar-width), 1fr) minmax(0, calc(var(--fd-layout-width) - var(--fd-sidebar-width) - var(--fd-toc-width))) minmax(min-content, 1fr)`,
+        "sidebar main toc" 1fr / minmax(var(--fd-sidebar-track), 1fr) minmax(0, calc(var(--fd-layout-width) - var(--fd-sidebar-track) - var(--fd-toc-track))) minmax(var(--fd-toc-track), 1fr)`,
           '--fd-docs-row-1': 'var(--fd-banner-height, 0px)',
           '--fd-docs-row-2':
             'calc(var(--fd-docs-row-1) + var(--fd-header-height))',
           '--fd-docs-row-3':
             'calc(var(--fd-docs-row-2) + var(--fd-toc-popover-height))',
+          '--fd-sidebar-track': 'var(--fd-sidebar-width)',
+          '--fd-toc-track': 'var(--fd-toc-width)',
           ...style,
+          // Collapsing the tracks (rather than swapping the template) lets the
+          // registered track variables interpolate, so the content column
+          // recentres instead of jumping. See `--zen-duration` in globals.css.
           ...(isZenMode && {
-            gridTemplate: '"header" "main" 1fr / minmax(0, 1fr)',
+            '--fd-sidebar-track': '0px',
+            '--fd-toc-track': '0px',
           }),
         } as object
       }

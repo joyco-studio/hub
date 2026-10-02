@@ -157,6 +157,8 @@
   --gap: 0.25rem;
   --aside-width: 4rem;
   --sidebar-width: 268px;
+  --zen-duration: 300ms;
+  --zen-ease: cubic-bezier(0.32, 0.72, 0, 1);
   --mobile-header-height: 3rem;
   --content-sides: 1rem; /* px-4 */
 
@@ -326,6 +328,63 @@ body {
     --fd-header-height: var(--mobile-header-height) !important;
     --fd-sidebar-width: 0px !important;
     --fd-toc-width: 0px !important;
+  }
+}
+
+/*
+ * Zen mode collapses the sidebar/TOC grid tracks instead of swapping the grid
+ * template, so the content column reflows and recentres smoothly.
+ *
+ * The tracks animate through their own variables: the regions keep their real
+ * `--fd-*-width`, so their text never rewraps mid-transition — they slide out
+ * of the shrinking track and get clipped by the layout's `overflow-x-clip`.
+ * Custom properties are only interpolable once registered.
+ */
+@property --fd-sidebar-track {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+
+@property --fd-toc-track {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+
+/*
+ * Gated on `data-zen-animating`, which only the toggle sets. Breakpoints move
+ * the same track variables, so an always-on transition would also animate
+ * every resize across the md/xl boundaries.
+ */
+#nd-docs-layout[data-zen-animating] {
+  transition:
+    --fd-sidebar-track var(--zen-duration) var(--zen-ease),
+    --fd-toc-track var(--zen-duration) var(--zen-ease);
+}
+
+#nd-docs-layout[data-zen-animating] > [data-slot='layout-sidebar'],
+#nd-docs-layout[data-zen-animating] > #nd-toc {
+  transition:
+    opacity var(--zen-duration) var(--zen-ease),
+    translate var(--zen-duration) var(--zen-ease);
+}
+
+#nd-docs-layout[data-zen='true'] > [data-slot='layout-sidebar'],
+#nd-docs-layout[data-zen='true'] > #nd-toc {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#nd-docs-layout[data-zen='true'] > [data-slot='layout-sidebar'] {
+  translate: -100% 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #nd-docs-layout[data-zen-animating],
+  #nd-docs-layout[data-zen-animating] > [data-slot='layout-sidebar'],
+  #nd-docs-layout[data-zen-animating] > #nd-toc {
+    transition: none;
   }
 }
 

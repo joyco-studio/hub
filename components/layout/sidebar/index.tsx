@@ -150,10 +150,11 @@ export function RegistrySidebar({
     }
   }, [])
 
+  // Width tracks the grid column so Zen mode collapses both together.
   return (
     <div
       data-slot="layout-sidebar"
-      className="sticky top-0 flex h-screen shrink-0 gap-1 [grid-area:sidebar] max-md:hidden"
+      className="sticky top-0 flex h-screen w-(--fd-sidebar-width) shrink-0 gap-1 [grid-area:sidebar] max-md:hidden"
     >
       <NavAside />
 
