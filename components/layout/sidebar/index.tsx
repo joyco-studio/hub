@@ -151,7 +151,10 @@ export function RegistrySidebar({
   }, [])
 
   return (
-    <div className="sticky top-0 hidden h-screen shrink-0 gap-1 [grid-area:sidebar] md:flex">
+    <div
+      data-slot="layout-sidebar"
+      className="sticky top-0 flex h-screen shrink-0 gap-1 [grid-area:sidebar] max-md:hidden"
+    >
       <NavAside />
 
       <Command
