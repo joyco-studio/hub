@@ -106,59 +106,11 @@ coalesces updates to one per animation frame and gives the newest target priorit
 Reversing direction swaps the larger ahead/behind transfer neighborhood. A late
 candidate cannot move presentation farther from the latest target.
 
-```tsx
-'use client'
+Scroll inside the preview, or focus it and use the arrow keys. Scroll progress maps
+from frame `0` to `frameCount - 1`; the sticky image stays visible while you move
+through the sequence. With reduced motion enabled, the poster stays visible.
 
-import { useEffect, useRef, useState } from 'react'
-import { ImageSequence } from '@/components/image-sequence'
-
-const source = (index: number) => `/frames/${index}.webp`
-
-export function ScrollSequence() {
-  const section = useRef<HTMLElement>(null)
-  const [target, setTarget] = useState(0)
-
-  useEffect(() => {
-    let raf = 0
-    const update = () => {
-      cancelAnimationFrame(raf)
-      raf = requestAnimationFrame(() => {
-        const element = section.current
-        if (!element) return
-        const bounds = element.getBoundingClientRect()
-        const distance = Math.max(1, bounds.height - window.innerHeight)
-        const progress = Math.max(0, Math.min(1, -bounds.top / distance))
-        setTarget(Math.round(progress * 70))
-      })
-    }
-    update()
-    window.addEventListener('scroll', update, { passive: true })
-    window.addEventListener('resize', update)
-    return () => {
-      cancelAnimationFrame(raf)
-      window.removeEventListener('scroll', update)
-      window.removeEventListener('resize', update)
-    }
-  }, [])
-
-  return (
-    <section ref={section} className="h-[200vh]">
-      <div className="sticky top-0 flex h-screen items-center">
-        <ImageSequence
-          sequenceId="scroll-product"
-          poster={{ src: source(0), width: 1080, height: 1080 }}
-          frameCount={71}
-          source={source}
-          mode="scrub"
-          target={target}
-          alt="Product rotation controlled by scrolling"
-          className="mx-auto aspect-square w-full max-w-96"
-        />
-      </div>
-    </section>
-  )
-}
-```
+<ComponentPreview name="image-sequence-scroll-demo" />
 
 ## Responsive sources
 
@@ -208,7 +160,7 @@ type FrameSource =
 | `frameCount`    | `number`                         | Required         | Number of zero-based source frames                                      |
 | `source`        | `(index: number) => FrameSource` | Required         | Frame URL or responsive candidates                                      |
 | `alt`           | `string`                         | Required         | Meaningful description, or `""` for decoration                          |
-| `className`     | `string`                         | —                | Root styling; target inner elements with data slots                     |
+| `className`     | `string`                         | None             | Root styling; target inner elements with data slots                     |
 | `playing`       | `boolean`                        | `true`           | Allow sequence demand and visible playback                              |
 | `resetOnPause` | `boolean` | `false` | Restore the retained opening frame on pause; restart on resume |
 | `enabled`       | `boolean`                        | `true`           | Allow runtime work; disabling preserves the last frame                  |
@@ -224,8 +176,8 @@ type FrameSource =
 | `ahead`         | `number`                         | `7`              | Scrub transfer positions in the travel direction                        |
 | `behind`        | `number`                         | `3`              | Scrub transfer positions against the travel direction                   |
 | `pixelated`     | `boolean`                        | `false`          | Set pixelated image rendering                                           |
-| `onFrame`       | `(index: number) => void`        | —                | Decoded frame assigned to the mounted image                             |
-| `onComplete`    | `() => void`                     | —                | One-shot autoplay final frame assigned, once per run                    |
+| `onFrame`       | `(index: number) => void`        | None             | Decoded frame assigned to the mounted image                             |
+| `onComplete`    | `() => void`                     | None             | One-shot autoplay final frame assigned, once per run                    |
 
 ## Ownership and lifecycle
 
@@ -310,8 +262,10 @@ alias or public controller API.
 
 `playing={false}` normally holds the last presented frame. For hover previews,
 use `resetOnPause`: it retains the decoded opening frame separately and restores
-it immediately on pause, without fetching or decoding it again. Until an opening
-frame has been decoded it shows the poster. Resuming starts a fresh run while
+it immediately on pause, without fetching or decoding it again. The opening frame
+is the clamped `initialFrame`, even when a scrub target is presented first. Until
+that initial frame has been presented, pausing shows the poster; use a poster of
+the same pose for a consistent reset. Resuming starts a fresh run while
 keeping the same image element mounted. This opt-in behavior retains one extra
 decoded frame until the sequence changes or unmounts.
 

@@ -339,6 +339,10 @@ export class SequenceDemandController {
     return this.completed
   }
 
+  get initialFrame() {
+    return this.initial
+  }
+
   setConditions(nearby: boolean, playing: boolean) {
     if (this.disposed) return
     this.nearby = nearby

@@ -148,7 +148,11 @@ export function ImageSequence({
         image.src = frame.src
         surfaceLease.current = releaseNext
         releasePrevious?.()
-        if (latest.current.resetOnPause && !openingSurface.current) {
+        if (
+          latest.current.resetOnPause &&
+          index === controller.initialFrame &&
+          !openingSurface.current
+        ) {
           const retain = () => controller.retainSurface(frame)
           openingSurface.current = {
             key: runKey,
