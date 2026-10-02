@@ -7,7 +7,7 @@ import {
   CategoryCardLinkHeader,
   CategoryCardLinkSplash,
 } from '@/components/category-card-link'
-import { CanvasSequence } from '@/registry/components/image-sequence'
+import { ImageSequence } from '@/registry/components/image-sequence'
 import { useRegistryMeta } from '@/components/registry-meta'
 import { useCycleIndex } from '@/hooks/use-cycle-index'
 import CubeIcon from './icons/3d-cube'
@@ -53,6 +53,9 @@ export function CategoryQuickLinks() {
   }
   const handleLeave = () => setIsHovering(false)
 
+  // Inactive cards restore their retained opening frame without another decode.
+  // resetOnPause also restarts playback when a card becomes active again.
+  // Absolute positioning lets the splash aspect ratio own the image bounds.
   return (
     <div className="not-prose @container">
       <div className="grid grid-cols-1 gap-2 @md:gap-4 @xl:grid-cols-2 @2xl:grid-cols-3">
@@ -70,16 +73,22 @@ export function CategoryQuickLinks() {
             count={counts.components}
           />
           <CategoryCardLinkSplash className="relative overflow-visible">
-            <CanvasSequence
+            <ImageSequence
+              sequenceId="category-0"
+              poster={{
+                src: sequences[1].getImagePath(0),
+                width: 600,
+                height: 600,
+              }}
+              alt=""
               frameCount={sequences[1].frameCount}
               frameDuration={33}
-              getImagePath={sequences[1].getImagePath}
-              objectFit="contain"
-              isPlaying={activeIndex === 0}
-              resetOnPlay
+              source={sequences[1].getImagePath}
+              playing={activeIndex === 0}
+              resetOnPause
               /* Only start loading the sequence on md */
-              preload={isMd ?? false}
-              className="pointer-events-none translate-y-[-3%] scale-[1.3] max-md:hidden"
+              enabled={isMd ?? false}
+              className="pointer-events-none absolute inset-0 size-full translate-y-[-3%] scale-[1.3] max-md:hidden"
             />
             <Image
               className="object-contain md:hidden"
@@ -105,16 +114,22 @@ export function CategoryQuickLinks() {
             count={counts.toolbox}
           />
           <CategoryCardLinkSplash className="relative overflow-visible">
-            <CanvasSequence
+            <ImageSequence
+              sequenceId="category-1"
+              poster={{
+                src: sequences[2].getImagePath(0),
+                width: 600,
+                height: 600,
+              }}
+              alt=""
               frameCount={sequences[2].frameCount}
               frameDuration={33}
-              getImagePath={sequences[2].getImagePath}
-              objectFit="contain"
-              isPlaying={activeIndex === 1}
-              resetOnPlay
+              source={sequences[2].getImagePath}
+              playing={activeIndex === 1}
+              resetOnPause
               /* Only start loading the sequence on md */
-              preload={isMd ?? false}
-              className="pointer-events-none scale-[1.3] max-md:hidden"
+              enabled={isMd ?? false}
+              className="pointer-events-none absolute inset-0 size-full scale-[1.3] max-md:hidden"
             />
             <Image
               className="object-contain md:hidden"
@@ -140,16 +155,22 @@ export function CategoryQuickLinks() {
             count={counts.logs}
           />
           <CategoryCardLinkSplash className="relative overflow-visible">
-            <CanvasSequence
+            <ImageSequence
+              sequenceId="category-2"
+              poster={{
+                src: sequences[0].getImagePath(0),
+                width: 600,
+                height: 600,
+              }}
+              alt=""
               frameCount={sequences[0].frameCount}
               frameDuration={33}
-              getImagePath={sequences[0].getImagePath}
-              objectFit="contain"
-              isPlaying={activeIndex === 2}
-              resetOnPlay
+              source={sequences[0].getImagePath}
+              playing={activeIndex === 2}
+              resetOnPause
               /* Only start loading the sequence on md */
-              preload={isMd ?? false}
-              className="pointer-events-none translate-y-[-5%] scale-[1.3] max-md:hidden"
+              enabled={isMd ?? false}
+              className="pointer-events-none absolute inset-0 size-full translate-y-[-5%] scale-[1.3] max-md:hidden"
             />
             <Image
               className="object-contain md:hidden"
