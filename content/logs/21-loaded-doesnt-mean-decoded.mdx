@@ -1,11 +1,19 @@
 ---
-title: 21 - Loaded Doesn't Mean Decoded
+title: 21 - Image decoding at frame speed
 description: How to fetch, decode, and present large image sequences without putting that work on the critical frame.
 author: 'justkahdri'
 ---
 
-An image sequence looks like one moving visual, but the browser sees dozens or
-hundreds of independent images. Every displayed frame needs three things:
+We iterated on JOYCO's installable [Image Sequence
+component](/components/image-sequence) after large sequences exposed two
+problems: loading every file upfront did not keep every frame decoded, and
+presenting a frame after the browser discarded its pixels could move decode work
+onto the critical frame and block the main thread.
+
+The fix was to treat the sequence as a moving preparation window instead of one
+large preload. An image sequence looks like one moving visual, but the browser
+sees dozens or hundreds of independent images. Every displayed frame needs
+three things:
 
 - **encoded bytes**, transferred from the network or an HTTP cache;
 - **decoded pixels**, prepared from those compressed bytes;
@@ -195,10 +203,6 @@ compete with JavaScript, style, layout, and paint. The
 [Performance Monitor](/logs/09-performance-monitor) helps observe that behavior
 without turning this player into its own diagnostics system.
 
-JOYCO's [Image Sequence component](/components/image-sequence) applies this
-model with shared bounded transfers, local prepared-frame windows, responsive
-sources, and both continuity policies.
-
 ## The rule
 
 > Fetch encoded frames ahead, decode only the frames relevant to current demand,
@@ -207,3 +211,16 @@ sources, and both continuity policies.
 > hold the last valid frame whenever preparation loses the race.
 
 Loaded does not mean decoded, and decoded does not mean permanently resident.
+
+## Try it yourself
+
+The [Image Sequence component](/components/image-sequence) packages this model
+with shared bounded transfers, local prepared-frame windows, responsive sources,
+and both continuity policies. Install it from the JOYCO registry:
+
+```bash
+npx shadcn@latest add @joyco/image-sequence
+```
+
+You can [try it yourself](/components/image-sequence) in the autoplay and
+scroll-driven demos.
