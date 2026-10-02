@@ -73,67 +73,48 @@ The `Image` class creates an image element without displaying it. It can prepare
 future frames without exposing incomplete work:
 
 ```ts showLineNumbers
-function createDecodeJob(index: number, generation: number) {
+async function decodeFrame(blob: Blob, signal: AbortSignal) {
   const image = new Image()
-  let retired = false
+  const src = URL.createObjectURL(blob)
 
   image.decoding = 'async'
-  image.src = getFrameUrl(index)
+  image.src = src
 
-  const retire = () => {
-    retired = true
+  try {
+    await raceDecode(image.decode(), signal, FRAME_TIMEOUT)
+    if (signal.aborted) throw signal.reason
+    return image
+  } catch (error) {
     image.removeAttribute('src')
-  }
-
-  return {
-    generation,
-    get retired() {
-      return retired
-    },
-    retire,
-    async decode() {
-      try {
-        await withTimeout(image.decode(), FRAME_TIMEOUT)
-        return image
-      } catch (error) {
-        retire()
-        throw error
-      }
-    },
+    URL.revokeObjectURL(src)
+    throw error
   }
 }
 
-function queueDecode(index: number, generation: number) {
-  const previous = pending.get(index)
-  if (previous?.generation === generation) return
+function queueDecode(url: string, blob: Blob) {
+  if (pending.has(url)) return
 
-  previous?.retire()
+  const controller = new AbortController()
+  pending.set(url, controller)
 
-  const job = createDecodeJob(index, generation)
-  pending.set(index, job)
-
-  void job
-    .decode()
-    .then((image) => {
+  void decodeFrame(blob, controller.signal)
+    .then((frame) => {
       if (
-        job.retired ||
-        pending.get(index) !== job ||
-        generation !== activeGeneration ||
-        !wanted.has(index)
-      )
+        controller.signal.aborted ||
+        pending.get(url) !== controller ||
+        !wanted.has(url)
+      ) {
+        releaseFrame(frame)
         return
-
-      ready.set(index, image)
-    })
-    .catch(() => {
-      if (pending.get(index) === job && generation === activeGeneration) {
-        failed.add(index)
       }
+
+      ready.set(url, frame)
+    })
+    .catch((error) => {
+      if (!controller.signal.aborted) scheduleRetry(url, error)
     })
     .finally(() => {
-      if (pending.get(index) !== job) return
-
-      pending.delete(index)
+      if (pending.get(url) === controller) pending.delete(url)
       pumpDecodes()
     })
 }
@@ -141,11 +122,10 @@ function queueDecode(index: number, generation: number) {
 
 `await image.decode()` suspends the async function instead of spinning until
 decode finishes. Decode still consumes CPU and may use main-thread time, so its
-admission must remain bounded. Supersession retires the old job immediately,
-while the identity checks prevent its completion from touching the replacement.
-Timeout and failure also retire the image and release the slot in `finally`.
-Clearing `src` is best-effort because the browser may not stop underlying work
-immediately.
+admission must remain bounded. Pending work is keyed by resolved URL, and the
+identity check prevents an obsolete completion from touching its replacement.
+Cancellation is logical: clearing `src` and revoking its Blob URL retires the
+job, but browser codec work may overlap briefly before it stops.
 
 Successful `decode()` is not a permanent lease. The
 [HTML `decode()` algorithm](https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-decode-dev)
@@ -172,71 +152,67 @@ decoded pixel buffers. Decode should remain close to presentation:
 
 ```ts showLineNumbers
 const policy = {
-  sharedFetchConcurrency: 4,
-  decodeConcurrencyPerSequence: 1,
+  sharedFetchConcurrency: 8,
+  decodeConcurrencyPerSequence: 3,
   readyAhead: 3,
 }
 ```
 
 The queues should roll continuously rather than wait for rigid batches. When a
 fetch finishes, the highest-priority missing response takes the free slot. Each
-sequence then decodes one frame at a time until its small ready window is full.
+sequence admits only the decodes relevant to its current three-frame window.
+These limits bound application demand; abandoned browser decode work can still
+overlap briefly.
 
 Priority depends on the interaction:
 
 - **autoplay:** next frame first, then fill forward in order;
-- **time-based loops:** closest useful frame within a content-defined search
-  range;
+- **time-based loops:** spread transfer coverage across the range, then present
+  the closest useful ready frame without moving backward in the loop;
 - **scroll-driven sequences:** target frame first, then nearby frames biased
-  toward scroll direction;
+  toward scroll direction, with rapid targets coalesced to one per animation
+  frame;
 - **approaching sections:** poster and entry frames only, expanding the runway
   once the sequence becomes active.
 
-A single sequence can load versioned URLs directly through `Image` and rely on
-normal HTTP caching. Immutable assets can use:
+Immutable frame URLs can use:
 
 ```txt
 Cache-Control: public, max-age=31536000, immutable
 ```
 
-A page with several sequences can add a shared transfer manager to deduplicate
-requests, bound encoded bytes, and distribute the four slots fairly. Decoded
-frames should stay local to each player so disposal and presentation remain
-simple.
+The current component uses one module-level transfer manager for every instance,
+with no provider setup. It deduplicates requests, retains a bounded LRU of
+encoded `Blob`s, and distributes the eight slots round-robin among active
+sequences. Decoded frames stay local to each player so disposal and
+presentation remain simple.
 
-## Reveal only a ready surface
+## Hand off only prepared frames
 
-Decoding one `Image`, copying its URL to a different visible `<img>`, and
-immediately advancing state is not enough. The visible element still needs its
-own readiness check.
-
-Double buffering keeps the current frame visible while a hidden surface
-prepares the replacement:
+The current player keeps one `<img>` mounted. Future frames decode in off-DOM
+`Image` elements backed by Blob URLs; presentation assigns only a URL that has
+already passed that gate:
 
 ```ts showLineNumbers
-async function presentFrame(
-  frame: HTMLImageElement,
-  index: number,
-  generation: number
-) {
-  const staging = hiddenSurface
-  staging.src = frame.currentSrc || frame.src
+function presentFrame(frame: HTMLImageElement, index: number) {
+  if (index !== wantedIndex) return false
 
-  await staging.decode()
+  const releasePrevious = surfaceLease
+  surfaceLease = retainSurface(frame)
 
-  if (generation !== activeGeneration || index !== wantedIndex) return
-
-  staging.hidden = false
-  visibleSurface.hidden = true
-  hiddenSurface = visibleSurface
-  visibleSurface = staging
+  visibleImage.removeAttribute('srcset')
+  visibleImage.src = frame.src
+  releasePrevious?.()
   currentIndex = index
+
+  return true
 }
 ```
 
-Failure, timeout, or supersession leaves the old surface visible. Canvas follows
-the same rule: await the frame's decode immediately before drawing, do not clear
-the canvas first, and advance `currentIndex` only after `drawImage()`.
+The lease keeps that Blob URL alive while the mounted image uses it. Failed,
+timed-out, or superseded frames never enter the ready map, so the last valid
+surface remains instead of being replaced by a loader. This handoff is a
+readiness gate, not proof that pixels have physically reached the GPU.
 
 ## A runway cannot fix slow delivery
 
@@ -249,16 +225,16 @@ When transfer cannot sustain the target cadence, it must start earlier, use
 smaller assets, or let playback hold the poster or current frame while the
 buffer recovers.
 
-Use separate start and resume thresholds to avoid alternating between one new
-frame and another stall. When the runway empties, hold the last valid frame;
-never reveal a blank or undecoded replacement.
+The default `hybrid` policy keeps authored time moving and presents the closest
+useful ready frame. `Sequential` holds for the exact next frame instead. Both
+keep the last valid surface visible when preparation loses the race.
 
 ## Handle source changes and lifecycle explicitly
 
-Responsive source selection belongs to the scheduler. Choose a variant from
-rendered width and device pixel ratio, reserve the aspect ratio, and invalidate
-the old generation when a resize crosses a source breakpoint. Keep the last
-valid surface visible while the new variant prepares.
+Responsive source selection belongs to the scheduler. Choose a concrete URL
+from rendered width and device pixel ratio, reserve the aspect ratio, and reset
+the local decode window when a resize selects another variant. Keep the last
+valid surface visible while the new source prepares.
 
 The same principle applies to page lifecycle:
 
@@ -271,11 +247,11 @@ The same principle applies to page lifecycle:
 
 ## Tune the whole pipeline
 
-Start with three future decoded frames, one decode per sequence, and four
-shared transfer slots. Then measure request-to-ready, request-to-reveal, holds,
-skips, and dropped frames on the real page. Increase the runway only when
-end-to-end readiness repeatedly exhausts it, and increase transfer concurrency
-only when throughput improves without starving other work.
+The current player uses three future decoded frames, up to three relevant
+decode promises per sequence, and eight shared transfer slots. Measure
+request-to-ready, holds, skips, and dropped frames on the real page before
+changing those limits. More concurrency helps only while it improves throughput
+without starving other work.
 
 The [Render Pipeline](/logs/12-the-render-pipeline) explains how preparation can
 compete with JavaScript, style, layout, and paint. The
@@ -284,9 +260,9 @@ without turning this player into its own diagnostics system.
 
 ## The rule
 
-> Fetch encoded frames ahead, decode only the frames approaching presentation,
-> and reveal only a surface whose own decode is complete. Keep the decoded
-> window small, share transfer capacity when several sequences compete, and
-> hold the last valid frame whenever preparation loses the race.
+> Fetch encoded frames ahead, decode only the frames relevant to current demand,
+> and assign only prepared Blob URLs. Keep the decoded window small, share
+> transfer capacity when several sequences compete, and hold the last valid
+> frame whenever preparation loses the race.
 
 Loaded does not mean decoded, and decoded does not mean permanently resident.
