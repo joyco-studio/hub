@@ -370,25 +370,34 @@ body {
     translate var(--zen-duration) var(--zen-ease);
 }
 
+/*
+ * Entering Zen mode holds `visibility` until the fade has finished. On the way
+ * out it is left out of the transition so the regions become visible straight
+ * away and the fade has something to animate from — an element coming back
+ * from a hidden box has no previous style to interpolate against.
+ */
+#nd-docs-layout[data-zen-animating][data-zen='true']
+  > [data-slot='layout-sidebar'],
+#nd-docs-layout[data-zen-animating][data-zen='true'] > #nd-toc {
+  transition:
+    opacity var(--zen-duration) var(--zen-ease),
+    translate var(--zen-duration) var(--zen-ease),
+    visibility 0s linear var(--zen-duration);
+}
+
+/*
+ * `visibility: hidden` keeps the collapsed regions out of the tab order and
+ * the accessibility tree, and unlike `display: none` it still transitions.
+ */
 #nd-docs-layout[data-zen='true'] > [data-slot='layout-sidebar'],
 #nd-docs-layout[data-zen='true'] > #nd-toc {
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
 }
 
 #nd-docs-layout[data-zen='true'] > [data-slot='layout-sidebar'] {
   translate: -100% 0;
-}
-
-/*
- * Once the collapse has settled the regions go back to `display: none`, which
- * is what keeps them out of the tab order and the accessibility tree. They
- * stay rendered only for the duration of the transition itself.
- */
-#nd-docs-layout[data-zen='true']:not([data-zen-animating])
-  > [data-slot='layout-sidebar'],
-#nd-docs-layout[data-zen='true']:not([data-zen-animating]) > #nd-toc {
-  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
