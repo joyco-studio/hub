@@ -106,9 +106,10 @@ coalesces updates to one per animation frame and gives the newest target priorit
 Reversing direction swaps the larger ahead/behind transfer neighborhood. A late
 candidate cannot move presentation farther from the latest target.
 
-Scroll inside the preview, or focus it and use the arrow keys. Scroll progress maps
-from frame `0` to `frameCount - 1`; the sticky image stays visible while you move
-through the sequence. With reduced motion enabled, the poster stays visible.
+Scroll the page to animate the duck. As the preview passes through the viewport,
+playback moves from frame `0` to `frameCount - 1` and reverses when you scroll
+back up. A 20% viewport margin at the bottom and top keeps the start and end
+of playback inside the viewport. With reduced motion enabled, the poster stays visible.
 
 <ComponentPreview name="image-sequence-scroll-demo" />
 
@@ -160,7 +161,7 @@ type FrameSource =
 | `frameCount`    | `number`                         | Required         | Number of zero-based source frames                                      |
 | `source`        | `(index: number) => FrameSource` | Required         | Frame URL or responsive candidates                                      |
 | `alt`           | `string`                         | Required         | Meaningful description, or `""` for decoration                          |
-| `className`     | `string`                         | None             | Root styling; target inner elements with data slots                     |
+| `className`     | `string`                         | —                | Root styling; target inner elements with data slots                     |
 | `playing`       | `boolean`                        | `true`           | Allow sequence demand and visible playback                              |
 | `resetOnPause` | `boolean` | `false` | Restore the retained opening frame on pause; restart on resume |
 | `enabled`       | `boolean`                        | `true`           | Allow runtime work; disabling preserves the last frame                  |
@@ -176,8 +177,8 @@ type FrameSource =
 | `ahead`         | `number`                         | `7`              | Scrub transfer positions in the travel direction                        |
 | `behind`        | `number`                         | `3`              | Scrub transfer positions against the travel direction                   |
 | `pixelated`     | `boolean`                        | `false`          | Set pixelated image rendering                                           |
-| `onFrame`       | `(index: number) => void`        | None             | Decoded frame assigned to the mounted image                             |
-| `onComplete`    | `() => void`                     | None             | One-shot autoplay final frame assigned, once per run                    |
+| `onFrame`       | `(index: number) => void`        | —                | Decoded frame assigned to the mounted image                             |
+| `onComplete`    | `() => void`                     | —                | One-shot autoplay final frame assigned, once per run                    |
 
 ## Ownership and lifecycle
 
