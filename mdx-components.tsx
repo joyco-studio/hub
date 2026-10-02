@@ -12,6 +12,9 @@ import { PackageManagerCommand } from './components/package-manager-command'
 import { AgentsScriptCommand } from './components/agents-script-command'
 import { Mermaid } from './components/mermaid'
 import { Diagram } from './components/flow'
+import { CaretRightIcon } from '@/components/icons'
+
+const DefaultCallout = defaultMdxComponents.Callout
 
 export function getMDXComponents(
   components?: MDXComponents,
@@ -20,6 +23,14 @@ export function getMDXComponents(
   const articleNumber = opts?.logNumber ?? undefined
   return {
     ...defaultMdxComponents,
+    Callout: ({
+      icon = (
+        <CaretRightIcon className="size-5 shrink-0 text-(--callout-color)" />
+      ),
+      ...props
+    }: React.ComponentProps<typeof DefaultCallout>) => (
+      <DefaultCallout icon={icon} {...props} />
+    ),
     Mermaid,
     Diagram: (props: React.ComponentProps<typeof Diagram>) => (
       <Diagram {...props} articleNumber={articleNumber} />
