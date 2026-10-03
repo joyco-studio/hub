@@ -175,7 +175,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
 
           {/* Description */}
           {page.data.description && (
-            <p className="text-foreground/70 mb-4 text-lg">
+            <p className="text-foreground/70 mb-4 text-lg text-pretty">
               {page.data.description}
             </p>
           )}
