@@ -339,20 +339,9 @@ body {
   }
 }
 
-/*
- * Zen mode swaps the grid template outright; the View Transitions API animates
- * between the before and after snapshots.
- *
- * Naming the three regions keeps them out of the single root snapshot, so each
- * one animates on its own instead of the whole page crossfading. Nothing else
- * in the app starts a view transition, so the names can stay applied.
- */
-/*
- * Every route puts something different in the main grid area — the docs
- * article, the lab list, the experiment iframe — and each one moves when the
- * grid collapses, so they all share the slot and the name. Only one of them is
- * ever rendered at a time, which is what a view-transition-name requires.
- */
+/* Zen mode swaps the grid template outright; View Transitions animate it. */
+
+/* Shared so the name follows whichever main region the route renders. */
 [data-slot='layout-main'] {
   view-transition-name: zen-main;
 }
@@ -365,16 +354,11 @@ body {
   view-transition-name: zen-toc;
 }
 
-/* Everything unnamed swaps instantly rather than crossfading. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
 }
 
-/*
- * The sidebar and TOC only exist on one side of the swap, so each selector
- * below runs in exactly one direction: `old` when entering, `new` when leaving.
- */
 ::view-transition-old(zen-sidebar) {
   animation: zen-exit-left var(--zen-duration) var(--zen-ease) both;
 }
@@ -391,12 +375,7 @@ body {
   animation: zen-enter-right var(--zen-duration) var(--zen-ease) both;
 }
 
-/*
- * Entering gets its own keyframes rather than reusing the exit ones with
- * `reverse`, which flips the timing function too: the ease-out becomes an
- * ease-in, so the columns hang still for most of the duration and then snap
- * into place. Spelling both directions out keeps the ease-out either way.
- */
+/* Not `reverse`: that flips the easing too, turning the ease-out into an ease-in. */
 @keyframes zen-exit-left {
   to {
     opacity: 0;
@@ -425,22 +404,12 @@ body {
   }
 }
 
-/*
- * The main region exists on both sides of the swap, so its group morphs from
- * one box to the other. That morph is the whole animation: it carries the
- * sideways move, and the width too on the viewports where the column is
- * narrower than the content's own max-width.
- */
 ::view-transition-group(zen-main) {
   animation-duration: var(--zen-duration);
   animation-timing-function: var(--zen-ease);
 }
 
-/*
- * Only the group moves. Crossfading the two snapshots would dip the whole
- * column's opacity mid-flight for no gain, since the article is the same
- * content on both sides — so the new one is painted for the whole transition.
- */
+/* Group move only — crossfading the two snapshots dips the column's opacity. */
 ::view-transition-old(zen-main) {
   animation: none;
   opacity: 0;

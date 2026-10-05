@@ -38,37 +38,28 @@ const ZEN_DESKTOP_QUERY = '(min-width: 768px)'
 const prefersReducedMotion = () =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-/**
- * Hands the state flip to the View Transitions API, which snapshots the layout
- * before and after and animates between the two. The grid swap itself stays
- * instant — `::view-transition-*` in globals.css owns the motion.
- */
 const runZenTransition = (update: () => void) => {
   if (!document.startViewTransition || prefersReducedMotion()) {
     update()
     return
   }
 
-  // The callback has to leave the DOM in its final state synchronously,
-  // otherwise the API snapshots a half-updated layout.
+  // flushSync: the callback must leave the DOM final, or the API snapshots
+  // a half-updated layout.
   document.startViewTransition(() => flushSync(update))
 }
 
-/** Regions Zen mode collapses — focus must never be left inside them. */
 const ZEN_COLLAPSED_REGIONS =
   '[data-slot="layout-sidebar"], #nd-toc, [data-slot="experiment-toc"]'
 
 const isModalOpen = () =>
   document.querySelector('[role="dialog"][aria-modal="true"]') !== null
 
-/** `display: none` elements cannot take focus, so skip them. */
+/** `display: none` elements cannot take focus. */
 const isRendered = (element: Element | null): element is HTMLElement =>
   element instanceof HTMLElement && element.getClientRects().length > 0
 
-/**
- * Preferred landing spot first. The toggle is hidden on top-category pages and
- * absent on lab routes, so fall back to the article and then to the layout.
- */
+/** The toggle is hidden on top-category pages and absent on lab routes. */
 const ZEN_FOCUS_FALLBACKS = [
   '[data-slot="zen-toggle"]',
   '#nd-page',
@@ -136,8 +127,7 @@ export function LayoutContextProvider({
     }
   }, [isZenMode, setZenMode, toggleZenMode])
 
-  // Entering Zen mode hides the sidebar and TOC. If focus was inside one of
-  // them the browser would drop it on <body>, so hand it to the toggle.
+  // Zen mode hides the sidebar and TOC; focus inside them would land on <body>.
   useEffect(() => {
     if (!isZenMode) return
     const active = document.activeElement
@@ -249,8 +239,6 @@ export function LayoutBody({
           '--fd-docs-row-3':
             'calc(var(--fd-docs-row-2) + var(--fd-toc-popover-height))',
           ...style,
-          // The swap is instant; the View Transitions API animates between the
-          // two snapshots. See `::view-transition-*` in globals.css.
           ...(isZenMode && {
             gridTemplate: '"header" "main" 1fr / minmax(0, 1fr)',
           }),
