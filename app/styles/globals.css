@@ -159,6 +159,14 @@
   --sidebar-width: 268px;
   --zen-duration: 300ms;
   --zen-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  /*
+   * Both regions slide this far, rather than 100% of their own width, so they
+   * travel at the same speed. Matches the wider of the two (the sidebar) so
+   * each one still clears its edge.
+   */
+  --zen-slide-distance: calc(
+    var(--aside-width) + var(--gap) + var(--sidebar-width)
+  );
   --mobile-header-height: 3rem;
   --content-sides: 1rem; /* px-4 */
 
@@ -331,81 +339,85 @@ body {
   }
 }
 
-/*
- * Zen mode collapses the sidebar/TOC grid tracks instead of swapping the grid
- * template, so the content column reflows and recentres smoothly.
- *
- * The tracks animate through their own variables: the regions keep their real
- * `--fd-*-width`, so their text never rewraps mid-transition — they slide out
- * of the shrinking track and get clipped by the layout's `overflow-x-clip`.
- * Custom properties are only interpolable once registered.
- */
-@property --fd-sidebar-track {
-  syntax: '<length>';
-  inherits: true;
-  initial-value: 0px;
+/* Zen mode swaps the grid template outright; View Transitions animate it. */
+
+/* Shared so the name follows whichever main region the route renders. */
+[data-slot='layout-main'] {
+  view-transition-name: zen-main;
 }
 
-@property --fd-toc-track {
-  syntax: '<length>';
-  inherits: true;
-  initial-value: 0px;
+[data-slot='layout-sidebar'] {
+  view-transition-name: zen-sidebar;
 }
 
-/*
- * Gated on `data-zen-animating`, which only the toggle sets. Breakpoints move
- * the same track variables, so an always-on transition would also animate
- * every resize across the md/xl boundaries.
- */
-#nd-docs-layout[data-zen-animating] {
-  transition:
-    --fd-sidebar-track var(--zen-duration) var(--zen-ease),
-    --fd-toc-track var(--zen-duration) var(--zen-ease);
+#nd-toc {
+  view-transition-name: zen-toc;
 }
 
-#nd-docs-layout[data-zen-animating] > [data-slot='layout-sidebar'],
-#nd-docs-layout[data-zen-animating] > #nd-toc {
-  transition:
-    opacity var(--zen-duration) var(--zen-ease),
-    translate var(--zen-duration) var(--zen-ease);
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
 }
 
-/*
- * Entering Zen mode holds `visibility` until the fade has finished. On the way
- * out it is left out of the transition so the regions become visible straight
- * away and the fade has something to animate from — an element coming back
- * from a hidden box has no previous style to interpolate against.
- */
-#nd-docs-layout[data-zen-animating][data-zen='true']
-  > [data-slot='layout-sidebar'],
-#nd-docs-layout[data-zen-animating][data-zen='true'] > #nd-toc {
-  transition:
-    opacity var(--zen-duration) var(--zen-ease),
-    translate var(--zen-duration) var(--zen-ease),
-    visibility 0s linear var(--zen-duration);
+::view-transition-old(zen-sidebar) {
+  animation: zen-exit-left var(--zen-duration) var(--zen-ease) both;
 }
 
-/*
- * `visibility: hidden` keeps the collapsed regions out of the tab order and
- * the accessibility tree, and unlike `display: none` it still transitions.
- */
-#nd-docs-layout[data-zen='true'] > [data-slot='layout-sidebar'],
-#nd-docs-layout[data-zen='true'] > #nd-toc {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
+::view-transition-new(zen-sidebar) {
+  animation: zen-enter-left var(--zen-duration) var(--zen-ease) both;
 }
 
-#nd-docs-layout[data-zen='true'] > [data-slot='layout-sidebar'] {
-  translate: -100% 0;
+::view-transition-old(zen-toc) {
+  animation: zen-exit-right var(--zen-duration) var(--zen-ease) both;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  #nd-docs-layout[data-zen-animating],
-  #nd-docs-layout[data-zen-animating] > [data-slot='layout-sidebar'],
-  #nd-docs-layout[data-zen-animating] > #nd-toc {
-    transition: none;
+::view-transition-new(zen-toc) {
+  animation: zen-enter-right var(--zen-duration) var(--zen-ease) both;
+}
+
+/* Not `reverse`: that flips the easing too, turning the ease-out into an ease-in. */
+@keyframes zen-exit-left {
+  to {
+    opacity: 0;
+    transform: translateX(calc(var(--zen-slide-distance) * -1));
   }
+}
+
+@keyframes zen-enter-left {
+  from {
+    opacity: 0;
+    transform: translateX(calc(var(--zen-slide-distance) * -1));
+  }
+}
+
+@keyframes zen-exit-right {
+  to {
+    opacity: 0;
+    transform: translateX(var(--zen-slide-distance));
+  }
+}
+
+@keyframes zen-enter-right {
+  from {
+    opacity: 0;
+    transform: translateX(var(--zen-slide-distance));
+  }
+}
+
+::view-transition-group(zen-main) {
+  animation-duration: var(--zen-duration);
+  animation-timing-function: var(--zen-ease);
+}
+
+/* Group move only — crossfading the two snapshots dips the column's opacity. */
+::view-transition-old(zen-main) {
+  animation: none;
+  opacity: 0;
+}
+
+::view-transition-new(zen-main) {
+  animation: none;
+  opacity: 1;
 }
 
 [style*='--callout-color'] {
