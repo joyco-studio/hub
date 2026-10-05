@@ -5,218 +5,136 @@ author: 'justkahdri'
 ---
 
 We iterated on JOYCO's installable [Image Sequence
-component](/components/image-sequence) after large sequences exposed two
-problems: loading every file upfront did not keep every frame decoded, and
-presenting a frame after the browser discarded its pixels could move decode work
-onto the critical frame and block the main thread.
+component](/components/image-sequence) after large sequences stuttered even when
+every file had loaded. The browser had discarded some decoded frames, so asking
+for one of them again forced it to decode before painting. Frame presentation
+waited, and the whole page lost fps.
 
-The fix was to treat the sequence as a moving preparation window instead of one
-large preload. An image sequence looks like one moving visual, but the browser
-sees dozens or hundreds of independent images. Every displayed frame needs
-three things:
-
-- **encoded bytes**, transferred from the network or an HTTP cache;
-- **decoded pixels**, prepared from those compressed bytes;
-- **a ready surface**, safe to reveal at the next presentation deadline.
-
-Those stages have different budgets. Loading every file does not make every
-frame ready, and keeping every `Image` object does not keep every decoded bitmap
-in memory.
+The fix was to keep a small moving buffer of decoded frames near the playhead.
+That sounds simple, but it depends on separating three states that are easy to
+conflate.
 
 ## Every frame has a pipeline
 
-<Diagram index={1} title="The lifecycle of one sequence frame">{`
+<Diagram index={1} title="Loading is only the first step">{`
 flow LR
-demand["Frame is demanded"]:primary
-transfer["Encoded bytes"]:info
-decode["Decoded pixels"]:warning
-ready["Ready frame"]:success
-present["Presented surface"]:success
-evicted["Decoded pixels evicted"]:error
-demand --> transfer
-transfer --> decode
-decode --> ready
-ready --> present
-ready --> evicted
-evicted --> decode
-note transfer below "network or cache"
-note decode below "must finish before reveal"
+loaded["Loaded<br/>Encoded image bytes"]:info
+decoded["Decoded<br/>Bitmap ready for display"]:success
+presented["Presented<br/>Frame painted on screen"]:primary
+blocking["Decode at display time<br/>Presentation waits"]:error
+loaded --> decoded
+decoded --> presented
+loaded --> blocking
+blocking --> presented
+note loaded below "image.png, image.avif, image.webp"
+note decoded below "keep the next frames here"
+note blocking below "the page can miss its refresh"
 `}</Diagram>
 
-| State       | What exists                            | What it means                            |
-| ----------- | -------------------------------------- | ---------------------------------------- |
-| Transferred | Encoded AVIF or WebP bytes             | Another network request may be avoidable |
-| Decoded     | A pixel representation exists          | The element can be prepared for a render |
-| Presented   | A DOM or Canvas surface uses the frame | The frame is selected for the next paint |
+- **Loaded** means the encoded bytes for an image file are available from the
+  network or HTTP cache.
+- **Decoded** means the browser has turned those bytes into bitmap information
+  ready to display in an `<img>` or Canvas.
+- **Presented** means that bitmap has been painted on screen.
 
-Even when `image.complete === true`, the resource has finished loading. It does
-not promise that its decoded pixels are still resident when you present it.
+Even after an image loads successfully, `image.complete === true` does not mean
+its bitmap is still decoded when the page needs to present it.
 
-Frame count limits temporal granularity. Frame count and playback cadence
-together determine duration, while the playback clock determines target fps. A
-24 fps clock means that a ready frame is needed every 41.67 ms. It does not give
-each decode 41.67 ms of main-thread time.
+An image sequence running at 24 fps needs its next frame every 41.67 ms, while a
+120 Hz display refreshes every 8.33 ms. If the requested frame still needs
+decoding when it reaches presentation, painting waits for that work and the page
+can miss the refresh.
 
 ## The browser can discard decoded frames
 
-Browsers retain decoded image data within internal memory budgets and **may
-evict older frames when those budgets are exceeded**. Holding an `Image`
-reference does not reserve its decoded pixels, and the browser does not expose
-control over this cache. Dropping references makes an image eligible for
-cleanup, but does not force an immediate release.
+Decoded bitmaps do not stay available indefinitely. Browsers manage them within
+internal memory budgets and may discard older ones under memory pressure.
+Keeping an `Image` reference does not reserve its decoded bitmap.
 
-This is where large eager sequences fail. All encoded responses may already be
-cached, yet early frames can require another decode by the time playback loops
-back to them. Attempting to reveal an `<img>` or draw to Canvas without checking
-readiness can pull that decode onto the presentation path and cost frames across
-the page.
+That is why decoding a large sequence upfront fails. By the time playback loops,
+already decoded frames may need to be decoded again. If one of those frames is
+selected for display, the browser must finish decoding it before it can paint,
+blocking frame presentation and lowering fps across the page.
 
-The surface is not the root problem. Both `<img>` and Canvas are smooth when a
-frame is prepared before presentation, and both can fail when an unprepared
-frame reaches that deadline.
+The presentation surface is not the root problem. Both `<img>` and Canvas can
+present smoothly when the bitmap is ready, and both have to wait when it is not.
 
 ## Decode before the deadline
 
-The `Image` class can prepare a frame without displaying it:
+The JavaScript `Image` class can prepare a frame without displaying it:
 
 ```ts
 const image = new Image()
-image.src = URL.createObjectURL(blob) // Use already-fetched encoded bytes.
-await image.decode() // Prepare the frame before presentation.
+image.src = URL.createObjectURL(blob) // Use already-loaded encoded bytes.
+await image.decode() // Prepare the bitmap before presentation.
 ```
 
-`await image.decode()` waits without a busy loop.
-
 <Callout type="info">
-  Decode still consumes CPU and may use main-thread time, so admit only a few
-  relevant jobs at once. A successful
+  Every frame must be decoded. The goal is to finish that work before the frame
+  is selected for an `<img>` or Canvas.
   [`decode()`](https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-decode-dev)
-  makes decoded data available for the next successful rendering update, not
-  permanently.
+  lets the browser prepare the bitmap ahead of that presentation deadline.
 </Callout>
 
-## Keep a small runway and separate transfer from decode
+## Keep a small buffer window
 
 <Figure
   src="/static/logs/loaded-doesnt-mean-decoded/decoded-runway.png"
   alt="A hand-drawn timeline showing one visible frame, three decoded frames in a moving buffer, and the next frame waiting to be decoded"
-  caption="Decode enough frames to protect the next paints, but few enough to avoid wasting CPU on pixels that may be evicted before use."
+  caption="Keep the next few frames decoded before they are due, then move the buffer with playback."
   width={2154}
   height={1162}
 />
 
-At 24 fps, three resident future frames provide about 125 ms of runway. This is
-a useful starting point, not a universal value. The target is the smallest
-window that avoids underruns on the real page.
+At 24 fps, three decoded future frames provide about 125 ms of buffer. That is a
+starting point, not a universal value. The target is the smallest window that
+keeps the next frame decoded before its display deadline.
 
-A scheduler can fetch farther ahead and keep those encoded responses in a
-bounded cache. Decode stays close to the playhead because pixel buffers are
-larger and their results may be evicted before they are used:
+Prepare the window as a rolling batch: prioritize the next frame, fill later
+frames with the remaining decode slots, and retire old entries as the playhead
+moves. This avoids allocating memory for the whole sequence only to have the
+browser discard most of its decoded bitmaps before they are used.
 
-```ts showLineNumbers
-const policy = {
-  sharedFetchConcurrency: 8, // Max requests shared by every sequence.
-  decodeConcurrencyPerSequence: 3, // Max active decodes in one sequence.
-  readyAhead: 3, // Future frames prepared near the playhead.
-}
-```
-
-The queues should roll continuously rather than wait for rigid batches. When a
-fetch finishes, the highest-priority missing response takes the free slot. Each
-sequence admits only the decodes relevant to its current three-frame window.
-These limits bound application demand; abandoned browser decode work can still
-overlap briefly.
-
-Priority depends on the interaction:
-
-- **autoplay:** next frame first, then fill forward in order;
-- **time-based loops:** spread transfer coverage across the range, then present
-  the closest useful ready frame without moving backward in the loop;
-- **scroll-driven sequences:** target frame first, then nearby frames biased
-  toward scroll direction, with rapid targets coalesced to one per animation
-  frame;
-- **approaching sections:** poster and entry frames only, expanding the runway
-  once the sequence becomes active.
-
-Immutable frame URLs can use:
-
-```txt
-Cache-Control: public, max-age=31536000, immutable
-```
-
-## Present only prepared frames
-
-Presentation should choose from prepared frames instead of discovering at the
-deadline that the requested image still needs work:
+Presentation then chooses only from that recently prepared window:
 
 ```ts
-const prepared = readyFrames.get(targetFrame)
+const prepared = decodedFrames.get(targetFrame)
 if (prepared) present(prepared)
 else keepCurrentFrame()
 ```
 
-Failed, timed-out, or superseded frames never enter `readyFrames`. The current
-surface remains visible until an acceptable replacement is prepared.
+Failed, timed-out, or superseded frames never enter `decodedFrames`. If the next
+frame misses its deadline, keep the current frame visible instead of making
+presentation wait for a decode.
 
-## A runway cannot fix slow delivery
+When a resize selects another source variant, reset the buffer and prepare the
+new target while the last valid frame stays visible. Pause new work for hidden
+documents or reduced-motion experiences.
 
-A decoded runway absorbs temporary latency. It cannot compensate when the
-network provides fewer frames than playback consumes. Every finite buffer will
-eventually empty, so increasing the runway only delays the stall while using
-more memory.
+## Tune against the deadline
 
-When transfer cannot sustain the target cadence, start earlier, use smaller
-assets, or choose which kind of continuity matters more:
+Start with a small buffer and bounded decode concurrency, then measure holds,
+skips, and dropped frames on the real page. More concurrency helps only while it
+makes the next required frame ready on time.
 
-- **Frame continuity:** pause progression and keep the current frame visible
-  until the exact next frame is prepared.
-- **Motion continuity:** keep authored time moving and present the closest
-  useful prepared frame, skipping missing frames when necessary.
-
-Neither policy should force an unprepared image onto the presentation path.
-
-## Handle source changes and lifecycle explicitly
-
-Responsive source selection belongs to the scheduler. Choose a concrete URL
-from rendered width and device pixel ratio, reserve the aspect ratio, and reset
-the local decode window when a resize selects another variant. Keep the last
-valid surface visible while the new source prepares.
-
-The same principle applies to page lifecycle:
-
-| Condition            | Default behavior                                                     |
-| -------------------- | -------------------------------------------------------------------- |
-| Reduced motion       | Keep the poster and skip speculative sequence work                   |
-| Hidden document      | Stop the playback clock and suspend local decode demand              |
-| Resize/source change | Retire stale work, retain the surface, then prepare the new variant  |
-| Missing frame        | Hold the current frame until an acceptable replacement becomes ready |
-
-## Tune the whole pipeline
-
-Start with a small decoded runway and bounded fetch and decode concurrency, then
-measure request-to-ready time, holds, skips, and dropped frames on the real
-page. More concurrency helps only while it improves throughput without starving
-other work.
-
-The [Render Pipeline](/logs/12-the-render-pipeline) explains how preparation can
-compete with JavaScript, style, layout, and paint. The
-[Performance Monitor](/logs/09-performance-monitor) helps observe that behavior
-without turning this player into its own diagnostics system.
+The [Render Pipeline](/logs/12-the-render-pipeline) explains why synchronous work
+on the presentation path can delay a frame. The [Performance
+Monitor](/logs/09-performance-monitor) helps observe that behavior without
+turning the player into its own diagnostics system.
 
 ## The rule
 
-> Fetch encoded frames ahead, decode only the frames relevant to current demand,
-> and present only frames that passed the readiness gate. Keep the decoded
-> window small, share transfer capacity when several sequences compete, and
-> hold the last valid frame whenever preparation loses the race.
+> Load encoded frames ahead, decode only the frames near current demand, and
+> present only a recently prepared frame. Keep the decoded window small and hold
+> the last valid frame whenever preparation loses the race.
 
-Loaded does not mean decoded, and decoded does not mean permanently resident.
+Loaded does not mean decoded, and decoded does not mean permanently available.
 
 ## Try it yourself
 
 The [Image Sequence component](/components/image-sequence) packages this model
-with shared bounded transfers, local prepared-frame windows, responsive sources,
-and both continuity policies. Install it from the JOYCO registry:
+with bounded work, a moving decoded-frame buffer, responsive sources, and both
+autoplay and scroll-driven modes. Install it from the JOYCO registry:
 
 ```bash
 npx shadcn@latest add @joyco/image-sequence
