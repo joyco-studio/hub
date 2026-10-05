@@ -159,6 +159,14 @@
   --sidebar-width: 268px;
   --zen-duration: 300ms;
   --zen-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  /*
+   * Both regions slide this far, rather than 100% of their own width, so they
+   * travel at the same speed. Matches the wider of the two (the sidebar) so
+   * each one still clears its edge.
+   */
+  --zen-slide-distance: calc(
+    var(--aside-width) + var(--gap) + var(--sidebar-width)
+  );
   --mobile-header-height: 3rem;
   --content-sides: 1rem; /* px-4 */
 
@@ -380,14 +388,14 @@ body {
 @keyframes zen-exit-left {
   to {
     opacity: 0;
-    transform: translateX(-100%);
+    transform: translateX(calc(var(--zen-slide-distance) * -1));
   }
 }
 
 @keyframes zen-exit-right {
   to {
     opacity: 0;
-    transform: translateX(100%);
+    transform: translateX(var(--zen-slide-distance));
   }
 }
 
