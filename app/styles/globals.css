@@ -374,7 +374,7 @@ body {
 }
 
 ::view-transition-new(zen-sidebar) {
-  animation: zen-exit-left var(--zen-duration) var(--zen-ease) reverse both;
+  animation: zen-enter-left var(--zen-duration) var(--zen-ease) both;
 }
 
 ::view-transition-old(zen-toc) {
@@ -382,9 +382,15 @@ body {
 }
 
 ::view-transition-new(zen-toc) {
-  animation: zen-exit-right var(--zen-duration) var(--zen-ease) reverse both;
+  animation: zen-enter-right var(--zen-duration) var(--zen-ease) both;
 }
 
+/*
+ * Entering gets its own keyframes rather than reusing the exit ones with
+ * `reverse`, which flips the timing function too: the ease-out becomes an
+ * ease-in, so the columns hang still for most of the duration and then snap
+ * into place. Spelling both directions out keeps the ease-out either way.
+ */
 @keyframes zen-exit-left {
   to {
     opacity: 0;
@@ -392,8 +398,22 @@ body {
   }
 }
 
+@keyframes zen-enter-left {
+  from {
+    opacity: 0;
+    transform: translateX(calc(var(--zen-slide-distance) * -1));
+  }
+}
+
 @keyframes zen-exit-right {
   to {
+    opacity: 0;
+    transform: translateX(var(--zen-slide-distance));
+  }
+}
+
+@keyframes zen-enter-right {
+  from {
     opacity: 0;
     transform: translateX(var(--zen-slide-distance));
   }
