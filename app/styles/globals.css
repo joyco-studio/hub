@@ -347,7 +347,13 @@ body {
  * one animates on its own instead of the whole page crossfading. Nothing else
  * in the app starts a view transition, so the names can stay applied.
  */
-#nd-page {
+/*
+ * Every route puts something different in the main grid area — the docs
+ * article, the lab list, the experiment iframe — and each one moves when the
+ * grid collapses, so they all share the slot and the name. Only one of them is
+ * ever rendered at a time, which is what a view-transition-name requires.
+ */
+[data-slot='layout-main'] {
   view-transition-name: zen-main;
 }
 
@@ -420,10 +426,10 @@ body {
 }
 
 /*
- * The article exists on both sides, so its group morphs from one box to the
- * other. Snapshots are stretched to fill that box by default, which smears the
- * text whenever the column also changes width — pinning the width and anchoring
- * both snapshots to the top centre keeps the glyphs at their real size.
+ * The main region exists on both sides of the swap, so its group morphs from
+ * one box to the other. That morph is the whole animation: it carries the
+ * sideways move, and the width too on the viewports where the column is
+ * narrower than the content's own max-width.
  */
 ::view-transition-group(zen-main) {
   animation-duration: var(--zen-duration);

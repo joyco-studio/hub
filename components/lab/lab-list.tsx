@@ -18,7 +18,10 @@ interface LabListProps {
 export function LabList({ experiments, onViewChange }: LabListProps) {
   if (experiments.length === 0) {
     return (
-      <div className="text-muted-foreground flex h-full flex-col items-center justify-center gap-3 [grid-area:main]">
+      <div
+        data-slot="layout-main"
+        className="text-muted-foreground flex h-full flex-col items-center justify-center gap-3 [grid-area:main]"
+      >
         <FlaskIcon className="size-8" />
         <p className="font-mono text-sm tracking-wide uppercase">
           No experiments yet
@@ -28,7 +31,10 @@ export function LabList({ experiments, onViewChange }: LabListProps) {
   }
 
   return (
-    <article className="px-content-sides xl:layout:[--fd-toc-width:268px] mx-auto w-full max-w-[900px] pt-6 pb-14 [grid-area:main] md:pt-8 lg:pb-24 xl:pt-14">
+    <article
+      data-slot="layout-main"
+      className="px-content-sides xl:layout:[--fd-toc-width:268px] mx-auto w-full max-w-[900px] pt-6 pb-14 [grid-area:main] md:pt-8 lg:pb-24 xl:pt-14"
+    >
       <Badge variant="accent" className="mb-6">
         Lab
       </Badge>

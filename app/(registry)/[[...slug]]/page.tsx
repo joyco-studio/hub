@@ -139,6 +139,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
         {/* Main article content */}
         <article
           id="nd-page"
+          data-slot="layout-main"
           tabIndex={-1}
           className={cn(
             'px-content-sides mx-auto w-full max-w-3xl pt-6 pb-14 [grid-area:main] md:pt-8 lg:pb-24 xl:pt-14 2xl:max-w-[900px]',
