@@ -27,7 +27,7 @@ decoded --> presented
 loaded --> blocking
 blocking --> presented
 note loaded below "image.png, image.avif, image.webp"
-note decoded below "keep the next frames here"
+note decoded above "keep the next frames here"
 note blocking below "the page can miss its refresh"
 `}</Diagram>
 
@@ -44,6 +44,19 @@ An image sequence running at 24 fps needs its next frame every 41.67 ms, while a
 120 Hz display refreshes every 8.33 ms. If the requested frame still needs
 decoding when it reaches presentation, painting waits for that work and the page
 can miss the refresh.
+
+<FrameExplanationDiagram
+  index={2}
+  title="A late decode delays frame presentation"
+  className="h-auto max-w-full"
+/>
+
+1. The image was decoded earlier and has not been evicted, so it is ready.
+2. Chrome does not proactively decode an evicted image again just because the
+   encoded `image.png` file is still in memory.
+3. Painting hits a wall because decoding starts too late, leaving only the
+   current display refresh as its budget.
+4. The next image is selected for the new frame before decoding has finished.
 
 ## The browser can discard decoded frames
 
@@ -78,12 +91,10 @@ await image.decode() // Prepare the bitmap before presentation.
 
 ## Keep a small buffer window
 
-<Figure
-  src="/static/logs/loaded-doesnt-mean-decoded/decoded-runway.png"
-  alt="A hand-drawn timeline showing one visible frame, three decoded frames in a moving buffer, and the next frame waiting to be decoded"
-  caption="Keep the next few frames decoded before they are due, then move the buffer with playback."
-  width={2154}
-  height={1162}
+<DecodedBufferDiagram
+  index={3}
+  title="A moving decoded-frame buffer"
+  className="h-auto max-w-full"
 />
 
 At 24 fps, three decoded future frames provide about 125 ms of buffer. That is a
