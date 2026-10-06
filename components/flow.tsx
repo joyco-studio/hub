@@ -81,6 +81,11 @@ function detectLang(source: string): DiagramLang {
 // parsed here, or handed in already-parsed from a `flow`/`seq`/`git`/`block`
 // tagged-template call (which validates the DSL at build time).
 export type DiagramGraph = FlowGraph | SequenceGraph | BlockGraph | CommitGraph
+type DiagramSource = DiagramGraph | PositionedGraph
+
+function isPositionedGraph(graph: DiagramSource): graph is PositionedGraph {
+  return 'width' in graph && 'height' in graph && 'laneCount' in graph
+}
 
 // The commit graph is the only trazo graph without a `kind` discriminator — it
 // carries `commits`/`refs` instead — so it's identified by the absence of `kind`.
@@ -167,7 +172,7 @@ export function Diagram({
   // A string DSL (parsed here) or a graph from a `flow`/`seq`/`git`/`block`
   // tagged-template call (parsed at the call site, so the DSL is validated at
   // build time). `ascii` mode requires a string.
-  children: string | DiagramGraph
+  children: string | DiagramSource
   title?: string
   index?: number
   articleNumber?: string
@@ -191,6 +196,8 @@ export function Diagram({
       const parsed = parseSource(detectLang(source), source)
       theme = themeFor(parsed)
       graph = layoutParsed(parsed, theme)
+    } else if (isPositionedGraph(children)) {
+      graph = children
     } else {
       theme = themeFor(children)
       graph = layoutParsed(children, theme)

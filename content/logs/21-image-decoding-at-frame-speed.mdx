@@ -1,0 +1,155 @@
+---
+title: 21 - Image decoding at frame speed
+description: How to fetch, decode, and present large image sequences without putting that work on the critical frame.
+author: 'justkahdri'
+---
+
+We iterated on JOYCO's installable [Image Sequence
+component](/components/image-sequence) after large sequences stuttered even when
+every file had loaded. The browser had discarded some decoded frames, so asking
+for one of them again forced it to decode before painting. Frame presentation
+waited, and the whole page lost fps.
+
+The fix was to keep a small moving buffer of decoded frames near the playhead.
+That sounds simple, but it depends on separating three states that are easy to
+conflate.
+
+## Every frame has a pipeline
+
+<Diagram index={1} title="Loading is only the first step">{`
+flow LR
+loaded["Loaded<br/>Encoded image bytes"]:info
+decoded["Decoded<br/>Bitmap ready for display"]:success
+presented["Presented<br/>Frame painted on screen"]:primary
+blocking["Decode at display time<br/>Presentation waits"]:error
+loaded --> decoded
+decoded --> presented
+loaded --> blocking
+blocking --> presented
+note loaded below "image.png, image.avif, image.webp"
+note decoded above "keep the next frames here"
+note blocking below "the page can miss its refresh"
+`}</Diagram>
+
+- **Loaded** means the encoded bytes for an image file are available from the
+  network or HTTP cache.
+- **Decoded** means the browser has turned those bytes into bitmap information
+  ready to display in an `<img>` or Canvas.
+- **Presented** means that bitmap has been painted on screen.
+
+Even after an image loads successfully, `image.complete === true` does not mean
+its bitmap is still decoded when the page needs to present it.
+
+An image sequence running at 24 fps needs its next frame every 41.67 ms, while a
+120 Hz display refreshes every 8.33 ms. If the requested frame still needs
+decoding when it reaches presentation, painting waits for that work and the page
+can miss the refresh.
+
+<FrameExplanationDiagram
+  index={2}
+  title="A late decode delays frame presentation"
+  className="h-auto max-w-full"
+/>
+
+1. The image was decoded earlier and has not been evicted, so it is ready.
+2. Chrome does not proactively decode an evicted image again just because the
+   encoded `image.png` file is still in memory.
+3. Painting hits a wall because decoding starts too late, leaving only the
+   current display refresh as its budget.
+4. The next image is selected for the new frame before decoding has finished.
+
+## The browser can discard decoded frames
+
+Decoded bitmaps do not stay available indefinitely. Browsers manage them within
+internal memory budgets and may discard older ones under memory pressure.
+Keeping an `Image` reference does not reserve its decoded bitmap.
+
+That is why decoding a large sequence upfront fails. By the time playback loops,
+already decoded frames may need to be decoded again. If one of those frames is
+selected for display, the browser must finish decoding it before it can paint,
+blocking frame presentation and lowering fps across the page.
+
+The presentation surface is not the root problem. Both `<img>` and Canvas can
+present smoothly when the bitmap is ready, and both have to wait when it is not.
+
+## Decode before the deadline
+
+The JavaScript `Image` class can prepare a frame without displaying it:
+
+```ts
+const image = new Image()
+image.src = URL.createObjectURL(blob) // Use already-loaded encoded bytes.
+await image.decode() // Prepare the bitmap before presentation.
+```
+
+<Callout type="info">
+  Every frame must be decoded. The goal is to finish that work before the frame
+  is selected for an `<img>` or Canvas.
+  [`decode()`](https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-decode-dev)
+  lets the browser prepare the bitmap ahead of that presentation deadline.
+</Callout>
+
+## Keep a small buffer window
+
+<DecodedBufferDiagram
+  index={3}
+  title="A moving decoded-frame buffer"
+  className="h-auto max-w-full"
+/>
+
+At 24 fps, three decoded future frames provide about 125 ms of buffer. That is a
+starting point, not a universal value. The target is the smallest window that
+keeps the next frame decoded before its display deadline.
+
+Prepare the window as a rolling batch: prioritize the next frame, fill later
+frames with the remaining decode slots, and retire old entries as the playhead
+moves. This avoids allocating memory for the whole sequence only to have the
+browser discard most of its decoded bitmaps before they are used.
+
+Presentation then chooses only from that recently prepared window:
+
+```ts
+const prepared = decodedFrames.get(targetFrame)
+if (prepared) present(prepared)
+else keepCurrentFrame()
+```
+
+Failed, timed-out, or superseded frames never enter `decodedFrames`. If the next
+frame misses its deadline, keep the current frame visible instead of making
+presentation wait for a decode.
+
+When a resize selects another source variant, reset the buffer and prepare the
+new target while the last valid frame stays visible. Pause new work for hidden
+documents or reduced-motion experiences.
+
+## Tune against the deadline
+
+Start with a small buffer and bounded decode concurrency, then measure holds,
+skips, and dropped frames on the real page. More concurrency helps only while it
+makes the next required frame ready on time.
+
+The [Render Pipeline](/logs/12-the-render-pipeline) explains why synchronous work
+on the presentation path can delay a frame. The [Performance
+Monitor](/logs/09-performance-monitor) helps observe that behavior without
+turning the player into its own diagnostics system.
+
+## The rule
+
+> Load encoded frames ahead, decode only the frames near current demand, and
+> present only a recently prepared frame. Keep the decoded window small and hold
+> the last valid frame whenever preparation loses the race.
+
+Loaded does not mean decoded, and decoded does not mean permanently available.
+
+## Try it yourself
+
+The [Image Sequence component](/components/image-sequence) packages this model
+with bounded work, a moving decoded-frame buffer, responsive sources, and both
+autoplay and scroll-driven modes. Install it from the JOYCO registry:
+
+```bash
+npx shadcn@latest add @joyco/image-sequence
+```
+
+You can [try it yourself](/components/image-sequence) in the autoplay and
+scroll-driven demos.
