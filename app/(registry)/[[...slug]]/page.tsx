@@ -21,6 +21,7 @@ import { TOC } from '@/components/layout/toc'
 import { InferPageType } from 'fumadocs-core/source'
 import { DocLinks } from '@/components/layout/doc-links'
 import { PageActions } from '@/components/layout/page-actions'
+import { ZenModeToggle } from '@/components/layout/docs/client'
 import { TOCProvider } from '@/components/toc'
 import {
   PageTOCPopover,
@@ -138,6 +139,8 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
         {/* Main article content */}
         <article
           id="nd-page"
+          data-slot="layout-main"
+          tabIndex={-1}
           className={cn(
             'px-content-sides mx-auto w-full max-w-3xl pt-6 pb-14 [grid-area:main] md:pt-8 lg:pb-24 xl:pt-14 2xl:max-w-[900px]',
             'xl:layout:[--fd-toc-width:268px]'
@@ -146,9 +149,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
           {/* Badge and actions row */}
           <div className="mb-6 flex items-start justify-between gap-4">
             {/* Category badge */}
-            <Badge variant="accent">
-              {badgeLabel}
-            </Badge>
+            <Badge variant="accent">{badgeLabel}</Badge>
 
             <div
               className={cn(
@@ -165,6 +166,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
                 llmUrl={llmUrl}
                 componentSource={componentSource}
               />
+              <ZenModeToggle />
             </div>
           </div>
 

@@ -69,6 +69,7 @@ export default defineConfig({
             dark: 'github-dark',
             light: 'github-light-default',
           },
+          defaultLang: { block: 'plaintext' },
           transformers,
           onVisitTitle(node: Element) {
             node.properties['class'] = cn(

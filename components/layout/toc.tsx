@@ -26,11 +26,13 @@ export function TOC({ header, footer, className }: ClerkTOCProps) {
     <div
       id="nd-toc"
       className={cn(
-        'sticky top-0 flex h-screen gap-1 [grid-area:toc] max-xl:hidden',
+        'sticky top-0 flex h-screen gap-1 overflow-hidden [grid-area:toc] max-xl:hidden',
         className
       )}
     >
-      <div className="flex h-full max-h-screen w-(--fd-toc-width) flex-col gap-1">
+      {/* `shrink-0` keeps the panel at its real width while Zen mode collapses
+          the column, so the text slides out instead of rewrapping. */}
+      <div className="flex h-full max-h-screen w-(--fd-toc-width) shrink-0 flex-col gap-1">
         <div className="bg-muted flex max-h-[77vh] min-h-0 flex-col px-6 py-4 font-mono uppercase">
           {header}
           <h3

@@ -157,6 +157,16 @@
   --gap: 0.25rem;
   --aside-width: 4rem;
   --sidebar-width: 268px;
+  --zen-duration: 300ms;
+  --zen-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  /*
+   * Both regions slide this far, rather than 100% of their own width, so they
+   * travel at the same speed. Matches the wider of the two (the sidebar) so
+   * each one still clears its edge.
+   */
+  --zen-slide-distance: calc(
+    var(--aside-width) + var(--gap) + var(--sidebar-width)
+  );
   --mobile-header-height: 3rem;
   --content-sides: 1rem; /* px-4 */
 
@@ -327,6 +337,87 @@ body {
     --fd-sidebar-width: 0px !important;
     --fd-toc-width: 0px !important;
   }
+}
+
+/* Zen mode swaps the grid template outright; View Transitions animate it. */
+
+/* Shared so the name follows whichever main region the route renders. */
+[data-slot='layout-main'] {
+  view-transition-name: zen-main;
+}
+
+[data-slot='layout-sidebar'] {
+  view-transition-name: zen-sidebar;
+}
+
+#nd-toc {
+  view-transition-name: zen-toc;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+::view-transition-old(zen-sidebar) {
+  animation: zen-exit-left var(--zen-duration) var(--zen-ease) both;
+}
+
+::view-transition-new(zen-sidebar) {
+  animation: zen-enter-left var(--zen-duration) var(--zen-ease) both;
+}
+
+::view-transition-old(zen-toc) {
+  animation: zen-exit-right var(--zen-duration) var(--zen-ease) both;
+}
+
+::view-transition-new(zen-toc) {
+  animation: zen-enter-right var(--zen-duration) var(--zen-ease) both;
+}
+
+/* Not `reverse`: that flips the easing too, turning the ease-out into an ease-in. */
+@keyframes zen-exit-left {
+  to {
+    opacity: 0;
+    transform: translateX(calc(var(--zen-slide-distance) * -1));
+  }
+}
+
+@keyframes zen-enter-left {
+  from {
+    opacity: 0;
+    transform: translateX(calc(var(--zen-slide-distance) * -1));
+  }
+}
+
+@keyframes zen-exit-right {
+  to {
+    opacity: 0;
+    transform: translateX(var(--zen-slide-distance));
+  }
+}
+
+@keyframes zen-enter-right {
+  from {
+    opacity: 0;
+    transform: translateX(var(--zen-slide-distance));
+  }
+}
+
+::view-transition-group(zen-main) {
+  animation-duration: var(--zen-duration);
+  animation-timing-function: var(--zen-ease);
+}
+
+/* Group move only — crossfading the two snapshots dips the column's opacity. */
+::view-transition-old(zen-main) {
+  animation: none;
+  opacity: 0;
+}
+
+::view-transition-new(zen-main) {
+  animation: none;
+  opacity: 1;
 }
 
 [style*='--callout-color'] {

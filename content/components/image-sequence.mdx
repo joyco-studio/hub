@@ -1,7 +1,7 @@
 ---
 title: Image Sequence
-description: A canvas-based image sequence player with binary progressive loading for smooth playback.
-maintainers: ['matiasperz']
+description: Play an image sequence automatically or control it with scrolling.
+maintainers: ['matiasperz', 'justkahdri']
 ---
 
 import { ComponentPreview } from '@/components/preview/component-preview'
@@ -17,68 +17,104 @@ npx shadcn@latest add @joyco/image-sequence
 ## Usage
 
 ```tsx
-import { CanvasSequence } from '@/components/image-sequence'
-<div className="h-[400px] w-[400px]">
-  <CanvasSequence
-    frameCount={71}
-    frameDuration={33}
-    getImagePath={(idx) => `/frames/frame_${String(idx).padStart(2, '0')}.webp`}
-    className="size-full"
-  />
-</div>
+import { ImageSequence } from '@/components/image-sequence'
+
+const source = (index: number) =>
+  `/frames/frame_${String(index).padStart(2, '0')}.webp`
+
+export function ProductSpin() {
+  return (
+    <ImageSequence
+      sequenceId="product-spin"
+      poster={{ src: source(0), width: 1080, height: 1080 }}
+      frameCount={71}
+      source={source}
+      alt="Rotating product"
+      className="aspect-square w-full max-w-96"
+    />
+  )
+}
+```
+
+Playback loops by default. Set `loop={false}` to play once and use `onComplete`
+to respond when it finishes. Change `sequenceId` to replay or replace the sources.
+
+Set `playing={false}` to pause on the current frame. For hover previews, add
+`resetOnPause` to return to the starting frame (or poster) and restart on resume.
+
+Use `priority="sequential"` to wait for every frame. The default, `"hybrid"`, can
+skip frames to keep pace when loading is slow.
+
+## Scroll scrubbing
+
+Use `mode="scrub"` and pass a zero-based frame index as `target`. Scroll the page
+to animate the duck below; scrolling back up reverses it.
+
+<ComponentPreview name="image-sequence-scroll-demo" />
+
+## Responsive sources
+
+`poster` and `source(index)` accept a URL string or an object with `src`, `srcSet`,
+`sizes`, `width`, and `height`. Use width descriptors (`w`) for responsive frames:
+
+```tsx
+const source = (index: number) => ({
+  src: `/frames/1080/${index}.webp`,
+  srcSet: `/frames/320/${index}.webp 320w, /frames/640/${index}.webp 640w, /frames/1080/${index}.webp 1080w`,
+  sizes: '(max-width: 768px) 100vw, 630px',
+  width: 1080,
+  height: 1080,
+})
 ```
 
 ## Props
 
-### CanvasSequence
+| Prop            | Type                             | Default          | Behavior                                                    |
+| --------------- | -------------------------------- | ---------------- | ----------------------------------------------------------- |
+| `sequenceId`    | `string`                         | Required         | Change to replace sources or replay intentionally           |
+| `poster`        | `FrameSource`                    | Required         | Image shown before playback and with reduced motion         |
+| `frameCount`    | `number`                         | Required         | Number of frames                                            |
+| `source`        | `(index: number) => FrameSource` | Required         | Frame URL or responsive candidates                          |
+| `alt`           | `string`                         | Required         | Meaningful description, or `""` for decoration              |
+| `className`     | `string`                         | —                | Root styling; target inner elements with data slots         |
+| `playing`       | `boolean`                        | `true`           | Play or pause the sequence                                  |
+| `resetOnPause`  | `boolean`                        | `false`          | Reset on pause and restart on resume                        |
+| `enabled`       | `boolean`                        | `true`           | Enable loading and playback; disabling holds the last frame |
+| `mode`          | `"autoplay" \| "scrub"`          | `"autoplay"`     | Autoplay or manual frame control                            |
+| `target`        | `number`                         | `initialFrame`   | Frame to display in scrub mode                              |
+| `frameDuration` | `number`                         | `1000 / 24`      | Milliseconds per frame                                      |
+| `loop`          | `boolean`                        | `true`           | Repeat the configured range                                 |
+| `loopStart`     | `number`                         | `0`              | Inclusive lower bound                                       |
+| `loopEnd`       | `number`                         | `frameCount - 1` | Inclusive upper bound                                       |
+| `initialFrame`  | `number`                         | `loopStart`      | Starting frame, clamped to the range                        |
+| `loadInitial`   | `boolean`                        | `false`          | Load the starting frame before entering view                |
+| `priority`      | `"sequential" \| "hybrid"`       | `"hybrid"`       | Wait for each frame or skip to keep pace                    |
+| `ahead`         | `number`                         | `7`              | Frames to preload ahead when scrubbing                      |
+| `behind`        | `number`                         | `3`              | Frames to preload behind when scrubbing                     |
+| `pixelated`     | `boolean`                        | `false`          | Set pixelated image rendering                               |
+| `onFrame`       | `(index: number) => void`        | —                | Called when a frame is displayed                            |
+| `onComplete`    | `() => void`                     | —                | Called when non-looping playback finishes                   |
 
-| Prop                | Type                             | Default                   | Description                                       |
-| ------------------- | -------------------------------- | ------------------------- | ------------------------------------------------- |
-| `frameCount`        | `number`                         | -                         | Total number of frames in the sequence            |
-| `frameDuration`     | `number`                         | -                         | Duration of each frame in milliseconds            |
-| `getImagePath`      | `(frameIndex: number) => string` | -                         | Function to generate the image URL for each frame |
-| `width`             | `number`                         | -                         | Optional wrapper width in CSS pixels              |
-| `height`            | `number`                         | -                         | Optional wrapper height in CSS pixels             |
-| `isPlaying`         | `boolean`                        | `true`                    | Whether the animation is playing                  |
-| `isVisible`         | `boolean`                        | `true`                    | Whether the canvas is visible                     |
-| `loop`              | `boolean`                        | `true`                    | Whether to loop the animation                     |
-| `preload`           | `boolean`                        | `true`                    | Whether to preload images on mount                |
-| `objectFit`         | `'contain' \| 'cover' \| 'fill'` | `'contain'`               | How the image fits in the canvas                  |
-| `onFrameChange`     | `(frameIndex: number) => void`   | -                         | Callback when frame changes                       |
-| `onAllFramesLoaded` | `() => void`                     | -                         | Callback when all frames are loaded               |
-| `timeTransform`     | `(deltaTime: number) => number`  | -                         | Transform delta time for speed control            |
-| `devicePixelRatio`  | `number`                         | `window.devicePixelRatio` | Pixel ratio for high-DPI displays                 |
-| `resetOnPlay`       | `boolean`                        | `false`                   | Reset animation to frame 0 when playback starts   |
+## Styling and accessibility
 
-## useSequence Hook
+Set poster dimensions and a container aspect ratio to avoid layout shifts.
+Use `alt=""` for decorative sequences. Reduced motion shows the poster instead
+of playing; use `playing` to connect a pause control when needed.
 
-For more control, use the `useSequence` hook directly:
+Style the root with `className` and the image through its data slot:
 
 ```tsx
-import { useSequence } from '@/components/image-sequence'
-
-function MyComponent() {
-  const { state, getFrame, getFrameByProgress } = useSequence({
-    frameCount: 71,
-    getImagePath: (idx) => `/frames/frame_${idx}.webp`,
-    preload: true,
-    onAllFramesLoaded: () => console.log('Ready!'),
-  })
-
-  // state.initialFramesLoaded - first and last frames are ready
-  // state.loadedCount - number of frames loaded
-  // getFrame(index) - get image for specific frame
-  // getFrameByProgress(0.5) - get image at 50% progress
-}
+<ImageSequence
+  {...props}
+  className="aspect-video w-full **:data-[slot=sequence-image]:object-cover"
+/>
 ```
 
-## Binary Loading Strategy
+To fill an existing aspect-ratio wrapper, give the wrapper `relative` and the
+player `className="absolute inset-0 size-full"`.
 
-The hook uses a binary loading strategy for progressive playback:
+## Hosting frames
 
-1. First and last frames load first
-2. Then the middle frame
-3. Then middles of each half
-4. Continues recursively until all frames load
-
-This ensures the full animation range is visible early at low framerate, progressively smoothing out as more frames load.
+Images hosted on another domain must allow CORS requests from your site.
+If you use a Content Security Policy, allow the image host in `connect-src`
+and `img-src`, plus `blob:` in `img-src`.

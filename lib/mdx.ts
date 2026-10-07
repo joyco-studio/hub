@@ -150,6 +150,7 @@ export const rehypePlugins: PluggableList = [
         dark: 'github-dark',
         light: 'github-light-default',
       },
+      defaultLang: { block: 'plaintext' },
       transformers,
     },
   ],
