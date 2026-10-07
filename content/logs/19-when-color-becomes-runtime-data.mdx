@@ -4,7 +4,9 @@ description: How to let one runtime color shape an entire interface while keepin
 author: 'alejopequeno'
 ---
 
+import { ChromaCeilingDemo } from '@/components/logs/oklch/chroma-ceiling-demo'
 import { ColorConverter } from '@/components/logs/oklch/color-converter'
+import { CylinderDemo } from '@/components/logs/oklch/cylinder-demo'
 import { HueRampDemo } from '@/components/logs/oklch/hue-ramp-demo'
 import { HueWheelDemo } from '@/components/logs/oklch/hue-wheel-demo'
 import { PerceptualLightnessDemo } from '@/components/logs/oklch/perceptual-lightness-demo'
@@ -22,16 +24,24 @@ backgrounds, cards, borders, text, and focus states without flattening the visua
 hierarchy is the real problem. A dark blue and a bright yellow cannot be allowed
 to drag every surface to their own brightness.
 
-The useful move is to separate what can change from what must stay fixed, and
-OKLCH makes that separation explicit. Hue carries identity, chroma controls how
-strongly that identity reaches each layer, and lightness preserves the hierarchy
-between surfaces.
+The useful move is to separate what can change from what must stay fixed: hue
+carries the identity of the input, chroma decides how far that identity reaches
+into each layer, and lightness keeps the surfaces in order.
+
+Those three controls only exist if the color format hands them to you, and the
+ones we reach for by default do not. Rotate the hue of an `hsl()` value and its
+perceived brightness moves too, dragging the hierarchy with it.
+
+This is where OKLCH comes into play. So what is it? A CSS color space with one
+axis per question: how light (`L`), how colorful (`C`), and which color (`H`).
+Those axes are tuned to human perception and, more useful here, they are
+independent — one can move while the other two hold still.
 
 ## Start with coordinates, not a swatch
 
 Hex is a fine delivery format and a poor editing model. Its channels describe
-display output, not the qualities a designer is trying to control. OKLCH exposes
-three coordinates that map cleanly to the job:
+display output, not the qualities a designer is trying to control. OKLCH, on the
+other hand, exposes three coordinates that map cleanly to the job:
 
 | Channel | Controls            | Practical range   |
 | ------- | ------------------- | ----------------- |
@@ -45,8 +55,15 @@ the triangle marks sRGB, the baseline gamut for the web.
 
 <SrgbGamutDiagram />
 
-OKLCH can describe colors both inside and outside that boundary. When a color
-falls outside sRGB, the browser must map it to something the display can produce.
+OKLCH can describe colors both inside and outside that boundary, and falling
+outside sRGB does not mean the color is impossible to show. Wide-gamut displays
+reach well past that triangle and render those colors properly. They are the
+exception, not the baseline.
+
+Every other screen maps the value to the nearest color it can produce, and you do
+not get to choose the substitute. Staying inside sRGB is the widest-compatibility
+path: the value you write is the value that renders, on every display. The rest of
+this article treats that boundary as the one to respect.
 
 The converter below accepts common CSS color formats, normalizes them into OKLCH,
 and shows the sRGB ceiling for the current lightness and hue. Move one channel at
@@ -67,10 +84,15 @@ with the HSL row:
 
 <PerceptualLightnessDemo />
 
-Near black and white, the sRGB boundary gets smaller. Keeping chroma fixed can
-therefore produce colors the display cannot reproduce. This demo sends those
-values to CSS unchanged so you can see the browser adjust them. Production code
-should reduce chroma before emitting a token so the result stays predictable.
+Drag the lightness slider toward either end and watch the four swatches stop
+keeping pace with each other. The sRGB boundary narrows as colors approach black
+or white, so a chroma that was reachable in the middle of the range no longer is.
+
+The demo hands those out-of-range values to CSS untouched, which leaves the
+browser to pick the replacement. That is the part to avoid in production: two
+different values can collapse onto the same rendered color, and a hierarchy you
+calibrated quietly loses a step. Reduce chroma yourself before the value becomes
+a token, and the color you emit is the color that renders.
 
 This is the first property a runtime theme needs. A surface role can keep a stable
 brightness even while its hue changes completely.
@@ -85,6 +107,11 @@ perceived hue drifts.
 With OKLCH, lightness can move without asking hue to compensate. The ramp remains
 recognizably one color from shadow to highlight.
 
+Each step across a row below is a different lightness, fixed per swatch — that
+fixed progression is what makes it a ramp rather than a set of related colors. The
+slider moves the other value, hue, which is exactly the channel a runtime theme
+hands over to its input. Sweep it and watch which row keeps its identity.
+
 <HueRampDemo />
 
 This matters beyond aesthetics. A stable hue makes semantic tokens easier to
@@ -93,20 +120,39 @@ family instead of three colors that happen to be related.
 
 ## The wheel has an irregular edge
 
-OKLCH is usually drawn as a cylinder: lightness runs vertically, chroma moves
-outward, and hue rotates around the center. The model is simple. The display gamut
-is not.
+OKLCH is usually drawn as a cylinder: lightness runs up the axis, chroma moves
+outward from it, and hue rotates around it. Stack a hue wheel at every lightness
+step and you have the whole space:
+
+<CylinderDemo />
+
+Each slice is a wheel. Gray sits at the center, where chroma is zero, and every
+rim color is the most colorful version of that hue sRGB can still show. The model
+is simple. The display gamut is not.
 
 At a given lightness, some hues can reach much more chroma than others before they
-leave sRGB. The wheel below is generated from actual OKLCH samples. Change
-lightness and chroma to see the available ring expand, contract, and clip.
+leave sRGB. The wheel below is a single slice, generated from actual OKLCH
+samples. Change lightness and chroma to see the available ring expand, contract,
+and clip.
 
 <HueWheelDemo />
 
-That irregular edge is why one raw chroma value cannot be reused across every hue.
-`C: 0.22` may be valid for a purple and impossible for a cyan at the same
-lightness. A robust system works with a percentage of each hue's available chroma,
-then clamps the result to the target gamut.
+The chroma readout carries the whole point: it shows the value you asked for next
+to the ceiling for the hue you are currently on. Hold lightness still and rotate
+the handle around the rim. Your value never moves, the ceiling does, and the ring
+clips wherever the two cross. That is the irregular edge — not a property of
+OKLCH, but the shape of sRGB seen from inside it.
+
+Unrolled, the edge is a curve. The solid line is the ceiling at each hue; the
+dashed line is what you asked for. Everywhere the dashed line sits above the
+curve, the color you wrote is not the color that renders:
+
+<ChromaCeilingDemo />
+
+Which is why one raw chroma value cannot be reused across every hue. `C: 0.22` may
+be valid for a purple and impossible for a cyan at the same lightness. A robust
+system works with a percentage of each hue's available chroma, then clamps the
+result to the target gamut.
 
 ## Keep hierarchy fixed and let identity move
 
@@ -118,7 +164,7 @@ The theme algorithm can now be small:
 4. Clamp that chroma to the sRGB maximum for the surface's lightness and hue.
 
 The result is a family of tinted surfaces whose ordering does not change when the
-input color changes.
+runtime color changes.
 
 <RuntimeThemeDemo />
 
@@ -139,9 +185,11 @@ system-wide intensity control, and `budget` decides how much color belongs in on
 specific role. Backgrounds can stay nearly neutral while borders and muted text
 carry more of the hue.
 
-The accent is a separate decision. Buttons and links often need to look like the
-input color rather than a restrained surface, so their lightness can live in a
-narrow safe band while retaining more chroma.
+Surfaces are deliberately restrained. The accent is the opposite case, and it
+needs its own rule: a button or a link should look like the color the user
+actually picked, not like a wall tinted with it. Keep its lightness inside a
+narrow band that stays readable against both themes, and let it spend far more of
+its chroma budget than any surface does.
 
 ## Gamut mapping is part of the algorithm
 

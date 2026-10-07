@@ -70,7 +70,7 @@ function RampRow({
           <span
             key={`${color}-${index}`}
             aria-hidden="true"
-            className="h-14 min-w-0 flex-1 motion-safe:transition-[background-color] motion-safe:duration-150"
+            className="h-14 min-w-0 flex-1"
             style={{ backgroundColor: color }}
           />
         ))}

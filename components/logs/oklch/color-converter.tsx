@@ -68,7 +68,7 @@ export function ColorConverter() {
     <ColorDemoFrame>
       <div
         data-slot="color-preview"
-        className="flex min-h-32 items-end p-4 motion-safe:transition-[background-color] motion-safe:duration-150"
+        className="flex min-h-32 items-end p-4"
         style={{
           backgroundColor: previewColor,
           color: formatOklch(previewForeground),

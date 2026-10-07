@@ -65,7 +65,7 @@ function SwatchRow({
           <span
             key={`${color}-${index}`}
             aria-hidden="true"
-            className="h-14 border border-black/10 motion-safe:transition-[background-color] motion-safe:duration-150 dark:border-white/10"
+            className="h-14 border border-black/10 dark:border-white/10"
             style={{ backgroundColor: color }}
           />
         ))}

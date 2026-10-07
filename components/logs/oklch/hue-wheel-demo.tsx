@@ -116,7 +116,7 @@ export function HueWheelDemo() {
             style={{ inset: RING_WIDTH }}
           >
             <span
-              className="size-20 rounded-full border border-black/10 motion-safe:transition-[background-color] motion-safe:duration-150 dark:border-white/10"
+              className="size-20 rounded-full border border-black/10 dark:border-white/10"
               style={{ backgroundColor: selectedColor }}
             />
           </div>

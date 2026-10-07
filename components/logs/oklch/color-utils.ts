@@ -71,6 +71,18 @@ export function formatOklch(color: OklchColor): string {
   return `oklch(${roundChannel(color.l, 3)} ${roundChannel(color.c, 3)} ${roundChannel(color.h, 1)})`
 }
 
+export function formatOklchChannels(color: OklchColor): {
+  lightness: string
+  chroma: string
+  hue: string
+} {
+  return {
+    lightness: roundChannel(color.l, 3),
+    chroma: roundChannel(color.c, 3),
+    hue: roundChannel(color.h, 1),
+  }
+}
+
 export function formatHexColor(color: OklchColor): string {
   return formatHex(toCuloriColor(color)) ?? '#000000'
 }
@@ -134,6 +146,21 @@ export function createLightnessGradient(
   })
 
   return `linear-gradient(90deg in oklab, ${stops.join(', ')})`
+}
+
+export function getGamutRing(lightness: number, steps = 72): OklchColor[] {
+  return Array.from({ length: steps + 1 }, (_, index) => {
+    const hue = (index / steps) * 360
+    return { l: lightness, c: getMaximumChroma(lightness, hue), h: hue }
+  })
+}
+
+export function createGamutRingGradient(lightness: number, steps = 72): string {
+  const stops = getGamutRing(lightness, steps).map(
+    (color, index) => `${formatOklch(color)} ${(index / steps) * 360}deg`
+  )
+
+  return `conic-gradient(from 0deg, ${stops.join(', ')})`
 }
 
 export function createChromaGradient(

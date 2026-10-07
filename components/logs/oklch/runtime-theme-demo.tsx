@@ -14,9 +14,10 @@ import {
   buildSurfaceThemeVariants,
   createChromaGradient,
   createHueGradient,
-  formatOklch,
+  formatOklchChannels,
   getMaximumChroma,
   toSafeCssColor,
+  type OklchColor,
 } from './color-utils'
 import { ColorDemoFrame, DemoSlider } from './demo-primitives'
 
@@ -32,6 +33,18 @@ interface ThemeDemoStyle extends CSSProperties {
   '--demo-foreground-light': string
   '--demo-foreground-dark': string
   '--demo-accent': string
+}
+
+function TokenValue({ color }: { color: OklchColor }) {
+  const { lightness, chroma, hue } = formatOklchChannels(color)
+
+  return (
+    <>
+      oklch(
+      <span className="bg-accent text-accent-foreground px-1">{lightness}</span>
+      <span className="sr-only"> lightness,</span> {chroma} {hue})
+    </>
+  )
 }
 
 export function RuntimeThemeDemo() {
@@ -110,7 +123,13 @@ export function RuntimeThemeDemo() {
               className="size-4"
               strokeWidth={1.5}
             />
-            Lightness is locked per role
+            <span>
+              Lightness is locked per role — it is the{' '}
+              <span className="bg-accent text-accent-foreground px-1 font-mono">
+                first
+              </span>{' '}
+              channel below
+            </span>
           </p>
           {[
             {
@@ -136,10 +155,10 @@ export function RuntimeThemeDemo() {
             >
               --{name}:{' '}
               <span className="terminal:hidden dark:hidden">
-                {formatOklch(light)}
+                <TokenValue color={light} />
               </span>
               <span className="terminal:inline hidden dark:inline">
-                {formatOklch(dark)}
+                <TokenValue color={dark} />
               </span>
             </code>
           ))}

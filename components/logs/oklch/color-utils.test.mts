@@ -6,6 +6,7 @@ import {
   buildSurfaceThemeVariants,
   clampToSrgb,
   createChromaGradient,
+  createGamutRingGradient,
   createHueGradient,
   createLightnessGradient,
   formatHexColor,
@@ -13,6 +14,7 @@ import {
   formatOklch,
   formatRgbColor,
   getContrastingNeutral,
+  getGamutRing,
   getMaximumChroma,
   isColorInSrgb,
   parseColor,
@@ -102,4 +104,22 @@ test('builds left-to-right gradients from display-safe OKLCH stops', () => {
     assert.match(gradient, /^linear-gradient\(90deg in oklab, /)
     assert.doesNotMatch(gradient, /NaN|undefined/)
   }
+})
+
+test('samples a gamut ring that stays inside sRGB at every hue', () => {
+  const ring = getGamutRing(0.65, 24)
+
+  assert.equal(ring.length, 25)
+  assert.equal(ring[0].h, 0)
+  assert.equal(ring.at(-1)?.h, 360)
+  assert.ok(ring.every((color) => isColorInSrgb(color)))
+  assert.ok(ring.some((color) => color.c > 0.1))
+})
+
+test('builds a conic gradient from the gamut ring', () => {
+  const gradient = createGamutRingGradient(0.65, 12)
+
+  assert.ok(gradient.startsWith('conic-gradient(from 0deg, oklch('))
+  assert.equal(gradient.split('oklch(').length - 1, 13)
+  assert.ok(gradient.includes('360deg)'))
 })
