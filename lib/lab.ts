@@ -51,31 +51,6 @@ function githubHeaders() {
   }
 }
 
-export async function isRepoPublic(
-  repoUrl: string | undefined
-): Promise<boolean> {
-  if (!repoUrl) return false
-
-  const parsed = parseRepoOwnerAndName(repoUrl)
-  if (!parsed || parsed.host !== 'github') return false
-
-  try {
-    const res = await fetch(
-      `https://api.github.com/repos/${parsed.owner}/${parsed.repo}`,
-      {
-        headers: githubHeaders(),
-        next: { revalidate: 3600 },
-      }
-    )
-    if (!res.ok) return false
-
-    const data: { private: boolean } = await res.json()
-    return !data.private
-  } catch {
-    return false
-  }
-}
-
 export async function getRepoContributors(
   repoUrl: string | undefined
 ): Promise<RepoContributor[]> {
