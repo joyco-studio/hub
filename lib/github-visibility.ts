@@ -8,6 +8,8 @@ export function getGitHubRepository(href: string): string | null {
     if (url.protocol !== 'https:' && url.protocol !== 'http:') return null
     const [owner, name] = url.pathname.split('/').filter(Boolean)
     if (!owner || !name) return null
+    // GitHub navigation routes do not identify an owner/repository pair.
+    if (['orgs', 'users'].includes(owner.toLowerCase())) return null
     const repo = name.replace(/\.git$/i, '')
     if (!repo) return null
     return `${owner}/${repo}`.toLowerCase()

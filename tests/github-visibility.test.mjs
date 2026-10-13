@@ -110,3 +110,23 @@ test('filters independently, preserves order and other links, and deduplicates r
   )
   assert.equal(requests.length, 2)
 })
+
+test('organization and user navigation links stay visible without repository requests', async () => {
+  let requests = 0
+  const { getGitHubRepository, filterPublicRepoLinks } = setup(async () => {
+    requests++
+    return { ok: false }
+  })
+  const links = [
+    { href: 'https://github.com/orgs/joyco-studio/repositories' },
+    { href: 'https://github.com/orgs/joyco-studio/people' },
+    { href: 'https://github.com/users/justkahdri/projects' },
+    { href: 'https://github.com/ORGS/joyco-studio/repositories' },
+    { href: 'https://github.com/justkahdri?tab=repositories' },
+  ]
+  for (const link of links) {
+    assert.equal(getGitHubRepository(link.href), null)
+  }
+  assert.deepEqual(Array.from(await filterPublicRepoLinks(links)), links)
+  assert.equal(requests, 0)
+})

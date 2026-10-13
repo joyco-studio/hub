@@ -15,3 +15,7 @@ Add focused mocked visibility/filtering tests, run focused lint and TypeScript c
 ## Defaults
 
 Unknown visibility hides buttons. Existing hourly caching remains. No relevant prior guidance was found in the JOYCO indexes.
+
+## Review correction
+
+Exclude GitHub's `/orgs/...` and `/users/...` navigation routes from repository parsing. Verify these buttons remain visible and make no repository API requests, alongside profile links with navigation query parameters.
