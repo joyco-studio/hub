@@ -1,3 +1,5 @@
+import { getGitHubRepoUrl } from '@/lib/github'
+import { filterPublicRepoLinks, isRepoPublic } from '@/lib/github-visibility'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { createRelativeLink } from 'fumadocs-ui/mdx'
@@ -104,13 +106,17 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
     isLibrary ? getLibraryReadme(page.data.repo!) : null,
   ])
   const componentSource = await getComponentSource(componentSlug)
-  const links = [...page.data.links]
+  const candidateLinks = [...page.data.links]
   if (isLibrary) {
-    links.unshift({
+    candidateLinks.unshift({
       label: 'GitHub',
       href: `https://github.com/${page.data.repo}`,
     })
   }
+  const [links, hubRepoPublic] = await Promise.all([
+    filterPublicRepoLinks(candidateLinks),
+    isRepoPublic(getGitHubRepoUrl()),
+  ])
   const llmText = await getLLMText(page)
   const llmUrl = page.slugs.length === 0 ? null : `/${page.slugs.join('/')}.md`
   const relatedItems = getRelatedPages(page, 3)
@@ -157,10 +163,12 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
                 isTopCategoryPage && 'hidden'
               )}
             >
-              <PageGithubLinkButton
-                className="max-lg:hidden"
-                path={page.path}
-              />
+              {hubRepoPublic && (
+                <PageGithubLinkButton
+                  className="max-lg:hidden"
+                  path={page.path}
+                />
+              )}
               <PageActions
                 content={llmText}
                 llmUrl={llmUrl}
@@ -188,7 +196,9 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
             })}
           >
             <DocLinks links={links}>
-              <PageGithubLinkButton className="lg:hidden" path={page.path} />
+              {hubRepoPublic && (
+                <PageGithubLinkButton className="lg:hidden" path={page.path} />
+              )}
             </DocLinks>
             <PageActions
               className="sm:hidden"
