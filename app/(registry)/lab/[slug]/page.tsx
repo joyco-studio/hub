@@ -1,10 +1,10 @@
+import { isRepoPublic } from '@/lib/github-visibility'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import {
   getExperiments,
   getExperimentBySlug,
   getRepoContributors,
-  isRepoPublic,
 } from '@/lib/lab'
 import { getRegistryCounts } from '@/lib/source'
 import { RegistryMetaProvider } from '@/components/registry-meta'
