@@ -34,7 +34,6 @@ import { TOCItems } from '@/components/toc/clerk'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { RegistryMetaProvider } from '@/components/registry-meta'
-import { PageGithubLinkButton } from '@/components/page-github-link-button'
 import { PageViews } from '@/components/layout/views'
 import { MDXContent } from '@/components/content'
 import { getLibraryReadme } from '@/lib/libraries'
@@ -157,10 +156,6 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
                 isTopCategoryPage && 'hidden'
               )}
             >
-              <PageGithubLinkButton
-                className="max-lg:hidden"
-                path={page.path}
-              />
               <PageActions
                 content={llmText}
                 llmUrl={llmUrl}
@@ -187,9 +182,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
               'lg:hidden': links.length === 0,
             })}
           >
-            <DocLinks links={links}>
-              <PageGithubLinkButton className="lg:hidden" path={page.path} />
-            </DocLinks>
+            <DocLinks links={links} />
             <PageActions
               className="sm:hidden"
               content={llmText}
