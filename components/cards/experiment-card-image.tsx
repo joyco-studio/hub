@@ -4,21 +4,24 @@ import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import { useState } from 'react'
 import FlaskIcon from '../icons/flask'
+import { getExperimentThumbnailUrl } from '@/lib/experiment-thumbnail'
 
 interface ExperimentCardImageProps extends React.ComponentProps<'div'> {
   slug: string
+  thumbnail?: string
   alt?: string
 }
 
 export function ExperimentCardImage({
   slug,
+  thumbnail,
   alt,
   className,
   ...props
 }: ExperimentCardImageProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
-  const screenshotUrl = `/api/screenshot?experiment=${encodeURIComponent(slug)}`
+  const thumbnailUrl = getExperimentThumbnailUrl(slug, thumbnail)
 
   return (
     <div
@@ -40,7 +43,7 @@ export function ExperimentCardImage({
         </div>
       ) : (
         <Image
-          src={screenshotUrl}
+          src={thumbnailUrl}
           alt={alt || `Preview of ${slug}`}
           width={800}
           height={400}

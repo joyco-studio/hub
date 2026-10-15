@@ -16,6 +16,10 @@ const CLOUDFLARE_API_TOKEN = process.env.CLOUDFLARE_API_TOKEN
 const MAX_RETRIES = 5
 const INITIAL_BACKOFF_MS = 2000
 
+// WebGL frames as PNG blow past unstable_cache's 2MB item limit once base64'd
+const SCREENSHOT_OPTIONS = { type: 'webp', quality: 80 } as const
+const SCREENSHOT_CONTENT_TYPE = 'image/webp'
+
 async function fetchScreenshotFromCloudflare(
   targetUrl: string,
   config: DemoConfig,
@@ -40,6 +44,7 @@ async function fetchScreenshotFromCloudflare(
               timeout: 30000,
             },
             ...(config.timeout ? { waitForTimeout: config.timeout } : {}),
+            screenshotOptions: SCREENSHOT_OPTIONS,
             addStyleTag: [
               {
                 content: `
@@ -91,7 +96,7 @@ const getCachedScreenshot = unstable_cache(
     const targetUrl = `${APP_BASE_URL}/view/${name}-demo`
     return fetchScreenshotFromCloudflare(targetUrl, demoConfig)
   },
-  ['screenshot'],
+  ['screenshot-webp'],
   { revalidate: false }
 )
 
@@ -107,7 +112,7 @@ const getCachedExperimentScreenshot = unstable_cache(
       baseExperimentStyle
     )
   },
-  ['experiment-screenshot'],
+  ['experiment-screenshot-webp'],
   { revalidate: 604800 }
 )
 
@@ -138,7 +143,7 @@ export async function GET(request: NextRequest) {
 
     return new NextResponse(imageBuffer, {
       headers: {
-        'Content-Type': 'image/png',
+        'Content-Type': SCREENSHOT_CONTENT_TYPE,
         'Cache-Control': 'public, max-age=604800, s-maxage=604800, stale-while-revalidate=86400',
       },
     })

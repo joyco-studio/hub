@@ -22,6 +22,7 @@ interface LabCanvasProps {
     title: string
     description?: string
     tags?: string[]
+    thumbnail?: string
   }>
   onViewChange: () => void
 }
@@ -31,6 +32,7 @@ interface VisibleCard {
   title: string
   description?: string
   tags?: string[]
+  thumbnail?: string
   x: number
   y: number
   key: string
@@ -194,6 +196,7 @@ export function LabCanvas({ experiments, onViewChange }: LabCanvasProps) {
               title={card.title}
               description={card.description}
               tags={card.tags}
+              thumbnail={card.thumbnail}
               className="h-full"
             />
           </div>
