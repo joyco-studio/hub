@@ -11,6 +11,7 @@ interface LabListProps {
     title: string
     description?: string
     tags?: string[]
+    thumbnail?: string
   }>
   onViewChange: () => void
 }
@@ -56,6 +57,7 @@ export function LabList({ experiments, onViewChange }: LabListProps) {
             title={experiment.title}
             description={experiment.description}
             tags={experiment.tags}
+            thumbnail={experiment.thumbnail}
           />
         ))}
       </div>

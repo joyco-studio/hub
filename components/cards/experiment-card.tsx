@@ -8,6 +8,7 @@ interface ExperimentCardProps extends React.ComponentProps<'a'> {
   title: string
   description?: string
   tags?: string[]
+  thumbnail?: string
 }
 
 export function ExperimentCard({
@@ -15,6 +16,7 @@ export function ExperimentCard({
   title,
   description,
   tags,
+  thumbnail,
   className,
   ...props
 }: ExperimentCardProps) {
@@ -37,6 +39,7 @@ export function ExperimentCard({
 
         <ExperimentCardImage
           slug={slug}
+          thumbnail={thumbnail}
           className="h-full w-full rounded-none border-0"
         />
       </div>

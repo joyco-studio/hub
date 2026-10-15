@@ -10,6 +10,8 @@ export type Experiment = {
   tags?: string[]
   repo?: string
   hasControls: boolean
+  /** Curated preview image; when set it replaces the generated screenshot. */
+  thumbnail?: string
 }
 
 export type RepoContributor = {
