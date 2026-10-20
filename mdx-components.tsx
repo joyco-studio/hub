@@ -12,6 +12,13 @@ import { PackageManagerCommand } from './components/package-manager-command'
 import { AgentsScriptCommand } from './components/agents-script-command'
 import { Mermaid } from './components/mermaid'
 import { Diagram } from './components/flow'
+import {
+  DecodedBufferDiagram,
+  FrameExplanationDiagram,
+} from '@/components/log-diagrams/image-decoding-at-frame-speed'
+import { CaretRightIcon } from '@/components/icons'
+
+const DefaultCallout = defaultMdxComponents.Callout
 
 export function getMDXComponents(
   components?: MDXComponents,
@@ -20,10 +27,24 @@ export function getMDXComponents(
   const articleNumber = opts?.logNumber ?? undefined
   return {
     ...defaultMdxComponents,
+    Callout: ({
+      icon = (
+        <CaretRightIcon className="size-5 shrink-0 text-(--callout-color)" />
+      ),
+      ...props
+    }: React.ComponentProps<typeof DefaultCallout>) => (
+      <DefaultCallout icon={icon} {...props} />
+    ),
     Mermaid,
     Diagram: (props: React.ComponentProps<typeof Diagram>) => (
       <Diagram {...props} articleNumber={articleNumber} />
     ),
+    FrameExplanationDiagram: (
+      props: React.ComponentProps<typeof FrameExplanationDiagram>
+    ) => <FrameExplanationDiagram {...props} articleNumber={articleNumber} />,
+    DecodedBufferDiagram: (
+      props: React.ComponentProps<typeof DecodedBufferDiagram>
+    ) => <DecodedBufferDiagram {...props} articleNumber={articleNumber} />,
     CodeTabs: CodeTabs,
     FileCodeblock: FileCodeblock,
     Video: ({
