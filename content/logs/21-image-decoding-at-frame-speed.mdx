@@ -1,6 +1,6 @@
 ---
 title: 21 - Image decoding at frame speed
-description: How to fetch, decode, and present large image sequences without putting that work on the critical frame.
+description: How to fetch, decode, and present large image sequences without losing fps in the process.
 author: 'justkahdri'
 ---
 
@@ -10,9 +10,9 @@ every file had loaded. The browser had discarded some decoded frames, so asking
 for one of them again forced it to decode before painting. Frame presentation
 waited, and the whole page lost fps.
 
-The fix was to keep a small moving buffer of decoded frames near the playhead.
-That sounds simple, but it depends on separating three states that are easy to
-conflate.
+**TL;DR:** The fix was to keep a small moving buffer of decoded frames near the
+playhead. That sounds simple, but it depends on separating three states that are
+easy to conflate.
 
 ## Every frame has a pipeline
 
@@ -28,7 +28,7 @@ loaded --> blocking
 blocking --> presented
 note loaded below "image.png, image.avif, image.webp"
 note decoded above "keep the next frames here"
-note blocking below "the page can miss its refresh"
+note blocking below "every time this happens, we lose frames"
 `}</Diagram>
 
 - **Loaded** means the encoded bytes for an image file are available from the
@@ -37,8 +37,8 @@ note blocking below "the page can miss its refresh"
   ready to display in an `<img>` or Canvas.
 - **Presented** means that bitmap has been painted on screen.
 
-Even after an image loads successfully, `image.complete === true` does not mean
-its bitmap is still decoded when the page needs to present it.
+**Even after an image loads successfully, `image.complete === true` does not
+mean its bitmap is still decoded when the page needs to present it.**
 
 An image sequence running at 24 fps needs its next frame every 41.67 ms, while a
 120 Hz display refreshes every 8.33 ms. If the requested frame still needs
@@ -52,11 +52,13 @@ can miss the refresh.
 />
 
 1. The image was decoded earlier and has not been evicted, so it is ready.
-2. Chrome does not proactively decode an evicted image again just because the
-   encoded `image.png` file is still in memory.
-3. Painting hits a wall because decoding starts too late, leaving only the
+2. The browser does not proactively decode an evicted image again just because
+   the encoded `image.png` file is still in memory.
+3. A new sequence frame starts, and the browser tries to paint the next image,
+   but its decoding is not ready. Decoding starts too late, leaving only the
    current display refresh as its budget.
-4. The next image is selected for the new frame before decoding has finished.
+4. Decoding takes more than ~8.33 ms—one 120 Hz refresh interval—making the
+   whole site miss one presentation frame.
 
 ## The browser can discard decoded frames
 
@@ -69,25 +71,19 @@ already decoded frames may need to be decoded again. If one of those frames is
 selected for display, the browser must finish decoding it before it can paint,
 blocking frame presentation and lowering fps across the page.
 
-The presentation surface is not the root problem. Both `<img>` and Canvas can
-present smoothly when the bitmap is ready, and both have to wait when it is not.
-
 ## Decode before the deadline
 
-The JavaScript `Image` class can prepare a frame without displaying it:
+The JavaScript `Image` class can prepare a frame without displaying it. Every
+frame must be decoded before presentation, so the goal is to finish that work
+before the frame is selected for an `<img>` or Canvas.
+[`decode()`](https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-decode-dev)
+lets the browser prepare the bitmap ahead of that presentation deadline.
 
 ```ts
 const image = new Image()
 image.src = URL.createObjectURL(blob) // Use already-loaded encoded bytes.
 await image.decode() // Prepare the bitmap before presentation.
 ```
-
-<Callout type="info">
-  Every frame must be decoded. The goal is to finish that work before the frame
-  is selected for an `<img>` or Canvas.
-  [`decode()`](https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-decode-dev)
-  lets the browser prepare the bitmap ahead of that presentation deadline.
-</Callout>
 
 ## Keep a small buffer window
 
