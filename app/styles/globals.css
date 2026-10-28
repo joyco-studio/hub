@@ -5,6 +5,7 @@
 @plugin './slot.ts';
 @import 'tailwindcss-better-gradient';
 @import './shiki.css' layer(components);
+@import './pele.css' layer(components);
 @import './prose.css' layer(utilities);
 @import './theming.css' layer(base);
 @import './utilities.css';

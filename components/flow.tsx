@@ -204,6 +204,47 @@ export function Diagram({
     }
   }
 
+  return (
+    <DiagramFrame title={title} index={index} articleNumber={articleNumber}>
+      {graph ? (
+        <div className="relative flex justify-center px-6 py-12 [&_svg]:max-w-full">
+          <Graph
+            graph={graph}
+            title={title}
+            className={className}
+            theme={theme}
+          />
+        </div>
+      ) : (
+        <div className="relative overflow-x-auto px-6 py-12">
+          <pre
+            className={cn(
+              'text-foreground/90 w-fit min-w-full font-mono text-[13px] leading-relaxed whitespace-pre',
+              className
+            )}
+          >
+            {asciiSource}
+          </pre>
+        </div>
+      )}
+    </DiagramFrame>
+  )
+}
+
+// The shared figure chrome every log diagram sits in — caption badge, hatched
+// backdrop, and the corner tag — regardless of which renderer draws the graph
+// inside it (trazo here, Pele in `pele-diagram.tsx`).
+export function DiagramFrame({
+  title,
+  index,
+  articleNumber,
+  children,
+}: {
+  title?: string
+  index?: number
+  articleNumber?: string
+  children: React.ReactNode
+}) {
   // The corner tag reads `N{article}-{illustration}` (e.g. N07-01): the log's
   // number, injected per-page, paired with this diagram's order in the article.
   const tag =
@@ -243,27 +284,7 @@ export function Diagram({
           {tag}
         </Badge>
       )}
-      {graph ? (
-        <div className="relative flex justify-center px-6 py-12 [&_svg]:max-w-full">
-          <Graph
-            graph={graph}
-            title={title}
-            className={className}
-            theme={theme}
-          />
-        </div>
-      ) : (
-        <div className="relative overflow-x-auto px-6 py-12">
-          <pre
-            className={cn(
-              'text-foreground/90 w-fit min-w-full font-mono text-[13px] leading-relaxed whitespace-pre',
-              className
-            )}
-          >
-            {asciiSource}
-          </pre>
-        </div>
-      )}
+      {children}
     </figure>
   )
 }
