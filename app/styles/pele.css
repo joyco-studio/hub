@@ -1,0 +1,74 @@
+/* Pele diagrams (`components/pele-diagram.tsx`) themed to match the JOYCO trazo
+   diagrams: square corners, flat role fills with no outline, neutral connectors.
+
+   Every Pele SVG root carries the `pele` class and reads its palette from these
+   `--pele-*` variables, so the diagrams follow light/dark and the theme switcher
+   without re-rendering. The node outline is pinned to the frame's own `--card`
+   surface so filled boxes read as flat blocks, like trazo's. */
+.pele {
+  --pele-bg: var(--card);
+  --pele-fg: var(--foreground);
+  --pele-fg-on-light: oklch(0.145 0 0);
+  --pele-fg-on-dark: oklch(1 0 0);
+  --pele-muted: var(--muted-foreground);
+  --pele-line: var(--muted-foreground);
+  --pele-surface: color-mix(in oklab, var(--foreground) 8%, var(--card));
+  --pele-surface-alt: color-mix(in oklab, var(--foreground) 4%, var(--card));
+  --pele-border: var(--card);
+  --pele-accent: var(--primary);
+  --pele-critical: var(--destructive);
+  --pele-radius: 0;
+  --pele-font: var(--font-sans);
+  --pele-font-mono: var(--font-mono);
+}
+
+/* Semantic roles. Flowchart and block nodes opt in with a class
+   (`A[Label]:::success`, or `class A success`), which Pele copies onto the node's
+   group. Gantt has no node classes, only its fixed task tags, so those map onto
+   the same roles: an untagged task is `primary`, `done` is `success`, `active` is
+   `info`, and `crit` is `error` (declared last so `crit` wins on combined tags).
+   Label colors are the AA-checked foregrounds trazo uses for the same fills. */
+.pele .primary,
+.pele-gantt .pele-task {
+  --pele-role: var(--primary);
+  --pele-role-foreground: var(--primary-foreground);
+}
+.pele .success,
+.pele-gantt .pele-done {
+  --pele-role: var(--color-mint-green);
+  --pele-role-foreground: oklch(0.145 0 0);
+}
+.pele .warning {
+  --pele-role: var(--color-mustard-yellow);
+  --pele-role-foreground: oklch(0.145 0 0);
+}
+.pele .info,
+.pele-gantt .pele-active {
+  --pele-role: var(--chart-3);
+  --pele-role-foreground: var(--chart-3-foreground);
+}
+.pele .error,
+.pele-gantt .pele-crit {
+  --pele-role: var(--destructive);
+  --pele-role-foreground: var(--trazo-error-foreground);
+}
+
+/* `fill-opacity` is reset because Pele draws `active` gantt tasks as a faint
+   tint; the house style is solid fills. */
+.pele
+  :is(.primary, .success, .warning, .info, .error)
+  > :is(rect, polygon, path, circle, ellipse),
+.pele-gantt .pele-task > rect {
+  fill: var(--pele-role);
+  fill-opacity: 1;
+  stroke: var(--pele-role);
+}
+
+/* Gantt task labels are recolored for the bar they sit on. Pele draws a label
+   that doesn't fit beside its bar instead, and there it would keep the bar's
+   foreground on the bare card (white on white in light mode), so keep gantt
+   task labels short enough to fit inside their bar. */
+.pele :is(.primary, .success, .warning, .info, .error) > .pele-label,
+.pele-gantt .pele-task > .pele-label {
+  fill: var(--pele-role-foreground);
+}

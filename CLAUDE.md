@@ -28,4 +28,12 @@ Log diagrams render through the `Diagram` component (`components/flow.tsx`) usin
 - **Arrows/connectors are never colored.** Only node fills carry semantic role color (`:primary`, `:success`, …); every connector renders in the neutral accent color. This is **enforced in code** — `Diagram` strips trazo's per-edge `colored` flag before layout — so a colored token (`===`, `==>`, `<==`, `<==>`) renders identically to its neutral form (`---`, `-->`, `<--`, `<-->`). Prefer the neutral tokens in new DSL for clarity, but either way the render stays neutral. (Git-graph branch lanes are exempt — those are colored by branch on purpose.)
 - **Sequence participants should carry roles.** Give each `participant` a `:role` (e.g. `participant S[Server]:primary`) so the actor boxes are colored, matching the flow diagrams. Keep the role for a given actor consistent across an article (e.g. Main Thread → `:primary`, Compositor → `:success`).
 
+### `<PeleDiagram>` (Mermaid via Pele)
+
+`PeleDiagram` (`components/pele-diagram.tsx`) renders Mermaid syntax with [Pele](https://pele.run) to a static SVG inside the same frame as `Diagram`. Use it for diagram types trazo can't draw (gantt timelines, block grids). Theme lives in `app/styles/pele.css`:
+
+- Color a flowchart/block node with a role class: `A[Label]:::success` or `class A success` (`primary`, `success`, `warning`, `info`, `error`). Don't use `classDef`/`style` fills — they hardcode colors and skip light/dark.
+- Gantt tasks map their tags onto roles: untagged → `primary`, `done` → `success`, `active` → `info`, `crit` → `error`. Keep task labels short enough to fit inside their bar.
+- Don't use `---` frontmatter inside the MDX template (Prettier rewrites it); use an `%%{init: …}%%` directive instead.
+
 When editing a diagram that also appears on the temporary `/diagram-comparison` review page (`app/diagram-comparison/page.tsx`), update the duplicated DSL in that page's `after` field too.

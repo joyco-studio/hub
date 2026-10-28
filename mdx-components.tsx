@@ -12,10 +12,7 @@ import { PackageManagerCommand } from './components/package-manager-command'
 import { AgentsScriptCommand } from './components/agents-script-command'
 import { Mermaid } from './components/mermaid'
 import { Diagram } from './components/flow'
-import {
-  DecodedBufferDiagram,
-  FrameExplanationDiagram,
-} from '@/components/log-diagrams/image-decoding-at-frame-speed'
+import { PeleDiagram } from './components/pele-diagram'
 import { CaretRightIcon } from '@/components/icons'
 
 const DefaultCallout = defaultMdxComponents.Callout
@@ -39,12 +36,9 @@ export function getMDXComponents(
     Diagram: (props: React.ComponentProps<typeof Diagram>) => (
       <Diagram {...props} articleNumber={articleNumber} />
     ),
-    FrameExplanationDiagram: (
-      props: React.ComponentProps<typeof FrameExplanationDiagram>
-    ) => <FrameExplanationDiagram {...props} articleNumber={articleNumber} />,
-    DecodedBufferDiagram: (
-      props: React.ComponentProps<typeof DecodedBufferDiagram>
-    ) => <DecodedBufferDiagram {...props} articleNumber={articleNumber} />,
+    PeleDiagram: (props: React.ComponentProps<typeof PeleDiagram>) => (
+      <PeleDiagram {...props} articleNumber={articleNumber} />
+    ),
     CodeTabs: CodeTabs,
     FileCodeblock: FileCodeblock,
     Video: ({

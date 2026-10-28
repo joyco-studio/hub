@@ -16,20 +16,17 @@ easy to conflate.
 
 ## Every frame has a pipeline
 
-<Diagram index={1} title="Loading is only the first step">{`
-flow LR
-loaded["Loaded<br/>Encoded image bytes"]:info
-decoded["Decoded<br/>Bitmap ready for display"]:success
-presented["Presented<br/>Frame painted on screen"]:primary
-blocking["Decode at display time<br/>Presentation waits"]:error
-loaded --> decoded
-decoded --> presented
-loaded --> blocking
-blocking --> presented
-note loaded below "image.png, image.avif, image.webp"
-note decoded above "keep the next frames here"
-note blocking below "every time this happens, we lose frames"
-`}</Diagram>
+<PeleDiagram index={1} title="Loading is only the first step">{`
+flowchart LR
+  loaded["Loaded<br/>Encoded image bytes"]:::info
+  decoded["Decoded<br/>Bitmap ready for display"]:::success
+  presented["Presented<br/>Frame painted on screen"]:::primary
+  blocking["Decode at display time<br/>Presentation waits"]:::error
+  loaded -- "decode ahead" --> decoded
+  decoded -- "on time" --> presented
+  loaded -- "decode on demand" --> blocking
+  blocking -- "frames lost" --> presented
+`}</PeleDiagram>
 
 - **Loaded** means the encoded bytes for an image file are available from the
   network or HTTP cache.
@@ -45,11 +42,36 @@ An image sequence running at 24 fps needs its next frame every 41.67 ms, while a
 decoding when it reaches presentation, painting waits for that work and the page
 can miss the refresh.
 
-<FrameExplanationDiagram
-  index={2}
-  title="A late decode delays frame presentation"
-  className="h-auto max-w-full"
-/>
+<PeleDiagram index={2} title="A late decode delays frame presentation">{`
+%%{init: {"gantt": {"displayMode": "compact"}}}%%
+gantt
+  dateFormat x
+  axisFormat %Q ms
+  tickInterval 10millisecond
+  section 120 Hz display
+    ✓ :done, r0, 0, 7
+    ✓ :done, r1, 8, 16
+    ✓ :done, r2, 17, 24
+    ✓ :done, r3, 25, 32
+    ✓ :done, r4, 33, 41
+    ✓ :done, r5, 42, 49
+    ✓ :done, r6, 50, 57
+    ✓ :done, r7, 58, 66
+    ✓ :done, r8, 67, 74
+    ✓ :done, r9, 75, 82
+    4 ✕ :crit, r10, 83, 91
+    ✓ :done, r11, 92, 99
+    ✓ :done, r12, 100, 107
+    ✓ :done, r13, 108, 116
+    ✓ :done, r14, 117, 124
+  section 24 fps sequence
+    Frame 1 :f1, 0, 41
+    1 · Frame 2 decoded, on time :f2, 42, 82
+    3 · Frame 3 decodes too late :crit, f3, 83, 125
+  section Main thread
+    2 · Idle, no proactive decode :active, idle, 42, 82
+    ~9 ms :crit, decode, 83, 92
+`}</PeleDiagram>
 
 1. The image was decoded earlier and has not been evicted, so it is ready.
 2. The browser does not proactively decode an evicted image again just because
@@ -87,11 +109,17 @@ await image.decode() // Prepare the bitmap before presentation.
 
 ## Keep a small buffer window
 
-<DecodedBufferDiagram
-  index={3}
-  title="A moving decoded-frame buffer"
-  className="h-auto max-w-full"
-/>
+<PeleDiagram index={3} title="A moving decoded-frame buffer">{`
+block-beta
+  columns 5
+  playhead["Playhead · 41.67 ms"] buffer["Decoded buffer · ~125 ms"]:3 space
+  f0["[0] presented"] f1["[1] decoded"] f2["[2] decoded"] f3["[3] decoding"] f4["[4] not decoded yet"]
+  retire["delete buffer[0]"] space:2 decode["new Image() · ~6 ms"] space
+  class f0 primary
+  class f1,f2 success
+  class f3 info
+  class f4 warning
+`}</PeleDiagram>
 
 At 24 fps, three decoded future frames provide about 125 ms of buffer. That is a
 starting point, not a universal value. The target is the smallest window that
