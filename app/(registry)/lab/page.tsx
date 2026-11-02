@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   title: 'Lab',
   description:
     'Experimental projects and creative explorations from JOYCO Studio.',
+  alternates: { canonical: '/lab' },
 }
 
 export default async function LabPage() {
