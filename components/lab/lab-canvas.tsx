@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import FlaskIcon from '@/components/icons/flask'
 import { LabViewToggle } from './lab-view-toggle'
+import { LabTagFilter } from './lab-tag-filter'
 
 const CELL_WIDTH = 380
 const CELL_HEIGHT = 320
@@ -216,6 +217,8 @@ export function LabCanvas({ experiments, onViewChange }: LabCanvasProps) {
             className="top-4 right-4 lg:absolute"
           />
         </div>
+
+        <LabTagFilter className="pointer-events-auto w-fit" />
       </div>
 
       <Button

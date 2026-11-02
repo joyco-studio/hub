@@ -4,6 +4,7 @@ import { ExperimentCard } from '@/components/cards/experiment-card'
 import { Badge } from '@/components/ui/badge'
 import FlaskIcon from '@/components/icons/flask'
 import { LabViewToggle } from './lab-view-toggle'
+import { LabTagFilter } from './lab-tag-filter'
 
 interface LabListProps {
   experiments: Array<{
@@ -48,6 +49,8 @@ export function LabList({ experiments, onViewChange }: LabListProps) {
       <p className="text-foreground/70 mb-10 text-lg">
         Creative explorations and experimental projects from the studio.
       </p>
+
+      <LabTagFilter className="-mt-6 mb-6" />
 
       <div className="grid gap-2 sm:grid-cols-2">
         {experiments.map((experiment) => (
