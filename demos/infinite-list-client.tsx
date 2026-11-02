@@ -35,7 +35,7 @@ export function PokemonInfiniteListClient({
 }: PokemonInfiniteListClientProps) {
   const [pokemon, setPokemon] = useState<Pokemon[]>(initialPokemon)
   const [isPending, startTransition] = useTransition()
-  const list = useInfiniteList({ pageSize, initialItems: pokemon })
+  const list = useInfiniteList({ pageSize, initialItems: initialPokemon })
 
   const loadMore = () => {
     list.nextPage()
